@@ -27,49 +27,16 @@ function GM:InitializeDifficulty()
 end
 
 function GM:SaveTransitionDifficulty(data)
-	data.RoundNumber = self.RoundNumber
-	data.PlayerDeaths = self.PlayerDeaths
-	data.PlayerKills = self.PlayerKills
-	data.PlayerBulletsFired = self.PlayerBulletsFired
-	data.PlayerFitness = self.PlayerFitness
-	data.PlayerFitnessScale = self.PlayerFitnessScale
-	data.NPCDeaths = self.NPCDeaths
-	data.NPCKills = self.NPCKills
-	data.NPCFitness = self.NPCFitness
-	data.NPCBulletsFired = self.NPCBulletsFired
-	data.NPCAwareness = self.NPCAwareness
-	data.PlayerDamage = self.PlayerDamage
-	data.NPCDamage = self.NPCDamage
-	data.RoundsLost = self.RoundsLost
-	data.RoundsWon = self.RoundsWon
 end
 
 function GM:LoadTransitionDifficulty(data)
-	self.RoundNumber = data.RoundNumber
-	self.PlayerDeaths = data.PlayerDeaths
-	self.PlayerKills = data.PlayerKills
-	self.PlayerBulletsFired = data.PlayerBulletsFired
-	self.PlayerFitness = data.PlayerFitness
-	self.PlayerFitnessScale = data.PlayerFitnessScale
-	self.NPCDeaths = data.NPCDeaths
-	self.NPCKills = data.NPCKills
-	self.NPCFitness = data.NPCFitness
-	self.NPCBulletsFired = data.NPCBulletsFired
-	self.NPCAwareness = data.NPCAwareness
-	self.PlayerDamage = data.PlayerDamage
-	self.NPCDamage = data.NPCDamage
-	self.RoundsLost = data.RoundsLost
-	self.RoundsWon = data.RoundsWon
 
-	--self:CalculateDifficulty()
 end
 
 function GM:RegisterBulletFired(attacker, bullets)
-
 end
 
 function GM:RegisterNPCDamage(npc, attacker, dmginfo)
-
 end
 
 function GM:RegisterPlayerDamage(ply, attacker, dmginfo)

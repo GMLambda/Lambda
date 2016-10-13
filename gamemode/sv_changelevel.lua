@@ -5,10 +5,10 @@ function GM:InitializeCurrentLevel()
 
 	DbgPrint("GM:InitializeCurrentLevel")
 
-	local changelevel = tobool(util.GetPData("Lambda", "Changelevel", "0"))
-	local prevMap = util.GetPData("Lambda", "PrevMap", nil)
-	local targetMap = util.GetPData("Lambda", "NextMap", nil)
-	local landmark = util.GetPData("Lambda", "Landmark", nil)
+	local changelevel = tobool(util.GetPData("Lambda" .. lambda_instance_id:GetString(), "Changelevel", "0"))
+	local prevMap = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", nil)
+	local targetMap = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", nil)
+	local landmark = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "Landmark", nil)
 
 	self.PreviousMap = prevMap
 	if targetMap == self:GetCurrentMap() then
@@ -24,9 +24,9 @@ function GM:InitializeCurrentLevel()
 		self.IsChangeLevel = false
 	end
 
-	util.RemovePData("Lambda", "Changelevel")
-	util.RemovePData("Lambda", "Landmark")
-	util.RemovePData("Lambda", "PrevMap")
+	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Changelevel")
+	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Landmark")
+	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "PrevMap")
 
 	DbgPrint("Used Changelevel: " .. tostring(self.IsChangeLevel))
 
@@ -111,10 +111,10 @@ end
 
 function GM:PreChangelevel(map, landmark, playersInTrigger)
 
-	util.SetPData("Lambda", "PrevMap", self:GetCurrentMap())
-	util.SetPData("Lambda", "NextMap", map)
-	util.SetPData("Lambda", "Landmark", landmark)
-	util.SetPData("Lambda", "Changelevel", "1")
+	util.SetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", self:GetCurrentMap())
+	util.SetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", map)
+	util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Landmark", landmark)
+	util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Changelevel", "1")
 
 	-- Serialize user infos.
 	if self.MapScript ~= nil and self.MapScript.PreChangelevel then

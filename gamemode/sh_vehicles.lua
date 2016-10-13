@@ -400,7 +400,7 @@ if SERVER then
 		end
 
 		-- Make sure we clean up vehicles from disconnected players.
-		for vehicle,_ in pairs(self.ActiveVehicles) do
+		for vehicle,_ in pairs(self.ActiveVehicles or {}) do
 
 			if vehicle.LambdaPlayer ~= nil then
 				local ply = vehicle.LambdaPlayer

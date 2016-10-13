@@ -1008,7 +1008,7 @@ else -- CLIENT
 
 	end
 
-	local MAT_BLOCKED = Material("lambda/blocked.png")
+	local MAT_BLOCKED = Material("lambda/blockade.png")
 
 	local function DrawTriggerBlockade(data)
 
