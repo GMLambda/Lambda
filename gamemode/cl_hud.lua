@@ -13,19 +13,21 @@ local function AskWeapon(ply, hud, wep)
 	end
 end
 
+local hidehud = GetConVar("hidehud")
+
 function GM:HUDTick()
 
-	local drawHud = true
+	local drawHud = hidehud:GetBool() ~= true
 	local ply = LocalPlayer()
 	if not IsValid(ply) then
 		return
 	end
 
 	local wep = ply:GetActiveWeapon()
-	local CHudHealth = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
-	local CHudAmmo = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
-	local CHudBattery = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
-	local CHudSecondaryAmmo = drawHud and wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
+	local CHudHealth = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
+	local CHudAmmo = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
+	local CHudBattery = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
+	local CHudSecondaryAmmo = drawHud == true and wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
 
 	--DbgPrint(CHudHealth, CHudAmmo, CHudBattery, CHudSecondaryAmmo)
 
@@ -35,6 +37,7 @@ function GM:HUDTick()
 		suit.HUDArmor:SetVisible(CHudBattery)
 		suit.HUDAux:SetVisible(CHudBattery)
 		suit.HUDAmmo:SetVisible(CHudSecondaryAmmo)
+		suit:SetVisible(drawHud)
 	end
 
 end
@@ -43,6 +46,10 @@ function GM:HUDShouldDraw( name )
 
 	local ply = LocalPlayer()
 	local res = true
+
+	if hidehud:GetBool() == true then
+		return false
+	end
 
 	if name == "CHudCrosshair"  then
 		local wep = ply:GetActiveWeapon()
