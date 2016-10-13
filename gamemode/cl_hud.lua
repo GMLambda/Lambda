@@ -1,0 +1,283 @@
+include("huds/hud_numeric.lua")
+include("huds/hud_suit.lua")
+include("huds/hud_pickup.lua")
+include("huds/hud_respawn.lua")
+
+local DbgPrint = GetLogging("HUD")
+
+DEFINE_BASECLASS( "gamemode_base" )
+
+local function AskWeapon(ply, hud, wep)
+	if IsValid( wep ) and wep.HUDShouldDraw ~= nil then
+		return wep.HUDShouldDraw( wep, name )
+	end
+end
+
+function GM:HUDTick()
+
+	local drawHud = true
+	local ply = LocalPlayer()
+	if not IsValid(ply) then
+		return
+	end
+
+	local wep = ply:GetActiveWeapon()
+	local CHudHealth = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
+	local CHudAmmo = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
+	local CHudBattery = drawHud and (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
+	local CHudSecondaryAmmo = drawHud and wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
+
+	--DbgPrint(CHudHealth, CHudAmmo, CHudBattery, CHudSecondaryAmmo)
+
+	if IsValid(self.HUDSuit) then
+		local suit = self.HUDSuit
+		suit.HUDHealth:SetVisible(CHudHealth)
+		suit.HUDArmor:SetVisible(CHudBattery)
+		suit.HUDAux:SetVisible(CHudBattery)
+		suit.HUDAmmo:SetVisible(CHudSecondaryAmmo)
+	end
+
+end
+
+function GM:HUDShouldDraw( name )
+
+	local ply = LocalPlayer()
+	local res = true
+
+	if name == "CHudCrosshair"  then
+		local wep = ply:GetActiveWeapon()
+		if not IsValid(wep) then
+			return false
+		end
+		if lambda_dynamic_crosshair:GetBool() == true and wep.DoDrawCrosshair == nil then
+			return false
+		end
+	elseif name == "CHudGeiger" then
+		if not ply:IsSuitEquipped() then
+			return false
+		end
+	elseif name == "CHudBattery" then
+		return false
+	elseif name == "CHudHealth" or
+		name == "CHudAmmo" or
+		name == "CHudSecondaryAmmo" then
+		return false
+	elseif name == "CHudDamageIndicator" then
+		-- We include the lifetime because theres some weird thing going with the damage indicator.
+		if ply:Alive() == false or ply:GetLifeTime() < 1.0 then
+			return false
+		end
+	elseif name == "CHudHistoryResource" then
+		return false
+	end
+
+	return true
+
+end
+
+local CROSSHAIR_W = 32
+local CROSSHAIR_H = 32
+local CROSSHAIR_SPACE = 4
+local RT_NAME = "LambdaCrosshair" .. CurTime()
+local CROSSHAIR_RT
+local CROSSHAIR_MAT
+local CROSSHAIR_RT_SETUP = false
+
+local AMMO_BAR_H = 2
+local AMMO_BAR_W = 32
+local AMMO_BAR_SPACING = 2
+local AMMO_BAR1_Y = (CROSSHAIR_H / 2) + AMMO_BAR_SPACING
+local AMMO_BAR2_Y = AMMO_BAR1_Y + AMMO_BAR_H + AMMO_BAR_SPACING
+local AMMO_BAR1_COLOR = Color(255, 255, 255, 50)
+local AMMO_BAR2_COLOR = Color(255, 255, 255, 50)
+
+local function UpdateCrosshair(centerX, centerY)
+
+	local screenCenterX = ScrH() / 2
+	local screenCenterY = ScrW() / 2
+	local localCenterX = CROSSHAIR_W / 2
+	local localCenterY = CROSSHAIR_H / 2
+	local r,g,b
+
+	--local data = render.Capture({format = "png", h = CROSSHAIR_H, w = CROSSHAIR_W, x = screenCenterX, y = screenCenterY, quality = 50})
+	--DbgPrint(data)
+	render.CapturePixels()
+
+	if CROSSHAIR_RT_SETUP == false  then
+
+		CROSSHAIR_RT = GetRenderTarget(RT_NAME, CROSSHAIR_W, CROSSHAIR_H, false)
+		CROSSHAIR_MAT = CreateMaterial("LambdaCrosshair" .. CurTime(), "UnlitGeneric",
+		{
+			["$basetexture"] = RT_NAME,
+			["$translucent"] = 1,
+		})
+
+		CROSSHAIR_MAT:SetTexture("$basetexture", CROSSHAIR_RT)
+
+		render.ClearRenderTarget(CROSSHAIR_RT, Color(0, 0, 0, 0))
+		--render.ClearDepth()
+		--render.Clear( 0, 0, 0, 0 )
+
+		CROSSHAIR_RT_SETUP = true
+
+	end
+
+	render.PushRenderTarget(CROSSHAIR_RT)
+	render.OverrideAlphaWriteEnable( true, true )
+
+	r,g,b = render.ReadPixel(centerX, centerY + AMMO_BAR1_Y)
+	AMMO_BAR1_COLOR.r = 255 - r
+	AMMO_BAR1_COLOR.g = 255 - g
+	AMMO_BAR1_COLOR.b = 255 - b
+	AMMO_BAR1_COLOR.a = 128
+
+	r,g,b = render.ReadPixel(centerX, centerY + AMMO_BAR2_Y)
+	AMMO_BAR2_COLOR.r = 255 - r
+	AMMO_BAR2_COLOR.g = 255 - g
+	AMMO_BAR2_COLOR.b = 255 - b
+	AMMO_BAR2_COLOR.a = 128
+
+	cam.Start2D()
+
+		local pad = 1
+		local alpha = 128
+
+		-- Up
+		for y = 0, (CROSSHAIR_H / 2) - CROSSHAIR_SPACE, pad do
+			r,g,b = render.ReadPixel(centerX, centerY - y - CROSSHAIR_SPACE)
+			surface.SetDrawColor(255 - r, 255 - g, 255 - b, alpha)
+			surface.DrawLine(localCenterX, localCenterY - y - CROSSHAIR_SPACE, localCenterX, localCenterY - y - CROSSHAIR_SPACE - 1)
+			--surface.DrawRect(localCenterX, localCenterY - y - CROSSHAIR_SPACE, 2, 2)
+		end
+
+		-- Down
+		for y = 0, (CROSSHAIR_H / 2) - CROSSHAIR_SPACE, pad do
+			r,g,b = render.ReadPixel(centerX, centerY + y + CROSSHAIR_SPACE)
+			surface.SetDrawColor(255 - r, 255 - g, 255 - b, alpha)
+			surface.DrawLine(localCenterX, localCenterY + y + CROSSHAIR_SPACE, localCenterX, localCenterY + y + CROSSHAIR_SPACE + 1)
+			--surface.DrawRect(localCenterX, localCenterY + y + CROSSHAIR_SPACE, 2, 2)
+		end
+
+		-- Left
+		for x = 0, (CROSSHAIR_W / 2) - CROSSHAIR_SPACE, pad do
+			r,g,b = render.ReadPixel(centerX - x - CROSSHAIR_SPACE, centerY)
+			surface.SetDrawColor(255 - r, 255 - g, 255 - b, alpha)
+			surface.DrawLine(localCenterX - x - CROSSHAIR_SPACE, localCenterY, localCenterX - x - CROSSHAIR_SPACE - 1, localCenterY)
+			--surface.DrawRect(localCenterX - x - CROSSHAIR_SPACE, localCenterY, 2, 2)
+		end
+
+		-- Right
+		for x = 0, (CROSSHAIR_W / 2) - CROSSHAIR_SPACE, pad do
+			r,g,b = render.ReadPixel(centerX + x + CROSSHAIR_SPACE, centerY)
+			surface.SetDrawColor(255 - r, 255 - g, 255 - b, alpha)
+			surface.DrawLine(localCenterX + x + CROSSHAIR_SPACE, localCenterY, localCenterX + x + CROSSHAIR_SPACE + 1, localCenterY)
+			--surface.DrawRect(localCenterX + x + CROSSHAIR_SPACE, localCenterY, 2, 2)
+		end
+
+		-- Dot
+		r,g,b = render.ReadPixel(centerX, centerY)
+		surface.SetDrawColor(255 - (r / 4), math.Clamp(255 - (g * 4), 0, 255), math.Clamp(255 - (b * 4), 0, 255), 255)
+		surface.DrawLine(localCenterX - 4, localCenterY - 4, localCenterX + 4, localCenterY + 4)
+		surface.DrawLine(localCenterX + 4, localCenterY - 4, localCenterX - 4, localCenterY + 4)
+
+	cam.End2D()
+
+	render.OverrideAlphaWriteEnable( false )
+	render.PopRenderTarget()
+
+end
+
+function GM:DrawDynamicCrosshair()
+
+	local ply = LocalPlayer()
+	if ply:Alive() == true then
+		if ply:InVehicle() == true then
+			local veh = ply:GetVehicle()
+			if veh:GetClass() == "prop_vehicle_jeep" or veh:GetClass() == "prop_vehicle_airboat" then
+				return
+			end
+		end
+	end
+
+	local wep = ply:GetActiveWeapon()
+	if wep == nil or not IsValid(wep) then
+		return
+	end
+	if wep:GetClass() == "weapon_crowbar" then
+		return
+	end
+
+	if wep.DoDrawCrosshair ~= nil then
+		return
+	end
+
+	local scrW, scrH = ScrW(), ScrH()
+	local centerX = scrW / 2
+	local centerY = scrH / 2
+
+	if FrameNumber() % 60 == 0 or CROSSHAIR_RT_SETUP == false then
+		UpdateCrosshair(centerX, centerY)
+	end
+
+	surface.SetDrawColor( 255, 255, 255, 255 )
+	surface.SetMaterial(CROSSHAIR_MAT)
+	surface.DrawTexturedRect(centerX - (CROSSHAIR_W / 2), centerY - (CROSSHAIR_H / 2), CROSSHAIR_W, CROSSHAIR_H)
+
+	local clip1 = wep:Clip1()
+	if clip1 ~= -1 then
+		local p = clip1 / wep:GetMaxClip1()
+		local w = math.Round(p * 32)
+		surface.SetDrawColor( AMMO_BAR1_COLOR.r, AMMO_BAR1_COLOR.g, AMMO_BAR1_COLOR.b, AMMO_BAR1_COLOR.a )
+		surface.DrawRect(centerX - (AMMO_BAR_W / 2), centerY + AMMO_BAR1_Y, w, AMMO_BAR_H)
+	end
+
+	local ammoType = wep:GetPrimaryAmmoType()
+	local ammoCount = ply:GetAmmoCount(ammoType)
+	if ammoCount > 0 then
+		local ammoName = game.GetAmmoName(ammoType)
+		local maxVar = self.MAX_AMMO_DEF[ammoName]
+		if maxVar ~= nil then
+			local p = ammoCount / maxVar:GetInt()
+			local w = math.Round(p * 32)
+			surface.SetDrawColor( AMMO_BAR2_COLOR.r, AMMO_BAR2_COLOR.g, AMMO_BAR2_COLOR.b, AMMO_BAR2_COLOR.a )
+			surface.DrawRect(centerX - (AMMO_BAR_W / 2), centerY + AMMO_BAR2_Y, w, AMMO_BAR_H)
+		end
+	end
+
+end
+
+function GM:HUDPaint()
+
+	hook.Run( "HUDDrawPickupHistory" )
+	hook.Run( "DrawDeathNotice", 0.85, 0.04 )
+	if lambda_dynamic_crosshair:GetBool() == true then
+		hook.Run( "DrawDynamicCrosshair" )
+	end
+
+end
+
+function GM:HUDInit()
+
+	if IsValid(self.HUDSuit) then
+		self.HUDSuit:Remove()
+	end
+
+	if IsValid(self.HUDRespawn) then
+		self.HUDRespawn:Remove()
+	end
+
+	self.HUDRespawn = vgui.Create("HudRespawn")
+	self.HUDSuit = vgui.Create("HudSuit")
+
+	CROSSHAIR_RT_SETUP = false
+
+end
+
+function GM:EnableRespawnHUD(enabled, startTime, timeout)
+	if not IsValid(self.HUDRespawn) then
+		-- What?
+		return
+	end
+	self.HUDRespawn:SetVisible(enabled)
+	self.HUDRespawn:SetTimeout(startTime, timeout)
+end
