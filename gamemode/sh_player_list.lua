@@ -35,7 +35,7 @@ if SERVER then
 
 			end
 
-			PrintTable(self.Connecting)
+			--PrintTable(self.Connecting)
 
 			for k,_ in pairs(self.Connecting) do
 				hook.Call("NotifyPlayerListChanged", GAMEMODE, k)

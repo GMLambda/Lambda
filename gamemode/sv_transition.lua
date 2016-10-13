@@ -865,7 +865,7 @@ function GM:CreateTransitionObjects()
 				local mapData = game.FindEntityByGlobalNameInMapData(data.GlobalName)
 				--PrintTable(mapData)
 				if mapData ~= nil and mapData["model"] ~= nil then
-					PrintTable(mapData)
+					--PrintTable(mapData)
 					local oldMdl = data.Mdl
 					data.Mdl = mapData["model"]
 					DbgPrint("Old Model: " .. oldMdl .. ", new: " .. data.Mdl)
