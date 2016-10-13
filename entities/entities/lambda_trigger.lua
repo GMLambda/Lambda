@@ -377,8 +377,6 @@ if SERVER then
 
 		local waitTime = self:GetNWVar("WaitTime")
 
-		DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
-
 		if self:GetNWVar("Disabled") == true or self:GetNWVar("Blocked") == true then
 			--DbgPrint("Disabled")
 			return
@@ -395,6 +393,8 @@ if SERVER then
 			--DbgPrint(self, "Object " .. tostring(ent) .. " did not pass trigger filter")
 			return
 		end
+
+		DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
 
 		--DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. tostring(self.WaitTime))
 		--DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)

@@ -355,6 +355,8 @@ if SERVER then
 
 		DbgPrint("Registered output")
 
+		return true
+		
 	end
 
 	function ENT:ClearOutputs()
