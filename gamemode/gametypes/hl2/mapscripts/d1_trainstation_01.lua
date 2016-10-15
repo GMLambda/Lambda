@@ -187,7 +187,7 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
 
 	DbgPrint("PostPlayerSpawn")
 
-	if self.PlayersLocked then
+	if self.PlayersLocked == true then
 		self:ResetPlayerPos(ply)
 		ply:SetNoDraw(true)
 	else
