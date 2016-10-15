@@ -126,6 +126,7 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_odessa"] = true,
 	["npc_kleiner"] = true,
 	["npc_dog"] = true,
+	["npc_eli"] = true,
 	["npc_mossman"] = true,
 }
 
