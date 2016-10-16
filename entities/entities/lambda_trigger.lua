@@ -2,6 +2,7 @@
 
 local showtriggers = GetConVar("showtriggers")
 local DbgPrint = GetLogging("Trigger")
+local DbgPrint2 = GetLogging("TriggerTouch")
 
 local TRIGGER_MSG_PLAYER_COUNT = 0
 local TRIGGER_MSG_SHOWWAIT = 1
@@ -394,7 +395,7 @@ if SERVER then
 			return
 		end
 
-		DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
+		DbgPrint2(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
 
 		--DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. tostring(self.WaitTime))
 		--DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
@@ -875,8 +876,6 @@ else -- CLIENT
 		local playerCount = 0
 		local activePlayerCount = #activePlayers
 
-		--print(scheduledTime)
-
 		for _,v in pairs(player.GetAll()) do
 			if v:Alive() then
 				playerCount = playerCount + 1
@@ -884,25 +883,19 @@ else -- CLIENT
 		end
 
 		local ply = LocalPlayer()
-		-- TODO: Expirement with clamping the position within the trigger box.
-		--pos = ply:GetEyeTrace().HitPos
 		local eyePos = ply:EyePos()
-		local eyeAngles = EyeAngles() --ply:EyeAngles()
+		local eyeAngles = EyeAngles()
 
 		local distance = eyePos:Distance(pos)
 		local localView = false
-		local allowLocalView = true -- TODO: Make this a setting.
+		local allowLocalView = true
 
 		local showRunner = true
 		if distance < 50 then
 			localView = true
 		end
 
-		local distanceScale = distance * 0.0008
-
 		if allowLocalView and table.HasValue(activePlayers, ply:EntIndex()) then
-			--pos = eyePos + (eyeAngles:Forward() * 90)
-			--distanceScale = 0.1
 			local plyPos = ply:GetPos()
 			if plyPos:WithinAABox(realPos + (obbMins * 5), realPos + (obbMaxs * 5)) == true then
 				localView = true
@@ -929,10 +922,9 @@ else -- CLIENT
 			showRunner = false
 		end
 
-		distanceScale = math.Clamp(distanceScale, 0.05, 5.5)
-
-		local w,h = 0,0
+		local w, h = 0,0
 		local text = ""
+
 		local remaining = scheduledTime - GetSyncedTimestamp()
 		if remaining < 0 then
 			remaining = 0
@@ -941,70 +933,44 @@ else -- CLIENT
 		local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5)
 		pos = pos + (Vector(0, 0, 1) * bounce)
 
-		local diff = pos - eyePos
-		ang = diff:Angle()
+		local screenPos = pos:ToScreen()
 
-		ang:RotateAroundAxis(ang:Up(), 90)
-		ang:RotateAroundAxis(ang:Forward(), 90)
+		local x = screenPos.x
+		local y = screenPos.y
 
-		--DbgPrint(distanceScale)
+		pcall(function()
+			surface.SetFont("LAMBDA_2")
 
-		local mat1 = Matrix()
-		mat1:SetTranslation( pos )
-		mat1:Scale( Vector(1, 1, 1) * distanceScale  )
-		mat1:SetTranslation( pos )
-		mat1:SetAngles(ang)
-		mat1:Rotate(Angle(0, 180, 0))
-		mat1:SetTranslation( pos )
+			local textY = 0
+			local spacing = 10
 
-		diff = pos - eyePos
-		ang = diff:Angle()
+			text = "Waiting for players: " .. tostring(activePlayerCount) .. " / " .. tostring(playerCount)
+			draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
+			draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
+			w,h = surface.GetTextSize( text )
+			textY = textY + h + spacing
 
-		ang:RotateAroundAxis(ang:Up(), 45)
-		ang:RotateAroundAxis(ang:Forward(), 180)
+			text = "Game will continue once all players are here"
+			draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
+			draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
+			textY = textY + h + spacing
 
-		cam.IgnoreZ(true)
-		cam.Start3D2D(pos, Angle(0,0,0), 0.1)
-			cam.PushModelMatrix(mat1)
+			if scheduledTime > 0 then
 
-			pcall(function()
-				surface.SetFont("LAMBDA_2")
+				text = "Timeout in " .. string.format("%.02f", remaining) .. " seconds"
 
-				local textY = 0
-				local spacing = 10
-
-				text = "Waiting for players: " .. tostring(activePlayerCount) .. " / " .. tostring(playerCount)
-				draw.DrawText( text, "LAMBDA_1", 0, textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-				draw.DrawText( text, "LAMBDA_2", 0, textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
-				w,h = surface.GetTextSize( text )
+				draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
+				draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
 				textY = textY + h + spacing
 
-				text = "Game will continue once all players are here"
-				draw.DrawText( text, "LAMBDA_1", 0, textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-				draw.DrawText( text, "LAMBDA_2", 0, textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
-				textY = textY + h + spacing
+			end
 
-				if scheduledTime > 0 then
-
-					text = "Timeout in " .. string.format("%.02f", remaining) .. " seconds"
-
-					draw.DrawText( text, "LAMBDA_1", 0, textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-					draw.DrawText( text, "LAMBDA_2", 0, textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
-					textY = textY + h + spacing
-
-				end
-
-				if showRunner == true then
-					surface.SetDrawColor( 255, 255, 255, 200 )
-					surface.SetMaterial( MAT_POINTER )
-					surface.DrawTexturedRect( -30, textY + 30 + (-bounce * 10), 60, 60 )
-				end
-			end)
-
-			cam.PopModelMatrix()
-
-		cam.End3D2D()
-		cam.IgnoreZ(false)
+			if showRunner == true then
+				surface.SetDrawColor( 255, 255, 255, 200 )
+				surface.SetMaterial( MAT_POINTER )
+				surface.DrawTexturedRect( x + -30, y + textY + 30 + (-bounce * 10), 60, 60 )
+			end
+		end)
 
 	end
 
@@ -1012,7 +978,6 @@ else -- CLIENT
 
 	local function DrawTriggerBlockade(data)
 
-		--DbgPrint("Drawing mesh")
 		local mesh = data.Mesh
 
 		if mesh == nil then
@@ -1029,11 +994,9 @@ else -- CLIENT
 			data.Mesh = mesh
 		end
 
-		--render.SuppressEngineLighting(true)
 		render.SetMaterial(MAT_BLOCKED)
 
 		mesh:Draw()
-		--render.SuppressEngineLighting(false)
 
 	end
 
@@ -1043,7 +1006,17 @@ else -- CLIENT
 
 			if data.Blocked == true then
 				DrawTriggerBlockade(data)
-			elseif data.Waiting == true then
+			end
+
+		end
+
+	end)
+
+	hook.Add("HUDPaint", "LambdaTrigger", function()
+
+		for k, data in pairs(LAMBDA_TRIGGERS) do
+
+			if data.Waiting == true then
 				DrawTriggerWaiting(data.ActivePlayers, data.Timeout, data.Pos + data.Center, Angle(0, 0, 0), data.Pos, data.Mins, data.Maxs)
 			end
 

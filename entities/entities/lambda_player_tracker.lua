@@ -15,6 +15,10 @@ function ENT:Initialize()
 			end
 			ent:RenderPlayer()
 		end)
+
+		hook.Add("HUDPaint", self, function(ent)
+			ent:RenderPlayerStats()
+		end)
 	end
 	self:DrawShadow(false)
 end
@@ -94,6 +98,15 @@ if CLIENT then
 			cam.IgnoreZ(false)
 		end
 
+	end
+
+	function ENT:RenderPlayerStats()
+
+		local ply = self:GetParent()
+		if not IsValid(ply) or not ply:IsPlayer() or ply == LocalPlayer() then
+			return
+		end
+
 		local text = ply:Nick()
 		local pos = ply:EyePos() + Vector(0, 0, 12)
 
@@ -102,69 +115,62 @@ if CLIENT then
 			pos = ply:GetBonePosition(boneIdx) + Vector(0, 0, 14)
 		end
 
-		local ang = (pos - EyePos()):GetNormal():Angle()
-		ang:RotateAroundAxis(ang:Forward(), 90);
-		ang:RotateAroundAxis(ang:Right(), 90);
-		ang:RotateAroundAxis(ang:Up(), 0);
-
 		local dist = EyePos():Distance(ply:EyePos())
-		local scale = 0.12 * (dist * 0.005)
-		if scale < 0.12 then
-			scale = 0.12
-		end
-		if dist < 200 then
-			dist = 200
+		if dist < 100 then
+			dist = 100
 		elseif dist > 6000 then
 			dist = 6000
 		end
-		local zOffset = 1 * (scale * 45)
+		local scaleFactor = math.log(dist) * 6
 
-		cam.IgnoreZ(true)
+		local scale = 0.12 * (dist * 0.01)
+		if scale < 0.12 then
+			scale = 0.12
+		end
 
-		cam.Start3D2D(pos + Vector(0, 0, zOffset), ang, scale)
+		local zOffset = 1 * (scale * scaleFactor)
 
-			surface.SetFont(font)
+		local screenPos = (pos + Vector(0, 0, zOffset)):ToScreen()
 
-			local w, h = surface.GetTextSize( text )
-			local x = -(w / 2)
-			local y = 0
+		surface.SetFont(font)
 
-			draw.SimpleText( text, font, x + 1, y + 1, Color( 0, 0, 0, 120 ) )
-			draw.SimpleText( text, font, x + 2, y + 2, Color( 0, 0, 0, 50 ) )
-			draw.SimpleText( text, font, x, y, GAMEMODE:GetTeamColor( ply ) )
+		local w, h = surface.GetTextSize( text )
+		local x = -(w / 2) + screenPos.x
+		local y = 0 + screenPos.y
 
-			y = y + h + pad
+		draw.SimpleText( text, font, x + 1, y + 1, Color( 0, 0, 0, 120 ) )
+		draw.SimpleText( text, font, x + 2, y + 2, Color( 0, 0, 0, 50 ) )
+		draw.SimpleText( text, font, x, y, GAMEMODE:GetTeamColor( ply ) )
 
-			do
-				local p = ply:Health() / ply:GetMaxHealth()
-				local redPower = (1.0 - p) * 10
-				local v = CurTime() * redPower
-				local flash = (1 + math.sin(v) * math.cos(v)) * 55
+		y = y + h + pad
 
-				surface.SetDrawColor(0, 0, 0, 100)
-				surface.DrawOutlinedRect(-1 - (health_w / 2), y, health_w + 2, health_h + 2)
+		do
+			local p = ply:Health() / ply:GetMaxHealth()
+			local redPower = (1.0 - p) * 10
+			local v = CurTime() * redPower
+			local flash = (1 + math.sin(v) * math.cos(v)) * 55
 
-				surface.SetDrawColor(200 - (p * 200) + flash, (p * 255) - (flash / 2), 0, 100)
-				surface.DrawRect(-(health_w / 2), y + 1, p * health_w, health_h)
+			surface.SetDrawColor(0, 0, 0, 100)
+			surface.DrawOutlinedRect(screenPos.x + -1 - (health_w / 2), y, health_w + 2, health_h + 2)
 
-				y = y + health_h + pad
+			surface.SetDrawColor(200 - (p * 200) + flash, (p * 255) - (flash / 2), 0, 100)
+			surface.DrawRect(screenPos.x +  -(health_w / 2), y + 1, p * health_w, health_h)
 
-			end
+			y = y + health_h + pad
 
-			do
-				local aux = ply:GetSuitPower()
-				local p = aux / 100
+		end
 
-				surface.SetDrawColor(0, 0, 0, 100)
-				surface.DrawOutlinedRect(-1 - (aux_w / 2), y, aux_w + 2, aux_h + 2)
+		do
+			local aux = ply:GetSuitPower()
+			local p = aux / 100
 
-				surface.SetDrawColor(255 - p * 255, p * 200, p * 150, 100)
-				surface.DrawRect(-(aux_w / 2), y + 1, p * aux_w, aux_h)
+			surface.SetDrawColor(0, 0, 0, 100)
+			surface.DrawOutlinedRect(screenPos.x + -1 - (aux_w / 2), y, aux_w + 2, aux_h + 2)
 
-			end
-		cam.End3D2D()
+			surface.SetDrawColor(255 - p * 255, p * 200, p * 150, 100)
+			surface.DrawRect(screenPos.x + -(aux_w / 2), y + 1, p * aux_w, aux_h)
 
-		cam.IgnoreZ(false)
+		end
 
 	end
 

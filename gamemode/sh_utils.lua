@@ -24,7 +24,11 @@ if SERVER then
 
 	function util.TriggerOutputs(outputs, activator, caller, param, self)
 
-		--DbgPrint("Firing " .. tostring(table.Count(outputs)) .. " outputs")
+		local count = table.Count(outputs)
+		if count > 0 then
+			DbgPrint("Firing " .. tostring(count) .. " outputs")
+		end
+
 		local removedOutput = false
 
 		for k, data in pairs(outputs) do

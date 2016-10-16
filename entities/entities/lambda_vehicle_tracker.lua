@@ -11,10 +11,7 @@ function ENT:Initialize()
 		-- I know this seems insane but otherwise it would clip the purpose.
 		self:SetRenderBounds(Vector(-10000, -10000, -10000), Vector(10000, 10000, 10000))
 
-		hook.Add("PostDrawTranslucentRenderables", self, function(ent, bDrawingDepth, bDrawingSkybox)
-			if bDrawingDepth == true or bDrawingSkybox == true then
-				return
-			end
+		hook.Add("HUDPaint", self, function(ent)
 			ent:RenderVehicleStatus()
 		end)
 	end
@@ -104,15 +101,6 @@ elseif CLIENT then
 			return
 		end
 
-		-- We could do this but its rather ugly.
-		--[[
-		if IsVehicleVisible(vehicle) == false then
-			cam.IgnoreZ(true)
-			vehicle:DrawModel()
-			cam.IgnoreZ(false)
-		end
-		]]
-
 		local pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 50)
 		local localPly = LocalPlayer()
 
@@ -122,11 +110,9 @@ elseif CLIENT then
 		end
 
 		local ownedVehicle = localPly:GetNW2Entity("LambdaOwnedVehicle")
-		--DbgPrint("Owned: " .. tostring(ownedVehicle))
 		local isTaken = self:GetNW2Bool("LambdaVehicleTaken")
 		local vehiclePly = self:GetNW2Entity("LambdaVehicleOwner")
 		local displayIcon = false
-
 
 		if isTaken == false then
 			displayIcon = true
@@ -140,51 +126,24 @@ elseif CLIENT then
 			displayIcon = false
 		end
 
-		if displayIcon == true then
-
-			local eyePos = EyePos()
-			local distance = eyePos:Distance(pos)
-			local distanceScale = distance * 0.0008
-			distanceScale = math.Clamp(distanceScale, 0.25, 5.5)
-
-			local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5)
-			pos = pos + (Vector(0, 0, 1) * bounce)
-
-			local diff = pos - eyePos
-			ang = diff:Angle()
-
-			ang:RotateAroundAxis(ang:Up(), 90)
-			ang:RotateAroundAxis(ang:Forward(), 90)
-
-			pos = pos + (Vector(0, 0, 60) * distanceScale)
-
-			local mat1 = Matrix()
-			mat1:SetTranslation( pos )
-			mat1:Scale( Vector(1, 1, 1) * distanceScale  )
-			mat1:SetTranslation( pos )
-			mat1:SetAngles(ang)
-			mat1:Rotate(Angle(0, 180, 0))
-			mat1:SetTranslation( pos )
-
-			diff = pos - eyePos
-			ang = diff:Angle()
-
-			ang:RotateAroundAxis(ang:Up(), 45)
-			ang:RotateAroundAxis(ang:Forward(), 180)
-
-			cam.IgnoreZ(true)
-			cam.Start3D2D(pos, Angle(0,0,0), 0.1)
-
-				cam.PushModelMatrix(mat1)
-					surface.SetDrawColor( 255, 255, 255, 200 )
-					surface.SetMaterial( VEHICLE_MAT )
-					surface.DrawTexturedRect( -32, 0 + (-bounce * 10), 60, 60 )
-				cam.PopModelMatrix()
-
-			cam.End3D2D()
-			cam.IgnoreZ(false)
-
+		if displayIcon ~= true then
+			return
 		end
+
+		local eyePos = EyePos()
+		local distance = eyePos:Distance(pos)
+		local distanceScale = distance * 0.0008
+		distanceScale = math.Clamp(distanceScale, 0.25, 5.5)
+
+		local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5) * 5
+		pos = pos + (Vector(0, 0, 1) * bounce)
+		pos = pos + (Vector(0, 0, 60) * distanceScale)
+
+		local screenPos = pos:ToScreen()
+
+		surface.SetDrawColor( 255, 255, 255, 200 )
+		surface.SetMaterial( VEHICLE_MAT )
+		surface.DrawTexturedRect( screenPos.x + -32, screenPos.y, 60, 60 )
 
 	end
 

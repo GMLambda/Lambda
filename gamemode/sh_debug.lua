@@ -89,13 +89,15 @@ if _DEBUG then
 		end
 		printResult = printResult
 
+		local timestamp = string.format("(%.02f)", CurTime())
+
 		if SERVER then
-			print("[SV:" .. group .. "] " .. printResult)
+			print(timestamp .. "[SV:" .. group .. "] " .. printResult)
 		else
 			if epoe and epoe.Print then
-				epoe.Print("[CL:" .. group .. "] " .. printResult)
+				epoe.Print(timestamp .. "[CL:" .. group .. "] " .. printResult)
 			else
-				print("[CL:" .. group .. "] " .. printResult)
+				print(timestamp .. "[CL:" .. group .. "] " .. printResult)
 			end
 		end
 
@@ -109,15 +111,15 @@ if _DEBUG then
 		end
 		printResult = printResult
 
+		local timestamp = string.format("(%.02f)", CurTime())
+
 		if SERVER then
-			--MsgC(Color(0, 179, 255), "[SV] " .. printResult .. "\n")
-			print("[SV] " .. printResult)
+			print(timestamp .. "[SV] " .. printResult)
 		else
-			--MsgC(Color(188, 188, 0), "[CL] " .. printResult .. "\n")
 			if epoe and epoe.Print then
-				epoe.Print("[CL] " .. printResult)
+				epoe.Print(timestamp .. "[CL] " .. printResult)
 			else
-				print("[CL] " .. printResult)
+				print(timestamp .. "[CL] " .. printResult)
 			end
 		end
 
