@@ -34,20 +34,6 @@ end
 
 function PANEL:Think()
 
-	local ply = LocalPlayer()
-	if not IsValid(ply) then
-		return
-	end
-
-	local drawHud = ply:IsSuitEquipped() and ply:Alive()
-
-	self.HUDHealth:SetVisible(drawHud)
-	self.HUDArmor:SetVisible(drawHud)
-	self.HUDAux:SetVisible(drawHud)
-
-	local wep = ply:GetActiveWeapon()
-	local vehicle = ply:GetVehicle()
-	self.HUDAmmo:SetVisible(drawHud and IsValid(wep) or IsValid(vehicle))
 end
 
 vgui.Register( "HudSuit", PANEL, "Panel" )

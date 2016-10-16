@@ -17,27 +17,39 @@ local hidehud = GetConVar("hidehud")
 
 function GM:HUDTick()
 
-	local drawHud = hidehud:GetBool() ~= true
 	local ply = LocalPlayer()
 	if not IsValid(ply) then
 		return
 	end
 
 	local wep = ply:GetActiveWeapon()
-	local CHudHealth = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
-	local CHudAmmo = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
-	local CHudBattery = drawHud == true and (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
-	local CHudSecondaryAmmo = drawHud == true and wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
+	local CHudHealth = (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
+	local CHudAmmo = (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
+	local CHudBattery = (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
+	local CHudSecondaryAmmo = (wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
 
 	--DbgPrint(CHudHealth, CHudAmmo, CHudBattery, CHudSecondaryAmmo)
 
+	local ply = LocalPlayer()
+	if not IsValid(ply) then
+		return
+	end
+
+	local drawHud = ply:IsSuitEquipped() and ply:Alive() and hidehud:GetBool() ~= true
+
 	if IsValid(self.HUDSuit) then
+
+		local wep = ply:GetActiveWeapon()
+		local vehicle = ply:GetVehicle()
+
 		local suit = self.HUDSuit
-		suit.HUDHealth:SetVisible(CHudHealth)
-		suit.HUDArmor:SetVisible(CHudBattery)
-		suit.HUDAux:SetVisible(CHudBattery)
-		suit.HUDAmmo:SetVisible(CHudSecondaryAmmo)
+		suit.HUDHealth:SetVisible(CHudHealth and drawHud)
+		suit.HUDArmor:SetVisible(CHudBattery and drawHud)
+		suit.HUDAux:SetVisible(CHudBattery and drawHud)
+		suit.HUDAmmo:SetVisible(CHudSecondaryAmmo and IsValid(wep) or IsValid(vehicle) and drawHud)
+
 		suit:SetVisible(drawHud)
+
 	end
 
 end
@@ -45,7 +57,6 @@ end
 function GM:HUDShouldDraw( name )
 
 	local ply = LocalPlayer()
-	local res = true
 
 	if hidehud:GetBool() == true then
 		return false
