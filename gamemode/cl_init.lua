@@ -90,7 +90,16 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 	local ply = LocalPlayer()
 
-	local speed = Lerp(RealFrameTime() * 3, PLAYER_SPEED, ply:GetVelocity():Length2D())
+	local dt = SysTime() - (self.LastViewBob or SysTime())
+	self.LastViewBob = SysTime()
+
+	if dt >= 1/60 then
+		dt = 1/60
+	end
+
+	dt = dt * GetTimeScale()
+
+	local speed = Lerp(dt * 10, PLAYER_SPEED, ply:GetVelocity():Length2D())
 	PLAYER_SPEED = speed
 
 	speed = math.Clamp(speed, -MAX_SPEED, MAX_SPEED)
@@ -98,7 +107,7 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 	-- NOTE: Using 0.0 instead of 0.1 causes weird behavior, hl2 uses 0.0 but lets not make it uglier than required.
 	local bob_offset = math.Remap(speed, 0, MAX_SPEED, 0.0, 1.0)
 
-	BOBTIME = BOBTIME + (RealFrameTime() * 0.8 * GetTimeScale()) * bob_offset
+	BOBTIME = BOBTIME + (dt * 1.3) * bob_offset
 	LAST_BOBTIME = BOBTIME
 
 	local cycle = BOBTIME - math.Round(BOBTIME / HL2_BOB_CYCLE_MAX, 0) * HL2_BOB_CYCLE_MAX
@@ -154,7 +163,16 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 	local newPos = oldPos
 	local newAng = oldAng
 
-	local frameTime = math.Clamp(RealFrameTime() * GetTimeScale(), 0, 1 / 30)
+	local dt = SysTime() - (self.LastViewLag or SysTime())
+	self.LastViewLag = SysTime()
+
+	if dt >= 1/60 then
+		dt = 1/60
+	end
+
+	dt = dt * GetTimeScale()
+
+	local frameTime = dt
 	if frameTime ~= 0.0 then
 
 		local diff = fwd - LastFacing

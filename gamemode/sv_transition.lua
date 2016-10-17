@@ -856,7 +856,6 @@ function GM:CreateTransitionObjects()
 				--if data.SourceMap == self:GetCurrentMap() then
 					local oldMdl = data.Mdl
 					data.Mdl = e:GetModel() or oldMdl
-					DbgPrint("Old Model: " .. oldMdl .. ", new: " .. data.Mdl)
 				--end
 				--e:SetSaveValue("globalname", "nope")
 				--DbgPrint("Deleting duplicate: " .. tostring(data.GlobalName), e:GetModel())
