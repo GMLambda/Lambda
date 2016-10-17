@@ -103,7 +103,7 @@ if CLIENT then
 	function ENT:RenderPlayerStats()
 
 		local ply = self:GetParent()
-		if not IsValid(ply) or not ply:IsPlayer() or ply == LocalPlayer() then
+		if not IsValid(ply) or not ply:IsPlayer() or ply == LocalPlayer() or not ply:Alive() then
 			return
 		end
 
