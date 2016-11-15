@@ -41,6 +41,8 @@ end
 
 function MAPSCRIPT:PostInit()
 
+	DbgPrint("PostInit")
+
 	if SERVER then
 
 		ents.WaitForEntityByName("global_gordon_invulnerable", function(ent) ent:Fire("TurnOff") end)
@@ -112,7 +114,8 @@ function MAPSCRIPT:PostInit()
 		end)
 
 		ents.WaitForEntityByName("trigger_elevator_go_down", function(ent)
-			ent:ResizeTriggerBox(Vector(-70, -70, -60), Vector(70, 70, 60))
+			print("BLUB")
+			ent:ResizeTriggerBox(Vector(-70, -70, -60), Vector(50, 70, 60))
 			ent:SetKeyValue("teamwait", "1")
 			ent.OnTrigger = function(ent)
 				local checkpoint = ents.Create("lambda_checkpoint")
