@@ -114,7 +114,6 @@ function MAPSCRIPT:PostInit()
 		end)
 
 		ents.WaitForEntityByName("trigger_elevator_go_down", function(ent)
-			print("BLUB")
 			ent:ResizeTriggerBox(Vector(-70, -70, -60), Vector(50, 70, 60))
 			ent:SetKeyValue("teamwait", "1")
 			ent.OnTrigger = function(ent)
