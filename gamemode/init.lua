@@ -14,6 +14,7 @@ AddCSLuaFile("huds/hud_ammo.lua")
 AddCSLuaFile("huds/hud_aux.lua")
 AddCSLuaFile("huds/hud_pickup.lua")
 AddCSLuaFile("huds/hud_respawn.lua")
+AddCSLuaFile("huds/hud_settings.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 

@@ -70,15 +70,13 @@ function GM:Think()
 
 end
 
-local BOBTIME = 0
-local LAST_BOBTIME = CurTime()
 local HL2_BOB_CYCLE_MAX = 0.40
 local HL2_BOB_UP = 0.5
 local MAX_SPEED = 320
 local PI = math.pi
-local PLAYER_SPEED = 0
 
 local host_timescale = GetConVar("host_timescale")
+
 local function GetTimeScale()
 	if host_timescale:GetFloat() ~= 1 then
 		return host_timescale:GetFloat()
@@ -89,6 +87,8 @@ end
 function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 	local ply = LocalPlayer()
+
+	self.LastPlayerSpeed = self.LastPlayerSpeed or 0
 
 	local dt = SysTime() - (self.LastViewBob or SysTime())
 	self.LastViewBob = SysTime()
@@ -101,21 +101,19 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 	local speed
 	if ply:OnGround() then
-		speed = Lerp(dt * 10, PLAYER_SPEED, ply:GetVelocity():Length2D())
+		speed = Lerp(dt * 10, self.LastPlayerSpeed, ply:GetVelocity():Length2D())
 	else
-		speed = Lerp(dt * 2, PLAYER_SPEED, 0)
+		speed = Lerp(dt * 2, self.LastPlayerSpeed, 0)
 	end
-	PLAYER_SPEED = speed
 
 	speed = math.Clamp(speed, -MAX_SPEED, MAX_SPEED)
+	self.LastPlayerSpeed = speed
 
-	-- NOTE: Using 0.0 instead of 0.1 causes weird behavior, hl2 uses 0.0 but lets not make it uglier than required.
 	local bob_offset = math.Remap(speed, 0, MAX_SPEED, 0.0, 1.0)
 
-	BOBTIME = BOBTIME + (dt * 1.3) * bob_offset
-	LAST_BOBTIME = BOBTIME
+	self.ViewBobTime = (self.ViewBobTime or 0) + (dt * 1.3) * bob_offset
 
-	local cycle = BOBTIME - math.Round(BOBTIME / HL2_BOB_CYCLE_MAX, 0) * HL2_BOB_CYCLE_MAX
+	local cycle = self.ViewBobTime - math.Round(self.ViewBobTime / HL2_BOB_CYCLE_MAX, 0) * HL2_BOB_CYCLE_MAX
 	cycle = cycle / HL2_BOB_CYCLE_MAX
 
 	if cycle < HL2_BOB_UP then
@@ -128,7 +126,7 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 	vertBob = vertBob * 0.3 + vertBob * 0.7 * math.sin(cycle)
 	vertBob = math.Clamp(vertBob, -7.0, 4.0)
 
-	cycle = BOBTIME - math.Round(BOBTIME / HL2_BOB_CYCLE_MAX * 2, 0) * HL2_BOB_CYCLE_MAX * 2
+	cycle = self.ViewBobTime - math.Round(self.ViewBobTime / HL2_BOB_CYCLE_MAX * 2, 0) * HL2_BOB_CYCLE_MAX * 2
 	cycle = cycle / (HL2_BOB_CYCLE_MAX * 2)
 
 	if cycle < HL2_BOB_UP then
@@ -158,8 +156,7 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 end
 
-local LastFacing = Vector(0, 0, 0)
-local MaxViewModelLag = 0.4
+local HL2_MAX_VIEWMODEL_LAG = 0.4
 
 function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 
@@ -167,6 +164,8 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 
 	local newPos = oldPos
 	local newAng = oldAng
+
+	self.LastViewDir = self.LastViewDir or fwd
 
 	local dt = SysTime() - (self.LastViewLag or SysTime())
 	self.LastViewLag = SysTime()
@@ -180,18 +179,17 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 	local frameTime = dt
 	if frameTime ~= 0.0 then
 
-		local diff = fwd - LastFacing
+		local diff = fwd - self.LastViewDir
 		local speed = 0.8
 
 		local len = diff:Length()
-		if len > MaxViewModelLag and MaxViewModelLag > 0.0 then
-			local scale = len / MaxViewModelLag
+		if len > HL2_MAX_VIEWMODEL_LAG and HL2_MAX_VIEWMODEL_LAG > 0.0 then
+			local scale = len / HL2_MAX_VIEWMODEL_LAG
 			speed = speed * scale
 		end
 
-		LastFacing = LastFacing + (diff * (speed * frameTime))
-
-		LastFacing:Normalize()
+		self.LastViewDir = self.LastViewDir + (diff * (speed * frameTime))
+		self.LastViewDir:Normalize()
 
 		newPos = oldPos + (diff * -1.0 * speed)
 
@@ -214,9 +212,6 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 	return newPos, newAng
 
 end
-
-local HEAD_POS
-local HEAD_POS_DELTA = Vector(0, 0, 0)
 
 function GM:CalcViewModelView( wep, vm, oldPos, oldAng, pos, ang )
 
@@ -251,7 +246,7 @@ function GM:CalcViewModelView( wep, vm, oldPos, oldAng, pos, ang )
 	end
 
 	local newPos = oldPos
-	newPos = newPos + HEAD_POS_DELTA
+	newPos = newPos + (self.PlayerHeadPosDelta or Vector(0, 0, 0))
 	local newAng = oldAng
 
 	newPos, newAng = self:CalcViewModelBob(wep, vm, newPos, newAng, pos, ang)
@@ -279,22 +274,22 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 	local t = RealFrameTime() * 10
 
-	HEAD_POS = LerpVector(t, HEAD_POS or headPos, headPos)
-	if HEAD_POS:Distance(headPos) > 50 then
-		HEAD_POS = headPos
+	self.PlayerHeadPos = LerpVector(t, self.PlayerHeadPos or headPos, headPos)
+	if self.PlayerHeadPos:Distance(headPos) > 50 then
+		self.PlayerHeadPos = headPos
 	end
 
-	local deltaX = (HEAD_POS.x - view.origin.x) * 0.05
-	local deltaY = (HEAD_POS.y - view.origin.y) * 0.05
-	local deltaZ = (HEAD_POS.z - view.origin.z) * 0.16
+	local deltaX = (self.PlayerHeadPos.x - view.origin.x) * 0.05
+	local deltaY = (self.PlayerHeadPos.y - view.origin.y) * 0.05
+	local deltaZ = (self.PlayerHeadPos.z - view.origin.z) * 0.16
 
 	if ply:IsSpectator() == false then
-		HEAD_POS_DELTA = Vector(deltaX, deltaY, deltaZ)
+		self.PlayerHeadPosDelta = Vector(deltaX, deltaY, deltaZ)
 	else
-		HEAD_POS_DELTA = Vector(0, 0, 0)
+		self.PlayerHeadPosDelta = Vector(0, 0, 0)
 	end
 
-	view.origin = view.origin + HEAD_POS_DELTA
+	view.origin = view.origin + self.PlayerHeadPosDelta
 
 	local viewlock = ply:GetViewLock()
 
