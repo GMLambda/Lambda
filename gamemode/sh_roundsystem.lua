@@ -335,21 +335,22 @@ end
 
 function GM:PreCleanupMap()
 	DbgPrint("GM:PreCleanupMap")
+	if SERVER then
+	    for _,v in pairs(player.GetAll()) do
+			v:KillSilent()
+		end
 
-    for _,v in pairs(player.GetAll()) do
-		v:KillSilent()
+		-- Prevent recursions.
+		for _,v in pairs(ents.GetAll()) do
+			v:EnableRespawn(false)
+		end
+
+		-- Cleanup the input/output system.
+		self.RoundState = STATE_RESTARTING
+		self:CleanUpGameEvents()
+		self:ResetInputOutput()
+		self:ResetVehicleCheckpoint()
 	end
-
-	-- Prevent recursions.
-	for _,v in pairs(ents.GetAll()) do
-		v:EnableRespawn(false)
-	end
-
-	-- Cleanup the input/output system.
-	self.RoundState = STATE_RESTARTING
-	self:CleanUpGameEvents()
-	self:ResetInputOutput()
-	self:ResetVehicleCheckpoint()
 end
 
 function GM:PostCleanupMap()

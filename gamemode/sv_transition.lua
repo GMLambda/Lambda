@@ -958,6 +958,7 @@ function GM:CreateTransitionObjects()
 			if KEYVALUE_BLACKLIST[k] == true then
 				continue
 			end
+			v = tostring(v)
 			-- Deal with specifics.
 			if data.Type == ENT_TYPE_DOOR and table.HasValue(DOOR_KEYVALUES, k) then
 				ent:SetKeyValue(k, v)

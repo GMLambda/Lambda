@@ -99,7 +99,12 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 	dt = dt * GetTimeScale()
 
-	local speed = Lerp(dt * 10, PLAYER_SPEED, ply:GetVelocity():Length2D())
+	local speed
+	if ply:OnGround() then
+		speed = Lerp(dt * 10, PLAYER_SPEED, ply:GetVelocity():Length2D())
+	else
+		speed = Lerp(dt * 2, PLAYER_SPEED, 0)
+	end
 	PLAYER_SPEED = speed
 
 	speed = math.Clamp(speed, -MAX_SPEED, MAX_SPEED)
@@ -272,9 +277,12 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 		headPos = ply:EyePos()
 	end
 
-	local t = RealFrameTime() * 5
+	local t = RealFrameTime() * 10
 
 	HEAD_POS = LerpVector(t, HEAD_POS or headPos, headPos)
+	if HEAD_POS:Distance(headPos) > 50 then
+		HEAD_POS = headPos
+	end
 
 	local deltaX = (HEAD_POS.x - view.origin.x) * 0.05
 	local deltaY = (HEAD_POS.y - view.origin.y) * 0.05
