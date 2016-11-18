@@ -416,12 +416,12 @@ if SERVER then
 			end
 		end
 
-		local n = table.Count(self.OutputTable["OnTrigger"] or {})
-		self:FireOutputs("OnTrigger", nil, ent)
-
-		if self.OnTrigger ~= nil then
+		if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
 			self.OnTrigger(self, ent)
 		end
+
+		local n = table.Count(self.OutputTable["OnTrigger"] or {})
+		self:FireOutputs("OnTrigger", nil, ent)
 
 		if waitTime < 0 then
 			self:Disable()
