@@ -86,6 +86,10 @@ if CLIENT then
 			return
 		end
 
+		if lambda_playertracker:GetBool() == false then
+			return
+		end
+
 		local lastFrame = self.LastFrameNumber
 		if lastFrame == nil or lastFrame == FrameNumber() then
 			--return
@@ -106,6 +110,13 @@ if CLIENT then
 		if not IsValid(ply) or not ply:IsPlayer() or ply == LocalPlayer() or not ply:Alive() then
 			return
 		end
+
+		if lambda_playertracker:GetBool() == false and IsPlayerVisible(ply) == false then
+			return
+		end
+
+		
+
 
 		local text = ply:Nick()
 		local pos = ply:EyePos() + Vector(0, 0, 12)
