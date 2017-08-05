@@ -1,0 +1,24 @@
+"LightmappedGeneric"
+{
+	"$basetexture" 			"lambda/blocked.vtf"
+	"$receiveflashlight" 	"1"
+			
+	Proxies 
+	{
+		Sine // a proxy which produces a sine wave
+		{
+			resultVar		$alpha // The shader parameter to be manipulated
+			sineperiod		1
+			sinemin			0.6
+			sinemax		1
+		}
+		
+		TextureScroll
+		{
+			textureScrollVar $basetexturetransform
+			textureScrollRate 0.1
+			textureScrollAngle 180
+		}
+		
+	}
+}

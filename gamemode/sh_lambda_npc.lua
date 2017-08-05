@@ -42,7 +42,6 @@ end
 		if class == "npc_combine" or class == "npc_combine_s" then
 			--npc:EmitSound(table.Random(SOLIDER_GEAR_SOUNDS))
 			local vel = npc:GetVelocity()
-			local len = vel:Length()
 			if vel:Length() >= 40 then
 				EmitSound(table.Random(SOLIDER_GEAR_SOUNDS), npc:GetPos(), npc:EntIndex(), CHAN_BODY)
 			end
@@ -54,21 +53,17 @@ if SERVER then
 
 	function GM:ScaleNPCDamage(npc, hitgroup, dmginfo)
 
-		local attacker = dmginfo:GetAttacker()
-		local inflictor = dmginfo:GetInflictor()
+		-- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
+		self:ApplyCorrectedDamage(dmginfo)
 
+		local attacker = dmginfo:GetAttacker()
 		--DbgPrint("ScaleNPCDamage -> Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor))
 
 		-- For the lazy matt to test things more quickly.
-		if attacker:IsPlayer() then
-			--dmginfo:ScaleDamage(100)
-			if not IsValid(npc:GetEnemy()) then
-				DbgPrint("Making the attacker the NPC enemy")
-				npc:SetEnemy(attacker)
-			end
+		if attacker:IsPlayer() and IsValid(npc:GetEnemy()) == false then
+			DbgPrint("Making the attacker the NPC enemy")
+			npc:SetEnemy(attacker)
 		end
-
-		self:ApplyCorrectedDamage(dmginfo)
 
 		local hitgroupScale = HITGROUP_SCALE[hitgroup]  or function() return 1.0 end
 
@@ -81,18 +76,13 @@ if SERVER then
 				return
 			else
 				local scale = hitgroupScale()
-				--DbgPrint("Scaling damage with: " .. scale)
+				DbgPrint("Scaling damage with: " .. scale)
 				dmginfo:ScaleDamage( scale )
-			end
-
-			local difficulty = game.GetSkillLevel()
-			if difficulty == 3 then
-				dmginfo:ScaleDamage( 0.7 )
 			end
 
 		end
 
-		--DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
+		DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
 
 	end
 
@@ -111,21 +101,41 @@ if SERVER then
 
 		self:AdjustNPCDifficulty(npc)
 
-		if npc:GetClass() == "npc_combine_s" then
-
+		if npc:GetClass() == "npc_combine_s" and npc:GetInternalVariable("additionalequipment") == "ai_weapon_shotgun" then
 			-- HACKHACK: I'm guessing garry removed loading skins based on their weapons at some point.
-			if npc:GetInternalVariable("additionalequipment") == "ai_weapon_shotgun" then
-				npc:SetSkin(1)
-			end
-
+			npc:SetSkin(1)
 		end
 
 		npc:SetCustomCollisionCheck(true)
+
+		if self.MapScript.OnRegisterNPC ~= nil then
+			self.MapScript:OnRegisterNPC(npc)
+		end
+
+	end
+
+	local function DissolveEntity(ent)
+
+		DbgPrint("Dissolving: " .. tostring(ent))
+
+		local name = "dissolve_" .. tostring(ent:EntIndex())
+		ent:SetName(name)
+
+		local dissolver = ents.Create("env_entity_dissolver")
+		dissolver:SetKeyValue("target", name)
+		dissolver:SetKeyValue("dissolvetype", "0")
+		dissolver:Spawn()
+		dissolver:Activate()
+
+		dissolver:Fire("Dissolve", ent:GetName(), 0)
+		dissolver:Fire("Kill", ent:GetName(), 0.1)
 
 	end
 
 	function GM:OnNPCKilled(npc, attacker, inflictor)
 		local ply = nil
+		print(tostring(npc:GetActiveWeapon()))
+
 		if IsValid(attacker) and attacker:IsPlayer() then
 			ply = attacker
 		elseif IsValid(inflictor) and inflictor:IsPlayer() then
@@ -134,41 +144,23 @@ if SERVER then
 		if IsValid(ply) then
 			if IsFriendEntityName(npc:GetClass()) then
 				ply:AddFrags(-1)
+				hook.Run("OnPlayerKilledFriendly", ply, npc)
 			else
 				ply:AddFrags(1)
+				hook.Run("OnPlayerKilledEnemy", ply, npc)
 			end
+		end
+
+		local wep = npc:GetActiveWeapon()
+		if npc:HasSpawnFlags(8192) == true and IsValid(wep) then
+			--wep:Remove()
+			DissolveEntity(wep)
 		end
 
 		self:RegisterNPCDeath(npc, attacker, inflictor)
 
 		BaseClass.OnNPCKilled(self, npc, attacker, inflictor)
 	end
-
-	local function GetClosestPlayer(pos, minRange)
-		-- Hunt closest player.
-		local minDist = minRange
-		local ply
-		for _,v in pairs(player.GetAll()) do
-			if bit.band(v:GetFlags(), FL_NOTARGET) ~= 0 then
-				continue
-			end
-			local dist = v:GetPos():Distance(pos)
-			if dist < minDist then
-				minDist = dist
-				ply = v
-			end
-		end
-		return ply
-	end
-
-	local IDLE_SCHEDULES =
-	{
-		SCHED_COMBAT_PATROL,
-		SCHED_PATROL_RUN,
-		SCHED_COMBAT_STAND,
-		SCHED_COMBAT_SWEEP,
-		SCHED_COMBAT_WALK,
-	}
 
 	function GM:NPCThink()
 
@@ -182,16 +174,8 @@ if SERVER then
 
 		self.NextNPCThink = curTime + 0.1
 
-		local precriminal = false
-		for _,v in pairs(ents.FindByClass("env_global")) do
-			local state = v:GetInternalVariable("globalstate")
-			if isstring(state) and state == "gordon_precriminal" then
-				--DbgPrint("Gordon precriminal")
-				precriminal = true
-			end
-		end
-
 		-- Don't chase players if they are not criminals.
+		local precriminal = game.GetGlobalState("gordon_precriminal") == GLOBAL_ON
 		if precriminal == true then
 			return
 		end

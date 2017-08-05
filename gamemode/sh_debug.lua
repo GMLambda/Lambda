@@ -13,8 +13,7 @@ function GetLogging(group, color)
 		return function(...) end
 	end
 
-	local group = group
-	local color = color or Color(255, 255, 255)
+	color = color or Color(255, 255, 255)
 
 	return function(...)
 		LogGroup(group, color, ...)
@@ -77,6 +76,14 @@ if _DEBUG then
 		LogGeneric(Color(255, 255, 255), ...)
 	end
 
+	function DbgPrintGeneric(...)
+		LogGeneric(Color(255, 255, 255), ...)
+	end
+
+	local function GetTimestamp()
+		return string.format("(%.03f %.03f)", CurTime(), GetSyncedTimestamp())
+	end
+
 	function LogGroup(group, color, ...)
 
 		if IsGroupLogActive(group) == false then
@@ -89,16 +96,16 @@ if _DEBUG then
 		end
 		printResult = printResult
 
-		local timestamp = string.format("(%.02f)", CurTime())
+		local timestamp = GetTimestamp()
 
 		if SERVER then
-			print(timestamp .. "[SV:" .. group .. "] " .. printResult)
+			print("[SV" .. timestamp .. ":" .. group .. "] " .. printResult)
 		else
-			if epoe and epoe.Print then
-				epoe.Print(timestamp .. "[CL:" .. group .. "] " .. printResult)
-			else
-				print(timestamp .. "[CL:" .. group .. "] " .. printResult)
-			end
+			---if epoe and epoe.Print then
+				--epoe.Print("[CL" .. timestamp .. ":" .. group .. "] " .. printResult)
+			--else
+				print("[CL" .. timestamp .. ":" .. group .. "] " .. printResult)
+			--end
 		end
 
 	end
@@ -111,16 +118,16 @@ if _DEBUG then
 		end
 		printResult = printResult
 
-		local timestamp = string.format("(%.02f)", CurTime())
+		local timestamp = GetTimestamp()
 
 		if SERVER then
-			print(timestamp .. "[SV] " .. printResult)
+			print("[SV" .. timestamp .. "] " .. printResult)
 		else
-			if epoe and epoe.Print then
-				epoe.Print(timestamp .. "[CL] " .. printResult)
-			else
-				print(timestamp .. "[CL] " .. printResult)
-			end
+			--if epoe and epoe.Print then
+				--epoe.Print("[CL" .. timestamp .. "] " .. printResult)
+			--else
+				print("[CL" .. timestamp .. "] " .. printResult)
+			--end
 		end
 
 	end
@@ -130,16 +137,16 @@ if _DEBUG then
 		local printResult = ""
 		for i,v in ipairs( {...} ) do
 			printResult = printResult .. tostring(v) .. "\t"
-        end
+		end
 
 		if SERVER then
 			MsgC(Color(0, 179, 255), "[SV] " .. printResult .. "\n")
 		else
-			if epoe and epoe.Print then
-				epoe.Print(printResult)
-			else
+			--if epoe and epoe.Print then
+				--epoe.Print(printResult)
+			--else
 				print(printResult)
-			end
+			--end
 		end
 
 		error(printResult)

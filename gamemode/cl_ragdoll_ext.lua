@@ -1,4 +1,4 @@
-local DbgPrint = GetLogging("Ragdoll")
+--local DbgPrint = GetLogging("Ragdoll")
 
 local ImpactSounds =
 {
@@ -69,7 +69,7 @@ local function HandleRagdollImpact(ent, data)
 			effectdata:SetColor(0)
 			util.Effect("bloodspray", effectdata, true, true)
 
-			local effectdata = EffectData()
+			effectdata = EffectData()
 			effectdata:SetNormal(data.HitNormal)
 			effectdata:SetOrigin(data.HitPos)
 			effectdata:SetMagnitude(data.Speed / 100)

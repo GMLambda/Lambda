@@ -73,10 +73,10 @@ function ENT:PreInitialize()
 	self:SetInputFunction("SetSpawnFrequency", self.SetSpawnFrequency)
 
 	self:SetupNWVar("Disabled", "bool", { Default = false, KeyValue = "StartDisabled" })
-	self:SetupNWVar("MaxNPCCount", "int", { Default = 0, KeyValue = "MaxNPCCount" })
-	self:SetupNWVar("MaxLiveChildren", "int", { Default = 0, KeyValue = "MaxLiveChildren" })
+	self:SetupNWVar("MaxNPCCount", "int", { Default = 0, KeyValue = "MaxNPCCount", OnChange = self.OnChangedMaxValues })
+	self:SetupNWVar("MaxLiveChildren", "int", { Default = 0, KeyValue = "MaxLiveChildren", OnChange = self.OnChangedMaxValues })
+	self:SetupNWVar("DisableScaling", "bool", { Default = 0, KeyValue = "DisableScaling", OnChange = self.OnChangedMaxValues })
 	self:SetupNWVar("SpawnFrequency", "float", { Default = 0, KeyValue = "SpawnFrequency" })
-	self:SetupNWVar("DisableScaling", "bool", { Default = 0, KeyValue = "DisableScaling" })
 	self:SetupNWVar("LiveChildren", "int", { Default = 0 })
 	self:SetupNWVar("CreatedCount", "int", { Default = 0 })
 	self:SetupNWVar("ScaleLiveChildren", "bool", { Default = true, KeyValue = "ScaleLiveChildren" })
@@ -88,6 +88,14 @@ function ENT:PreInitialize()
 	--self.LiveChildren = 0
 	--self.CreatedCount = 0
 	--self.DisableScaling = false
+
+end
+
+function ENT:OnChangedMaxValues()
+
+	self.CachedMaxNPCCount = nil
+	self.CachedMaxLiveChildren = nil
+	self.CachedPlayerCount = player.GetCount()
 
 end
 
@@ -182,26 +190,37 @@ end
 
 function ENT:GetScaledMaxLiveChildren()
 
+	if self.CachedMaxLiveChildren ~= nil then
+		return self.CachedMaxLiveChildren
+	end
+
 	local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
+	local res = 0
 
 	if self:GetNWVar("DisableScaling") == true or
 		self:GetNWVar("ScaleLiveChildren") ~= true or
 		(GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true) then
 		DbgPrint("Using original MaxLiveChildren: " .. maxLiveChildren)
-		return maxLiveChildren
+		res = maxLiveChildren
+		self.CachedMaxLiveChildren = res
+		return res
 	end
 
 	if self.PrecacheData ~= nil then
 		local class = self.PrecacheData["classname"]
 
 		if IsFriendEntityName(class) then
-			return maxLiveChildren
+			res = maxLiveChildren
+			self.CachedMaxLiveChildren = res
+			return res
 		end
 	end
 
-	local playerCount = #player.GetAll()
-	local extraCount = math.floor(playerCount / 4)
-	local res = maxLiveChildren + extraCount
+	local playerCount = player.GetCount()
+	local extraCount = math.ceil(playerCount * 0.75)
+
+	res = maxLiveChildren + extraCount
+	self.CachedMaxLiveChildren = res
 
 	return res
 
@@ -209,21 +228,26 @@ end
 
 function ENT:GetScaledMaxNPCs()
 
+	if self.CachedMaxNPCCount ~= nil then
+		return self.CachedMaxNPCCount
+	end
+
 	local maxNPCCount = self:GetNWVar("MaxNPCCount")
+	local res = 0
 
 	if self:GetNWVar("DisableScaling") == true or
 		(GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true) then
 		return maxNPCCount
 	end
 
-	local playerCount = #player.GetAll()
-	local extraCount = math.floor(playerCount / 2)
+	local playerCount = player.GetCount()
+	local extraCount = math.ceil(playerCount / 2)
 	local res = maxNPCCount + extraCount
 
 	if self.PrecacheData ~= nil then
 		local class = self.PrecacheData["classname"]
 		if IsFriendEntityName(class) then
-			return maxNPCCount
+			res = maxNPCCount
 		end
 	end
 
@@ -265,6 +289,12 @@ function ENT:Disable()
 	self:SetNWVar("Disabled", true)
 	self.Think = self.StubThink
 end
+
+local ForcedNPCS =
+{
+	["npc_rollermine"] = true,
+	["npc_breen"] = true,
+}
 
 function ENT:CanMakeNPC(ignoreSolidEnts)
 
@@ -318,12 +348,6 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
 		end
 
 	end
-
-	local ForcedNPCS =
-	{
-		["npc_rollermine"] = true,
-		["npc_breen"] = true,
-	}
 
 	if self:HasSpawnFlags( SF_NPCMAKER_HIDEFROMPLAYER ) then
 
@@ -379,6 +403,11 @@ end
 function ENT:MakerThink()
 
 	--DbgPrint(self, "ENT:MakerThink", ent)
+	if self.CachedPlayerCount ~= player.GetCount() then
+		self.CachedMaxNPCCount = nil
+		self.CachedMaxLiveChildren = nil
+		self.CachedPlayerCount = player.GetCount()
+	end
 
 	self:NextThink( CurTime() + self:GetNWVar("SpawnFrequency") )
 	self:MakeNPC()
@@ -476,6 +505,9 @@ function ENT:UpdateScaling()
 		DbgPrint("Adjusted flags, hiding from player, CreatedCount == 1 and MaxNPCCount == 1")
 		self:AddSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER)
 	end
+
+	self.CachedMaxNPCCount = nil
+	self.CachedMaxLiveChildren = nil
 
 end
 

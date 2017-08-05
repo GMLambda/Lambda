@@ -8,9 +8,13 @@ if SERVER then
 	local delayedcallbacks = {}
 	local delayedcallbacksIndex = {}
 
-	hook.Add("OnEntityCreated", "LambdaEntityCreation", function(ent)
+	hook.Add("PreCleanupMap", "LambadPreCleanupMap", function()
+		persistantremovals = {}
+		delayedcallbacks = {}
+		delayedcallbacksIndex = {}
+	end)
 
-		local ent = ent
+	hook.Add("OnEntityCreated", "LambdaEntityCreation", function(ent)
 
 		-- Do this the next frame.
 		util.RunNextFrame(function()
@@ -43,7 +47,7 @@ if SERVER then
 
 	function ents.WaitForEntityByName(name, cb, multiple)
 
-		local multiple = multiple or false
+		if multiple == nil then multiple = false end
 		local found = ents.FindByName(name)
 
 		for _,v in pairs(found) do
@@ -103,7 +107,7 @@ if SERVER then
 
 	function ents.FindByGlobalName(globalname)
 		for _,v in pairs(ents.GetAll()) do
-			if v:GetInternalVariable("globalname") == globalname or v:GetNWString("GlobalName") == globalname then
+			if v:GetInternalVariable("globalname") == globalname or v:GetNW2String("GlobalName") == globalname then
 				return v
 			end
 		end

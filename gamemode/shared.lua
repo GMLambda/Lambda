@@ -9,7 +9,9 @@ DEFINE_BASECLASS( "gamemode_base" )
 
 include("sh_debug.lua")
 include("sh_string_extend.lua")
+include("sh_interpvalue.lua")
 
+include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
 include("sh_mapdata.lua")
 include("sh_utils.lua")
@@ -31,6 +33,8 @@ include("sh_lambda_npc.lua")
 include("sh_lambda_player.lua")
 include("sh_animations.lua")
 include("sh_spectate.lua")
+include("sh_playermodels.lua")
+include("sh_globalstate.lua")
 
 --Disabled for now
 --include("sh_gibs.lua")
@@ -43,8 +47,16 @@ function GM:Tick()
 
 	if CLIENT then
 		self:HUDTick()
+	else
+		self:UpdateCheckoints()
 	end
 
+end
+
+function GM:EntityRemoved(ent)
+	-- Burning sounds are annoying.
+    ent:StopSound("General.BurningFlesh")
+	ent:StopSound("General.BurningObject")
 end
 
 function GM:Think()
@@ -54,9 +66,24 @@ function GM:Think()
 		self:RoundThink()
 		self:VehiclesThink()
 		self:NPCThink()
+		self:WeaponTrackingThink()
+	end
 
-		for _,v in pairs(player.GetAll()) do
-			self:PlayerThink(v)
+	if self.MapScript.Think then
+		self.MapScript:Think()
+	end
+
+	-- Make sure physics don't go crazy when we toggle it.
+	local collisionChanged = false
+	if self.LastAllowCollisions ~= lambda_playercollision:GetBool() then
+		collisionChanged = true
+		self.LastAllowCollisions = lambda_playercollision:GetBool()
+	end
+
+	for _,v in pairs(player.GetAll()) do
+		self:PlayerThink(v)
+		if collisionChanged == true then
+			v:CollisionRulesChanged()
 		end
 	end
 
@@ -68,9 +95,15 @@ function GM:OnReloaded()
 		self:HUDInit()
 	end
 
+	self:LoadGameTypes()
+	self:SetGameType(lambda_gametype:GetString())
+
 end
 
 function GM:Initialize()
+
+	DbgPrint("GM:Initialize")
+	DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
 	self:LoadGameTypes()
 	self:SetGameType(lambda_gametype:GetString())
@@ -79,6 +112,10 @@ function GM:Initialize()
 	self:InitializeRoundSystem()
 
 	if SERVER then
+		self:InitializeGlobalSpeechContext()
+		self:InitializeWeaponTracking()
+		self:InitializeGlobalStates()
+		self:InitializePlayerModels()
 		self:InitializeDifficulty()
 		if self.InitializeSkybox then
 			self:InitializeSkybox()
@@ -89,28 +126,12 @@ function GM:Initialize()
 
 end
 
-function GM:ClearGlobalState()
-
-	local gordon_invulnerable = ents.Create("env_global")
-	gordon_invulnerable:SetKeyValue("globalstate", "gordon_invulnerable")
-	gordon_invulnerable:SetKeyValue("initialstate", "0")
-	gordon_invulnerable:Spawn()
-	gordon_invulnerable:Fire("TurnOff")
-
-	local gordon_precriminal = ents.Create("env_global")
-	gordon_precriminal:SetKeyValue("globalstate", "gordon_precriminal")
-	gordon_precriminal:SetKeyValue("initialstate", "0")
-	gordon_precriminal:Spawn()
-	gordon_precriminal:Fire("TurnOff")
-
-end
-
 function GM:InitPostEntity()
 
 	DbgPrint("GM:InitPostEntity")
 
 	if SERVER then
-		self:ClearGlobalState()
+		self:ResetGlobalStates()
 		self:PostLoadTransitionData()
 		self:InitializeMapVehicles()
 		if self.PostInitializeSkybox then
@@ -127,7 +148,12 @@ end
 function GM:ShouldCollide(ent1, ent2)
 
 	if ent1:IsPlayer() and ent2:IsPlayer() then
-		return false
+		if lambda_playercollision:GetBool() == false then
+			return false
+		end
+		if ent1:GetNW2Bool("DisablePlayerCollide") == true or ent2:GetNW2Bool("DisablePlayerCollide") == true then
+			return false
+		end
 	elseif (ent1:IsNPC() and ent2:GetClass() == "trigger_changelevel") or
 	   (ent2:IsNPC() and ent1:GetClass() == "trigger_changelevel")
 	then
@@ -167,35 +193,8 @@ function GM:EntityKeyValue(ent, key, val)
 
 end
 
-function GM:ApplyCorrectedDamage(dmginfo)
-
-	local attacker = dmginfo:GetAttacker()
-
-	if IsValid(attacker) and dmginfo:IsDamageType(DMG_BULLET) then
-
-		local weaponTable = nil
-		local wep = nil
-
-		if attacker:IsPlayer() then
-			weaponTable = self.PLAYER_WEAPON_DAMAGE
-			wep = attacker:GetActiveWeapon()
-		elseif attacker:IsNPC() then
-			weaponTable = self.NPC_WEAPON_DAMAGE
-			wep = attacker:GetActiveWeapon()
-		end
-
-		if weaponTable ~= nil and IsValid(wep) then
-			local class = wep:GetClass()
-			local dmgCVar = weaponTable[class]
-			if dmgCVar ~= nil then
-				local dmgAmount = dmgCVar:GetInt()
-				--DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
-				dmginfo:SetDamage(dmgAmount)
-			end
-		end
-
-	end
-
-	return dmginfo
-
+function GM:EntityRemoved(ent)
+	-- HACK: Fix fire sounds never stopping if packet loss happened, we just force it to stop on deletion.
+	ent:StopSound("General.BurningFlesh")
+	ent:StopSound("General.BurningObject")
 end

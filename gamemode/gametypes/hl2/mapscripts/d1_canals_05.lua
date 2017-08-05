@@ -70,6 +70,12 @@ function MAPSCRIPT:PostInit()
 			GAMEMODE:SetPlayerCheckpoint(checkpoint2)
 		end
 
+		ents.WaitForEntityByName("rotate_guncave_exit_wheel", function(ent)
+			ent:Fire("Unlock")
+			ent:Fire("AddOutput", "OnPressed relay_airboat_gateopen,Trigger")
+			ent:Fire("AddOutput", "OnPressed ss_arlene_opengate,Kill") -- In case the player opens it dont play the scene.
+		end)
+
 	end
 
 end

@@ -10,7 +10,7 @@ function ENT:Initialize()
 	--DbgPrint(self, "trigger_multiple:Initialize")
 
 	BaseClass.Initialize(self)
-	BaseClass.SetWaitTime(self, 0.2) -- Remove once triggered.
+	BaseClass.SetWaitTime(self, 0.2) 
 
 end
 

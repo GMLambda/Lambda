@@ -5,7 +5,9 @@ if SERVER then
 end
 
 CURRENT_TIMESTAMP = CURRENT_TIMESTAMP or 0
+TIMESTAMP_UPDATE_TIME = TIMESTAMP_UPDATE_TIME or 0
 
+local UpdateTime = 1
 local UpdateTimestamp
 
 if SERVER then
@@ -13,34 +15,37 @@ if SERVER then
 	util.AddNetworkString("LambdaTimeSync")
 	util.AddNetworkString("LambdaTimeClientSync")
 
-	local lastUpdate = SysTime()
-
 	hook.Add("Tick", "LambdaTimeSync", function()
 		UpdateTimestamp()
 	end)
 
 	UpdateTimestamp = function()
 
+		-- Entry update, make sure also set on world.
+		local updateTimestamp = CURRENT_TIMESTAMP == 0
+
 		CURRENT_TIMESTAMP = SysTime()
 
-		if CURRENT_TIMESTAMP - lastUpdate >= 1 then
+		if CURRENT_TIMESTAMP - TIMESTAMP_UPDATE_TIME >= UpdateTime then
 
 			net.Start("LambdaTimeSync")
 			net.WriteDouble(CURRENT_TIMESTAMP)
 			net.Broadcast()
 
-			lastUpdate = CURRENT_TIMESTAMP
+			TIMESTAMP_UPDATE_TIME = CURRENT_TIMESTAMP
+			updateTimestamp = true
 		end
 
-		local world = game.GetWorld()
-		if IsValid(world) then
-			world:SetNWFloat("LambdaTimeSync", CURRENT_TIMESTAMP)
+		if updateTimestamp == true then
+			local world = game.GetWorld()
+			if IsValid(world) then
+				world:SetNW2Float("LambdaTimeSync", CURRENT_TIMESTAMP)
+			end
 		end
+
 	end
 
 else
-
-	TIMESTAMP_UPDATE_TIME = TIMESTAMP_UPDATE_TIME or 0
 
 	net.Receive("LambdaTimeSync", function(len)
 
@@ -57,17 +62,24 @@ else
 end
 
 function GetSyncedTimestamp()
+
 	if CURRENT_TIMESTAMP == 0 then
 		if SERVER then
 			UpdateTimestamp()
 		else
+			-- This is a fallback to the last known timestamp before we are able to compensate.
 			local world = game.GetWorld()
 			if IsValid(world) then
-				CURRENT_TIMESTAMP = world:GetNWFloat("LambdaTimeSync", 0)
+				CURRENT_TIMESTAMP = world:GetNW2Float("LambdaTimeSync", 0)
+				TIMESTAMP_UPDATE_TIME = SysTime()
 			else
 				CURRENT_TIMESTAMP = 0
 			end
 		end
+	end
+
+	if SERVER then
+		return SysTime()
 	end
 
 	local res = CURRENT_TIMESTAMP

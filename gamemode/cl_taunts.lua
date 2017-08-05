@@ -1,6 +1,6 @@
 include("sh_taunts.lua")
 
-local DbgPrint = GetLogging("Taunts")
+--local DbgPrint = GetLogging("Taunts")
 
 local TauntIndex = 1
 local TauntMaxDisplay = 3 -- Each direction
@@ -101,18 +101,7 @@ function DrawTauntsMenu()
 		TauntIndex = 1
 	end
 
-	local back_count = math.Clamp(TauntIndex - 1, 0, TauntMaxDisplay)
-	local front_count = math.Clamp(count - (TauntIndex + 1), 0, TauntMaxDisplay)
-	local zpos = 0
-	local xpos = 0
-	local x = 1
-
-	local scrh = ScrH()
-	local scrw = ScrW()
-	local startx = scrh / 4
-	local endx = scrh / 8
-
-	local size = 10.0
+	local x
 	local xpos = (3 * 20) + math.pow(3, 1.5)
 
 	-- Back
@@ -121,7 +110,7 @@ function DrawTauntsMenu()
 		back_max = 1
 	end
 
-	local x = 1
+	x = 1
 	for i = (TauntIndex - 1), back_max, -1 do
 		local taunt = Taunts[gender][i]
 		if not taunt then
@@ -133,7 +122,7 @@ function DrawTauntsMenu()
 		xpos = xpos - 35 - math.pow(x + 1, 1.1)
 	end
 
-	local xpos = (3 * 20) + math.pow(3, 1.2) + 40
+	xpos = (3 * 20) + math.pow(3, 1.2) + 40
 
 	-- Current
 	local taunt = Taunts[gender][TauntIndex]
@@ -153,9 +142,9 @@ function DrawTauntsMenu()
 		front_max = count
 	end
 
-	local x = 1
+	x = 1
 	for i = (TauntIndex + 1), front_max do
-		local taunt = Taunts[gender][i]
+		taunt = Taunts[gender][i]
 		if not taunt then
 			break
 		end
@@ -190,8 +179,6 @@ function SendSelectedTaunt()
 	if not taunt then
 		return false
 	end
-
-	local snd = table.Random(taunt.Sounds)
 
 	net.Start("PlayerStartTaunt")
 	net.WriteFloat(TauntIndex)

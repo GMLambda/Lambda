@@ -14,7 +14,7 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.InputFilters =
 {
-	["relay_rush_downstairscops"] = { "Trigger" },
+	--["relay_rush_downstairscops"] = { "Trigger" },
 }
 
 MAPSCRIPT.EntityFilterByClass =
@@ -40,10 +40,6 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
-
-		-- FIX: This is not automatically reset because of the global stored state.
-		ents.WaitForEntityByName("gordon_criminal_global", function(ent) ent:Fire("TurnOn") end)
-		ents.WaitForEntityByName("gordon_invulnerable", function(ent) DbgPrint("Test2") ent:Fire("TurnOn") end)
 
 		-- FIX: The cop would stand there annoying players that have not yet passed through.
 		GAMEMODE:WaitForInput("brush_breakin_blockplayer1", "Kill", function()
@@ -94,7 +90,6 @@ function MAPSCRIPT:PostInit()
 			ents.WaitForEntityByName("lambda_attic_door_close_relay", function(ent) ent:Fire("Trigger") end)
 			ents.WaitForEntityByName("lambda_attic_door_push_trigger", function(ent) ent:Fire("Kill") end)
 			ents.WaitForEntityByName("lambda_brush_prevent_cops_getting_to_bracer", function(ent) ent:Fire("Enable") end)
-
 			ents.WaitForEntityByName("gordon_criminal_global", function(ent) ent:Fire("TurnOff") end)
 		end
 

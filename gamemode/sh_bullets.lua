@@ -9,7 +9,6 @@ if CLIENT then
 
 	local BULLET_STEP_SIZE = 2500
 	local BULLET_STEP_DISTANCE = 15
-	local BUBBLES_PER_UNIT = 1.5
 
 	function GM:CreateWaterBulletParticles(bullet, newPos, distance)
 
@@ -52,7 +51,6 @@ if CLIENT then
 				p1:SetColor(col, col, col)
 				p1:SetStartAlpha(128)
 				p1:SetEndAlpha(0)
-				local size = util.RandomInt(1, 2)
 				p1:SetStartSize(1)
 				p1:SetEndSize(0)
 				p1:SetVelocity( (dir * 64.0) + Vector(0, 0, 32) )
@@ -63,10 +61,9 @@ if CLIENT then
 					-- Because the bubble effect does not affect the position
 					-- this is based on the best result, its not precise but its close
 					-- enough to not really notice
-					local curPos = bubble.CurPos
-					curPos = curPos + (bubble:GetVelocity() * FrameTime() * 40)
+					curPos = bubble.CurPos + (bubble:GetVelocity() * FrameTime() * 40)
 					bubble.CurPos = curPos
-					local inWater = bit.band(util.PointContents(curPos), CONTENTS_WATER) ~= 0
+					inWater = bit.band(util.PointContents(curPos), CONTENTS_WATER) ~= 0
 					if inWater == false then
 						bubble:SetDieTime(0)
 						bubble:SetLifeTime(0)
@@ -86,10 +83,9 @@ if CLIENT then
 				p2:SetColor(col, col, col)
 				p2:SetStartAlpha(80)
 				p2:SetEndAlpha(0)
-				local size = 1
-				p2:SetStartSize(size)
-				p2:SetEndSize(size * 4)
-				p2:SetVelocity( (dir * 64.0)  )
+				p2:SetStartSize(1)
+				p2:SetEndSize(4)
+				p2:SetVelocity(dir * 64.0)
 			end
 
 			--DbgPrint("Created particle: " .. tostring(p))
@@ -138,8 +134,6 @@ if CLIENT then
 
 		local curTime = CurTime()
 		local dir = ang:Forward()
-		local timeDelta = curTime - timestamp
-		local pos = startPos + ((dir * BULLET_STEP_SIZE) * timeDelta)
 		local dist = startPos:Distance(endPos)
 
 		local bullet =
@@ -248,7 +242,7 @@ function GM:GetPlayerBulletSpread(ply)
 		return Vector(0, 0, 0)
 	end
 
-	vel = ply:GetAbsVelocity()
+	local vel = ply:GetAbsVelocity()
 	local velLen = vel:Length2D()
 
 	return Vector(0.005, 0.005, 0.005) * ((velLen * 0.5) + 1)
@@ -258,7 +252,6 @@ end
 function GM:EntityFireBullets(ent, data)
 
 	local class
-	local scale = false
 	local wep
 
 	if ent:IsPlayer() or ent:IsNPC() then
@@ -323,19 +316,15 @@ function GM:EntityFireBullets(ent, data)
 
 	-- We will add a callback to handle water bullets.
 	local prevCallback = data.Callback
-	local self = self
-	local ent = ent
 	local newData = { Dir = data.Dir, Src = data.Src }
 
 	data.Callback = function(attacker, tr, dmginfo)
 
 		local pointContents = util.PointContents(tr.HitPos)
 
-		if bit.band(pointContents, bit.bor(CONTENTS_WATER, CONTENTS_SLIME)) ~= 0 or bit.band(util.PointContents(newData.Src), CONTENTS_WATER) ~= 0 then
-			if IsFirstTimePredicted() then
-				-- Only call this once clientside, causes weird effects otherwise
-				hook.Call("HandleShotImpactingWater", self, ent, attacker, tr, dmginfo, newData)
-			end
+		if (bit.band(pointContents, bit.bor(CONTENTS_WATER, CONTENTS_SLIME)) ~= 0 or bit.band(util.PointContents(newData.Src), CONTENTS_WATER) ~= 0) and IsFirstTimePredicted() then
+			-- Only call this once clientside, causes weird effects otherwise
+			hook.Call("HandleShotImpactingWater", self, ent, attacker, tr, dmginfo, newData)
 		end
 
 		if prevCallback ~= nil then

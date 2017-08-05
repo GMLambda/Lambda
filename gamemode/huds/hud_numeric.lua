@@ -3,6 +3,16 @@ local FONT_NUMBER_GLOW = "LambdaHudNumbersGlow"
 local FONT_NUMBER_SMALL = "LambdaHudNumbersSmall"
 local FONT_TEXT = "HudDefault"
 
+local function GetTextColor()
+	local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 255)
+end
+
+local function GetBGColor()
+	local col = util.StringToType(lambda_hud_bg_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 128)
+end
+
 local function InitFonts()
 	surface.CreateFont(FONT_NUMBER,
 	{
@@ -150,8 +160,9 @@ end
 
 function PANEL:PaintLabel()
 
+	local colText = GetTextColor()
 	surface.SetFont(FONT_TEXT)
-	surface.SetTextColor(self.TextColor.r, self.TextColor.g, self.TextColor.b, self.TextColor.a * self.Alpha)
+	surface.SetTextColor(colText.r, colText.g, colText.b, colText.a * self.Alpha)
 	surface.SetTextPos(util.ScreenScaleH(self.TextX), util.ScreenScaleH(self.TextY))
 	surface.DrawText(self.LabelText)
 
@@ -185,14 +196,16 @@ function PANEL:Paint(width, height)
 	end
 
 	if self.ShouldDrawBackground == true then
-		local col = table.Copy(self:GetBackgroundColor())
+		local col = GetBGColor()
 		col.a = col.a * self.Alpha
 		draw.RoundedBox( 8, 0, 0, width, height, col )
 	end
 
+	local colText = GetTextColor()
+
 	if self.DisplayValue then
 
-		surface.SetTextColor(self.TextColor.r, self.TextColor.g, self.TextColor.b, self.TextColor.a * self.Alpha)
+		surface.SetTextColor(colText.r, colText.g, colText.b, colText.a * self.Alpha)
 
 		if self.LerpValues == true then
 			self.CurPrimaryVal = Lerp(self.LerpFraction, self.CurPrimaryVal, self.PrimaryVal)
@@ -207,7 +220,7 @@ function PANEL:Paint(width, height)
 			if i > 1.0 then
 				self:PaintNumbers(FONT_NUMBER_GLOW, util.ScreenScaleH(self.DigitX), util.ScreenScaleH(self.DigitY), math.Round(self.CurPrimaryVal))
 			else
-				surface.SetTextColor(self.TextColor.r, self.TextColor.g, self.TextColor.b, (self.TextColor.a * i) * self.Alpha)
+				surface.SetTextColor(colText.r, colText.g, colText.b, (colText.a * i) * self.Alpha)
 				self:PaintNumbers(FONT_NUMBER_GLOW, util.ScreenScaleH(self.DigitX), util.ScreenScaleH(self.DigitY), math.Round(self.CurPrimaryVal))
 			end
 
@@ -223,7 +236,7 @@ function PANEL:Paint(width, height)
 			self.CurSecondaryVal = self.SecondaryVal
 		end
 
-		surface.SetTextColor(self.TextColor.r, self.TextColor.g, self.TextColor.b, self.TextColor.a * self.Alpha)
+		surface.SetTextColor(colText.r, colText.g, colText.b, colText.a * self.Alpha)
 		self:PaintNumbers(FONT_NUMBER_SMALL, util.ScreenScaleH(self.Digit2X), util.ScreenScaleH(self.Digit2Y), math.Round(self.CurSecondaryVal))
 
 	end

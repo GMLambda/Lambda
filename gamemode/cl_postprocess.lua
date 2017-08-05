@@ -1,7 +1,7 @@
-local DbgPrint = GetLogging("PostProcess")
+--local DbgPrint = GetLogging("PostProcess")
 
-local GRAIN_RT = GetRenderTarget("LambdaFilmGrain", ScrW(), ScrH(), true)
-local GRAIN_MAT = CreateMaterial("LambdaFilmGrain" .. CurTime(), "UnlitGeneric",
+GRAIN_RT = GRAIN_RT or GetRenderTarget("LambdaFilmGrain", ScrW(), ScrH(), true)
+GRAIN_MAT = GRAIN_MAT or CreateMaterial("LambdaFilmGrain" .. CurTime(), "UnlitGeneric",
 {
 	["$alpha"] = 1,
 	["$translucent"] = 1,
@@ -16,7 +16,7 @@ local GRAIN_MAT = CreateMaterial("LambdaFilmGrain" .. CurTime(), "UnlitGeneric",
 		},
 	}
 })
-local GRAIN_SETUP = false
+GRAIN_SETUP = GRAIN_SETUP or false
 
 -- FIXME: Use a static texture instead.
 local function GenerateFilmGrain()
@@ -70,7 +70,7 @@ function GM:RenderRadiationEffects(ply)
 	local geigerRange = Lerp(FrameTime(), LAST_GEIGER_RANGE, curGeigerRange)
 	LAST_GEIGER_RANGE = geigerRange
 
-	local rv = (LAST_GEIGER_RANGE / 1000)
+	local rv = LAST_GEIGER_RANGE / 1000
 	local iv = 1 - rv
 
 	GRAIN_MAT:SetFloat("$alpha", iv)
@@ -95,7 +95,7 @@ function GM:RenderSprintEffect(ply)
 		end
 	else
 		vel = ply:GetVelocity()
- 	end
+	end
 
 	local len = vel:Length2DSqr()
 	local amount = 0
@@ -129,4 +129,12 @@ function GM:PreDrawSkyBox()
 end
 
 function GM:PostDrawSkyBox()
+end
+
+function GM:PostDrawTranslucentRenderables(bDrawingDepth,bDrawingSkybox)
+
+end
+
+function GM:PostDrawOpaqueRenderables(bDrawingDepth,bDrawingSkybox)
+
 end

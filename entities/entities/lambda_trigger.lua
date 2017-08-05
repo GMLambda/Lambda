@@ -290,15 +290,13 @@ if SERVER then
 
 		local playersInside = 0
 
-		self.DisabledTouchingObjects = self.DisabledTouchingObjects or {}
-		for id,v in pairs(self.DisabledTouchingObjects) do
+		for id, v in pairs(self.DisabledTouchingObjects) do
 			local ent = Entity(id)
 			if not IsValid(ent) then
 				self.DisabledTouchingObjects[id] = nil
 			end
 		end
 
-		self.TouchingObjects = self.TouchingObjects or {}
 		for id,v in pairs(self.TouchingObjects) do
 
 			local ent = Entity(id)
@@ -315,6 +313,14 @@ if SERVER then
 					continue
 				end
 			end
+
+			--
+			-- HACKHACK: Sometimes the player slips thru the trigger so it stops calling Touch.
+			if CurTime() - v >= 0.2 then
+				DbgPrint("Enforcing Touch")
+				self:Touch(ent)
+			end
+
 		end
 
 		if self:GetNWVar("WaitForTeam") == true then
@@ -334,13 +340,6 @@ if SERVER then
 
 			if playersInside > 0 then
 				if self:GetNWVar("Disabled") == false then
-
-					-- HACKHACK: Sometimes the player slips thru the trigger so it stops calling Touch.
-					if CurTime() - self.LastTouch >= 0.2 then
-						DbgPrint("Enforcing Touch")
-						self:Touch(nil)
-					end
-
 					if self.IsWaiting == false and playersInside > 0 then
 						if self:GetNWVar("Timeout", 0) > 0 then
 							DbgPrint("Setting next timeout")
@@ -378,6 +377,11 @@ if SERVER then
 
 		local waitTime = self:GetNWVar("WaitTime")
 
+		local waitForTeam = self:GetNWVar("WaitForTeam")
+		if waitForTeam == true and ent:IsPlayer() then
+			ent:DisablePlayerCollide(true)
+		end
+
 		if self:GetNWVar("Disabled") == true or self:GetNWVar("Blocked") == true then
 			--DbgPrint("Disabled")
 			return
@@ -390,10 +394,13 @@ if SERVER then
 			self.NextWait = nil
 		end
 
-		if ent and self.PassesTriggerFilters and self:PassesTriggerFilters(ent) == false then
+		if self.PassesTriggerFilters and self:PassesTriggerFilters(ent) == false then
 			--DbgPrint(self, "Object " .. tostring(ent) .. " did not pass trigger filter")
 			return
 		end
+
+		local entIndex = ent:EntIndex()
+		self.TouchingObjects[entIndex] = CurTime()
 
 		DbgPrint2(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
 
@@ -440,7 +447,7 @@ if SERVER then
 
 		if self:GetNWVar("Disabled") == true then
 			if self.DisabledTouchingObjects[entIndex] == nil then
-				self.DisabledTouchingObjects[entIndex] = true
+				self.DisabledTouchingObjects[entIndex] = CurTime()
 			end
 			return
 		end
@@ -472,7 +479,7 @@ if SERVER then
 		self.TouchingObjects = self.TouchingObjects or {} -- This is called before Initialize?
 		if self.TouchingObjects[entIndex] == nil then
 
-			self.TouchingObjects[entIndex] = true
+			self.TouchingObjects[entIndex] = CurTime()
 
 			if ent:IsPlayer() and self:GetNWVar("LockPlayers") == true --[[ self.LockPlayers ]] then
 				DbgPrint(self, "StartTouch: Locking player " .. tostring(ent))
@@ -566,6 +573,9 @@ if SERVER then
 
 	end
 
+	local ENTITY_META = FindMetaTable("Entity")
+	local ENT_PassesFilter = ENTITY_META.PassesFilter
+
 	function ENT:PassesTriggerFilters(ent)
 
 		if self:HasSpawnFlags(SF_TRIGGER_ALLOW_ALL) or
@@ -613,7 +623,8 @@ if SERVER then
 				local filter = ents.FindFirstByName(filterName)
 				if IsValid(filter) and filter.PassesFilter then
 					--DbgPrint("Using filter: " .. self.Filter .. " ( " .. tostring(filter) .. ") -> " .. tostring(ent))
-					local res = filter:PassesFilter(self, ent)
+					--local res = filter:PassesFilter(self, ent)
+					local res = ENT_PassesFilter(filter, self, ent)
 					--DbgPrint("Result: " .. tostring(res))
 					return res
 				end
@@ -707,6 +718,8 @@ if SERVER then
 			end
 			net.WriteVector(self:GetPos())
 			net.WriteVector(self:OBBCenter())
+			net.WriteVector(self:OBBMins())
+			net.WriteVector(self:OBBMaxs())
 		end
 
 		net.Send(ply)
@@ -803,9 +816,14 @@ else -- CLIENT
 			local mesh = net.ReadTable()
 			local pos = net.ReadVector()
 			local center = net.ReadVector()
+			local maxs = net.ReadVector()
+			local mins = net.ReadVector()
 			LAMBDA_TRIGGERS[entIndex].MeshData = mesh
 			LAMBDA_TRIGGERS[entIndex].Pos = pos
 			LAMBDA_TRIGGERS[entIndex].Center = center
+			LAMBDA_TRIGGERS[entIndex].Maxs = maxs
+			LAMBDA_TRIGGERS[entIndex].Mins = mins
+			PrintTable(LAMBDA_TRIGGERS[entIndex])
 			DbgPrint("Trigger(" .. entIndex .. ") now blocked")
 		else
 			-- What shall we do about this?
@@ -974,20 +992,24 @@ else -- CLIENT
 
 	end
 
-	local MAT_BLOCKED = Material("lambda/blockade.png")
+	local MAT_BLOCKED = Material("lambda/blocked.vmt")
 
 	local function DrawTriggerBlockade(data)
 
 		local mesh = data.Mesh
 
 		if mesh == nil then
-			DbgPrint("Creating new mesh")
+			print("Creating new mesh")
 			mesh = Mesh(MAT_BLOCKED)
 
+			local bounds = data.Maxs - data.Mins
 			local meshData = table.Copy(data.MeshData)
 			for k,v in pairs(meshData) do
-				meshData[k].v = v.pos.z * 0.005
-				meshData[k].u = v.pos.y * 0.005
+				local rel = v.pos
+				meshData[k].v = math.Remap(rel.y, data.Mins.y, data.Maxs.y, 0, 1)
+				meshData[k].u = math.Remap(rel.x, data.Mins.x, data.Maxs.x, 0, 1)
+				meshData[k].tangent = Vector(1, 1, 1)
+				print(meshData[k].u, meshData[k].v)
 			end
 
 			mesh:BuildFromTriangles(meshData)

@@ -2,7 +2,7 @@ if SERVER then
 	AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("Animation")
+--local DbgPrint = GetLogging("Animation")
 
 function GM:HandlePlayerJumping(ply, velocity)
 	if (ply:GetMoveType() == MOVETYPE_NOCLIP) then
@@ -11,12 +11,16 @@ function GM:HandlePlayerJumping(ply, velocity)
 		return
 	end
 
+	local waterLevel = ply:WaterLevel()
+	local onGround = ply:OnGround()
+	local curTime = CurTime()
+
 	-- airwalk more like hl2mp, we airwalk until we have 0 velocity, then it's the jump animation
 	-- underwater we're alright we airwalking
-	if (not ply.m_bJumping and not ply:OnGround() and ply:WaterLevel() <= 0) then
+	if (not ply.m_bJumping and not onGround and waterLevel <= 0) then
 		if (not ply.m_fGroundTime) then
-			ply.m_fGroundTime = CurTime()
-		elseif (CurTime() - ply.m_fGroundTime) > 0 and velocity:Length2DSqr() < 1 then
+			ply.m_fGroundTime = curTime
+		elseif (curTime - ply.m_fGroundTime) > 0 and velocity:Length2DSqr() < 1 then
 			ply.m_bJumping = true
 			ply.m_bFirstJumpFrame = false
 			ply.m_flJumpStartTime = 0
@@ -29,7 +33,7 @@ function GM:HandlePlayerJumping(ply, velocity)
 			ply:AnimRestartMainSequence()
 		end
 
-		if (ply:WaterLevel() >= 2) or ((CurTime() - ply.m_flJumpStartTime) > 0.2 and ply:OnGround()) then
+		if (waterLevel >= 2) or ((curTime - ply.m_flJumpStartTime) > 0.2 and onGround) then
 			ply.m_bJumping = false
 			ply.HandledCrouching = false
 			ply.m_fGroundTime = nil
@@ -181,6 +185,13 @@ Desc: Animation updates (pose params etc) should be done here
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 	local len = velocity:Length()
 	local movement = 1.0
+	local curWep = ply:GetActiveWeapon()
+
+	-- Workaround: Stop reload animation on weapon switches.
+	if curWep ~= ply.m_lastActiveWeapon then
+		ply:AnimResetGestureSlot(GESTURE_SLOT_ATTACK_AND_RELOAD)
+		ply.m_lastActiveWeapon = curWep
+	end
 
 	if (len > 0.2) then
 		movement = len / maxseqgroundspeed
@@ -253,37 +264,38 @@ end
 --
 -- Moves the mouth when talking on voicecom
 --
-local MOVING_MOUTH_PARTS =
-{
-	"jaw_drop",
-	"right_part",
-	"left_part",
-	"right_mouth_drop",
-	"left_mouth_drop"
-}
+function GM:MouthMoveAnimation( ply )
 
-function GM:MouthMoveAnimation(ply)
-	local isSpeaking = ply:IsSpeaking()
-	local moveMouth = isSpeaking or ply.m_bSpeaking
-	ply.m_bSpeaking = isSpeaking
-	if moveMouth ~= true then
-		return
+	local flexes = {
+		ply:GetFlexIDByName( "jaw_drop" ),
+		ply:GetFlexIDByName( "left_part" ),
+		ply:GetFlexIDByName( "right_part" ),
+		ply:GetFlexIDByName( "left_mouth_drop" ),
+		ply:GetFlexIDByName( "right_mouth_drop" )
+	}
+
+	local weight = ply:IsSpeaking() and math.Clamp( ply:VoiceVolume() * 2, 0, 2 ) or 0
+
+	for k, v in pairs( flexes ) do
+
+		ply:SetFlexWeight( v, weight )
+
 	end
-	local vol = math.Clamp(ply:VoiceVolume() * 2, 0, 2)
-	for _,v in ipairs(MOVING_MOUTH_PARTS) do
-		local index = ply:GetFlexIndexByName(v)
-		if index ~= nil then
-			ply:SetFlexWeight(index, vol)
-		end
-	end
+
 end
 
 function GM:CalcMainActivity(ply, velocity)
+
 	ply.CalcIdeal = ACT_MP_STAND_IDLE
 	ply.CalcSeqOverride = -1
 	self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
 
-	if (self:HandlePlayerNoClipping(ply, velocity) or self:HandlePlayerDriving(ply) or self:HandlePlayerVaulting(ply, velocity) or self:HandlePlayerJumping(ply, velocity) or self:HandlePlayerSwimming(ply, velocity) or self:HandlePlayerDucking(ply, velocity)) then
+	if (self:HandlePlayerNoClipping(ply, velocity) or
+		self:HandlePlayerDriving(ply) or
+		self:HandlePlayerVaulting(ply, velocity) or
+		self:HandlePlayerJumping(ply, velocity) or
+		self:HandlePlayerSwimming(ply, velocity) or
+		self:HandlePlayerDucking(ply, velocity)) then
 	else
 		local len2d = velocity:Length2DSqr()
 
@@ -298,6 +310,7 @@ function GM:CalcMainActivity(ply, velocity)
 	ply.m_bWasNoclipping = ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle()
 
 	return ply.CalcIdeal, ply.CalcSeqOverride
+
 end
 
 local IdleActivity = ACT_HL2MP_IDLE
@@ -317,43 +330,79 @@ IdleActivityTranslate[ACT_LAND] = ACT_LAND
 
 -- it is preferred you return ACT_MP_* in CalcMainActivity, and if you have a specific need to not tranlsate through the weapon do it here
 function GM:TranslateActivity(ply, act)
+
 	local newact = ply:TranslateWeaponActivity(act)
 	-- select idle anims if the weapon didn't decide
-	if (act == newact) then return IdleActivityTranslate[act] end
+	if (act == newact) then
+		newact = IdleActivityTranslate[act]
+		if newact == nil then
+			--DbgError("Unhandled activity: " .. act)
+		end
+	end
 
 	return newact
 end
 
+local function HandleAnimAttackPrimary(ply, event, data)
+	if ply:Crouching() then
+		ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_CROUCH_PRIMARYFIRE, true)
+	else
+		ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_STAND_PRIMARYFIRE, true)
+	end
+	return ACT_VM_PRIMARYATTACK
+end
+
+local function HandleAnimSecondaryAttack(ply, event, data)
+	return ACT_VM_SECONDARYATTACK
+end
+
+local function HandleAnimReload(ply, event, data)
+
+	if ply:Crouching() then
+		ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_CROUCH, true)
+	else
+		ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_STAND, true)
+	end
+
+	if SERVER then
+		GAMEMODE:OnPlayerReload(ply, event, data)
+	end
+
+	return ACT_INVALID
+end
+
+local function HandleAnimJump(ply, event, data)
+	ply.m_bJumping = true
+	ply.m_bFirstJumpFrame = true
+	ply.m_flJumpStartTime = CurTime()
+	ply:AnimRestartMainSequence()
+
+	return PLAYERANIMEVENT_JUMP
+end
+
+local function HandleAnimCancelReload(ply, event, data)
+	ply:AnimResetGestureSlot(GESTURE_SLOT_ATTACK_AND_RELOAD)
+
+	return ACT_INVALID
+end
+
+local HANDLE_ANIM =
+{
+	[PLAYERANIMEVENT_ATTACK_PRIMARY] = HandleAnimAttackPrimary,
+	[PLAYERANIMEVENT_ATTACK_SECONDARY] = HandleAnimSecondaryAttack,
+	[PLAYERANIMEVENT_RELOAD] = HandleAnimReload,
+	-- Missing?
+	--[PLAYERANIMEVENT_CANCEL_RELOAD] = HandleAnimCancelReload,
+	[PLAYERANIMEVENT_JUMP] = HandleAnimJump,
+}
+
 function GM:DoAnimationEvent(ply, event, data)
-	if (event == PLAYERANIMEVENT_ATTACK_PRIMARY) then
-		if ply:Crouching() then
-			ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_CROUCH_PRIMARYFIRE, true)
-		else
-			ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_STAND_PRIMARYFIRE, true)
-		end
-		-- there is no gesture, so just fire off the VM event
-
-		return ACT_VM_PRIMARYATTACK
-	elseif (event == PLAYERANIMEVENT_ATTACK_SECONDARY) then
-		return ACT_VM_SECONDARYATTACK
-	elseif (event == PLAYERANIMEVENT_RELOAD) then
-		if ply:Crouching() then
-			ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_CROUCH, true)
-		else
-			ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_STAND, true)
-		end
-
-		return ACT_INVALID
-	elseif (event == PLAYERANIMEVENT_JUMP) then
-		ply.m_bJumping = true
-		ply.m_bFirstJumpFrame = true
-		ply.m_flJumpStartTime = CurTime()
-		ply:AnimRestartMainSequence()
-
-		return PLAYERANIMEVENT_JUMP
-	elseif (event == PLAYERANIMEVENT_CANCEL_RELOAD) then
-		ply:AnimResetGestureSlot(GESTURE_SLOT_ATTACK_AND_RELOAD)
-
+	if event == nil then
 		return ACT_INVALID
 	end
+	local fn = HANDLE_ANIM[event]
+	if fn ~= nil then
+		return fn(ply, event, data)
+	end
+	return ACT_INVALID
 end

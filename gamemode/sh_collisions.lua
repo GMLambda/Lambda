@@ -3,7 +3,7 @@ if SERVER then
 end
 
 local COLLISION_ID_PAIRS = {}
-local DbgPrint = GetLogging("Collision")
+--local DbgPrint = GetLogging("Collision")
 
 local function GetPairId(ent1, ent2)
 	local id1 = ent1:GetCreationID()

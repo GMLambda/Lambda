@@ -45,6 +45,8 @@ end
 
 function MAPSCRIPT:PostInit()
 
+	DbgPrint("MAPSCRIPT:PostInit")
+
 	if SERVER then
 
 		for k,v in pairs(ents.FindByClass("info_player_start")) do

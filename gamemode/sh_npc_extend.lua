@@ -64,4 +64,22 @@ if SERVER then
 
 	end
 
+	function META_NPC:CreateServerRagdoll(dmginfo, collisionGroup)
+
+		local ragdoll = ents.Create("prop_ragdoll")
+		ragdoll:SetPos(self:GetPos())
+		ragdoll:SetOwner(self)
+		ragdoll:CopyAnimationDataFrom(self)
+
+		if self:IsEFlagSet(EFL_NO_DISSOLVE) then
+			ragdoll:AddEFlags(EFL_NO_DISSOLVE)
+		end
+
+		ragdoll:SetSaveValue("m_hKiller", dmginfo:GetInflictor())
+		ragdoll:Spawn()
+
+		return ragdoll
+
+	end
+
 end

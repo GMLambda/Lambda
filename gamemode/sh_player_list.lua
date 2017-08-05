@@ -20,10 +20,11 @@ if SERVER then
 			-- Changelevel does not signal a new connect, so we take players from the transition data instead.
 			for _,data in pairs(self.TransitionData.Players) do
 
-				local userId = data["UserID"]
+				local userId = tonumber(data["UserID"])
 				local playerData = self.Players[userId] or {}
 
 				playerData.ConnectTime = GetSyncedTimestamp()
+				playerData.TimeoutTime = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 				playerData.Nick = data["Nick"]
 				playerData.SteamID = data["SteamID"]
 				playerData.UserID = userId
@@ -63,6 +64,8 @@ if SERVER then
 			playerData.Connecting = bot == false
 		end
 
+		playerData.TimeoutTime = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
+
 		self.Players[userid] = playerData
 		if playerData.Connecting == true then
 			self.Connecting[userid] = playerData
@@ -76,7 +79,7 @@ if SERVER then
 
 		local playerData = self.Players[userid]
 		if playerData == nil then
-			DbgError("ERROR: User never signaled a connect")
+			DbgError("ERROR: User never signaled a connect: " .. userid)
 			return
 		end
 
@@ -94,7 +97,14 @@ if SERVER then
 		local userId = ply:UserID()
 		local playerData = self.Connecting[userId]
 		if playerData == nil then
-			DbgError("Bogus: User never signaled connection")
+			DbgError("ERROR: User never signaled a connect: " .. userid)
+			playerData = {}
+			playerData.ConnectTime = GetSyncedTimestamp()
+			playerData.Nick = ply:Nick()
+			playerData.SteamID = ply:SteamID64()
+			playerData.UserID = ply:UserID()
+			playerData.Bot = ply:IsBot()
+			playerData.Connecting = false
 		end
 
 		playerData.Connecting = false
@@ -109,9 +119,16 @@ if SERVER then
 	function GM:CheckPlayerTimeouts()
 
 		local timestamp = GetSyncedTimestamp()
+
+		if self.LastTimeoutCheck ~= nil and timestamp - self.LastTimeoutCheck < 0.2 then
+			return
+		end
+
+		self.LastTimeoutCheck = timestamp
+
 		for k,v in pairs(self.Connecting) do
-			if timestamp - v.ConnectTime >= 120 then
-				DbgPrint("Player " .. v.Nick .. " timed out")
+			if timestamp >= v.TimeoutTime then
+				DbgPrint("Player " .. v.Nick .. " timed out, timeout: " .. v.TimeoutTime)
 				v.Connecting = false
 				self.Connecting[k] = nil
 				continue
@@ -164,10 +181,6 @@ else -- CLIENT
 
 	end)
 
-end
-
-function player.GetCount()
-	return #player.GetAll()
 end
 
 function GM:GetConnectingCount()

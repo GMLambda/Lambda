@@ -1,8 +1,6 @@
 -- Those are the returned collision bounds for the airboat, big enough to work on the jeep.
 local DbgPrint = GetLogging("Vehicle")
 
-local VEHICLE_MINS = Vector(-150.0000, -150.0000, -40.0000)
-local VEHICLE_MAXS = Vector(150.0000, 150.0000, 150.0000)
 local VEHICLE_THINK = 1
 
 local VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
@@ -10,7 +8,7 @@ local VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
 
 local VEHICLE_JEEP = 0
 local VEHICLE_AIRBOAT = 1
-local VEHICLE_JALOPY = 2
+--local VEHICLE_JALOPY = 2
 
 if SERVER then
 
@@ -71,20 +69,6 @@ if SERVER then
 
 	end
 
-	local function SpawnAirboatSeat(airboat, localPos, localAng)
-
-		local pos = airboat:LocalToWorld(localPos)
-		local ang = airboat:LocalToWorldAngles(localAng)
-
-		local seat = ents.Create("prop_vehicle_prisoner_pod")
-		seat:SetModel("models/nova/airboat_seat.mdl")
-		seat:SetPos(pos)
-		seat:SetAngles(ang)
-		seat:SetParent(airboat)
-		seat:Spawn()
-
-	end
-
 	function GM:HandleVehicleCreation(vehicle)
 
 		DbgPrint("HandleVehicleCreation")
@@ -105,9 +89,6 @@ if SERVER then
 		end
 
 		-- We only get a model next frame, delay it.
-		local self = self
-		local vehicle = vehicle
-
 		util.RunNextFrame(function()
 
 			if not IsValid(vehicle) then
@@ -416,8 +397,6 @@ if SERVER then
 
 else -- CLIENT
 
-	local VEHICLE_LIST = {}
-
 	function GM:RenderVehicleStatus()
 
 		local ply = LocalPlayer()
@@ -445,7 +424,7 @@ else -- CLIENT
 		local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
 
 		if headBone ~= nil then
-			viewPos, _ = ply:GetBonePosition(headBone)
+			viewPos = ply:GetBonePosition(headBone)
 		end
 
 		if ply.VehicleSteeringView == true then
@@ -466,32 +445,10 @@ function GM:VehicleShouldCollide(veh1, veh2)
 
 end
 
-local function HandleVehiclePositionLock(ply, vehicle, cmd)
-
-	if ply:IsPositionLocked() == true then
-		cmd:SetButtons(0)
-		local phys = vehicle:GetPhysicsObject()
-		if IsValid(phys) then
-			local vel = phys:GetVelocity()
-			local len = vel:Length()
-
-			if vel:Length() >= 1 then
-				vel = vel - (vel * 0.02)
-				phys:SetVelocity(vel)
-			end
-
-			if len < 50 then
-				vehicle:Fire("HandBrakeOn")
-			end
-		end
-	end
-
-end
-
 function GM:VehicleMove(ply, vehicle, mv)
 
 	-- We have to call it here because PlayerTick wont be called if we are inside a vehicle.
-    self:UpdateSuit(ply, mv)
+	self:UpdateSuit(ply, mv)
 
 	--
 	-- On duck toggle third person view
@@ -527,10 +484,8 @@ function GM:VehicleMove(ply, vehicle, mv)
 			phys:SetVelocity(vel)
 		end
 
-		if len < 50 then
-			if vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_jalopy" then
-				vehicle:Fire("HandBrakeOn")
-			end
+		if len < 50 and (vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_jalopy") then
+			vehicle:Fire("HandBrakeOn")
 		end
 	end
 

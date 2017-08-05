@@ -28,8 +28,6 @@ end
 
 function PANEL:AnimValueChanged(anim, delta, data)
 	self.Blur = (1 - delta) * 3
-	self:SetBackgroundColor(0, 0, 0, 128)
-	self:SetTextColor(255, 208, 64, 255)
 end
 
 function PANEL:AnimShowAlt(anim, delta, data)

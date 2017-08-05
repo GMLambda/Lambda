@@ -1,6 +1,8 @@
 if SERVER then
 	AddCSLuaFile()
 	util.AddNetworkString("LambdaPlayerEnableRespawn")
+	util.AddNetworkString("LambdaPlayerSettings")
+	util.AddNetworkString("LambdaPlayerColorChanged")
 end
 
 local DbgPrint = GetLogging("Player")
@@ -10,10 +12,49 @@ DEFINE_BASECLASS( "gamemode_base" )
 local SUIT_DEVICE_BREATHER = 1
 local SUIT_DEVICE_SPRINT = 2
 local SUIT_DEVICE_FLASHLIGHT = 3
-
 local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 
 if SERVER then
+
+	function GM:ShowHelp(ply)
+
+		local posLocked = ply:IsPositionLocked()
+		if posLocked == false and ply:Alive() then
+			self:TogglePlayerSettings(ply, true)
+		end
+
+	end
+
+	function GM:TogglePlayerSettings(ply, state)
+
+		if state == true then
+			DbgPrint(ply, "Changing to settings")
+			ply:LockPosition(true, VIEWLOCK_SETTINGS_ON)
+			net.Start("LambdaPlayerSettings")
+			net.WriteBool(true)
+			net.Send(ply)
+		else
+			DbgPrint(ply, "Leaveing settings")
+			ply:LockPosition(true, VIEWLOCK_SETTINGS_RELEASE)
+			net.Start("LambdaPlayerSettings")
+			net.WriteBool(false)
+			net.Send(ply)
+		end
+
+	end
+
+	net.Receive("LambdaPlayerSettings", function(len, ply)
+		local state = net.ReadBool()
+		if (state) then end
+		-- Who cares about state, only sent when closed.
+		GAMEMODE:TogglePlayerSettings(ply, false)
+	end)
+
+	net.Receive("LambdaPlayerColorChanged", function(len, ply)
+
+		GAMEMODE:PlayerSetColors(ply)
+
+	end)
 
 	function GM:CanPlayerSuicide(ply)
 
@@ -45,11 +86,6 @@ if SERVER then
 
 	end
 
-	function GM:SetPlayerCheckpoint(checkpoint)
-		DbgPrint("Assigned new checkpoint to: " .. tostring(checkpoint))
-		self.CurrentCheckpoint = checkpoint
-	end
-
 	function GM:SetupPlayerVisibility(ply, viewEnt)
 
 	end
@@ -60,6 +96,7 @@ if SERVER then
 
 		self:HandlePlayerConnect(ply:SteamID(), ply:Nick(), ply:EntIndex(), ply:IsBot(), ply:UserID())
 	    self:IncludePlayerInRound(ply)
+		self:SendPlayerModelList(ply)
 
 		local model = "models/player/riot.mdl"
 		local name = "!player" -- Some stuff will fail if this is not set, not everything is ported.
@@ -90,13 +127,11 @@ if SERVER then
 			ply:SetDeaths(transitionData.Deaths)
 		end
 
-		DbgPrint("Gender: " .. gender)
-		DbgPrint("Model: " .. model)
-		DbgPrint("Unique: " .. tostring(unique))
-
-		ply:SetNWString("Gender", gender)
+		ply:SetNW2String("Gender", gender)
 		ply:SetName(name) -- Some thing are triggered between PlayerInitialSpawn and PlayerSpawn
-		ply:SetInactive(true)
+		if ply:IsBot() == false then
+			ply:SetInactive(true)
+		end
 
 		BaseClass.PlayerInitialSpawn( self, ply )
 
@@ -108,6 +143,7 @@ if SERVER then
 
 		-- Check if players reached a checkpoint.
 		if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
+			ply.SelectedSpawnpoint = self.CurrentCheckpoint
 			return self.CurrentCheckpoint
 		end
 
@@ -135,6 +171,7 @@ if SERVER then
 
 		DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))
 
+		ply.SelectedSpawnpoint = spawnpoint
 		return spawnpoint
 
 	end
@@ -143,14 +180,53 @@ if SERVER then
 
 		DbgPrint("GM:PlayerSetModel")
 
-		local mdl = "models/player"
+		local playermdl = ply:GetInfo("lambda_playermdl")
+		local group
+		local groupIdx
+
 		if ply:IsSuitEquipped() then
-			mdl = mdl .. "/group03/" .. ply.LambdaPlayerData.Model
+			group = "group03"
+			groupIdx = 2
 		else
-		    mdl = mdl .. "/group01/" .. ply.LambdaPlayerData.Model
+		    group = "group01"
+			groupIdx = 1
 		end
 
+		local mdls = self:GetAvailablePlayerModels()
+		local selection = mdls[playermdl]
+		local mdl
+		if selection == nil then
+			mdl = "models/player/" .. group .. "/" .. playermdl .. ".mdl"
+		else
+			mdl = selection[groupIdx]
+		end
+
+		if mdl == nil or util.IsValidModel(mdl) == false then
+			-- Fallback
+			mdl = "models/player/" .. group .. "/male_01.mdl"
+		end
+
+		local gender = "male"
+		if mdl:find("female", 1, true) ~= nil then
+			gender = "female"
+		end
+		ply:SetNW2String("Gender", gender)
+		print("New Gender: " .. gender)
+
+		util.PrecacheModel(mdl)
 		ply:SetModel(mdl)
+
+	end
+
+	function GM:PlayerSetColors(ply)
+
+		--DbgPrint("PlayerSetColors: " .. tostring(ply))
+
+		local plycolor = ply:GetInfo("lambda_player_color") or "0.3 1 1"
+		local wepcolor = ply:GetInfo("lambda_weapon_color") or "0.3 1 1"
+
+		ply:SetPlayerColor(util.StringToType(plycolor, "Vector"))
+		ply:SetWeaponColor(util.StringToType(wepcolor, "Vector"))
 
 	end
 
@@ -164,9 +240,16 @@ if SERVER then
 		if transitionData ~= nil and transitionData.Include == true then
 
 			for _,v in pairs(ply.TransitionData.Weapons) do
-				ply:Give(v.Class)
+				ply:Give(v.Class, true)
 				ply:SetAmmo(v.Ammo1.Count, v.Ammo1.Id)
 				ply:SetAmmo(v.Ammo2.Count, v.Ammo2.Id)
+
+				local wep = ply:GetWeapon(v.Class)
+				if IsValid(wep) then
+					wep:SetClip1(v.Clip1)
+					wep:SetClip2(v.Clip2)
+				end
+
 				if v.Active then
 					ply.ScheduledActiveWeapon = v.Class
 				end
@@ -183,12 +266,16 @@ if SERVER then
 
 		else
 			-- Weapons
+			DbgPrint("Giving player " .. tostring(ply) .. " default weapons")
+
 			for k,v in pairs(self.MapScript.DefaultLoadout.Weapons) do
-				ply:Give(v)
+				DbgPrint("Give(" .. tostring(ply) .. "): " .. v)
+				ply:Give(v, false)
 			end
 
 			-- Ammo
 			for k,v in pairs(self.MapScript.DefaultLoadout.Ammo) do
+				DbgPrint("GiveAmmo(" .. tostring(ply) .. "): " .. k .. " -> " .. v)
 				ply:GiveAmmo(v, k, true)
 			end
 
@@ -197,14 +284,53 @@ if SERVER then
 
 			-- HEV
 			if self.MapScript.DefaultLoadout.HEV then
+				DbgPrint("EquipSuit(" .. tostring(ply) .. ")")
 				ply:EquipSuit()
 			else
+				DbgPrint("RemoveSuit(" .. tostring(ply) .. ")")
 				ply:RemoveSuit()
 			end
 
 		end
 
 		ply.LambdaDisablePickupDuplication = false
+
+	end
+
+	function GM:SelectBestWeapon(ply)
+
+		-- Switch to a better weapon.
+		local weps = ply:GetWeapons()
+		local highestDmg = 0
+		local bestWep = nil
+
+		for k,v in pairs(weps) do
+
+			local ammo = ply:GetAmmoCount(v:GetPrimaryAmmoType())
+			if bestWep == nil then
+				bestWep = v
+			end
+
+			if v:GetClass() == "weapon_physcannon" and v:IsMegaPhysCannon() then
+				break
+			end
+
+			if ammo ~= 0 then
+				local dmgCVar = self.PLAYER_WEAPON_DAMAGE[v:GetClass()]
+				if dmgCVar ~= nil then
+					local dmg = dmgCVar:GetFloat()
+					if dmg > highestDmg then
+						bestWep = v
+						highestDmg = dmg
+					end
+				end
+			end
+		end
+
+		if bestWep ~= nil then
+			DbgPrint(bestWep)
+			ply:SelectWeapon(bestWep:GetClass())
+		end
 
 	end
 
@@ -217,15 +343,20 @@ if SERVER then
 	        return
 	    end
 
+		if IsValid(ply.SelectedSpawnpoint) then
+			ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
+			ply.SelectedSpawnpoint = nil
+		end
+
 		ply:EndSpectator()
+
+		self:InitializePlayerSpeech(ply)
+		self:PlayerSetColors(ply)
 
 		net.Start("LambdaPlayerEnableRespawn")
 		net.WriteUInt(ply:EntIndex(), 8)
 		net.WriteBool(false)
 		net.Send(ply)
-
-		-- Ensure we keep it.
-		local ply = ply
 
 		if not IsValid(ply.TrackerEntity) then
 			ply.TrackerEntity = ents.Create("lambda_player_tracker")
@@ -234,22 +365,28 @@ if SERVER then
 		-- Lets remove whatever the player left on vehicles behind before he got killed.
 		self:RemovePlayerVehicles(ply)
 
+		-- Should we really do this?
+		ply.WeaponDuplication = {}
+		ply:StripAmmo()
+		ply:StripWeapons()
+		ply:SetName(ply.LambdaPlayerData.Name)
+		ply:SetupHands()
+		ply:SetTeam(LAMBDA_TEAM_ALIVE)
+		ply:SetShouldServerRagdoll(false)
+		ply:SetCustomCollisionCheck(true)
+		ply:RemoveSuit()
+
 		-- We call this first in order to call PlayerLoadout, once we enter a vehicle we can not
 		-- get any weapons.
 		BaseClass.PlayerSpawn(self, ply)
+
+		DbgPrint("Base finished")
 
 		if self.MapScript.PrePlayerSpawn ~= nil then
 			self.MapScript:PrePlayerSpawn(ply)
 		end
 
 		ply.LambdaSpawnTime = CurTime()
-
-		-- Should we really do this?
-		ply:SetName(ply.LambdaPlayerData.Name)
-		ply:SetupHands()
-		ply:SetTeam(LAMBDA_TEAM_ALIVE)
-		ply:SetShouldServerRagdoll(false)
-		ply:SetCustomCollisionCheck(true)
 
 		ply:SetSuitPower(100)
 		ply:SetSuitEnergy(100)
@@ -258,10 +395,23 @@ if SERVER then
 		ply:SetSprinting(false)
 		ply:SetDuckSpeed(0.4)
 		ply:SetUnDuckSpeed(0.2)
-		ply:SetInactive(true)
+		if ply:IsBot() == false then
+			ply:SetInactive(true)
+		end
+		ply:DisablePlayerCollide(true)
+
+		-- Bloody fucking hell.
+		ply:SetSaveValue("m_bPreventWeaponPickup", false)
 
 		ply:SetRunSpeed(lambda_sprintspeed:GetInt()) -- TODO: Put this in a convar.
 		ply:SetWalkSpeed(lambda_normspeed:GetInt())
+
+		if ply:IsBot() then
+			local r = 0.3 + (math.sin(ply:EntIndex()) * 0.7)
+			local g = 0.3 + (math.sin(ply:EntIndex() * 33) * 0.7)
+			local b = 0.3 + (math.sin(ply:EntIndex() * 17) * 0.7)
+			ply:SetWeaponColor(Vector(r, g, b))
+		end
 
 		local transitionData = ply.TransitionData
 
@@ -307,6 +457,7 @@ if SERVER then
 		end
 
 		if SERVER then
+			DbgPrint("Selecting best weapon for " .. tostring(ply))
 			if ply.ScheduledActiveWeapon ~= nil then
 				ply:SelectWeapon(ply.ScheduledActiveWeapon)
 				ply.ScheduledActiveWeapon = nil
@@ -346,6 +497,27 @@ if SERVER then
 
 	function GM:DoPlayerDeath(ply, attacker, dmg)
 
+		DbgPrint("GM:DoPlayerDeath", ply)
+
+		ply.LastDmgPos = dmg:GetDamagePosition()
+		ply.LastDmgForce = dmg:GetDamageForce()
+		ply.LastDmgExplosive = dmg:IsExplosionDamage()
+
+	end
+
+	function GM:PlayerDeath(ply, attacker, inflictor)
+
+		DbgPrint("GM:PlayerDeath", ply)
+
+		local effectdata = EffectData()
+			effectdata:SetOrigin( ply:GetPos() )
+			effectdata:SetNormal( Vector(0,0,1) )
+			effectdata:SetRadius(50)
+			effectdata:SetEntity(ply)
+		util.Effect( "lambda_death", effectdata, true )
+
+		self:RegisterPlayerDeath(ply, attacker, inflictor)
+
 		if ply.LastWeaponsDropped ~= nil then
 			for _,v in pairs(ply.LastWeaponsDropped) do
 				if IsValid(v) and v:GetOwner() ~= ply then
@@ -354,14 +526,18 @@ if SERVER then
 			end
 		end
 
-		local weps = ply:GetWeapons()
+		local weps = {}
+		for _,v in pairs(ply:GetWeapons()) do
+			weps[v] = true
+		end
+
 		local activeWep = ply:GetActiveWeapon()
 		if IsValid(activeWep) then
-			table.insert(weps, activeWep)
+			weps[activeWep] = true
 		end
 
 		ply.LastWeaponsDropped = {}
-		for _,v in pairs(weps) do
+		for v,_ in pairs(weps) do
 
 			local ammoType1 = v:GetPrimaryAmmoType()
 			local ammoType2 = v:GetSecondaryAmmoType()
@@ -371,9 +547,10 @@ if SERVER then
 				continue
 			end
 
-			ply:DropWeapon(v)
+			--DbgPrint("Weapon Drop: " .. tostring(v))
 
 			v.PreventDuplication = true
+			ply:DropWeapon(v)
 
 			if v:GetClass() == "weapon_crowbar" then
 				-- Damage players if it gets thrown their way
@@ -382,17 +559,16 @@ if SERVER then
 			end
 
 			table.insert(ply.LastWeaponsDropped, v)
+
 		end
 
 		local createRagdoll = true
 
 		-- Because the weapons are attached to the player at the time the explosion happened they did
 		-- not receive the force, we gonna apply it so things go flying.
-		if dmg:IsExplosionDamage() then
+		if ply.LastDmgExplosive == true then
 
-			local dmgPos = dmg:GetDamagePosition()
-
-			local force = dmg:GetDamageForce() * 0.05
+			local force = ply.LastDmgForce * 0.05
 
 			for _,v in ipairs(ply.LastWeaponsDropped) do
 				local phys = v:GetPhysicsObject()
@@ -400,14 +576,6 @@ if SERVER then
 					phys:AddVelocity(force * Vector(math.random(-10, 10), math.random(-10, 10), 1))
 				end
 			end
-
-			--[[
-			-- Removed for now, actually working on getting the gibs models.
-			if ply:GetPos():Distance(dmgPos) < 128 and dmg:GetDamageForce():Length() > 256 then
-				createRagdoll = false
-				self:CreatePlayerGibs(ply, force)
-			end
-			]]
 
 		end
 
@@ -427,26 +595,13 @@ if SERVER then
 
 		end
 
-	end
-
-	function GM:PlayerDeath(victim, attacker, inflictor)
-
-		local effectdata = EffectData()
-			effectdata:SetOrigin( victim:GetPos() )
-			effectdata:SetNormal( Vector(0,0,1) )
-			effectdata:SetRadius(50)
-			effectdata:SetEntity(victim)
-		util.Effect( "lambda_death", effectdata, true )
-
-		self:RegisterPlayerDeath(victim, attacker, inflictor)
-
-		BaseClass.PlayerDeath(self, victim, attacker, inflictor)
+		BaseClass.PlayerDeath(self, ply, attacker, inflictor)
 
 	end
 
 	function GM:PostPlayerDeath(ply)
 
-	    DbgPrint("GM:PostPlayerDeath")
+	    DbgPrint("GM:PostPlayerDeath", ply)
 
 	    ply.DeathTime = GetSyncedTimestamp()
 		ply:SetTeam(LAMBDA_TEAM_DEAD)
@@ -454,7 +609,7 @@ if SERVER then
 
 		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), 1, 255)
 		local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
-		local total = #player.GetAll()
+		local total = player.GetCount()
 		local timeoutAmount = math.Round(alive / total * timeout)
 
 		ply.RespawnTime = ply.DeathTime + timeoutAmount
@@ -526,18 +681,7 @@ if SERVER then
 			if class == "prop_physics" or class == "func_physbox" then
 				local phys = groundEnt:GetPhysicsObject()
 				if IsValid(phys) and phys:IsMotionEnabled() == true then
-					local currentVel = phys:GetVelocity()
-					phys:EnableMotion(false)
-					-- Enable it back next frame
-					util.RunNextFrame(function()
-						if IsValid(groundEnt) then
-							local phys = groundEnt:GetPhysicsObject()
-							if IsValid(phys) then
-								phys:EnableMotion(true)
-								phys:SetVelocity(currentVel)
-							end
-						end
-					end)
+					ply:SetPos(ply:GetPos() + Vector(0, 0, 1))
 				end
 			end
 		end
@@ -582,6 +726,51 @@ if SERVER then
 
 	end
 
+	function GM:PlayerCanPickupAmmo(ply, ent, extendSize)
+
+		-- Limit the ammo to pickup based on the sk convars.
+		local res = true
+		local capacity = 0
+		local skill = tostring(game.GetSkillLevel())
+		local class = ent:GetClass()
+		extendSize = extendSize or 1
+
+		if ent:IsWeapon() then
+
+			local ammoType = ent:GetPrimaryAmmoType()
+			local ammoName = game.GetAmmoName(ammoType)
+			local cur = ply:GetAmmoCount(ammoType)
+			local ammoMax = self.MAX_AMMO_DEF[ammoName]
+			if ammoMax ~= nil then
+				ammoMax = ammoMax:GetInt()
+			else
+				ammoMax = 9999
+			end
+			if cur + extendSize > ammoMax then
+				res = false
+			end
+			capacity = ammoMax - cur
+
+		else
+
+			local ammo = self.ITEM_DEF[class]
+			if ammo then
+				local cur = ply:GetAmmoCount(ammo.Type)
+				local amount = ammo[skill]
+				local ammoMax = ammo.Max:GetInt()
+				if cur + amount > ammoMax then
+					--DbgPrint("Limited ammo pickup: " .. tostring(item))
+					res = false
+				end
+				capacity = ammoMax - cur
+			end
+
+		end
+
+		return res, capacity
+
+	end
+
 	function GM:PlayerCanPickupItem(ply, item)
 
 		if ply.LambdaDisablePickupDuplication == true then
@@ -614,18 +803,8 @@ if SERVER then
 			end
 		end
 
-		-- Limit the ammo to pickup based on the sk convars.
-		local skill = tostring(game.GetSkillLevel())
-
-		local ammo = self.ITEM_DEF[class]
-		if ammo then
-			local cur = ply:GetAmmoCount(ammo.Type)
-			local amount = ammo[skill]
-			local max = ammo.Max:GetInt()
-			if cur + amount > max then
-				--DbgPrint("Limited ammo pickup: " .. tostring(item))
-				res = false
-			end
+		if self:PlayerCanPickupAmmo(ply, item) == false then
+			res = false
 		end
 
 		return res
@@ -633,8 +812,6 @@ if SERVER then
 	end
 
 	function GM:WeaponEquip(wep)
-
-		local wep = wep
 
 	    util.RunNextFrame(function()
 			if not IsValid(wep) then
@@ -647,8 +824,21 @@ if SERVER then
 				if wep.CreatedForPlayer == ply then
 					ply.WeaponDuplication[wep.OriginalWeapon] = nil
 				end
+
 				if ply.LastDuplicatedWeapon == wep then
-					ply:SelectWeapon(wep:GetClass())
+					-- Lets see if we should actually select it.
+					local activeWep = ply:GetActiveWeapon()
+
+					local selectWeapon = true
+					if (IsValid(activeWep) and
+						activeWep:GetClass() == "weapon_physcannon" and
+						activeWep:IsMegaPhysCannon() == true) then
+						selectWeapon = false
+					end
+
+					if selectWeapon == true then
+						ply:SelectWeapon(wep:GetClass())
+					end
 				end
 
 				for k,v in pairs(wep.EntityOutputs or {}) do
@@ -663,7 +853,7 @@ if SERVER then
 
 	function GM:PlayerCanPickupWeapon(ply, wep)
 
-		--DbgPrint("PlayerCanPickupWeapon", ply, wep)
+		DbgPrint("PlayerCanPickupWeapon", ply, wep)
 
 		if ply.LambdaDisablePickupDuplication == true then
 			return true
@@ -688,12 +878,19 @@ if SERVER then
 		if ply:HasWeapon(wep:GetClass()) then
 
 			local clip1 = wep:Clip1()
-			if clip1 > 5 then
-				local rest = clip1 - 5
-				ply:GiveAmmo(rest, wep:GetPrimaryAmmoType(), false)
-				wep:SetClip1(5)
+			if clip1 >= 5 then
+				local canPickup, capacity = self:PlayerCanPickupAmmo(ply, wep, 5)
+				if canPickup == true then
+					local pickupAmount = clip1 - 5
+					if pickupAmount > capacity then
+						pickupAmount = capacity
+					end
+					ply:GiveAmmo(pickupAmount, wep:GetPrimaryAmmoType(), false)
+					wep:SetClip1(clip1 - pickupAmount)
+				end
 			end
 
+			DbgPrint("Already owns the gun")
 			return false
 
 		end
@@ -702,20 +899,19 @@ if SERVER then
 			return true
 		end
 
-		ply.WeaponDuplication = ply.WeaponDuplication or {}
-
 		if ply.WeaponDuplication[wep] == true then
-			--DbgPrint("Already duplicating this weapon")
+			DbgPrint("Already duplicating this weapon")
 			return false
 		end
 
 		if wep.CreatedForPlayer ~= nil then
 			if wep.CreatedForPlayer == ply then
 				-- This was specifically created for the player, allow it.
-				--DbgPrint("Allowing to pickup")
+				DbgPrint("Allowing to pickup")
 				return true
 			else
 				-- Lets not duplicate a duplicate
+				DbgPrint("Not the correct player to pickup")
 				return false
 			end
 		end
@@ -765,6 +961,7 @@ if SERVER then
 
 		DbgPrint("ScalePlayerDamage", ply, hitgroup)
 
+		-- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
 		self:ApplyCorrectedDamage(dmginfo)
 
 		local hitgroupScale = HITGROUP_SCALE[hitgroup] or function() return 1.0 end
@@ -818,7 +1015,7 @@ if SERVER then
 			hitgroup = HITGROUP_GENERIC
 		end
 
-		local gender = ply.LambdaPlayerData.Gender
+		local gender = ply:GetNW2String("Gender")
 		local hurtsounds = self.HurtSounds[gender][hitgroup]
 
 		ply.NextHurtSound = ply.NextHurtSound or 0
@@ -1028,7 +1225,17 @@ function GM:PlayerStartSprinting(ply, mv)
 
 	ply:AddSuitDevice(SUIT_DEVICE_SPRINT)
 
-	if CLIENT and IsFirstTimePredicted() then
+	local playSprintSnd = false
+
+	if game.MaxPlayers() > 1 then
+		if CLIENT and IsFirstTimePredicted() then
+			playSprintSnd = true
+		end
+	else
+		playSprintSnd = true
+	end
+
+	if playSprintSnd then
 		local suitPower = ply:GetSuitPower()
 		if suitPower <= 0 then
 			ply:EmitSound("HL2Player.SprintNoPower")
@@ -1069,6 +1276,14 @@ function GM:StartCommand(ply, cmd)
 		ply:SetVelocity(vel)
 		cmd:ClearButtons()
 		cmd:ClearMovement()
+
+		local viewlock = ply:GetViewLock()
+		if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
+			cmd:SetMouseX(0)
+			cmd:SetMouseY(0)
+			cmd:SetViewAngles(ply:GetAngles())
+		end
+
 		return
 	end
 
@@ -1130,9 +1345,38 @@ end
 
 function GM:FinishMove(ply, mv)
 
-	if (mv:GetButtons() ~= 0 or ply:IsBot()) and ply:GetLifeTime() > 0.1 and ply:IsInactive() == true then
-		DbgPrint(ply, "Player now active")
-		ply:SetInactive(false)
+	if SERVER then
+
+		local modifiedPlayer = false
+
+		if ply.TeleportQueue ~= nil and #ply.TeleportQueue > 0 then
+			local data = ply.TeleportQueue[1]
+			ply:SetPos(data.pos)
+			ply:SetAngles(data.ang)
+			ply:SetVelocity(data.vel)
+			table.remove(ply.TeleportQueue, 1)
+			modifiedPlayer = true
+		end
+
+		if (mv:GetButtons() ~= 0 or ply:IsBot()) and ply:GetLifeTime() > 0.1 and ply:IsInactive() == true then
+			DbgPrint(ply, "Player now active")
+			ply:SetInactive(false)
+		end
+
+		local curPos = mv:GetOrigin()
+		if ply.LastPlayerPos ~= nil then
+			local distance = ply.LastPlayerPos:Distance(curPos)
+			if distance >= 100 then
+				-- Player probably teleported
+				DbgPrint("Teleport detected, disabling player collisions temporarily.")
+				ply:DisablePlayerCollide(true)
+			end
+		end
+		ply.LastPlayerPos = curPos
+
+		if modifiedPlayer == true then
+			return modifiedPlayer
+		end
 	end
 
 end
@@ -1354,13 +1598,62 @@ end
 function GM:PlayerThink(ply)
 
 	if SERVER then
+
+		self:UpdatePlayerSpeech(ply)
+
 		-- I don't really like this, however there is no way to tell if we just equipped the suit
+		local lastMdl = ply.LambdaLastModel or ""
+		local curMdl = ply:GetInfo("lambda_playermdl")
+
 		local prevSuitEquipped = ply.LambdaSuitEquipped or false
 		local suitEquipped = ply:IsSuitEquipped()
-		if suitEquipped == true and prevSuitEquipped == false then
+		if (suitEquipped ~= prevSuitEquipped) or (curMdl ~= lastMdl) then
 			self:PlayerSetModel(ply)
 		end
+
+		ply.LambdaLastModel = curMdl
 		ply.LambdaSuitEquipped = suitEquipped
+
+		-- Make sure we reset the view lock if we are in release mode.
+		local viewlock = ply:GetViewLock()
+		if viewlock == VIEWLOCK_SETTINGS_RELEASE then
+			local viewlockTime = ply:GetNW2Float("ViewLockTime")
+			if viewlockTime + VIEWLOCK_RELEASE_TIME < CurTime() then
+				ply:LockPosition(false)
+			end
+		end
+
+	end
+
+	local disablePlayerCollide = ply:GetNW2Bool("DisablePlayerCollide", false)
+
+	if SERVER then
+		if disablePlayerCollide == true and CurTime() >= ply:GetNW2Float("NextPlayerCollideTest") and ply:IsPositionLocked() == false then
+
+			local hullMin, hullMax = ply:GetHull()
+
+			local tr = util.TraceHull({
+				start = ply:GetPos(),
+				endpos = ply:GetPos(),
+				filter = ply,
+				mins = hullMin,
+				maxs = hullMax,
+				mask = MASK_SHOT_HULL,
+			})
+
+			if tr.Hit == false then
+				ply:DisablePlayerCollide(false)
+				DbgPrint("Reset player collision.")
+			--else
+				--DbgPrint("Trace Hit: " .. tostring(tr.Entity))
+			end
+
+		end
+	else
+		if ply.LastDisablePlayerCollide ~= disablePlayerCollide then
+			ply:CollisionRulesChanged()
+			ply.LastDisablePlayerCollide = disablePlayerCollide
+		end
 	end
 
 	--DbgPrint(CurTime())
@@ -1370,7 +1663,7 @@ end
 
 function GM:GravGunPickupAllowed(ply, ent)
 
-    if ent:IsWeapon() and ent:GetClass() ~= "weapon_crowbar" then
+	if ent:IsWeapon() and ent:GetClass() ~= "weapon_crowbar" then
 		return false
 	end
 
@@ -1388,12 +1681,8 @@ function GM:GravGunPunt(ply, ent)
 	end
 
 	local playerVehicle = ply:GetVehicle()
-	if playerVehicle and IsValid(playerVehicle) then
-		if ent:IsVehicle() then
-			if ent.PassengerSeat == playerVehicle then
-				return false
-			end
-		end
+	if playerVehicle ~= NULL and IsValid(playerVehicle) == true and ent:IsVehicle() == true and ent.PassengerSeat == playerVehicle then
+		return false
 	end
 
 	if ent:IsVehicle() then
@@ -1431,39 +1720,8 @@ function GM:PlayerFootstep( ply, pos, foot, sound, volume, filter )
 
 end
 
-if SERVER then
-
-	function GM:SelectBestWeapon(ply)
-
-		-- Switch to a better weapon.
-		local weps = ply:GetWeapons()
-		local highestDmg = 0
-		local bestWep = nil
-
-		for k,v in pairs(weps) do
-			local ammo = ply:GetAmmoCount(v:GetPrimaryAmmoType())
-			if bestWep == nil then
-				bestWep = v
-			end
-			if ammo ~= 0 then
-				local dmgCVar = self.PLAYER_WEAPON_DAMAGE[v:GetClass()]
-				if dmgCVar ~= nil then
-					local dmg = dmgCVar:GetFloat()
-					if dmg > highestDmg then
-						bestWep = v
-						highestDmg = dmg
-					end
-				end
-			end
-		end
-
-		if bestWep ~= nil then
-			DbgPrint(bestWep)
-			ply:SelectWeapon(bestWep:GetClass())
-		end
-
-	end
-
+function GM:PlayerSwitchWeapon(ply, old, new)
+	DbgPrint("PlayerSwitchWeapon", ply, old, new)
 end
 
 function GM:OnPlayerAmmoDepleted(ply, wep)

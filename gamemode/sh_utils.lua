@@ -16,13 +16,14 @@ if SERVER then
 			local param = out[4] or ""
 			local targetents = ents.FindByName(entname) or {}
 			for k,v in pairs(targetents) do
+				DbgPrint("Firing " .. tostring(v) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
 				v:Fire(cmd, param, delay)
 			end
 		end
 
 	end
 
-	function util.TriggerOutputs(outputs, activator, caller, param, self)
+	function util.TriggerOutputs(outputs, activator, caller, parameter, self)
 
 		local count = table.Count(outputs)
 		if count > 0 then
@@ -37,9 +38,9 @@ if SERVER then
 
 			local entname = out[1] or ""
 			local cmd = out[2] or ""
-			local param = param
+			local param = parameter
 			if out[3] and out[3] ~= "" then
-				param = out[3]
+				param = string.Trim(out[3])
 			end
 			if IsEntity(param) and IsValid(param) then
 				param = param:GetName()
@@ -81,7 +82,7 @@ if SERVER then
 						DbgPrint("Firing " .. tostring(ent) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
 						ent:Input(cmd, activator, caller, param)
 					else
-						DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
+						--DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
 					end
 				end
 			end
@@ -105,7 +106,7 @@ if SERVER then
 
 	end
 
-	function util.SimpleTriggerOutputs(outputs, activator, caller, param, self)
+	function util.SimpleTriggerOutputs(outputs, activator, caller, parameter, self)
 
 		--DbgPrint("Firing " .. tostring(table.Count(outputs)) .. " outputs")
 
@@ -115,9 +116,9 @@ if SERVER then
 
 			local entname = out[1] or ""
 			local cmd = out[2] or ""
-			local param = param
+			local param = parameter
 			if out[3] and out[3] ~= "" then
-				param = out[3]
+				param = string.Trim(out[3])
 			end
 			if IsEntity(param) and IsValid(param) then
 				param = param:GetName()
@@ -253,16 +254,12 @@ if SERVER then
 			end
 		end
 		return false
- 	end
+	end
 
 	function util.TracePlayerHull(ply, origin)
 
 		local mins, maxs = ply:OBBMins(), ply:OBBMaxs()
-		local height = maxs.z - mins.z
-
 		local pos = origin or ply:GetPos()
-
-		--DbgPrint(mins, maxs)
 
 		local tr = util.TraceHull(
 		{
@@ -273,13 +270,6 @@ if SERVER then
 			maxs = maxs,
 			mask = MASK_PLAYERSOLID,
 		})
-
-		debugoverlay.Cross(pos, 10, 7, Color(255, 255, 255), true)
-
-		debugoverlay.Box(tr.HitPos, Vector(0, 0, 0), Vector(1, 1, 1), 7, Color(255, 0, 0))
-		debugoverlay.Box(tr.StartPos, Vector(0, 0, 0), Vector(2, 2, 2), 7, Color(0, 255, 0))
-
-		--debugoverlay.Box(tr.HitPos, mins, maxs, 5 )
 
 		return tr
 
@@ -448,10 +438,16 @@ local funcQueue = {}
 
 hook.Add("Think", "LambdaRunNextFrame", function()
 
-	for k,v in ipairs(funcQueue) do
-		if v.thinkId == thinkCount then
-			-- In case it was added before Think was called.
-			continue
+	for k,v in pairs(funcQueue) do
+		if v.thinkId ~= nil then
+			if v.thinkId == thinkCount then
+				-- In case it was added before Think was called.
+				continue
+			end
+		elseif v.timestamp ~= nil then
+			if CurTime() < v.timestamp then
+				continue
+			end
 		end
 		v.func()
 		table.remove(funcQueue, k)
@@ -461,12 +457,29 @@ hook.Add("Think", "LambdaRunNextFrame", function()
 
 end)
 
+function util.ResetFunctionQueue()
+
+	funcQueue = {}
+
+end
+
 function util.RunNextFrame(func)
 
 	local data =
 	{
 		func = func,
 		thinkId = thinkCount,
+	}
+	table.insert(funcQueue, data)
+
+end
+
+function util.RunDelayed(func, ts)
+
+	local data =
+	{
+		func = func,
+		timestamp = ts,
 	}
 	table.insert(funcQueue, data)
 

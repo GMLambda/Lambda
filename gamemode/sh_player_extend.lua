@@ -7,13 +7,37 @@ VIEWLOCK_NONE = 0
 VIEWLOCK_ANGLE = 1
 VIEWLOCK_NPC = 2
 VIEWLOCK_PLAYER = 3
+VIEWLOCK_SETTINGS_ON = 4
+VIEWLOCK_SETTINGS_RELEASE = 5
+
+VIEWLOCK_RELEASE_TIME = 1.0 -- Seconds
 
 if SERVER then
+
+	function PLAYER_META:TeleportPlayer(pos, ang, vel)
+		local data = {}
+		data.vel = vel or self:GetVelocity()
+		data.ang = ang or self:GetAngles()
+		data.pos = pos or Vector(0, 0, 0)
+		self.TeleportQueue = self.TeleportQueue or {}
+		table.insert(self.TeleportQueue, data)
+	end
+
+	function PLAYER_META:DisablePlayerCollide(state, temporarily)
+		if state == true then
+			self:SetNW2Float("NextPlayerCollideTest", CurTime() + 2)
+		end
+		if temporarily == nil then temporarily = true end
+		self:SetNW2Bool("DisablePlayerCollide", state)
+		self.DisablePlayerCollisionTemporarily = temporarily
+		self:CollisionRulesChanged()
+		DbgPrint(self, "DisablePlayerCollide", tostring(state))
+	end
 
 	function PLAYER_META:LockPosition(poslock, viewlock, viewdata)
 
 		poslock = poslock or false
-		viewlock = viewlock or false
+		viewlock = viewlock or VIEWLOCK_NONE
 
 		self.PositionLocked = self.PositionLocked or false
 		self.ViewLocked = self.ViewLocked or false
@@ -22,6 +46,7 @@ if SERVER then
 			DbgPrint("Locking player position: " .. tostring(self))
 		else
 			DbgPrint("Unlocking player position: " .. tostring(self))
+			viewlock = VIEWLOCK_NONE
 		end
 
 		local prevPositionLock = self.PositionLocked
@@ -29,15 +54,19 @@ if SERVER then
 
 		self.PositionLocked = poslock
 		self.ViewLock = viewlock
-		self.LockedViewAngles = viewang
+		self.LockedViewAngles = viewdata
 		self:SetNoTarget(poslock)
-		self:SetNWBool("PositionLocked", poslock)
-		self:SetNWInt("ViewLock", viewlock)
+		self:SetNW2Bool("PositionLocked", poslock)
+		self:SetNW2Int("ViewLock", viewlock)
+		self:SetNW2Float("ViewLockTime", CurTime())
+		self:DisablePlayerCollide(poslock)
 
 		if viewlock == VIEWLOCK_ANGLE then
-			self:SetNWAngle("LockedViewAngles", viewdata)
+			self:SetNW2Angle("LockedViewAngles", viewdata)
 		elseif viewlock == VIEWLOCK_NPC then
-			self:SetNWEntity("LockedViewEntity", viewdata)
+			self:SetNW2Entity("LockedViewEntity", viewdata)
+		elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
+			-- Dealt within sh_lambda_player:PlayerThink
 		end
 
 		if self.PositionLocked ~= prevPositionLock or self.ViewLock ~= prevViewLocked then
@@ -55,27 +84,31 @@ function PLAYER_META:IsPositionLocked()
 		return self.PositionLocked
 	end
 
-	return self:GetNWBool("PositionLocked", false)
+	return self:GetNW2Bool("PositionLocked", false)
 
 end
 
+function PLAYER_META:GetViewLockTime()
+	return self:GetNW2Float("ViewLockTime", CurTime())
+end
+
 function PLAYER_META:GetGender()
-	return self:GetNWString("Gender", "male")
+	return self:GetNW2String("Gender", "male")
 end
 
 function PLAYER_META:GetViewLock()
 
 	if SERVER then
-		self.ViewLock = self.ViewLock or false
+		self.ViewLock = self.ViewLock or VIEWLOCK_NONE
 		return self.ViewLock
 	end
 
-	return self:GetNWInt("ViewLock", VIEWLOCK_NONE)
+	return self:GetNW2Int("ViewLock", VIEWLOCK_NONE)
 
 end
 
 function PLAYER_META:GetNearestRadiationRange()
-	return self:GetNWInt("LambdaRadiationRange", 1000)
+	return self:GetNW2Int("LambdaRadiationRange", 1000)
 end
 
 function PLAYER_META:SetNearestRadiationRange(range, override)
@@ -90,16 +123,16 @@ function PLAYER_META:SetNearestRadiationRange(range, override)
 		end
 	end
 
-	self:SetNWInt("LambdaRadiationRange", current)
+	self:SetNW2Int("LambdaRadiationRange", current)
 
 end
 
 function PLAYER_META:SetGeigerRange(range)
-	self:SetNWInt("LambdaGeigerRange", range)
+	self:SetNW2Int("LambdaGeigerRange", range)
 end
 
 function PLAYER_META:GetGeigerRange()
-	return self:GetNWInt("LambdaGeigerRange", 1000)
+	return self:GetNW2Int("LambdaGeigerRange", 1000)
 end
 
 function PLAYER_META:AddSuitDevice(device)
@@ -109,7 +142,7 @@ end
 
 function PLAYER_META:RemoveSuitDevice(device)
 	self.SuitDevices = self.SuitDevices or {}
-	self.SuitDevices[device] = nil
+	self.SuitDevices[device] = false
 end
 
 function PLAYER_META:GetSuitDevices()

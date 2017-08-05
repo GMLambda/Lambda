@@ -5,32 +5,6 @@ local DbgPrint = GetLogging("Trigger")
 ENT.Base = "base_point"
 ENT.Type = "point"
 
--- HACK: SetPos does not ensure that the position wont be modified again by the gamemovement.
--- There is currently no ENTITY:Teleport binding.
-TELEPORT_QUEUE = {}
-
-hook.Add("FinishMove", "LambdaTeleport", function(ply, mv)
-	local tpData = TELEPORT_QUEUE[ply]
-	if tpData ~= nil then
-		ply:SetPos(tpData.Pos)
-		ply:SetAngles(tpData.Angles)
-		TELEPORT_QUEUE[ply] = nil
-		return true
-	end
-end)
-
-local function TeleportPlayer(ent, pos, ang, vel)
-
-	-- Mimic IncrementInterpolationFrame, we just make sure we call the things at the right time.
-	local data = {}
-	data.Pos = pos
-	data.Angles = ang
-	data.Velocity = vel
-	data.Ent = ent
-	TELEPORT_QUEUE[ent] = data
-
-end
-
 function ENT:Initialize()
 	DbgPrint("point_teleport:Initialize")
 	self.Target = self.Target or ""
@@ -52,7 +26,7 @@ function ENT:AcceptInput(inputName, activator, called, data)
 
 			for _,v in pairs(player.GetAll()) do
 				DbgPrint("[" .. self:GetName() .. "] Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
-				TeleportPlayer(v, pos, ang, v:GetVelocity())
+				ply:TeleportPlayer(pos, ang)
 			end
 
 			return true

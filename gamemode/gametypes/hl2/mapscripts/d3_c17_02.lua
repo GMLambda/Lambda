@@ -71,7 +71,7 @@ function MAPSCRIPT:PostInit()
             Vector(-7763.793945, -6373.333496, 10.588013),
             Angle(0, 0, 0),
             Vector(-3400, -1050, -100),
-            Vector(2200, 1050, 300)
+            Vector(2200, 1750, 300)
         )
         checkpointTrigger1.OnEndTouchAll = function(ent)
 			TriggerOutputs({

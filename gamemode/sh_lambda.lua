@@ -181,6 +181,7 @@ GM.PLAYER_WEAPON_DAMAGE =
 	["weapon_crossbow"] = GetConVar("sk_plr_dmg_crowssbow"),
 	["weapon_shotgun"] = GetConVar("sk_plr_dmg_buckshot"),
 	["weapon_pistol"] = GetConVar("sk_plr_dmg_pistol"),
+	["weapon_physcannon"] = GetConVar("string name")
 }
 
 GM.NPC_WEAPON_DAMAGE =

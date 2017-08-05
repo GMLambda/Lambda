@@ -57,6 +57,7 @@ if SERVER then
 
 		self:NextThink(CurTime() + 0.1)
 		return true
+
 	end
 
 elseif CLIENT then
@@ -104,6 +105,12 @@ elseif CLIENT then
 		local pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 50)
 		local localPly = LocalPlayer()
 
+		local plyPos = localPly:GetPos()
+		local alphaDist = 1.0 - (plyPos:Distance(pos) / 1500)
+		if alphaDist <= 0.0 then
+			return
+		end
+
 		if IsVehicleBehind(vehicle) then
 			-- Dont bother
 			return
@@ -141,9 +148,9 @@ elseif CLIENT then
 
 		local screenPos = pos:ToScreen()
 
-		surface.SetDrawColor( 255, 255, 255, 200 )
+		surface.SetDrawColor( 255, 255, 255, alphaDist * 200 )
 		surface.SetMaterial( VEHICLE_MAT )
-		surface.DrawTexturedRect( screenPos.x + -32, screenPos.y, 60, 60 )
+		surface.DrawTexturedRect( screenPos.x, screenPos.y, 60, 60 )
 
 	end
 

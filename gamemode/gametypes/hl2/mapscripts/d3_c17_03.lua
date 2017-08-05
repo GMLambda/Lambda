@@ -62,6 +62,11 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+		ents.WaitForEntityByName("trigger_tower", function(ent)
+			-- Fail safe in case one decides to kill his allies.
+			ent:Fire("AddOutput", "OnTrigger plaza_exit_relay,Trigger,,40,-1")
+		end)
+
     end
 
 end

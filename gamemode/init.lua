@@ -4,6 +4,7 @@ AddCSLuaFile("cl_postprocess.lua")
 AddCSLuaFile("cl_ragdoll_ext.lua")
 AddCSLuaFile("cl_scoreboard.lua")
 
+AddCSLuaFile("cl_skin_lambda.lua")
 AddCSLuaFile("huds/hud_numeric.lua")
 AddCSLuaFile("huds/hud_suit.lua")
 AddCSLuaFile("huds/hud_health.lua")
@@ -26,15 +27,64 @@ include("sv_generic_fixes.lua")
 include("sv_difficulty.lua")
 include("sv_resource.lua")
 include("sv_taunts.lua")
+include("sv_playerspeech.lua")
 include("sv_commands.lua")
+include("sv_checkpoints.lua")
+include("sv_weapontracking.lua")
 
 local DbgPrint = GetLogging("Server")
 
+function GM:ProcessEnvHudHint(ent)
+	DbgPrint(ent, "Enabling env_hudhint for all players")
+	ent:AddSpawnFlags(1) -- SF_HUDHINT_ALLPLAYERS
+end
+
+function GM:ProcessEnvMessage(ent)
+	DbgPrint(ent, "Enabling env_message for all players")
+	ent:AddSpawnFlags(2) -- SF_MESSAGE_ALL
+end
+
+function GM:ProcessFuncAreaPortal(ent)
+	DbgPrint(ent, "Opening func_areaportal")
+	-- TODO: This is not ideal at all on larger maps, however can can not get a position for them.
+	ent:SetKeyValue("StartOpen", "1")
+	ent:Fire("Open")
+	ent:SetName("Lambda_" .. ent:GetName())
+end
+
+function GM:ProcessFuncAreaPortalWindow(ent)
+	DbgPrint(ent, "Extending func_areaportalwindow")
+	-- I know this is ugly, but its better than white windows everywhere, this is not 2004 anymore.
+	local saveTable = ent:GetSaveTable()
+	local fadeStartDist = tonumber(saveTable["FadeStartDist"] or "0") * 3
+	local fadeDist = tonumber(saveTable["FadeDist"] or "0") * 3
+	ent:SetKeyValue("FadeDist", fadeDist)
+	ent:SetKeyValue("FadeStartDist", fadeStartDist)
+end
+
+function GM:ProcessTriggerWeaponDissolve(ent)
+	-- OnChargingPhyscannon
+	-- UGLY HACK! But thats the only way we can tell when to upgrade.
+	ent:Fire("AddOutput", "OnChargingPhyscannon lambda_physcannon,Supercharge,,0")
+	print("Adding output for physcannon")
+end
+
+local ENTITY_PROCESSORS =
+{
+	["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
+	["env_message"] = { PostFrame = true, Fn = GM.ProcessEnvMessage },
+	["func_areaportal"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortal },
+	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
+}
+
 function GM:OnEntityCreated(ent)
 
-	local self = self
-	local ent = ent
 	local class = ent:GetClass()
+	local entityProcessor = ENTITY_PROCESSORS[class]
+
+	if entityProcessor ~= nil and entityProcessor.PostFrame == false then
+		entityProcessor.Fn(self, ent)
+	end
 
 	-- Run this next frame so we can safely remove entities and have their actual names assigned.
 	util.RunNextFrame(function()
@@ -43,44 +93,35 @@ function GM:OnEntityCreated(ent)
 			return
 		end
 
+		if ent:IsWeapon() then
+			self:TrackWeapon(ent)
+		end
+
 		if self.MapScript then
 			-- Monitor scripts that we have filtered by class name.
 			if self.MapScript.EntityFilterByClass and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
 				DbgPrint("Removing filtered entity by class: " .. tostring(ent))
 				ent:Remove()
+				return
 			end
 
 			-- Monitor scripts that have filtered by name.
 			if self.MapScript.EntityFilterByName and self.MapScript.EntityFilterByName[ent:GetName()] == true then
 				DbgPrint("Removing filtered entity by name: " .. tostring(ent) .. " (" .. ent:GetName() .. ")")
 				ent:Remove()
+				return
 			end
-
-			if class == "env_hudhint" then
-				DbgPrint("Enabling env_hudhint for all players")
-				ent:AddSpawnFlags(1) -- SF_HUDHINT_ALLPLAYERS
-			elseif class == "env_message" then
-				ent:AddSpawnFlags(2) -- SF_MESSAGE_ALL
-			elseif class == "func_areaportal" then
-				-- TODO: This is not ideal at all on larger maps, however can can not get a position for them.
-				ent:SetKeyValue("StartOpen", "1")
-				ent:Fire("Open")
-				ent:SetName("Lambda_" .. ent:GetName())
-			elseif class == "func_areaportalwindow" then
-				-- I know this is ugly, but its better than white windows everywhere, this is not 2004 anymore.
-				local saveTable = ent:GetSaveTable()
-				local fadeStartDist = tonumber(saveTable["FadeStartDist"] or "0") * 3
-				local fadeDist = tonumber(saveTable["FadeDist"] or "0") * 3
-				ent:SetKeyValue("FadeDist", fadeDist)
-				ent:SetKeyValue("FadeStartDist", fadeStartDist)
-			end
-
 		end
 
-		if ent:IsNPC() then
-			self:RegisterNPC(ent)
+		if entityProcessor ~= nil and entityProcessor.PostFrame == true then
+			entityProcessor.Fn(self, ent)
 		end
+
 	end)
+
+	if ent:IsNPC() then
+		self:RegisterNPC(ent)
+	end
 
 	-- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
 	if ent:IsVehicle() then
@@ -89,27 +130,61 @@ function GM:OnEntityCreated(ent)
 
 end
 
+function GM:ApplyCorrectedDamage(dmginfo)
+
+	local attacker = dmginfo:GetAttacker()
+
+	if IsValid(attacker) and (dmginfo:IsDamageType(DMG_BULLET) or dmginfo:IsDamageType(DMG_CLUB)) then
+
+		local weaponTable = nil
+		local wep = nil
+
+		if attacker:IsPlayer() then
+			weaponTable = self.PLAYER_WEAPON_DAMAGE
+			wep = attacker:GetActiveWeapon()
+		elseif attacker:IsNPC() then
+			weaponTable = self.NPC_WEAPON_DAMAGE
+			wep = attacker:GetActiveWeapon()
+		end
+
+		if weaponTable ~= nil and IsValid(wep) then
+			local class = wep:GetClass()
+			local dmgCVar = weaponTable[class]
+			if dmgCVar ~= nil then
+				local dmgAmount = dmgCVar:GetInt()
+				DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
+				dmginfo:SetDamage(dmgAmount)
+			end
+		end
+
+	end
+
+	return dmginfo
+
+end
+
 function GM:EntityTakeDamage(target, dmginfo)
 
 	local attacker = dmginfo:GetAttacker()
 	local inflictor = dmginfo:GetInflictor()
-	local class = target:GetClass()
+	local targetClass = target:GetClass()
 
 	DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor))
 
 	local gameType = self:GetGameType()
 
+	target.IsPhysgunDamage = dmginfo:IsDamageType(DMG_PHYSGUN)
+	DbgPrint(target, "PhysgunDamage: " .. tostring(target.IsPhysgunDamage))
+
 	if target:IsNPC() then
 
-		local isFriendly = gameType.ImportantPlayerNPCNames[target:GetName()] or gameType.ImportantPlayerNPCClasses[target:GetClass()]
+		local isFriendly = gameType.ImportantPlayerNPCNames[target:GetName()] or gameType.ImportantPlayerNPCClasses[targetClass]
 
 		-- Check if player is attacking friendlies.
-		if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
-			if isFriendly == true then
-				DbgPrint("Filtering damage on friendly")
-				dmginfo:ScaleDamage(0)
-				return true
-			end
+		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and isFriendly == true then
+			DbgPrint("Filtering damage on friendly")
+			dmginfo:ScaleDamage(0)
+			return true
 		end
 
 		if IsValid(attacker) and attacker:IsPlayer() and dmginfo:IsDamageType(DMG_BLAST) == false then
@@ -124,19 +199,15 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
-		if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
-			if not dmginfo:IsExplosionDamage() then
-				return true
-			end
+		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and lambda_friendlyfire:GetBool() == false and attacker ~= target then
+			return true
 		end
 
 		local dmg = dmginfo:GetDamage()
 		if dmg > 0 then
 			local hitGroup = HITGROUP_GENERIC
-			if dmginfo:IsDamageType(DMG_FALL) then
-				if dmg > 40 and math.random(1, 2) == 1 then
-					hitGroup = HITGROUP_LEFTLEG
-				end
+			if dmginfo:IsDamageType(DMG_FALL) and dmg > 40 and math.random(1, 2) == 1 then
+				hitGroup = HITGROUP_LEFTLEG
 			end
 			self:EmitPlayerHurt(dmginfo:GetDamage(), target, hitGroup)
 		end
@@ -156,10 +227,6 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
-
-	elseif target:IsVehicle() then
-
-
 	end
 
 	if target.FilterDamage == true then
@@ -168,5 +235,16 @@ function GM:EntityTakeDamage(target, dmginfo)
 		return true
 	end
 
+
+end
+
+function GM:CreateEntityRagdoll( owner, ragdoll )
+
+	DbgPrint("Create Ragdoll:", tostring(owner), tostring(ragdoll))
+	ragdoll.IsPhysgunDamage = owner.IsPhysgunDamage
+
+end
+
+function GM:LambdaPreChangelevel(data)
 
 end

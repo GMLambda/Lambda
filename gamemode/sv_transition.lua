@@ -27,7 +27,7 @@ local FIELD_DESERIALIZE =
 	["EyeAng"] = DESERIALIZE_ANGLES,
 }
 
-local DEFAULT_TRANSITION_DATA = util.TableToJSON({ Objects = {}, Players = {} })
+local DEFAULT_TRANSITION_DATA = util.TableToJSON({ Objects = {}, Players = {}, GlobalStates = {} })
 
 function GM:InitializeTransitionData()
 
@@ -112,8 +112,9 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
 	local transitionData = {
 		Objects = objectTable,
 		Players = playerTable,
-		Data = {},
 	}
+
+	hook.Run("SaveTransitionData", transitionData)
 
 	-- We have to mimic the input on transition.
 	local transitionMap = {}
@@ -133,8 +134,6 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
 		end
 	end
 
-	hook.Run("SaveTransitionData", transitionData.Data)
-
 	util.SetPData("Lambda" .. lambda_instance_id:GetString(), "TransitionData", util.TableToJSON(transitionData))
 
 end
@@ -142,6 +141,7 @@ end
 function GM:SaveTransitionData(data)
 
 	self:SaveTransitionDifficulty(data)
+	--self:SaveGlobalStates(data)
 
 end
 
@@ -205,7 +205,7 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
 		obj.ForceTransition = true
 	end
 
-	local globalName = obj:GetNWString("GlobalName", obj:GetInternalVariable("globalname") or "")
+	local globalName = obj:GetNW2String("GlobalName", obj:GetInternalVariable("globalname") or "")
 	if globalName ~= "" and obj:IsDormant() == false then
 		transition = true
 		obj.ForceTransition = true
@@ -286,6 +286,8 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 				Id = weapon:GetSecondaryAmmoType(),
 				Count = ply:GetAmmoCount(weapon:GetSecondaryAmmoType()),
 			},
+			Clip1 = weapon:Clip1(),
+			Clip2 = weapon:Clip2(),
 			Active = isActive,
 		}
 		table.insert(weapons, weaponData)
@@ -399,7 +401,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		SaveTable = ent:GetSaveTable(),
 		Table = ent:GetTable(),
 		SourceMap = ent.SourceMap or currentMap,
-		GlobalName = ent:GetNWString("GlobalName", ent:GetInternalVariable("globalname")),
+		GlobalName = ent:GetNW2String("GlobalName", ent:GetInternalVariable("globalname")),
 	}
 
 	if ent.CoopKeyValues ~= nil then
@@ -700,6 +702,8 @@ function GM:PostLoadTransitionData()
 
 	DbgPrint("GM:PostLoadTransitionData")
 
+	hook.Run("LoadTransitionData", self.TransitionData)
+
 	-- In case there is a entry landmark we are going to resolve the relative positioning,
 	-- this avoids us doing it over and over again at places where its used.
 	local entryLandmark = self:GetEntryLandmark()
@@ -765,13 +769,12 @@ function GM:PostLoadTransitionData()
 		end
 	end
 
-	hook.Run("LoadTransitionData", self.TransitionData.Data)
-
 end
 
 function GM:LoadTransitionData(data)
 
 	self:LoadTransitionDifficulty(data)
+	--self:LoadGlobalStates(data)
 
 end
 

@@ -133,5 +133,5 @@ if SERVER then
 end -- SERVER
 
 function PLAYER_META:IsSpectator()
-    return self:GetNW2Bool("Spectator", false)
+	return self:GetNW2Bool("Spectator", false)
 end

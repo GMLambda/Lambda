@@ -14,8 +14,6 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.InputFilters =
 {
-	["soda_machine_entry_door_1"] = { "Toggle" },
-	["soda_door_areaportal_1"] = { "Close" },
 	["lab_door"] = { "Close" },
 	["lab_door_clip"] = { "Close" },
 }
@@ -27,9 +25,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
-	["brush_soda_clip_player_2"] = true,
-	--["Barney_lab_entry_closedoor_1"] = true,
-	["brush_soda_clip_player"] = true, -- Why not
+	["lab_entry_script_trigger"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -41,6 +37,8 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
+
+		DbgPrint("MAPSCRIPT AY")
 
 		self.DefaultLoadout.HEV = false
 
@@ -74,6 +72,27 @@ function MAPSCRIPT:PostInit()
 
 		for _,v in pairs(ents.FindByClass("item_suit")) do
 			v:EnableRespawn(true)
+		end
+
+		-- Close the door once everyone is inside.
+		-- -6754.733398 -1360.082764 0.031250
+		local doorTrigger = ents.Create("trigger_once")
+		doorTrigger:SetKeyValue("TeamWait", "1")
+		doorTrigger:SetupTrigger(
+			Vector(-6754.733398, -1360.082764, 0.031250),
+			Angle(0, 0, 0),
+			Vector(-350, -300, 0),
+			Vector(400, 200, 180)
+		)
+		doorTrigger:SetName("door_trigger")
+		doorTrigger.OnTrigger = function()
+			TriggerOutputs({
+				{"brush_soda_clip_player", "Enable", 0.0, ""},
+				{"BarneyEnter_song", "PlaySound", 0.0, ""},
+				{"speaker_alyxsoda_nags", "Kill", 0.0, ""},
+				{"lab01_lcs", "Start", 0.1, ""},
+				{"kleiner_prepose_idle_1", "BeginSequence", 0.3, ""},
+			})
 		end
 
 		-- -6569.488281 -1150.120850 0.031250

@@ -216,6 +216,9 @@ function ENT:SetupNWVar(key, dtType, data)
 end
 
 function ENT:GetNWVar(key, fallback)
+	if self.DTVarTable == nil then
+		return fallback
+	end
 	local dtVar = self.DTVarTable[key]
 	if dtVar == nil and fallback == nil then
 		DbgError("DTVar not setup, no fallback specified")
@@ -230,6 +233,9 @@ function ENT:GetNWVar(key, fallback)
 end
 
 function ENT:SetNWVar(key, val)
+	if self.DTVarTable == nil then
+		return
+	end
 	local dtVar = self.DTVarTable[key]
 	if dtVar == nil then
 		DbgError("DTVar not setup: " .. key)
@@ -331,6 +337,7 @@ if SERVER then
 		local caller = caller or self
 		local activator = activator or self
 		local outputs = self.OutputTable[name] or {}
+		DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
 		util.RunNextFrame(function()
 			util.TriggerOutputs(outputs, activator, caller, param, self)
 		end)
@@ -356,7 +363,7 @@ if SERVER then
 		DbgPrint("Registered output")
 
 		return true
-		
+
 	end
 
 	function ENT:ClearOutputs()

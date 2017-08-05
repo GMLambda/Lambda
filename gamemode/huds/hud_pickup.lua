@@ -1,8 +1,8 @@
 GM.PickupHistory = {}
 GM.PickupHistoryLast = 0
-GM.PickupHistoryTop = ScrH() / 2
 GM.PickupHistoryWide = 300
 GM.PickupHistoryCorner = surface.GetTextureID( "gui/corner8" )
+GM.PickupHistoryMax = 6
 
 GM.SymbolLookupTable =
 {
@@ -16,6 +16,7 @@ GM.SymbolLookupTable =
 	["XBowBolt"] = "w",
 	["Grenade"] = "v",
 	["RPG_Round"] = "x",
+	["slam"] = "o",
 
 	["weapon_smg1"] = "&",
 	["weapon_shotgun"] = "(",
@@ -29,13 +30,38 @@ GM.SymbolLookupTable =
 	["weapon_physcannon"] = "!",
 	["weapon_physgun"] = "!",
 	["weapon_bugbait"] = "~",
+	["weapon_slam"] = "o",
+
+	["item_healthkit"] = "+",
+	["item_healthvial"] = "+",
+	["item_battery"] = "*",
 }
+
+local function GetTextColor()
+	local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 255)
+end
+
+local function GetBGColor()
+	local col = util.StringToType(lambda_hud_bg_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 128)
+end
 
 surface.CreateFont( "LAMBDA_AMMO",
 {
-	font		= 'halflife2',
-	size		= 46
+	font		= "halflife2",
+	size		= 38
 } )
+
+function GM:UpdatePickupHistory()
+
+	local i = 0
+	for _,v in pairs(self.PickupHistory) do
+		v.timescale = math.Clamp(table.Count(self.PickupHistory) - i / self.PickupHistoryMax * 10, 1, 10)
+		i = i + 1
+	end
+
+end
 
 --[[---------------------------------------------------------
    Name: gamemode:HUDWeaponPickedUp( wep )
@@ -49,6 +75,8 @@ function GM:HUDWeaponPickedUp( wep )
 
 	local pickup = {}
 	pickup.time			= CurTime()
+	pickup.elapsed      = 0
+	pickup.timescale = 1
 	pickup.symbol		= self.SymbolLookupTable[wep:GetClass()]
 	pickup.name			= wep:GetPrintName()
 	pickup.holdtime		= 10
@@ -59,14 +87,17 @@ function GM:HUDWeaponPickedUp( wep )
 
 	surface.SetFont( pickup.font )
 	local w, h = surface.GetTextSize( pickup.name )
-	pickup.height		= h + 10
+	pickup.theight = h
+	pickup.twidth = w
+	pickup.height		= 32
 	pickup.width		= w
 
 	if pickup.symbol then
 		surface.SetFont("LAMBDA_AMMO")
-		local w,_ = surface.GetTextSize(pickup.symbol)
+		w,h = surface.GetTextSize(pickup.symbol)
 		pickup.width = pickup.width + w + 16
-		pickup.swidth = w
+		pickup.swidth = math.Clamp(w, 48, 64)
+		pickup.sheight = math.Clamp(h, 38, 52)
 	end
 
 	if ( self.PickupHistoryLast >= pickup.time ) then
@@ -75,6 +106,8 @@ function GM:HUDWeaponPickedUp( wep )
 
 	table.insert( self.PickupHistory, pickup )
 	self.PickupHistoryLast = pickup.time
+
+	self:UpdatePickupHistory()
 
 end
 
@@ -114,18 +147,35 @@ function GM:HUDItemPickedUp( itemname )
 
 	local pickup = {}
 	pickup.time			= CurTime()
-	pickup.name			= "#"..itemname
+	pickup.elapsed      = 0
+	pickup.timescale = 1
+	pickup.name			= "#" .. itemname
 	pickup.holdtime		= 10
 	pickup.fadein		= 0.04
 	pickup.fadeout		= 0.3
 	pickup.font			= "DermaDefaultBold"
 	pickup.color		= Color( 180, 255, 180, 255 )
 	pickup.amount		= 1
+	pickup.symbol		= self.SymbolLookupTable[itemname]
 
 	surface.SetFont( pickup.font )
 	local w, h = surface.GetTextSize( pickup.name )
-	pickup.height		= h + 10
+	pickup.theight = h
+	pickup.twidth = w
+	pickup.height		= 32
 	pickup.width		= w
+
+	w, h = surface.GetTextSize( pickup.amount )
+	pickup.xwidth	= w
+	pickup.width	= pickup.width + w + 16
+
+	if pickup.symbol then
+		surface.SetFont("LAMBDA_AMMO")
+		w,h = surface.GetTextSize(pickup.symbol)
+		pickup.width = pickup.width + w + 16
+		pickup.swidth = math.Clamp(w, 48, 50)
+		pickup.sheight = math.Clamp(h, 32, 52)
+	end
 
 	if ( self.PickupHistoryLast >= pickup.time ) then
 		pickup.time = self.PickupHistoryLast + 0.05
@@ -133,6 +183,8 @@ function GM:HUDItemPickedUp( itemname )
 
 	table.insert( self.PickupHistory, pickup )
 	self.PickupHistoryLast = pickup.time
+
+	self:UpdatePickupHistory()
 
 end
 
@@ -174,6 +226,8 @@ function GM:HUDAmmoPickedUp( itemname, amount )
 
 	local pickup = {}
 	pickup.time			= CurTime()
+	pickup.elapsed      = 0
+	pickup.timescale = 1
 	pickup.symbol		= self.SymbolLookupTable[itemname]
 	pickup.name			= "#" .. itemname .. "_ammo"
 	pickup.holdtime		= 10
@@ -185,18 +239,21 @@ function GM:HUDAmmoPickedUp( itemname, amount )
 
 	surface.SetFont( pickup.font )
 	local w, h = surface.GetTextSize( pickup.name )
-	pickup.height	= h + 10
+	pickup.theight = h
+	pickup.twidth = w
+	pickup.height	= 32
 	pickup.width	= w
 
-	local w, h = surface.GetTextSize( pickup.amount )
+	w, h = surface.GetTextSize( pickup.amount )
 	pickup.xwidth	= w
 	pickup.width	= pickup.width + w + 16
 
 	if pickup.symbol then
 		surface.SetFont("LAMBDA_AMMO")
-		local w,h = surface.GetTextSize(pickup.symbol)
+		w,h = surface.GetTextSize(pickup.symbol)
 		pickup.width = pickup.width + w + 16
-		pickup.swidth = w
+		pickup.swidth = math.Clamp(w, 48, 64)
+		pickup.sheight = math.Clamp(h, 32, 56)
 	end
 
 	if ( self.PickupHistoryLast >= pickup.time ) then
@@ -206,40 +263,24 @@ function GM:HUDAmmoPickedUp( itemname, amount )
 	table.insert( self.PickupHistory, pickup )
 	self.PickupHistoryLast = pickup.time
 
+	self:UpdatePickupHistory()
+
 end
 
 local blur = Material("pp/blurscreen")
 
-local function DrawBlurRect(x, y, w, h)
-	local X, Y = 0,0
+local function DrawBlurRect(x, y, w, h, alpha)
+	local colBg = GetBGColor()
 
-	surface.SetDrawColor(255, 255, 255)
-	--surface.SetMaterial(blur)
-	--[[
-	for i = 1, 5 do
-		blur:SetFloat("$blur", (i / 3) * (5))
-		blur:Recompute()
-
-		render.UpdateScreenEffectTexture()
-
-		render.SetScissorRect(x, y, x+w, y+h, true)
-			surface.DrawTexturedRect(X * -1, Y * -1, ScrW(), ScrH())
-		render.SetScissorRect(0, 0, 0, 0, false)
-	end
-	]]
-
-   draw.RoundedBox(3, x, y, w, h, Color(0, 0, 0, 30))
-
-   surface.SetDrawColor(0, 0, 0)
-   --surface.DrawOutlinedRect(x, y, w, h)
-
+	draw.NoTexture()
+    draw.RoundedBox(3, x, y, w, h, colBg)
 end
 
 function GM:HUDDrawPickupHistory()
 
 	if ( self.PickupHistory == nil ) then return end
 
-	local x, y = ScrW() - self.PickupHistoryWide - 20, self.PickupHistoryTop
+	local x, y = ScrW() - self.PickupHistoryWide - 20, ScrH() / 4
 	local tall = 0
 	local wide = 0
 
@@ -253,14 +294,15 @@ function GM:HUDDrawPickupHistory()
 			return
 
 		end
-
-		if ( v.time < CurTime() ) then
+		v.elapsed = v.elapsed or 0
+		if ( v.elapsed < v.holdtime ) then
 
 			if ( v.y == nil ) then v.y = y end
 
-			v.y = ( v.y * 5 + y ) / 6
+			v.y = y
+			v.elapsed = v.elapsed + (FrameTime() * 2 * v.timescale)
 
-			local delta = ( v.time + v.holdtime ) - CurTime()
+			local delta = v.holdtime - v.elapsed
 			delta = delta / v.holdtime
 
 			local alpha = 255
@@ -275,29 +317,34 @@ function GM:HUDDrawPickupHistory()
 
 			v.x = x + self.PickupHistoryWide - (self.PickupHistoryWide * ( alpha / 255 ) )
 
-			local rx, ry, rw, rh = math.Round( v.x - 8 ), math.Round( v.y - ( v.height / 2 ) - 4 ), math.Round( self.PickupHistoryWide + 19 ), math.Round( v.height + 10 )
+			local rx = math.Round( v.x )
+			local ry = math.Round( v.y - ( v.height / 2 ) - 4 )
+			local rw = math.Round( self.PickupHistoryWide + 19 )
+			local rh = math.Round( v.height )
+
 			local bordersize = 8
 
-			DrawBlurRect( rx, ry, rw, rh )
+			DrawBlurRect( rx, ry, rw, rh, alpha )
 
 			local offsetX = 0
+			local col = GetTextColor()
+			col.a = alpha
 
 			if v.symbol ~= nil then
-				draw.SimpleText( v.symbol, "LAMBDA_AMMO", v.x + 55 , v.y - v.height, Color( 255, 220, 0, alpha ), TEXT_ALIGN_RIGHT )
+				draw.SimpleText( v.symbol, "LAMBDA_AMMO", rx + 60 , ry + (v.height / 2) - (v.sheight / 2), col, TEXT_ALIGN_RIGHT )
 				offsetX = 40
 			end
 
-			--draw.SimpleText( v.name, v.font, v.x + v.height + 4, v.y - ( v.height / 2 ) + 4, Color( 0, 0, 0, alpha * 0.5 ) )
-			draw.SimpleText( v.name, v.font, offsetX + v.x + v.height + 4, v.y - ( v.height / 2 ) + 4, Color( 255, 220, 0, alpha ) )
+			draw.SimpleText( v.name, v.font, offsetX + rx + (v.swidth or 55), ry + ( v.height / 2 ) - (v.theight / 2), col )
 
 			if ( v.amount ) then
 
 				--draw.SimpleText( v.amount, v.font, v.x + self.PickupHistoryWide + 1, v.y - ( v.height / 2 ) + 4, Color( 0, 0, 0, alpha * 0.5 ), TEXT_ALIGN_RIGHT )
-				draw.SimpleText( v.amount, v.font, v.x + self.PickupHistoryWide, v.y - ( v.height / 2 ) + 4, Color( 255, 220, 0, alpha ), TEXT_ALIGN_RIGHT )
+				draw.SimpleText( v.amount, v.font, rx + self.PickupHistoryWide, ry + ( v.height / 2 ) - (v.theight / 2), col, TEXT_ALIGN_RIGHT )
 
 			end
 
-			y = y + ( v.height + 20 )
+			y = y + ( v.height + 2 )
 			tall = tall + v.height + 18
 			wide = math.Max( wide, v.width + v.height + 24 )
 

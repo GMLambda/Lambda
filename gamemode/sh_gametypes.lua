@@ -1,5 +1,7 @@
 AddCSLuaFile()
 
+--local DbgPrint = GetLogging("GameType")
+
 include("gametypes/hl2.lua")
 
 local DEFAULT_MAPSCRIPT = {}
@@ -18,7 +20,7 @@ DEFAULT_MAPSCRIPT.DefaultLoadout =
 		"weapon_ar2",
 		"weapon_rpg",
 		"weapon_crossbow",
-        "weapon_bugbait",
+		"weapon_bugbait",
 	},
 	Ammo =
 	{
@@ -67,13 +69,28 @@ function GM:LoadGameTypes()
 end
 
 function GM:SetGameType(gametype)
-	local gametype = GameTypes:Get(gametype)
-	if gametype == nil then
+
+	local gametypeData = GameTypes:Get(gametype)
+	if gametypeData == nil then
 		error("Unable to find gametype: " .. gametype)
 		return
 	end
-	self.GameType = gametype
-	self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+
+	--gametype:LoadMapScript()
+
+	self.GameType = gametypeData
+	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+
+end
+
+function GM:ReloadGameType()
+
+	if self.GameType ~= nil then
+		local gametype = self.GameType
+		gametype:LoadMapScript()
+		self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+	end
+
 end
 
 function GM:GetGameType()

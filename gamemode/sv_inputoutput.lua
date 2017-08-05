@@ -35,15 +35,18 @@ function GM:AddOutputCallback(name, outputname, inputname, delay, cb)
 
 end
 
-function GM:WaitForInput(name, input, cb)
+function GM:WaitForEntityInput(ent, input, cb)
+	DbgPrint("Added new input listener on " .. tostring(ent) .. " -> " .. input)
 
-	ents.WaitForEntityByName(name, function(ent)
+	self.InputCallbacks[ent] = self.InputCallbacks[ent] or {}
+	self.InputCallbacks[ent][input] = cb
+end
 
-		DbgPrint("Added new input listener on " .. tostring(ent) .. " -> " .. input)
+-- Named entity variant.
+function GM:WaitForInput(nameEnt, input, cb)
 
-		self.InputCallbacks[ent] = self.InputCallbacks[ent] or {}
-		self.InputCallbacks[ent][input] = cb
-
+	ents.WaitForEntityByName(nameEnt, function(ent)
+		self:WaitForEntityInput(ent, input, cb)
 	end)
 
 end

@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-local DbgPrint = GetLogging("EntityExt")
+--local DbgPrint = GetLogging("EntityExt")
 local ENTITY_META = FindMetaTable("Entity")
 
 function ENTITY_META:AddSpawnFlags(flags)
@@ -22,11 +22,57 @@ function ENTITY_META:IsDoor()
 	return class == "prop_door_rotating" or class == "func_door" or class == "func_door_rotating"
 end
 
+function ENTITY_META:GetModelInfo()
+
+	local mdl = self:GetModel()
+	if self.CachedModelDataInfo ~= nil and self.CachedModelDataFile == mdl then
+		return self.CachedModelDataInfo
+	end
+
+	local mdlInfo = util.GetModelInfo(mdl)
+	if mdlInfo ~= nil and mdlInfo.KeyValues ~= nil then
+		self.CachedModelDataInfo = util.KeyValuesToTable(mdlInfo.KeyValues)
+		self.CachedModelDataFile = mdl
+	end
+
+	return self.CachedModelDataInfo
+
+end
+
+function ENTITY_META:PhysicsImpactSound(chan, vol, speed)
+
+	local mdlInfo = self:GetModelInfo()
+	if mdlInfo == nil then
+		return
+	end
+
+	local solid = mdlInfo["solid"];
+
+	if solid == nil then
+		return
+	end
+
+	local surfaceprop = solid["surfaceprop"]
+	if surfaceprop == nil then
+		return
+	end
+
+	local data = surfacedata.GetByName(surfaceprop)
+	if data == nil then
+		return
+	end
+
+	local snd = data["impactsoft"]
+	if snd ~= nil then
+		self:EmitSound(snd)
+	end
+
+end
+
 DOOR_STATE_CLOSED = 0
 DOOR_STATE_OPENING = 1
 DOOR_STATE_OPEN = 2
 DOOR_STATE_CLOSING = 3
-DOOR_STATE_AJAR = 4
 
 function ENTITY_META:GetDoorState()
 	return self:GetSaveTable().m_eDoorState
@@ -48,16 +94,8 @@ function ENTITY_META:IsDoorOpen()
 	return self:GetDoorState() == DOOR_STATE_OPEN
 end
 
-function ENTITY_META:GetDoorBlocker()
-	return self:GetSaveTable().m_hBlocker
-end
-
 function ENTITY_META:IsDoorLocked()
 	return self:GetSaveTable().m_bLocked
-end
-
-function ENTITY_META:GetDoorOpenDir()
-
 end
 
 OVERLAY_TEXT_BIT			=	0x00000001		-- show text debug overlay for this entity
@@ -150,11 +188,11 @@ function ENTITY_META:EnableRespawn(state, time)
 	if state == true then
 		time = time or 1
 
-		self:CallOnRemove("LambdaRespawn", function(self)
-			local class = self:GetClass()
-			local pos = self:GetPos()
-			local ang = self:GetAngles()
-			local mdl = self:GetModel()
+		self:CallOnRemove("LambdaRespawn", function(ent)
+			local class = ent:GetClass()
+			local pos = ent:GetPos()
+			local ang = ent:GetAngles()
+			local mdl = ent:GetModel()
 
 			timer.Simple(time, function()
 				local new = ents.Create(class)
@@ -177,28 +215,39 @@ function ENTITY_META:GetKeyValueTable()
 	return table.Copy(self.LambdaKeyValues or {})
 end
 
--- FIXME: I'm not sure if we can use the material path alone, no way to get surface data atm.
+CHAR_TEX_ANTLION		= 'A'
+CHAR_TEX_BLOODYFLESH	= 'B'
+CHAR_TEX_CONCRETE		= 'C'
+CHAR_TEX_DIRT			= 'D'
+CHAR_TEX_EGGSHELL		= 'E' -- the egg sacs in the tunnels in ep2.
+CHAR_TEX_FLESH			= 'F'
+CHAR_TEX_GRATE			= 'G'
+CHAR_TEX_ALIENFLESH		= 'H'
+CHAR_TEX_CLIP			= 'I'
+CHAR_TEX_SNOW			= 'J'
+
 function ENTITY_META:IsVPhysicsFlesh()
 
-	--[[
-	IPhysicsObject *pList[VPHYSICS_MAX_OBJECT_LIST_COUNT];
-	int count = VPhysicsGetObjectList( pList, ARRAYSIZE(pList) );
-	for ( int i = 0; i < count; i++ )
-	{
-		int material = pList[i]->GetMaterialIndex();
-		const surfacedata_t *pSurfaceData = physprops->GetSurfaceData( material );
-		// Is flesh ?, don't allow pickup
-		if ( pSurfaceData->game.material == CHAR_TEX_ANTLION || pSurfaceData->game.material == CHAR_TEX_FLESH || pSurfaceData->game.material == CHAR_TEX_BLOODYFLESH || pSurfaceData->game.material == CHAR_TEX_ALIENFLESH )
-			return true;
-	}
-	return false;
-	]]
+	if CLIENT then
+		-- Since they dont have physics this is our best bet.
+		local class = self:GetClass()
+		if class == "prop_ragdoll" then
+			return true
+		end
+	end
 
 	for i = 0, self:GetPhysicsObjectCount() - 1 do
 
 		local phys = self:GetPhysicsObjectNum( i )
 		local mat = phys:GetMaterial()
-		DbgPrint("IsVPhysicsFlesh: " .. mat)
+		--DbgPrint("MAT:" .. tostring(mat))
+		local surfdata = surfacedata.GetByName(mat)
+		if surfdata ~= nil then
+			local matType = surfdata["gamematerial"]
+			if matType == CHAR_TEX_ANTLION or matType == CHAR_TEX_FLESH or matType == CHAR_TEX_BLOODYFLESH or matType == CHAR_TEX_ALIENFLESH then
+				return true
+			end
+		end
 	end
 
 	return false
@@ -224,4 +273,31 @@ function ENTITY_META:GetPhysMass()
 		end
 	end
 	return mass
+end
+
+function ENTITY_META:CanBecomeRagdoll()
+	local seq = self:SelectWeightedSequence(ACT_DIERAGDOLL)
+	if seq == ACT_INVALID then
+		print("Invalid act")
+		return false
+	end
+	if self:IsFlagSet(FL_TRANSRAGDOLL) then
+		return false
+	end
+	return true
+end
+
+function ENTITY_META:CopyAnimationDataFrom(other)
+
+	self:SetModel(other:GetModel())
+	self:SetCycle(other:GetCycle())
+	self:RemoveEffects(self:GetEffects()) -- Clear, no set available.
+	self:AddEffects(other:GetEffects())
+	self:SetSequence(other:GetSequence())
+
+	local saveTable = other:GetSaveTable()
+	self:SetSaveValue("m_flAnimTime", saveTable["m_flAnimTime"])
+	self:SetSkin(other:GetSkin())
+
+
 end

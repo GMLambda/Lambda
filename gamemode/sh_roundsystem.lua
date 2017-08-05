@@ -19,7 +19,7 @@ function GM:InitializeRoundSystem()
 	self.RoundState = STATE_IDLE
 	self.RoundStartTime = GetSyncedTimestamp()
 	self.WaitingForRoundStart = true
-	self.RoundStartTimeout = GetSyncedTimestamp() + 120
+	self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 
 	if SERVER then
 		self.OnNewGameEvents = {}
@@ -110,68 +110,88 @@ if SERVER then
 
     end
 
-    function GM:RoundThink()
+	function GM:RoundStateBooting()
+		DbgUniquePrint("Waiting for boot")
+	end
+
+	function GM:RoundStateIdle()
+
+		local playerCount = player.GetCount()
+
+		if self.WaitingForRoundStart == true and (self:GetConnectingCount() > 0 or playerCount == 0) then
+			-- Waiting for players
+			--DbgUniquePrint("Waiting for players")
+			if self.RoundStartTimeout ~= nil and GetSyncedTimestamp() >= self.RoundStartTimeout then
+				DbgPrint("Timeout, round will start now")
+				self:StartRound()
+			end
+
+		elseif self.WaitingForRoundStart == true and playerCount > 0 and self:GetConnectingCount() == 0 then
+			DbgPrint("All players available")
+			self:StartRound()
+		elseif self.WaitingForRoundStart == false then
+			self:StartRound()
+		end
+
+	end
+
+	function GM:RoundStateRestartRequested()
+
+		local curTime = GetSyncedTimestamp()
+		if curTime > self.ScheduledRestartTime then
+			DbgPrint("Restarting round...")
+			self.RoundState = STATE_RESTARTING
+			self:CleanUpMap()
+		else
+			local remaining = self.ScheduledRestartTime - curTime
+			local timescale = 0.7 - ((curTime / self.ScheduledRestartTime) * 0.5)
+			game.SetTimeScale(timescale)
+
+			local remainingTime = string.format("%0.0f",remaining)
+			DbgUniquePrint(remainingTime .. "s remaining until restart")
+		end
+
+	end
+
+	function GM:RoundStateRestarting()
+
+		-- PostCleanupMap takes care of this.
+		-- Handle restarting state.
+		--DbgUniquePrint("Restarting")
+		--DbgPrint("Setting restart")
+		--self.WaitingForRoundStart = false
+		--self:OnNewGame()
+
+	end
+
+	function GM:RoundStateRunning()
 
 		local gameType = self:GetGameType()
 
-		if self.RoundState == STATE_BOOTING then
+		--DbgUniquePrint("Round Logic")
+		if gameType.ShouldRestartRound ~= nil and gameType:ShouldRestartRound() == true then
+			DbgPrint("All players are dead, restart required")
+			self:RestartRound()
+			self:RegisterRoundLost()
+		end
 
-			DbgUniquePrint("Waiting for boot")
+	end
 
-		elseif self.RoundState == STATE_IDLE then
+	local ROUND_STATE_LOGIC =
+	{
+		[STATE_BOOTING] = GM.RoundStateBooting,
+		[STATE_IDLE] = GM.RoundStateIdle,
+		[STATE_RESTART_REQUESTED] = GM.RoundStateRestartRequested,
+		[STATE_RESTARTING] = GM.RoundStateRestarting,
+		[STATE_RUNNING] = GM.RoundStateRunning,
+	}
 
-			if self.WaitingForRoundStart == true and (self:GetConnectingCount() > 0 or #player.GetAll() == 0) then
-                -- Waiting for players
-                --DbgUniquePrint("Waiting for players")
-				if self.RoundStartTimeout ~= nil and GetSyncedTimestamp() >= self.RoundStartTimeout then
-					DbgPrint("Timeout, round will start now")
-					self:StartRound()
-				end
+    function GM:RoundThink()
 
-            elseif self.WaitingForRoundStart == true and #player.GetAll() > 0 and self:GetConnectingCount() == 0 then
-                DbgPrint("All players available")
-				self:StartRound()
-			elseif self.WaitingForRoundStart == false then
-				self:StartRound()
-            end
-
-        elseif self.RoundState == STATE_RESTART_REQUESTED then
-
-            local curTime = GetSyncedTimestamp()
-            if curTime > self.ScheduledRestartTime then
-                DbgPrint("Restarting round...")
-				self.RoundState = STATE_RESTARTING
-                self:CleanUpMap()
-            else
-                local remaining = self.ScheduledRestartTime - curTime
-                local timescale = 0.7 - ((curTime / self.ScheduledRestartTime) * 0.5)
-                game.SetTimeScale(timescale)
-
-                local remainingTime = string.format("%0.0f",remaining)
-                DbgUniquePrint(remainingTime .. "s remaining until restart")
-            end
-
-        elseif self.RoundState == STATE_RESTARTING then
-
-			-- PostCleanupMap takes care of this.
-            -- Handle restarting state.
-			--DbgUniquePrint("Restarting")
-			--DbgPrint("Setting restart")
-			--self.WaitingForRoundStart = false
-			--self:OnNewGame()
-
-        elseif self.RoundState == STATE_RUNNING then
-
-			--DbgUniquePrint("Round Logic")
-			if gameType.ShouldRestartRound ~= nil and gameType:ShouldRestartRound() == true then
-				DbgPrint("All players are dead, restart required")
-				self:RestartRound()
-				self:RegisterRoundLost()
-			end
-
-		else
-			Error("Unknown round state")
-        end
+		local fn = ROUND_STATE_LOGIC[self.RoundState]
+		if fn ~= nil then
+			fn(self)
+		end
 
     end
 
@@ -350,6 +370,9 @@ function GM:PreCleanupMap()
 		self:CleanUpGameEvents()
 		self:ResetInputOutput()
 		self:ResetVehicleCheckpoint()
+		self:ResetCheckpoints()
+		self:InitializeGlobalSpeechContext()
+		self:InitializeWeaponTracking()
 	end
 end
 
@@ -438,6 +461,11 @@ function GM:OnNewGame()
 		-- FIXME: Don't ignore the delay time.
 		self:CreateTransitionObjects()
 
+		-- Create/Replace things for the map.
+		if self.MapScript.PostInit ~= nil then
+			self.MapScript:PostInit()
+		end
+
 		DbgPrint("Spawning players")
 		for _,v in pairs(player.GetAll()) do
 			v.TransitionData = self:GetPlayerTransitionData(v)
@@ -456,11 +484,6 @@ function GM:OnNewGame()
 
 		self.LambdaFailureMessage = failureMessage
 
-		-- Create/Replace things for the map.
-		if self.MapScript.PostInit ~= nil then
-	    	self.MapScript:PostInit()
-		end
-
 		util.RunNextFrame(function()
 			GAMEMODE:PostRoundSetup()
 		end)
@@ -474,63 +497,28 @@ function GM:PostRoundSetup()
 	DbgPrint("PostRoundSetup")
 	DbgPrint("Game Events: " .. tostring(#self.OnNewGameEvents))
 
-	-- Reset some env_global things.
-	local friendly_encounter = ents.Create("env_global")
-	friendly_encounter:SetKeyValue("globalstate", "friendly_encounter")
-	friendly_encounter:SetKeyValue("initialstate", "0")
-	friendly_encounter:Spawn()
-	friendly_encounter:Fire("TurnOff")
+	self:ResetGlobalStates()
 
-	-- we always fire OnMapSpawn
-	util.TriggerOutputs(self.OnMapSpawnEvents)
-	--[[
-	for _,outputs in pairs(self.OnMapSpawnEvents) do
-		local params = string.Split(outputs, ",")
-		for _, ent in pairs(ents.FindByName(params[1])) do
-			if IsValid(ent) then
-				DbgPrint("Firing OnMapSpawn -> " .. tostring(ent) .. " : " .. params[2] .. ", " .. params[3] .. ", " .. params[4])
-				ent:Fire(params[2], params[3], tonumber(params[4]))
-			end
-		end
-	end
-	]]
+	-- We fire things two frames later as deletion of objects seem to be delayed.
+	util.RunNextFrame(function()
 
-	-- Fire this only when we used map.
-	if self.IsChangeLevel == false then
-		DbgPrint("Firing OnNewGame events")
-		--[[
-		for _,outputs in pairs(self.OnNewGameEvents) do
-			local params = string.Split(outputs, ",")
-			--local ent = ents.FindFirstByName(params[1])
-			for _, ent in pairs(ents.FindByName(params[1])) do
-				if IsValid(ent) then
-					ent:Fire(params[2], params[3], tonumber(params[4]))
-				end
-			end
-		end
-		]]
-		util.TriggerOutputs(self.OnNewGameEvents)
-	else
-		DbgPrint("Firing OnMapTransition events")
-		--[[
-		for _,outputs in pairs(self.OnMapTransitionEvents) do
-			local params = string.Split(outputs, ",")
-			for _, ent in pairs(ents.FindByName(params[1])) do
-				if IsValid(ent) then
-					ent:Fire(params[2], params[3], tonumber(params[4]))
-				end
-			end
-		end
-		]]
-		util.TriggerOutputs(self.OnMapTransitionEvents)
-	end
+		-- We always fire OnMapSpawn
+		util.TriggerOutputs(self.OnMapSpawnEvents)
 
-    if self.MapScript.OnNewGame then
-		local self = self
-		util.RunNextFrame(function()
-        	self.MapScript:OnNewGame()
-		end)
-    end
+		-- Fire this only when we used map.
+		if self.IsChangeLevel == false then
+			DbgPrint("Firing OnNewGame events")
+			util.TriggerOutputs(self.OnNewGameEvents)
+		else
+			DbgPrint("Firing OnMapTransition events")
+			util.TriggerOutputs(self.OnMapTransitionEvents)
+		end
+
+		if self.MapScript.OnNewGame then
+			self.MapScript:OnNewGame()
+		end
+
+	end)
 
 end
 
@@ -568,7 +556,7 @@ function GM:StartRound(cleaned)
 
     if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
         self.WaitingForRoundStart = true
-    elseif #player.GetAll() == 0 then
+    elseif player.GetCount() == 0 then
         self.WaitingForRoundStart = true
     end
 

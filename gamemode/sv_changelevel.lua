@@ -24,6 +24,8 @@ function GM:InitializeCurrentLevel()
 		self.IsChangeLevel = false
 	end
 
+	self.ChangingLevel = false
+
 	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Changelevel")
 	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Landmark")
 	util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "PrevMap")

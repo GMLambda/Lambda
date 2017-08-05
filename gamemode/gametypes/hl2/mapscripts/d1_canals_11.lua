@@ -49,7 +49,6 @@ end
 
 function MAPSCRIPT:PostInit()
 
-	local self = self
 	if SERVER then
 
 		self.VehicleGuns = false

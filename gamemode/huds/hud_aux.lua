@@ -6,6 +6,16 @@ local SUIT_DEVICE_BREATHER = 1
 local SUIT_DEVICE_SPRINT = 2
 local SUIT_DEVICE_FLASHLIGHT = 3
 
+local function GetTextColor()
+	local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 255)
+end
+
+local function GetBGColor()
+	local col = util.StringToType(lambda_hud_bg_color:GetString(), "vector")
+	return Color(col.x, col.y, col.z, 128)
+end
+
 function PANEL:Init()
 
 	self.ShouldDrawBackground = true
@@ -105,8 +115,9 @@ end
 
 function PANEL:PaintLabel()
 
+	local textColor = GetTextColor()
 	surface.SetFont(FONT_TEXT)
-	surface.SetTextColor(self.TextColor.r, self.TextColor.g, self.TextColor.b, self.TextColor.a * self.Alpha)
+	surface.SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a * self.Alpha)
 	surface.SetTextPos(util.ScreenScaleH(self.TextX), util.ScreenScaleH(self.TextY))
 	surface.DrawText(self.LabelText)
 
@@ -126,7 +137,7 @@ function PANEL:Paint(width, height)
 	end
 
 	if self.ShouldDrawBackground == true then
-		local col = table.Copy(self:GetBackgroundColor())
+		local col = GetBGColor()
 		col.a = col.a * self.Alpha
 		draw.RoundedBox( 8, 0, 0, width, height, col )
 	end
@@ -145,23 +156,17 @@ function PANEL:Paint(width, height)
 	local enabledChunks = math.ceil(chunkCount * (suitPower * 1.0 / 100.0) )
 	local lowPower = false
 
+	local textColor = GetTextColor()
+	local density = 0.3 + ((suitPower / 100.0) * 0.5)
+
 	local red = ((enabledChunks / chunkCount) * 1.2) * 208
-	if red <= 100 then
-		self:SetTextColor(255, red, 0, 255 * self.Alpha)
-	else
-		self:SetTextColor(255, 208, 0, 255 * self.Alpha)
-	end
+	self:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a * self.Alpha)
 
 	local xpos = util.ScreenScaleH(self.BarInsetX)
 	local ypos = util.ScreenScaleH(self.BarInsetY)
 
-	local enabledColor = Color(255, red, 64, 255 * self.Alpha)
-	local emptyColor = Color(255, red, 64, 20 * self.Alpha)
-
-	if lowPower == true then
-		enabledColor = Color(255, 0, 0, 255 * self.Alpha)
-		emptyColor = Color(255, 0, 0, 20 * self.Alpha)
-	end
+	local enabledColor = Color(textColor.r * density, textColor.g * density, textColor.b * density, textColor.a * self.Alpha)
+	local emptyColor = Color(textColor.r, textColor.g, textColor.b, 20 * self.Alpha)
 
 	local chunkWidth = util.ScreenScaleH(self.BarChunkWidth)
 	local barHeight =  util.ScreenScaleH(self.BarHeight)

@@ -1,9 +1,11 @@
 include("shared.lua")
+include("cl_skin_lambda.lua")
 include("cl_postprocess.lua")
 include("cl_ragdoll_ext.lua")
 include("cl_taunts.lua")
 include("cl_hud.lua")
 include("cl_scoreboard.lua")
+--include("cl_pathobserve.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -47,7 +49,6 @@ function GM:Think()
 
 	if resChanged then
 
-		local self = self
 		local curW = self.CurResW
 		local curH = self.CurResH
 
@@ -74,6 +75,7 @@ local HL2_BOB_CYCLE_MAX = 0.40
 local HL2_BOB_UP = 0.5
 local MAX_SPEED = 320
 local PI = math.pi
+local HL2_MAX_VIEWDT = 1 / 60
 
 local host_timescale = GetConVar("host_timescale")
 
@@ -93,8 +95,8 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 	local dt = SysTime() - (self.LastViewBob or SysTime())
 	self.LastViewBob = SysTime()
 
-	if dt >= 1/60 then
-		dt = 1/60
+	if dt >= HL2_MAX_VIEWDT then
+		dt = HL2_MAX_VIEWDT
 	end
 
 	dt = dt * GetTimeScale()
@@ -170,8 +172,8 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 	local dt = SysTime() - (self.LastViewLag or SysTime())
 	self.LastViewLag = SysTime()
 
-	if dt >= 1/60 then
-		dt = 1/60
+	if dt >= HL2_MAX_VIEWDT then
+		dt = HL2_MAX_VIEWDT
 	end
 
 	dt = dt * GetTimeScale()
@@ -213,19 +215,18 @@ function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 
 end
 
-function GM:CalcViewModelView( wep, vm, oldPos, oldAng, pos, ang )
+function GM:CalcViewModelView( wep, vm, oldPos, oldAng, vm_origin, vm_angles )
 
 	if not IsValid( wep ) then
 		 return
 	 end
 
-	local vm_origin, vm_angles = pos, ang
 	local modified = false
 
 	-- Controls the position of all viewmodels
 	local func = wep.GetViewModelPosition
 	if ( func ) then
-		local pos, ang = func(wep, pos * 1, ang * 1)
+		local pos, ang = func(wep, vm_origin * 1, vm_angles * 1)
 		vm_origin = pos or vm_origin
 		vm_angles = ang or vm_angles
 		modified = true
@@ -234,7 +235,7 @@ function GM:CalcViewModelView( wep, vm, oldPos, oldAng, pos, ang )
 	-- Controls the position of individual viewmodels
 	func = wep.CalcViewModelView
 	if ( func ) then
-		local pos, ang = func(wep, ViewModel, oldPos * 1, oldAng * 1, pos * 1, ang * 1)
+		local pos, ang = func(wep, ViewModel, oldPos * 1, oldAng * 1, vm_origin * 1, vm_angles * 1)
 		vm_origin = pos or vm_origin
 		vm_angles = ang or vm_angles
 		modified = true
@@ -246,11 +247,10 @@ function GM:CalcViewModelView( wep, vm, oldPos, oldAng, pos, ang )
 	end
 
 	local newPos = oldPos
-	newPos = newPos + (self.PlayerHeadPosDelta or Vector(0, 0, 0))
 	local newAng = oldAng
 
-	newPos, newAng = self:CalcViewModelBob(wep, vm, newPos, newAng, pos, ang)
-	newPos, newAng = self:CalcViewModelLag(wep, vm, newPos, newAng, pos, ang)
+	newPos, newAng = self:CalcViewModelBob(wep, vm, newPos, newAng, vm_origin, vm_angles)
+	newPos, newAng = self:CalcViewModelLag(wep, vm, newPos, newAng, vm_origin, vm_angles)
 
 	return newPos, newAng
 
@@ -260,49 +260,24 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 	local view = {}
 	view.origin = pos
-	view.ang = ang
+	view.angles = ang
 	view.fov = fov
 	view.angles = ang
 
-	local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
-	local headPos
-	if headBone ~= nil then
-	 	headPos = ply:GetBonePosition(headBone)
-	else
-		headPos = ply:EyePos()
-	end
-
-	local t = RealFrameTime() * 10
-
-	self.PlayerHeadPos = LerpVector(t, self.PlayerHeadPos or headPos, headPos)
-	if self.PlayerHeadPos:Distance(headPos) > 50 then
-		self.PlayerHeadPos = headPos
-	end
-
-	local deltaX = (self.PlayerHeadPos.x - view.origin.x) * 0.05
-	local deltaY = (self.PlayerHeadPos.y - view.origin.y) * 0.05
-	local deltaZ = (self.PlayerHeadPos.z - view.origin.z) * 0.16
-
-	if ply:IsSpectator() == false then
-		self.PlayerHeadPosDelta = Vector(deltaX, deltaY, deltaZ)
-	else
-		self.PlayerHeadPosDelta = Vector(0, 0, 0)
-	end
-
-	view.origin = view.origin + self.PlayerHeadPosDelta
-
 	local viewlock = ply:GetViewLock()
+	local lastViewLock = ply.LastViewLock or -1
+	ply.LastViewLock = viewlock
 
 	if viewlock == VIEWLOCK_ANGLE then
 
-		view.angles = ply:GetNWAngle("LockedViewAngles")
+		view.angles = ply:GetNW2Angle("LockedViewAngles")
 		view.fov = fov
 		view.origin = pos
 		return view
 
 	elseif viewlock == VIEWLOCK_NPC or viewlock == VIEWLOCK_PLAYER then
 
-		local npc = ply:GetNWEntity("LockedViewEntity")
+		local npc = ply:GetNW2Entity("LockedViewEntity")
 		if IsValid(npc) then
 			view.angles = (npc:EyePos() - ply:EyePos()):Angle()
 			view.fov = fov
@@ -310,7 +285,64 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 			return view
 		end
 
+	elseif viewlock == VIEWLOCK_SETTINGS_ON then
+
+		local timeSet = ply:GetNW2Float("ViewLockTime", CurTime())
+		local elapsed = CurTime() - timeSet
+		local p = elapsed / VIEWLOCK_RELEASE_TIME
+
+		if lastViewLock ~= viewlock then
+			self.StartViewPos = pos
+			self.StartViewAng = ang
+		end
+
+		if p < 1 then
+			local targetPos = ply:EyePos()
+			local plyAng = ply:GetAngles()
+			plyAng.p = 0
+			local fwd = plyAng:Forward() + (-plyAng:Right() * 0.3)
+			targetPos = targetPos + (fwd * 150)
+
+			local targetAng = (pos - targetPos):Angle()
+
+			self.CurrentViewPos = LerpVector(p, self.StartViewPos, targetPos)
+			self.CurrentViewAng = LerpAngle(p, self.StartViewAng, targetAng)
+		end
+
+		view.origin = self.CurrentViewPos
+		view.angles = self.CurrentViewAng
+		view.drawviewer = true
+
+		return view
+
+	elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
+
+		local timeSet = ply:GetNW2Float("ViewLockTime", CurTime())
+		local elapsed = CurTime() - timeSet
+		local p = elapsed / VIEWLOCK_RELEASE_TIME
+
+		if lastViewLock ~= viewlock then
+			self.StartViewPos = self.CurrentViewPos
+			self.StartViewAng = self.CurrentViewAng
+		end
+
+		if p < 1 then
+			local targetPos = ply:EyePos()
+			local targetAng = ply:EyeAngles()
+
+			self.CurrentViewPos = LerpVector(p, self.StartViewPos, targetPos)
+			self.CurrentViewAng = LerpAngle(p, self.StartViewAng, targetAng)
+		end
+
+		view.origin = self.CurrentViewPos
+		view.angles = self.CurrentViewAng
+
+		return view
+
 	else
+
+		self.StartViewPos = pos
+		self.StartViewAng = ang
 
 		local Vehicle = ply:GetVehicle()
 		if IsValid( Vehicle ) then
@@ -334,6 +366,11 @@ function GM:ShouldDrawLocalPlayer(ply)
 		end
 	else
 		ply.VehicleSteeringView = false
+	end
+
+	local viewlock = ply:GetViewLock()
+	if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
+		return true
 	end
 
 end

@@ -2,9 +2,9 @@ if SERVER then
 	AddCSLuaFile()
 end
 
+local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 
-// Include Mapscript.
 GAMETYPE.MapScript = include("hl2/mapscripts/" .. game.GetMap():lower() .. ".lua")
 
 GAMETYPE.MapList =

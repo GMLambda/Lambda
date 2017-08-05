@@ -25,13 +25,10 @@ end
 
 function PANEL:AnimHealthIncreased(anim, delta, data)
 	self.Blur = (1 - delta) * 3
-	self:SetBackgroundColor(0, 0, 0, 128)
-	self:SetTextColor(255, 208, 64, 255)
 end
 
 function PANEL:AnimHealthDecreasedBelow20(anim, delta, data)
 	self.Blur = delta * 1
-	self:SetBackgroundColor(delta * 70, 0, 0, 128)
 end
 
 function PANEL:AnimHealthLow(anim, delta, data)

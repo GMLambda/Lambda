@@ -49,10 +49,11 @@ function EFFECT:Render( )
 	if  (self.Alpha < 0 ) then return end
 
 	local Normal = self.Normal
+	local eyePos = EyePos()
 	local dir = Normal:Angle()
 	local ply = LocalPlayer()
-	local ang = ply:GetPos() - self:GetPos()
-	local dist = ply:GetPos():Distance(self:GetPos())
+	local ang = eyePos - self:GetPos()
+	local dist = eyePos:Distance(self:GetPos())
 
 	local signsize = math.Clamp(dist / 20, self.Size / 2, self.Size * 5)
 	local offset_z = math.Clamp(dist / 20, 50, 200)

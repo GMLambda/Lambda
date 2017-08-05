@@ -4,7 +4,7 @@ include("huds/hud_pickup.lua")
 include("huds/hud_respawn.lua")
 include("huds/hud_settings.lua")
 
-local DbgPrint = GetLogging("HUD")
+--local DbgPrint = GetLogging("HUD")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -23,24 +23,18 @@ function GM:HUDTick()
 		return
 	end
 
+	local viewlock = ply:GetViewLock()
+	local hideHud = viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE
+
 	local wep = ply:GetActiveWeapon()
-	local CHudHealth = (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false
-	local CHudAmmo = (not wep:IsValid() or AskWeapon(ply, "CHudAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudAmmo") ~= false
-	local CHudBattery = (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false
-	local CHudSecondaryAmmo = (wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false
-
-	--DbgPrint(CHudHealth, CHudAmmo, CHudBattery, CHudSecondaryAmmo)
-
-	local ply = LocalPlayer()
-	if not IsValid(ply) then
-		return
-	end
+	local CHudHealth = (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false and not hideHud
+	local CHudBattery = (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false and not hideHud
+	local CHudSecondaryAmmo = (wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false and not hideHud
 
 	local drawHud = ply:IsSuitEquipped() and ply:Alive() and hidehud:GetBool() ~= true
 
 	if IsValid(self.HUDSuit) then
 
-		local wep = ply:GetActiveWeapon()
 		local vehicle = ply:GetVehicle()
 
 		local suit = self.HUDSuit
@@ -58,12 +52,20 @@ end
 function GM:HUDShouldDraw( name )
 
 	local ply = LocalPlayer()
+	if not IsValid(ply) then
+		return false
+	end
+
+	local viewlock = ply:GetViewLock()
 
 	if hidehud:GetBool() == true then
 		return false
 	end
 
 	if name == "CHudCrosshair"  then
+		if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
+			return false
+		end
 		local wep = ply:GetActiveWeapon()
 		if not IsValid(wep) then
 			return false
@@ -112,13 +114,11 @@ local AMMO_BAR2_COLOR = Color(255, 255, 255, 50)
 
 local function UpdateCrosshair(centerX, centerY)
 
-	local screenCenterX = ScrH() / 2
-	local screenCenterY = ScrW() / 2
 	local localCenterX = CROSSHAIR_W / 2
 	local localCenterY = CROSSHAIR_H / 2
 	local r,g,b
 
-	--local data = render.Capture({format = "png", h = CROSSHAIR_H, w = CROSSHAIR_W, x = screenCenterX, y = screenCenterY, quality = 50})
+	--local data = render.Capture({format = "png", h = CROSSHAIR_H, w = CROSSHAIR_W, x = screenCenterX, y = screenCenterY, quality = 10})
 	--DbgPrint(data)
 	render.CapturePixels()
 
@@ -209,12 +209,16 @@ end
 function GM:DrawDynamicCrosshair()
 
 	local ply = LocalPlayer()
-	if ply:Alive() == true then
-		if ply:InVehicle() == true then
-			local veh = ply:GetVehicle()
-			if veh:GetClass() == "prop_vehicle_jeep" or veh:GetClass() == "prop_vehicle_airboat" then
-				return
-			end
+	local viewlock = ply:GetViewLock()
+
+	if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
+		return false
+	end
+
+	if ply:Alive() == true and ply:InVehicle() == true then
+		local veh = ply:GetVehicle()
+		if veh:GetClass() == "prop_vehicle_jeep" or veh:GetClass() == "prop_vehicle_airboat" then
+			return
 		end
 	end
 
