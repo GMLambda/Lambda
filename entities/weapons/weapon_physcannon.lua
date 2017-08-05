@@ -154,6 +154,7 @@ function SWEP:Initialize()
 	self.UpdateName = true
 	self.NextIdleTime = CurTime()
 	self.EffectsSetup = false
+	self.ObjectAttached = false
 
 	if CLIENT then
 		self.CurrentElementLen = 0
@@ -1183,6 +1184,10 @@ function SWEP:Think()
 
 	if controller:IsObjectAttached() == true and self:UpdateObject() == false then
 		self:DetachObject()
+		return
+	elseif controller:IsObjectAttached() == false and self.ObjectAttached == true then
+		self:DetachObject()
+		return
 	end
 
 	local owner = self:GetOwner()
@@ -1267,6 +1272,7 @@ function SWEP:AttachObject(ent, tr)
 
 	local motionController = self:GetMotionController()
 	motionController:AttachObject(ent, grabPos, useGrabPos)
+	self.ObjectAttached = true
 
 	local phys = ent:GetPhysicsObject()
 	if not IsValid(phys) then
@@ -1345,6 +1351,17 @@ function SWEP:DetachObject(launched)
 
 	DbgPrint(self, "DetachObject")
 
+	if self.ObjectAttached == true then
+		self:WeaponSound("Weapon_PhysCannon.Drop")
+		self.ObjectAttached = false
+	end
+
+	local snd = self:GetMotorSound()
+	if snd ~= nil and snd ~= NULL then
+		snd:ChangeVolume(0, 1.0)
+		snd:ChangePitch(50, 1.0)
+	end
+
 	local controller = self:GetMotionController()
 	if not IsValid(controller) then
 		DbgPrint(self, "No valid controller")
@@ -1360,16 +1377,6 @@ function SWEP:DetachObject(launched)
 	if not IsValid(ent) then
 			DbgPrint(self, "Invalid attached object")
 		return
-	end
-
-	local snd = self:GetMotorSound()
-	if snd ~= nil and snd ~= NULL then
-		snd:ChangeVolume(0, 1.0)
-		snd:ChangePitch(50, 1.0)
-	end
-
-	if true then
-		self:WeaponSound("Weapon_PhysCannon.Drop")
 	end
 
 	local phys = ent:GetPhysicsObject()
@@ -2397,7 +2404,6 @@ function SWEP:UpdateEffects()
 	self:StartEffects()
 
 	local owner = self:GetOwner()
-	local isIdle = true
 
 	local colorMax = 128
 	if self:IsMegaPhysCannon() then
@@ -2432,7 +2438,7 @@ function SWEP:UpdateEffects()
 		data.Col = Color(r, g, b)
 	end
 
-	if CLIENT and isIdle == true and self:IsMegaPhysCannon() == true then
+	if CLIENT and self:IsMegaPhysCannon() == true then
 
 		local endCapMax = PHYSCANNON_ENDCAP3
 		if self:ShouldDrawUsingViewModel() == true then
@@ -2442,7 +2448,7 @@ function SWEP:UpdateEffects()
 		local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
 		local beamdata = self.BeamParameters[i]
 
-		if math.random(0, 100) == 0 then
+		if self:IsObjectAttached() == false and math.random(0, 100) == 0 then
 			self:EmitSound( "Weapon_MegaPhysCannon.ChargeZap" );
 			beamdata.Scale:InitFromCurrent(0.5, 0.1)
 			beamdata.Lifetime = 0.05 + (math.random() * 0.1)
