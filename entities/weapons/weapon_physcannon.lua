@@ -1461,8 +1461,7 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
 		dmgInfo:SetDamageForce(fwd)
 		dmgInfo:SetDamagePosition(tr.HitPos)
 
-		ent:TakeDamageInfo(dmgInfo)
-
+		ent:DispatchTraceAttack(dmgInfo, tr, fwd)
 		self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
 
 	end
