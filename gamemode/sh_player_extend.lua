@@ -225,3 +225,12 @@ end
 function PLAYER_META:GetStateSprinting()
 	return self:GetNW2Bool("StateSprinting", false)
 end
+
+function PLAYER_META:IsSprinting()
+	return self:GetSprinting()
+end
+
+-- Override the non-functional one.
+function PLAYER_META:StopSprinting()
+	self:SetSprinting(false)
+end

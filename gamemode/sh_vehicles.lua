@@ -153,6 +153,10 @@ if SERVER then
 
 	function GM:PlayerEnteredVehicle(ply, vehicle, role)
 
+		if ply:IsSprinting() == true then
+			ply:StopSprinting()
+		end
+		
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
 		   vehicle:GetClass() == "prop_vehicle_jalopy"

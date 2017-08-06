@@ -372,7 +372,6 @@ if SERVER then
 		ply:SetName(ply.LambdaPlayerData.Name)
 		ply:SetupHands()
 		ply:SetTeam(LAMBDA_TEAM_ALIVE)
-		ply:SetShouldServerRagdoll(false)
 		ply:SetCustomCollisionCheck(true)
 		ply:RemoveSuit()
 
@@ -503,6 +502,9 @@ if SERVER then
 		ply.LastDmgForce = dmg:GetDamageForce()
 		ply.LastDmgExplosive = dmg:IsExplosionDamage()
 
+		ply:SetShouldServerRagdoll(false)
+		ply:CreateRagdoll()
+
 	end
 
 	function GM:PlayerDeath(ply, attacker, inflictor)
@@ -562,8 +564,6 @@ if SERVER then
 
 		end
 
-		local createRagdoll = true
-
 		-- Because the weapons are attached to the player at the time the explosion happened they did
 		-- not receive the force, we gonna apply it so things go flying.
 		if ply.LastDmgExplosive == true then
@@ -577,10 +577,6 @@ if SERVER then
 				end
 			end
 
-		end
-
-		if createRagdoll == true then
-			ply:CreateRagdoll()
 		end
 
 		ply:AddDeaths( 1 )

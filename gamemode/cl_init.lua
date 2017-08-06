@@ -262,7 +262,6 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 	view.origin = pos
 	view.angles = ang
 	view.fov = fov
-	view.angles = ang
 	view.znear = znear
 	view.zfar = zfar
 	view.drawviewer	= false
