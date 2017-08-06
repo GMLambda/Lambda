@@ -1,0 +1,39 @@
+0.9:
+- Removed: Freezing physics when trying to jump off them.
+- Removed: Animation blending. 
+- Fix: Giving players more ammo than they can carry on weapon pickup.
+- Fix: Weapon damage not properly set via cvars. 
+- Fix: d1_canals_05 not opening gate, manually possible now. 
+- Fix: Giving default ammo ammount, only give what player carried from level to level. 
+- Fix: Draws the player weapon with player tracker now. 
+- Fix: Checkpoints not properly resetting. 
+- Fix: Death symbol using incorrect eye position. 
+- Fix: Weapon switching not stopping reload. 
+- Fix: Output log vanishing if EPOE is present. 
+- Fix: Hopefully fixed players timing out while they shouldn't. 
+- Fix: Player tracking being invisible in some cases. Better debug info on triggers. 
+- Fix: Player tracking being client option, now server side.
+- Fix: Grenade duplicating on death. 
+- Fix: User never signaled connection, consider him fully connected when message arrives.
+- Fix: Commands being unable to ran from server console.
+- Fix: Bots having invalid models. 
+- Fix: Sprint sound not working on singleplayer game.
+- Fix: Passing nil ent on Touch.
+- Fix: Calling Touch manually if the player left a trigger that disabled EndTouch events.
+- Fix: Autoreload not reloading mapscripts.
+- Fix: d1_trainstation_05 messing up barneys spawn if player is nearby, simply closing the soda door.
+- Fix: Dog disappearing in d3_c17_02.
+- Fix: Door never opening in d3_c17_03.
+- Fix: Pickup hud not being properly aligned and sized.
+- Fix: Fire sounds not stopping in some cases.
+- Improved: Precision on GetSyncedTimestamp. 
+- Improved: Minor performance improvements. 
+- Improved: Reduced distance of player stats.
+- Improved: Modified player tracker to be less annoying when barely visible.
+- Feature: Custom gravity gun rewritten from scratch with support of the mega gravity gun and prediction support.
+- Feature: Dynamic checkpoint selection. 
+- Feature: Made the player timeout a convar.
+- Feature: Settings menu for player models, admin settings etc. on F1.
+- Feature: Teleport heuristic to allow changes on collision rules.
+- Feature: Allow player collisions.
+- Feature: Friendly fire support.
