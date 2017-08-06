@@ -229,6 +229,13 @@ if SERVER then
 			ply.OwnedVehicle = nil
 		end
 
+		if vehicle.IsPassengerSeat == true then
+			vehicle:SetKeyValue("limitview", "0")
+			ply:SetAllowWeaponsInVehicle(true)
+		else
+			ply:SetAllowWeaponsInVehicle(false)
+		end
+
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
 		   vehicle:GetClass() == "prop_vehicle_jalopy" then
@@ -257,13 +264,6 @@ if SERVER then
 				end
 			end
 
-		end
-
-		if vehicle.IsPassengerSeat == true then
-			vehicle:SetKeyValue("limitview", "0")
-			ply:SetAllowWeaponsInVehicle(true)
-		else
-			ply:SetAllowWeaponsInVehicle(false)
 		end
 
 	    return true

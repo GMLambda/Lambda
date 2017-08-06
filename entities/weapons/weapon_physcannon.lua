@@ -935,7 +935,7 @@ end
 
 function SWEP:OpenElements()
 
-	DbgPrint(self, "OpenElements")
+	--DbgPrint(self, "OpenElements")
 
 	local owner = self:GetOwner()
 	if self.ElementOpen == true or owner == nil then
@@ -1524,7 +1524,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 		return
 	end
 
-	DbgPrint("EEK")
+	DbgPrint("PuntVPhysics")
 
 	self.LastPuntedObject = ent
 	self.NextPuntTime = curTime + 0.5
@@ -1565,10 +1565,6 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 			end
 
 			local maxMass = 250
-			if ent:IsVehicle() then
-				maxMass = maxMass * 2.5 -- 625 for vehicles
-			end
-
 			local actualMass = math.min(totalMass, maxMass)
 			local mainPhys = ent:GetPhysicsObject()
 

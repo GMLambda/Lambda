@@ -26,6 +26,8 @@
 - Fix: Door never opening in d3_c17_03.
 - Fix: Pickup hud not being properly aligned and sized.
 - Fix: Fire sounds not stopping in some cases.
+- Fix: Player unable to select weapons using passenger seat.
+- Fix: Player seeing the vehicle symbol when inside vehicle.
 - Improved: Precision on GetSyncedTimestamp. 
 - Improved: Minor performance improvements. 
 - Improved: Reduced distance of player stats.
