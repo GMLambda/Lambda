@@ -82,4 +82,12 @@ if SERVER then
 
 	end
 
+	function META_NPC:IsEnemey()
+		return not self:IsFriendly()
+	end
+
+	function META_NPC:IsFriendly()
+		return IsFriendEntityName(self:GetClass())
+	end
+
 end

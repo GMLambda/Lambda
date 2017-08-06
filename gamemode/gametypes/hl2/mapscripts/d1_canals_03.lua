@@ -73,6 +73,20 @@ function MAPSCRIPT:PostInit()
 			matt.FilterDamage = true
 		end)
 
+		-- Keep it consistent, he picksup a pipe so he will hold one.
+		GAMEMODE:WaitForInput("matt", "giveweapon", function(ent)
+			DbgPrint("Matt weapon")
+			util.RunNextFrame(function()
+				if not IsValid(ent) then return end
+				local wep = ent:GetActiveWeapon()
+				if IsValid(wep) then
+					DbgPrint("Replacing model")
+					wep.WorldModel = "models/props_canal/mattpipe.mdl"
+					wep:SetModel(wep.WorldModel)
+				end
+			end)
+		end)
+
 		GAMEMODE:WaitForInput("lcs_matt_survived", "Start", function()
 			if IsValid(matt) then
 				matt.FilterDamage = false -- Feel free to die now.

@@ -49,6 +49,10 @@ if SERVER then
 		end
 	end
 
+	function ENT:GetNPCClass()
+		return self.NPCType or ""
+	end
+
 	function ENT:MakeNPC()
 
 		--DbgPrint(self, "ENT:MakeNPC")

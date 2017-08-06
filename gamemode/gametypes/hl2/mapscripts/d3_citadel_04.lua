@@ -3,8 +3,6 @@ AddCSLuaFile()
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 
-MAPSCRIPT.DayTime = "morning"
-
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
@@ -43,7 +41,7 @@ function MAPSCRIPT:PostInit()
     if SERVER then
 
 		DbgPrint("YUP")
-		
+
 		ents.WaitForEntityByName("citadel_trigger_elevatorride_up", function(ent)
 			ent:SetKeyValue("teamwait", "1")
 		end)

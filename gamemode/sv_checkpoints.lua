@@ -1,6 +1,8 @@
 local DbgPrint = GetLogging("Checkpoints")
 
 local GRID_SIZE = 256
+local GRID_SIZE_Z = 1024
+local MIN_ENEMY_DISTANCE = 700
 local HULL_X = 32
 local HULL_Y = 32
 local HULL_Z = 74
@@ -11,7 +13,7 @@ function GM:GetGridData(x, y, z)
 
 	local gridX = math.Round(x / GRID_SIZE)
 	local gridY = math.Round(y / GRID_SIZE)
-	local gridZ = math.Round(z / GRID_SIZE)
+	local gridZ = math.Round(z / GRID_SIZE_Z)
 
 	self.GridData = self.GridData or {}
 
@@ -34,6 +36,11 @@ function GM:GetGridData(x, y, z)
 
 	return data
 
+end
+
+function GM:GetGridNPCs(x, y, z)
+
+	local gridData
 end
 
 function GM:ResetCheckpoints()
@@ -123,7 +130,31 @@ function GM:UpdateCheckoints()
 	end
 
 	local data = self:GetGridData(bestPos.x, bestPos.y, bestPos.z)
-	if data.checkpoint == false then
+
+	-- Make sure we don't have a spawnpoint in enemy terrority.
+	local entsInGrid = ents.FindInSphere(bestPos, MIN_ENEMY_DISTANCE)
+	local enemyNearby = false
+	for _,v in pairs(entsInGrid) do
+		local entPos = v:GetPos()
+		if entPos:Distance(bestPos) >= MIN_ENEMY_DISTANCE then
+			continue
+		end
+		local class = v:GetClass()
+		if v:IsNPC() == true and class ~= "npc_bullseye" and IsFriendEntityName(class) == false then
+			enemyNearby = true
+			DbgPrint("Enemie nearby " .. tostring(v) .. ", can not create checkpoint.")
+			break
+		elseif class == "npc_maker" or class == "npc_template_maker" and v.GetNPCClass ~= nil then
+			local npcclass = v:GetNPCClass()
+			if npctype ~= nil and IsFriendEntityName(npcclass) == false then
+				enemyNearby = true
+				DbgPrint("Enemy spawner nearby, can not create checkpoint.")
+				break
+			end
+		end
+	end
+
+	if data.checkpoint == false and enemyNearby == false then
 
 		local cp = ents.Create("lambda_checkpoint")
 		cp:SetPos(bestPos)

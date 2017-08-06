@@ -3,8 +3,6 @@ AddCSLuaFile()
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 
-MAPSCRIPT.DayTime = "morning"
-
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
