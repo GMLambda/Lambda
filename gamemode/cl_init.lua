@@ -263,6 +263,9 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 	view.angles = ang
 	view.fov = fov
 	view.angles = ang
+	view.znear = znear
+	view.zfar = zfar
+	view.drawviewer	= false
 
 	local viewlock = ply:GetViewLock()
 	local lastViewLock = ply.LastViewLock or -1
@@ -344,8 +347,8 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 		self.StartViewPos = pos
 		self.StartViewAng = ang
 
-		local Vehicle = ply:GetVehicle()
-		if IsValid( Vehicle ) then
+		local vehicle = ply:GetVehicle()
+		if IsValid( vehicle ) then
 			return hook.Run( "CalcVehicleView", Vehicle, ply, view )
 		end
 

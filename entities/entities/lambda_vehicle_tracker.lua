@@ -104,7 +104,11 @@ elseif CLIENT then
 
 		local pos = self:GetPos() + self:OBBCenter() + Vector(0, 0, 50)
 		local localPly = LocalPlayer()
-
+		local plyVeh = localPly:GetVehicle()
+		if IsValid(plyVeh) then
+			return
+		end
+		
 		local plyPos = localPly:GetPos()
 		local alphaDist = 1.0 - (plyPos:Distance(pos) / 1500)
 		if alphaDist <= 0.0 then

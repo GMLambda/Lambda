@@ -214,7 +214,7 @@ if SERVER then
 
 			ply:SetPos(exitpos)
 			ply:SetEyeAngles(exitang)
-			ply:SetAllowWeaponsInVehicle(false)
+			--ply:SetAllowWeaponsInVehicle(false)
 
 			vehicle:GetParent().Passenger = nil
 
@@ -410,8 +410,6 @@ else -- CLIENT
 			if ply:InVehicle() and ply:GetVehicle() == vehicle then
 				return
 			end
-
-
 		else
 			-- Show all available vehicles.
 
@@ -420,6 +418,7 @@ else -- CLIENT
 	end
 
 	function GM:CalcVehicleView(Vehicle, ply, view)
+
 		local viewPos = view.origin
 		local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
 
@@ -428,8 +427,10 @@ else -- CLIENT
 		end
 
 		if ply.VehicleSteeringView == true then
-			view.origin = viewPos + (view.angles:Forward() * 3)
+			view.origin = viewPos + (view.angles:Forward() * 1)
 		end
+
+		view.origin = ply:EyePos()
 
 		return view
 	end
