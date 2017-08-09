@@ -603,14 +603,14 @@ if SERVER then
 		ply:SetTeam(LAMBDA_TEAM_DEAD)
 		ply:LockPosition(false, false)
 
-		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), 1, 255)
+		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
 		local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
 		local total = player.GetCount()
 		local timeoutAmount = math.Round(alive / total * timeout)
 
 		ply.RespawnTime = ply.DeathTime + timeoutAmount
 
-		if self:IsRoundRestarting() == false and alive > 0 then
+		if self:IsRoundRestarting() == false and alive > 0 and timeout ~= -1 then
 			net.Start("LambdaPlayerEnableRespawn")
 			net.WriteUInt(ply:EntIndex(), 8)
 			net.WriteBool(true)
@@ -645,6 +645,10 @@ if SERVER then
 	        return false
 	    end
 
+		if lambda_max_respawn_timeout:GetInt() == -1 then
+			return false
+		end
+		
 	    if ply:KeyReleased(IN_JUMP) then
 	        ply:Spawn()
 	    end

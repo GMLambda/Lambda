@@ -93,6 +93,7 @@ function PANEL:Init()
 		resp_time:SetPos(5, 5)
 		resp_time:SetSize(nww, nwh)
 		resp_time:SetCursorColor(Color(255,255,255,255))
+		resp_time:SetMin(-1)
 		resp_time:SetValue(cvars.Number("lambda_max_respawn_timeout"))
 
 		function resp_time:OnValueChanged(val)
