@@ -45,18 +45,23 @@ function PANEL:Paint()
 
 	local text
 	local x,y
-	if remain > 0 then
-		text = string.upper("Time remaining until respawn")
-		x, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
-		text = string.format("%0.2f", remain)
-		self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
-		self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
-	else
-		local keyName = input.LookupBinding("+jump", true)
-		text = string.format("Press <%s> to respawn", keyName)
-		x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
-	end
 
+	if self.Timeout == -1 then
+		text = string.upper("Respawning next round")
+		self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+	else
+		if remain > 0 then
+			text = string.upper("Time remaining until respawn")
+			x, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
+			text = string.format("%0.2f", remain)
+			self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
+			self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
+		else
+			local keyName = input.LookupBinding("+jump", true)
+			text = string.format("Press <%s> to respawn", keyName)
+			x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+		end
+	end
 
 end
 
@@ -67,5 +72,6 @@ function PANEL:SetTimeout(startTime, timeout)
 	self.StartTime = startTime
 	self.Timeout = timeout
 end
+
 
 vgui.Register( "HudRespawn", PANEL )

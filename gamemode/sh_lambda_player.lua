@@ -610,12 +610,14 @@ if SERVER then
 
 		ply.RespawnTime = ply.DeathTime + timeoutAmount
 
-		if self:IsRoundRestarting() == false and alive > 0 and timeout ~= -1 then
+		if timeout == -1 then timeoutAmount = -1 end
+
+		if self:IsRoundRestarting() == false and alive > 0 then
 			net.Start("LambdaPlayerEnableRespawn")
 			net.WriteUInt(ply:EntIndex(), 8)
 			net.WriteBool(true)
 			net.WriteFloat(ply.DeathTime)
-			net.WriteUInt(timeoutAmount, 8)
+			net.WriteInt(timeoutAmount, 8)
 			net.Send(ply)
 		end
 
@@ -648,7 +650,6 @@ if SERVER then
 		if lambda_max_respawn_timeout:GetInt() == -1 then
 			return false
 		end
-		
 	    if ply:KeyReleased(IN_JUMP) then
 	        ply:Spawn()
 	    end
@@ -1063,7 +1064,7 @@ else -- CLIENT
 
 		if state == true then
 			deathTime = net.ReadFloat()
-			timeout = net.ReadUInt(8)
+			timeout = net.ReadInt(8)
 		end
 
 		GAMEMODE:NotifyPlayerRespawn(state, entIndex, deathTime, timeout)
