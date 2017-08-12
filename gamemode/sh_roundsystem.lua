@@ -1,7 +1,6 @@
 if SERVER then
     AddCSLuaFile()
-    util.AddNetworkString("LambdaRestartRound")
-    util.AddNetworkString("LambdaWaitingForPlayers")
+	util.AddNetworkString("LambdaRoundInfo")
 end
 
 local DbgPrint = GetLogging("RoundLogic")
@@ -11,6 +10,11 @@ local STATE_IDLE = -1
 local STATE_RESTART_REQUESTED = 0
 local STATE_RESTARTING = 1
 local STATE_RUNNING = 2
+
+ROUND_INFO_NONE = 0
+ROUND_INFO_PLAYERRESPAWN = 1
+ROUND_INFO_ROUNDRESTART = 2
+ROUND_INFO_WAITING_FOR_PLAYER = 3
 
 function GM:InitializeRoundSystem()
 
@@ -31,17 +35,29 @@ end
 
 if SERVER then
 
+	function GM:NotifyRoundStateChanged(receivers, infoType, params)
+		DbgPrint("GM:NotifyRoundStateChanged")
+
+		net.Start("LambdaRoundInfo")
+		net.WriteUInt(infoType, 4)
+		net.WriteTable(params)
+		net.Send(receivers)
+	end
+
 	function GM:NotifyPlayerListChanged()
+
+		if self.WaitingForRoundStart ~= true then
+			return
+		end
 
 		DbgPrint("GM:NotifyPlayerListChanged")
 
-		self.RoundStartTimeout = self.RoundStartTimeout or GetSyncedTimestamp() + 120
-		net.Start("LambdaWaitingForPlayers")
-            net.WriteBool(self.WaitingForRoundStart)
-			net.WriteFloat(self.RoundStartTimeout)
-			net.WriteUInt(self:GetFullyConnectedCount(), 8)
-			net.WriteUInt(self:GetConnectingCount() + self:GetFullyConnectedCount(), 8)
-        net.Broadcast()
+		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_WAITING_FOR_PLAYER, {
+			StartTime = self.ServerStartupTime,
+			Timeout = 60,
+			FullyConnected = self:GetFullyConnectedCount(),
+			Connecting = self:GetConnectingCount(),
+		})
 
 	end
 
@@ -62,11 +78,12 @@ if SERVER then
 
     end
 
-    function GM:RestartRound(restartTime, showInfo)
+    function GM:RestartRound()
 
         DbgPrint("Requested restart")
 
         restartTime = restartTime or lambda_map_restart_timeout:GetInt()
+		restartTime = math.Clamp(restartTime, 0, 127)
 
         if self.RoundState ~= STATE_RUNNING then
             DbgPrint("Attempted to restart while restart is pending")
@@ -74,22 +91,18 @@ if SERVER then
         end
 
         self.RoundState = STATE_RESTART_REQUESTED
-        self.ScheduledRestartTime = GetSyncedTimestamp() + restartTime
-        self.RealTimeScale = game.GetTimeScale()
+		self.RestartStartTime = GetSyncedTimestamp()
+		self.ScheduledRestartTime = self.RestartStartTime + restartTime
+		self.RealTimeScale = game.GetTimeScale()
 
 		if IsValid(self.LambdaFailureMessage) then
 			self.LambdaFailureMessage:Fire("ShowMessage")
 		end
 
-		if showInfo == nil then
-			showInfo = true
-		end
-
-        net.Start("LambdaRestartRound")
-			net.WriteFloat(restartTime)
-			net.WriteBool(showInfo)
-		net.Broadcast()
-
+		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_ROUNDRESTART, {
+			StartTime = self.RestartStartTime,
+			Timeout = restartTime,
+		})
     end
 
     function GM:CleanUpMap()
@@ -120,12 +133,10 @@ if SERVER then
 
 		if self.WaitingForRoundStart == true and (self:GetConnectingCount() > 0 or playerCount == 0) then
 			-- Waiting for players
-			--DbgUniquePrint("Waiting for players")
 			if self.RoundStartTimeout ~= nil and GetSyncedTimestamp() >= self.RoundStartTimeout then
 				DbgPrint("Timeout, round will start now")
 				self:StartRound()
 			end
-
 		elseif self.WaitingForRoundStart == true and playerCount > 0 and self:GetConnectingCount() == 0 then
 			DbgPrint("All players available")
 			self:StartRound()
@@ -197,24 +208,17 @@ if SERVER then
 
 else
 
-	net.Receive("LambdaRestartRound", function(length)
+	net.Receive("LambdaRoundInfo", function(len)
 
-		local scheduledRestartTime = net.ReadFloat()
-		local showMessage = net.ReadBool()
-		GAMEMODE:SetRoundRestarting(GetSyncedTimestamp(), scheduledRestartTime, showMessage)
+		local infoType = net.ReadUInt(4)
+		local params = net.ReadTable()
+
+		DbgPrint("Received round state info: " .. tostring(infoType))
+		PrintTable(params)
+
+		GAMEMODE:SetRoundDisplayInfo(infoType, params)
 
 	end)
-
-    net.Receive("LambdaWaitingForPlayers", function(length)
-
-        local waitingForPlayers = net.ReadBool()
-		local timeout = net.ReadFloat()
-		local connected = net.ReadUInt(8)
-		local totalPlayers = net.ReadUInt(8)
-
-        GAMEMODE:SetWaitingForPlayers(waitingForPlayers, timeout, connected, totalPlayers)
-
-    end)
 
     function GM:SetRoundRestarting(currentTime, scheduledRestartTime, showMessage)
 
@@ -267,66 +271,6 @@ else
     end
 
     function GM:DrawRoundRestart(showMessage)
-
-        local curTime = GetSyncedTimestamp()
-        if curTime > self.ScheduledRestartTime then
-            return
-        end
-
-        local remaining = self.ScheduledRestartTime - curTime
-		if remaining < 0 then
-			return
-		end
-
-		local reverse = self.RestartTimeout - remaining
-		local perc = 1 - (remaining / self.RestartTimeout)
-		local brightness = 0
-		if reverse <= 0.5 then
-			brightness = (0.5 - reverse) * 1.3
-		else
-			brightness = 0
-		end
-
-        local noiseX = 0
-		local noiseY = 0
-		local alpha = 255
-
-		if math.random(0, 15) == 0 then
-			noiseX = math.random(-10, 5)
-			noiseY = math.random(-5, 10)
-		end
-
-		if math.random(0, 5) == 0 then
-			alpha = math.random(50, 150)
-		end
-
-		if showMessage == true then
-
-			local text = "RESTARTING ROUND IN " .. string.format("%.1f", remaining) .. " SECONDS"
-			local x = (ScrW() * 0.5)
-			local y = (ScrH() * 0.5) + 80
-
-			draw.SimpleText(text, "DermaLarge", x, y, Color(255, 255, 255, 50), TEXT_ALIGN_CENTER)
-
-		end
-
-		local mul = perc * 3
-
-		local tab =
-		{
-			["$pp_colour_addr"] = 0,
-			["$pp_colour_addg"] = 0,
-			["$pp_colour_addb"] = 0,
-			["$pp_colour_brightness"] = brightness,
-			["$pp_colour_contrast"] = (1 - perc * 0.2),
-			["$pp_colour_colour"] = 0.8 - (perc * 0.5),
-			["$pp_colour_mulr"] = mul,
-			["$pp_colour_mulg"] = 0,
-			["$pp_colour_mulb"] = 0,
-		}
-
-		DrawColorModify( tab )
-
     end
 
     function GM:DrawWaitingForPlayers(timeout, connected, totalPlayers)
@@ -473,9 +417,7 @@ function GM:OnNewGame()
 		end
 
         -- Notify clients.
-        net.Start("LambdaWaitingForPlayers")
-            net.WriteBool(false)
-        net.Broadcast()
+		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
 
 		local failureMessage = ents.Create("env_message")
 		failureMessage:SetKeyValue("spawnflags", "2")
@@ -589,7 +531,7 @@ function GM:StartRound(cleaned)
 
     else
         if SERVER then
-			self.RoundStartTimeout = GetSyncedTimestamp() + 120
+			self.RoundStartTimeout = self.ServerStartupTime + 60
 			self:NotifyPlayerListChanged()
         end
     end

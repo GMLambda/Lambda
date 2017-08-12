@@ -90,6 +90,10 @@ function GM:Think()
 
 end
 
+function GM:OnGamemodeLoaded()
+    self.ServerStartupTime = GetSyncedTimestamp()
+end
+
 function GM:OnReloaded()
 
 	if CLIENT then
