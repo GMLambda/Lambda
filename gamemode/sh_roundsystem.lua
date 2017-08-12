@@ -54,7 +54,7 @@ if SERVER then
 
 		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_WAITING_FOR_PLAYER, {
 			StartTime = self.ServerStartupTime,
-			Timeout = 60,
+			Timeout = lambda_connect_timeout:GetInt(),
 			FullyConnected = self:GetFullyConnectedCount(),
 			Connecting = self:GetConnectingCount(),
 		})
@@ -82,7 +82,7 @@ if SERVER then
 
         DbgPrint("Requested restart")
 
-        restartTime = restartTime or lambda_map_restart_timeout:GetInt()
+        local restartTime = lambda_map_restart_timeout:GetInt()
 		restartTime = math.Clamp(restartTime, 0, 127)
 
         if self.RoundState ~= STATE_RUNNING then
@@ -103,6 +103,15 @@ if SERVER then
 			StartTime = self.RestartStartTime,
 			Timeout = restartTime,
 		})
+
+		local filter = RecipientFilter()
+		filter:AddAllPlayers()
+
+		local snd = CreateSound(game.GetWorld(), "lambda/roundover.mp3", filter)
+		snd:SetSoundLevel(0)
+		snd:Play()
+
+		self.RoundOverSound = snd
     end
 
     function GM:CleanUpMap()
@@ -149,29 +158,19 @@ if SERVER then
 	function GM:RoundStateRestartRequested()
 
 		local curTime = GetSyncedTimestamp()
+
 		if curTime > self.ScheduledRestartTime then
 			DbgPrint("Restarting round...")
 			self.RoundState = STATE_RESTARTING
 			self:CleanUpMap()
 		else
-			local remaining = self.ScheduledRestartTime - curTime
 			local timescale = 0.7 - ((curTime / self.ScheduledRestartTime) * 0.5)
 			game.SetTimeScale(timescale)
-
-			local remainingTime = string.format("%0.0f",remaining)
-			DbgUniquePrint(remainingTime .. "s remaining until restart")
 		end
 
 	end
 
 	function GM:RoundStateRestarting()
-
-		-- PostCleanupMap takes care of this.
-		-- Handle restarting state.
-		--DbgUniquePrint("Restarting")
-		--DbgPrint("Setting restart")
-		--self.WaitingForRoundStart = false
-		--self:OnNewGame()
 
 	end
 
@@ -219,81 +218,6 @@ else
 		GAMEMODE:SetRoundDisplayInfo(infoType, params)
 
 	end)
-
-    function GM:SetRoundRestarting(currentTime, scheduledRestartTime, showMessage)
-
-		self.ScheduledRestartTime = currentTime + scheduledRestartTime
-		self.RestartTimeout = scheduledRestartTime
-        self.RoundState = STATE_RESTART_REQUESTED
-
-		self:BeginRoundRestart()
-		self:EnableRespawnHUD(false, 0, 0)
-
-		local showMessage = showMessage
-
-        hook.Add("RenderScreenspaceEffects", "LambdaRoundRestart", function()
-            GAMEMODE:DrawRoundRestart(showMessage)
-        end)
-
-    end
-
-	function GM:BeginRoundRestart()
-
-		local self = self
-		local ply = LocalPlayer()
-
-		RunConsoleCommand("stopsound")
-		util.RunNextFrame(function()
-			if IsValid(ply) then
-				surface.PlaySound("lambda/death.mp3")
-			end
-			self:SetSoundSuppressed(true)
-		end)
-
-	end
-
-    function GM:SetWaitingForPlayers(waitingForPlayers, timeout, connected, totalPlayers)
-
-		local timeout = timeout
-		local connected = connected
-		local totalPlayers = totalPlayers
-
-        if waitingForPlayers == true then
-            DbgPrint("Set waiting for players")
-            hook.Add("HUDPaint", "LambdaRoundWaitingForPlayers", function()
-                GAMEMODE:DrawWaitingForPlayers(timeout, connected, totalPlayers)
-            end)
-        else
-            DbgPrint("Unset waiting for players")
-            hook.Remove("HUDPaint", "LambdaRoundWaitingForPlayers")
-        end
-
-    end
-
-    function GM:DrawRoundRestart(showMessage)
-    end
-
-    function GM:DrawWaitingForPlayers(timeout, connected, totalPlayers)
-
-        local noiseX = math.random(-2, 2)
-        local noiseY = math.random(-2, 2)
-        local progress = string.rep(".", 1 + (CurTime() * 0.5 % 3))
-		local remaining = timeout - GetSyncedTimestamp()
-		if remaining < 0 then
-			remaining = 0
-		end
-
-		surface.SetFont("DermaLarge")
-
-        local text = "Waiting for other players" .. progress
-		local _,h = surface.GetTextSize(text)
-		local y = 0
-
-        draw.SimpleText("Waiting for other players " .. string.format("%d/%d ", connected, totalPlayers) .. progress, "DermaLarge", ScrW() * 0.5, ScrH() * 0.5 + y, Color(255, 255, 255, 50), TEXT_ALIGN_CENTER)
-		y = y + h
-        draw.SimpleText("Forcing start in " .. string.format("%.02f seconds", remaining), "DermaLarge", ScrW() * 0.5, ScrH() * 0.5 + y, Color(255, 255, 255, 50), TEXT_ALIGN_CENTER)
-
-    end
 
 end
 
@@ -531,7 +455,7 @@ function GM:StartRound(cleaned)
 
     else
         if SERVER then
-			self.RoundStartTimeout = self.ServerStartupTime + 60
+			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 			self:NotifyPlayerListChanged()
         end
     end

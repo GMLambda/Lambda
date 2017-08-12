@@ -8,6 +8,7 @@ GM.Version = "0.9 Beta"
 
 DEFINE_BASECLASS( "gamemode_base" )
 
+include("sh_timestamp.lua")
 include("sh_debug.lua")
 include("sh_string_extend.lua")
 include("sh_interpvalue.lua")
@@ -27,7 +28,6 @@ include("sh_vehicles.lua")
 include("sh_sound_env.lua")
 include("sh_temp.lua")
 include("sh_bullets.lua")
-include("sh_timestamp.lua")
 
 include("sh_lambda.lua")
 include("sh_lambda_npc.lua")
