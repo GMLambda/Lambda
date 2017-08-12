@@ -497,9 +497,17 @@ if SERVER then
 		ply.LastDmgForce = dmg:GetDamageForce()
 		ply.LastDmgExplosive = dmg:IsExplosionDamage()
 
+		local gender = ply:GetGender()
+		local snd = table.Random(self.HurtSounds[gender][HITGROUP_GENERIC])
+
+		ply:EmitSound(snd)
 		ply:SetShouldServerRagdoll(false)
 		ply:CreateRagdoll()
 
+	end
+
+	function GM:PlayerDeathSound()
+		return true
 	end
 
 	function GM:PlayerDeath(ply, attacker, inflictor)
