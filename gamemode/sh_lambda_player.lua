@@ -1,6 +1,5 @@
 if SERVER then
 	AddCSLuaFile()
-	util.AddNetworkString("LambdaPlayerEnableRespawn")
 	util.AddNetworkString("LambdaPlayerSettings")
 	util.AddNetworkString("LambdaPlayerColorChanged")
 end
@@ -352,11 +351,7 @@ if SERVER then
 
 		self:InitializePlayerSpeech(ply)
 		self:PlayerSetColors(ply)
-
-		net.Start("LambdaPlayerEnableRespawn")
-		net.WriteUInt(ply:EntIndex(), 8)
-		net.WriteBool(false)
-		net.Send(ply)
+		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
 
 		if not IsValid(ply.TrackerEntity) then
 			ply.TrackerEntity = ents.Create("lambda_player_tracker")
@@ -613,12 +608,13 @@ if SERVER then
 		if timeout == -1 then timeoutAmount = -1 end
 
 		if self:IsRoundRestarting() == false and alive > 0 then
-			net.Start("LambdaPlayerEnableRespawn")
-			net.WriteUInt(ply:EntIndex(), 8)
-			net.WriteBool(true)
-			net.WriteFloat(ply.DeathTime)
-			net.WriteInt(timeoutAmount, 8)
-			net.Send(ply)
+			self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
+			{
+				EntIndex = ply:EntIndex(),
+				Respawn = true,
+				StartTime = ply.DeathTime,
+				Timeout = timeoutAmount,
+			})
 		end
 
 	end
@@ -647,9 +643,11 @@ if SERVER then
 	        return false
 	    end
 
-		if lambda_max_respawn_timeout:GetInt() == -1 then
+		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 127)
+		if timeout == -1 then
 			return false
 		end
+
 	    if ply:KeyReleased(IN_JUMP) then
 	        ply:Spawn()
 	    end
@@ -1045,31 +1043,6 @@ else -- CLIENT
 		return view
 
 	end
-
-	function GM:NotifyPlayerRespawn(state, entIndex, deathTime, timeout)
-
-		local localPly = LocalPlayer()
-		if Entity(entIndex) == localPly then
-			GAMEMODE:EnableRespawnHUD(state, deathTime, timeout)
-		end
-
-	end
-
-	net.Receive("LambdaPlayerEnableRespawn", function(len)
-
-		local entIndex = net.ReadUInt(8)
-		local state = net.ReadBool()
-		local deathTime = 0
-		local timeout = 0
-
-		if state == true then
-			deathTime = net.ReadFloat()
-			timeout = net.ReadInt(8)
-		end
-
-		GAMEMODE:NotifyPlayerRespawn(state, entIndex, deathTime, timeout)
-
-	end)
 
 end
 

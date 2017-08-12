@@ -1,7 +1,7 @@
 include("huds/hud_numeric.lua")
 include("huds/hud_suit.lua")
 include("huds/hud_pickup.lua")
-include("huds/hud_respawn.lua")
+include("huds/hud_roundinfo.lua")
 include("huds/hud_settings.lua")
 
 --local DbgPrint = GetLogging("HUD")
@@ -285,22 +285,21 @@ function GM:HUDInit()
 		self.HUDSuit:Remove()
 	end
 
-	if IsValid(self.HUDRespawn) then
-		self.HUDRespawn:Remove()
+	if IsValid(self.HUDRoundInfo) then
+		self.HUDRoundInfo:Remove()
 	end
 
-	self.HUDRespawn = vgui.Create("HudRespawn")
+	self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
 	self.HUDSuit = vgui.Create("HudSuit")
 
 	CROSSHAIR_RT_SETUP = false
 
 end
 
-function GM:EnableRespawnHUD(enabled, startTime, timeout)
-	if not IsValid(self.HUDRespawn) then
-		-- What?
+function GM:SetRoundDisplayInfo(infoType, params)
+	if not IsValid(self.HUDRoundInfo) then
 		return
 	end
-	self.HUDRespawn:SetVisible(enabled)
-	self.HUDRespawn:SetTimeout(startTime, timeout)
+	self.HUDRoundInfo:SetVisible(enabled)
+	self.HUDRoundInfo:SetDisplayInfo(infoType, params)
 end
