@@ -100,6 +100,9 @@ function MAPSCRIPT:PostInit()
 			end
 		end)
 
+		ents.WaitForEntityByName("citadel_movelinear_elevphysball1_1", function(ent)
+			ent:SetKeyValue("blockdamage", "0")
+		end)
 	end
 
 end
