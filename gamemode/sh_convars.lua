@@ -32,6 +32,7 @@ if SERVER then
 	lambda_map_change_timeout = GM:RegisterConVar("map_change_timeout", 60, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), "Time before changing level as soon first player gets to it")
 	lambda_player_god = GM:RegisterConVar("player_god", 0, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), "No player damage")
 	lambda_pickup_delay = GM:RegisterConVar("pickup_delay", 0.5, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), "The time to wait before player can pickup again")
+	lambda_dynamic_checkpoints = GM:RegisterConVar("dynamic_checkpoints", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), "Dynamically creates checkpoints if the position is appropriate")
 	-- Client side --
 else
 	lambda_dynamic_crosshair = GM:RegisterConVar("dynamic_crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")

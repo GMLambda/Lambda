@@ -3,6 +3,7 @@ local DbgPrint = GetLogging("Checkpoints")
 local GRID_SIZE = 256
 local GRID_SIZE_Z = 1024
 local MIN_ENEMY_DISTANCE = 700
+local MIN_CHECKPOINT_DISTANCE = 1024
 local HULL_X = 32
 local HULL_Y = 32
 local HULL_Z = 74
@@ -38,11 +39,6 @@ function GM:GetGridData(x, y, z)
 
 end
 
-function GM:GetGridNPCs(x, y, z)
-
-	local gridData
-end
-
 function GM:ResetCheckpoints()
 	self.GridData = {}
 	self.CurrentCheckpoint = nil
@@ -63,10 +59,11 @@ function GM:UpdateCheckoints()
 	if self.NextCheckpointTest ~= nil and CurTime() < self.NextCheckpointTest then
 		return
 	end
-
-	--DbgPrint("Testing checkpoints")
-
 	self.NextCheckpointTest = CurTime() + 1
+
+	if lambda_dynamic_checkpoints:GetBool() == false then
+		return
+	end 
 
 	local plys = {}
 	local centerPos = Vector(0, 0, 0)
@@ -97,7 +94,7 @@ function GM:UpdateCheckoints()
 		})
 
 		-- Only update if players have enough distance to the previous checkpoint.
-		if self.CurrentCheckpointPos ~= nil and pos:Distance(self.CurrentCheckpointPos) < 1024 then
+		if self.CurrentCheckpointPos ~= nil and pos:Distance(self.CurrentCheckpointPos) < MIN_CHECKPOINT_DISTANCE then
 			continue
 		end
 
@@ -164,7 +161,7 @@ function GM:UpdateCheckoints()
 		self.CurrentCheckpointPos = bestPos
 		data.checkpoint = true
 
-		debugoverlay.Box(bestPos, CHECKPOINT_MINS, CHECKPOINT_MAXS, 5, Color( 255, 255, 255, 100 ))
+		--debugoverlay.Box(bestPos, CHECKPOINT_MINS, CHECKPOINT_MAXS, 5, Color( 255, 255, 255, 100 ))
 
 		DbgPrint("Assigned checkpoint")
 	end
