@@ -5,7 +5,6 @@ local H = 440
 
 function PANEL:Init()
 
-
 	self:SetSkin("Lambda")
 	self:SetSize(W, H)
 	self:SetPos(20, ScrH() / 2 - (H / 2))
@@ -188,6 +187,13 @@ function PANEL:Init()
 		ply_friendlyfire:SizeToContents()
 		ply_friendlyfire:SetConVar("lambda_friendlyfire")
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
+
+		local dynamic_checkpoints = vgui.Create("DCheckBoxLabel", PanelAdmin)
+		dynamic_checkpoints:SetPos(5, 8*nwh+30)
+		dynamic_checkpoints:SetText("Dynamic checkpoints")
+		dynamic_checkpoints:SizeToContents()
+		dynamic_checkpoints:SetConVar("lambda_dynamic_checkpoints")
+		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
 
 		self.Sheet:AddSheet("Admin Settings", PanelAdmin, "lambda/icons/admin_settings.png")
 	end
