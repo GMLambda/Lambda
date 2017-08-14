@@ -1,6 +1,6 @@
-AddCSLuaFile()
-
-include("sh_debug.lua")
+if SERVER then
+	AddCSLuaFile()
+end
 
 GM.ConVars = {}
 

@@ -1,3 +1,5 @@
+print("sh_interpvalue.lua start")
+
 if SERVER then
 	AddCSLuaFile()
 end
@@ -102,3 +104,5 @@ function InterpValue(startVal, endVal, dt, interpType)
 	var:Init(startVal, endVal, dt, interpType)
 	return var
 end
+
+print("sh_interpvalue.lua end")

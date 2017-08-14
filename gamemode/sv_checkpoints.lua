@@ -63,7 +63,7 @@ function GM:UpdateCheckoints()
 
 	if lambda_dynamic_checkpoints:GetBool() == false then
 		return
-	end 
+	end
 
 	local plys = {}
 	local centerPos = Vector(0, 0, 0)

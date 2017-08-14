@@ -1,23 +1,25 @@
-AddCSLuaFile()
+if SERVER then
+	AddCSLuaFile()
+end
 
 GM.Name = "Lambda"
 GM.Author = "N/A"
 GM.Email = "N/A"
-GM.Website = "https://github.com/ZehM4tt/Lambda"
+GM.Website = "https://github.com/ZehMatt/Lambda"
 GM.Version = "0.9 Beta"
 
 DEFINE_BASECLASS( "gamemode_base" )
 
-include("sh_timestamp.lua")
 include("sh_debug.lua")
+include("sh_convars.lua")
 include("sh_string_extend.lua")
 include("sh_interpvalue.lua")
+include("sh_timestamp.lua")
 
 include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
 include("sh_mapdata.lua")
 include("sh_utils.lua")
-include("sh_convars.lua")
 include("sh_ents_extend.lua")
 include("sh_npc_extend.lua")
 include("sh_player_extend.lua")
@@ -107,7 +109,7 @@ end
 
 function GM:Initialize()
 
-	DbgPrint("GM:Initialize")
+	print("GM:Initialize")
 	DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
 	self:LoadGameTypes()
