@@ -1,8 +1,11 @@
-AddCSLuaFile()
+if SERVER then
+	AddCSLuaFile()
+end
 
 --local DbgPrint = GetLogging("GameType")
 
 include("gametypes/hl2.lua")
+include("gametypes/hl2ep1.lua")
 
 local DEFAULT_MAPSCRIPT = {}
 DEFAULT_MAPSCRIPT.InputFilters = {}

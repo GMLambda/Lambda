@@ -1,6 +1,6 @@
-AddCSLuaFile()
-
-include("sh_debug.lua")
+if SERVER then
+	AddCSLuaFile()
+end
 
 GM.ConVars = {}
 
@@ -22,6 +22,10 @@ function GM:RegisterConVar(name, value, flags, helptext)
 
 	return convar
 
+end
+
+function GM:GetRegisteredConVar(name)
+	return self.ConVars[name]
 end
 
 if SERVER then
