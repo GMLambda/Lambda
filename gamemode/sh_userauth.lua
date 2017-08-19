@@ -30,14 +30,21 @@ if SERVER then
 
 	end
 
+	function GM:ValidateUserToken(ply, token)
+		return ply.LambdaAuthToken == token
+	end
+
 else
+
+	-- Don't set this on the player as we may receive this message before the player is created.
+	LAMBDA_PLAYER_AUTH_TOKEN = LAMBDA_PLAYER_AUTH_TOKEN or ""
 
 	net.Receive("LambdaPlayerToken", function(len)
 
 		local ply = LocalPlayer()
 		local token = net.ReadString()
 
-		ply.LambdaAuthToken = token
+		LAMBDA_PLAYER_AUTH_TOKEN = token
 
 		DbgPrint("Received Auth Token: " .. token)
 

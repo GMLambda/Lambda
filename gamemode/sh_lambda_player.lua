@@ -132,6 +132,8 @@ if SERVER then
 			ply:SetInactive(true)
 		end
 
+		self:AssignPlayerAuthToken(ply)
+
 		BaseClass.PlayerInitialSpawn( self, ply )
 
 	end
@@ -608,7 +610,8 @@ if SERVER then
 
 		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
 		local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
-		local total = player.GetCount()
+		local total = player.GetCount() - 1
+		if total <= 0 then total = 1 end
 		local timeoutAmount = math.Round(alive / total * timeout)
 
 		ply.RespawnTime = ply.DeathTime + timeoutAmount

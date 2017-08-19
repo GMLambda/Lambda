@@ -92,11 +92,10 @@ function PANEL:Init()
 		resp_time:SetPos(5, 5)
 		resp_time:SetSize(nww, nwh)
 		resp_time:SetCursorColor(Color(255,255,255,255))
-		resp_time:SetMin(-1)
+		resp_time:SetMinMax(-1, 127)
 		resp_time:SetValue(cvars.Number("lambda_max_respawn_timeout"))
-
 		function resp_time:OnValueChanged(val)
-			pl:ConCommand("lambda_max_respawn_timeout " .. tonumber(val))
+			GAMEMODE:ChangeAdminConfiguration("max_respawn_timeout", val)
 		end
 
 		local resp_time_label = vgui.Create("DLabel", PanelAdmin)
@@ -112,9 +111,8 @@ function PANEL:Init()
 		rest_time:SetSize(nww, nwh)
 		rest_time:SetCursorColor(Color(255,255,255,255))
 		rest_time:SetValue(cvars.Number("lambda_map_restart_timeout"))
-
 		function rest_time:OnValueChanged(val)
-			pl:ConCommand("lambda_map_restart_timeout " .. tonumber(val))
+			GAMEMODE:ChangeAdminConfiguration("map_restart_timeout", tostring(val))
 		end
 
 		local rest_time_label = vgui.Create("DLabel", PanelAdmin)
@@ -130,9 +128,12 @@ function PANEL:Init()
 		change_time:SetSize(nww, nwh)
 		change_time:SetCursorColor(Color(255,255,255,255))
 		change_time:SetValue(cvars.Number("lambda_map_change_timeout"))
+		change_time:SetMinMax(0, 100)
 
 		function change_time:OnValueChanged(val)
-			pl:ConCommand("lambda_map_change_timeout " .. tonumber(val))
+			--pl:ConCommand("lambda_map_change_timeout " .. tonumber(val))
+			if tonumber(val) > 100 then val = 100 change_time:SetValue(val) end
+			GAMEMODE:ChangeAdminConfiguration("map_change_timeout", tostring(val))
 		end
 
 		local change_time_label = vgui.Create("DLabel", PanelAdmin)
@@ -148,10 +149,12 @@ function PANEL:Init()
 		pick_delay:SetSize(nww, nwh)
 		pick_delay:SetCursorColor(Color(255,255,255,255))
 		pick_delay:SetDecimals(1)
+		pick_delay:SetMinMax(0.0, 3.0)
 		pick_delay:SetValue(cvars.Number("lambda_pickup_delay"))
 
 		function pick_delay:OnValueChanged(val)
-			pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			GAMEMODE:ChangeAdminConfiguration("pickup_delay", tostring(val))
 		end
 
 		local pick_delay_label = vgui.Create("DLabel", PanelAdmin)
@@ -164,36 +167,56 @@ function PANEL:Init()
 		player_god:SetPos(5, 4 * nwh + 30)
 		player_god:SetText("God Mode.")
 		player_god:SizeToContents()
-		player_god:SetConVar("lambda_player_god")
 		player_god:SetValue(cvars.Number("lambda_player_god"))
+		function player_god:OnChange(val)
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("player_god", val)
+		end
 
 		local ply_coll = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		ply_coll:SetPos(5, 5 * nwh + 30)
 		ply_coll:SetText("Player collision.")
 		ply_coll:SizeToContents()
-		ply_coll:SetConVar("lambda_playercollision")
 		ply_coll:SetValue(cvars.Number("lambda_playercollision"))
+		function ply_coll:OnChange(val)
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("playercollision", val)
+		end
 
 		local ply_track = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		ply_track:SetPos( 5, 6*nwh+30 )
 		ply_track:SetText("Player tracking")
 		ply_track:SizeToContents()
-		ply_track:SetConVar("lambda_player_tracker")
 		ply_track:SetValue(cvars.Number("lambda_player_tracker"))
+		function ply_track:OnChange(val)
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("player_tracker", val)
+		end
 
 		local ply_friendlyfire = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		ply_friendlyfire:SetPos(5, 7*nwh+30)
 		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on.")
 		ply_friendlyfire:SizeToContents()
-		ply_friendlyfire:SetConVar("lambda_friendlyfire")
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
+		function ply_friendlyfire:OnChange(val)
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("friendlyfire", val)
+		end
 
 		local dynamic_checkpoints = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		dynamic_checkpoints:SetPos(5, 8*nwh+30)
 		dynamic_checkpoints:SetText("Dynamic checkpoints")
 		dynamic_checkpoints:SizeToContents()
-		dynamic_checkpoints:SetConVar("lambda_dynamic_checkpoints")
 		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
+		function dynamic_checkpoints:OnChange(val)
+			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("dynamic_checkpoints", val)
+		end
 
 		self.Sheet:AddSheet("Admin Settings", PanelAdmin, "lambda/icons/admin_settings.png")
 	end

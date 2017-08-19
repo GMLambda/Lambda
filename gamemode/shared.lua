@@ -38,6 +38,8 @@ include("sh_animations.lua")
 include("sh_spectate.lua")
 include("sh_playermodels.lua")
 include("sh_globalstate.lua")
+include("sh_userauth.lua")
+include("sh_admin_config.lua")
 
 --Disabled for now
 --include("sh_gibs.lua")

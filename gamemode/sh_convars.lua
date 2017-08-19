@@ -24,6 +24,10 @@ function GM:RegisterConVar(name, value, flags, helptext)
 
 end
 
+function GM:GetRegisteredConVar(name)
+	return self.ConVars[name]
+end
+
 if SERVER then
 	-- Server --
 	lambda_max_respawn_timeout = GM:RegisterConVar("max_respawn_timeout", 20, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), "Time before player can respawn")
