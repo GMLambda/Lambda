@@ -26,7 +26,7 @@ function ENT:AcceptInput(inputName, activator, called, data)
 
 			for _,v in pairs(player.GetAll()) do
 				DbgPrint("[" .. self:GetName() .. "] Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
-				ply:TeleportPlayer(pos, ang)
+				v:TeleportPlayer(pos, ang)
 			end
 
 			return true

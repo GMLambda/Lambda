@@ -116,8 +116,6 @@ if SERVER then
 
 	local function DissolveEntity(ent)
 
-		DbgPrint("Dissolving: " .. tostring(ent))
-
 		local name = "dissolve_" .. tostring(ent:EntIndex())
 		ent:SetName(name)
 
@@ -189,33 +187,17 @@ if SERVER then
 				continue
 			end
 
-			--[[
-			local enemy = v:GetEnemy()
-			if IsValid(enemy) then
-				if v:VisibleVec(enemy:GetPos()) == false then
-					--DbgPrint("Enemy is not visible")
-					--v:SetEnemy(nil)
-					--v:SetTarget(v)
-					--v:ClearSchedule()
-					--v:SetSchedule(SCHED_IDLE_STAND)
-				end
+			if v:GetName() ~= "" or v:GetNPCState() ~= NPC_STATE_IDLE then
+				continue
 			end
-			]]
 
-			local idleNPC = v:IsCurrentSchedule(SCHED_ALERT_STAND) or
-				v:IsCurrentSchedule(SCHED_IDLE_STAND) or
-				v:IsCurrentSchedule(SCHED_FAIL) or
-				v:IsCurrentSchedule(SCHED_COMBAT_STAND)
-
+			local idleNPC = v:IsCurrentSchedule(SCHED_IDLE_STAND)
 			if idleNPC == false then
 				continue
 			end
 
-			--DbgPrint("Found idle NPC: " .. tostring(v))
-
 			local npc = v
 			table.insert(self.IdleEnemyNPCs, npc)
-			npc:SetSchedule(SCHED_COMBAT_PATROL)
 
 		end
 
@@ -224,6 +206,10 @@ if SERVER then
 end
 
 function GM:NotifyNPCFootsteps( ply, pos, foot, sound, volume)
+	-- Appears to be still called in pods, so lets not notify them.
+	if ply:InVehicle() == true or ply:KeyDown(IN_DUCK) == true then
+		return
+	end
 
 	for _,npc in pairs(self.IdleEnemyNPCs or {}) do
 
@@ -232,7 +218,8 @@ function GM:NotifyNPCFootsteps( ply, pos, foot, sound, volume)
 		end
 
 		local dist = npc:GetPos():Distance(pos)
-		if dist < 1000 then
+		-- Slight chance that they will hear the footsteps and go towards the sound position.
+		if dist < 500 and math.random(0, 5) == 0 then
 			npc:SetLastPosition(pos)
 			npc:SetSchedule(SCHED_FORCED_GO)
 		end

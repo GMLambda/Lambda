@@ -8,7 +8,7 @@ MAPSCRIPT.DefaultLoadout =
 {
 	Weapons =
 	{
-		"weapon_physcannon",
+		--"weapon_physcannon",
 	},
 	Ammo =
 	{
@@ -40,10 +40,6 @@ end
 function MAPSCRIPT:PostInit()
 
     if SERVER then
-
-		ents.WaitForEntityByName("citadel_trigger_elevatorride_up", function(ent)
-			ent:SetKeyValue("teamwait", "1")
-		end)
 
     end
 

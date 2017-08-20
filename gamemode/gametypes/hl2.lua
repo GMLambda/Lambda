@@ -6,13 +6,7 @@ local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 local MAPSCRIPT_FILE = "hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
 
-if(file.Exists(MAPSCRIPT_FILE, "ADDON")) then
-	GAMETYPE.MapScript = include(MAPSCRIPT_FILE)
-else
-	print("No mapscript found, using default")
-	GAMETYPE.MapScript = DEFAULT_MAPSCRIPT
-end
-
+GAMETYPE.MapScript = include(MAPSCRIPT_FILE)
 GAMETYPE.MapList =
 {
 	"d1_trainstation_01",
