@@ -300,6 +300,6 @@ function GM:SetRoundDisplayInfo(infoType, params)
 	if not IsValid(self.HUDRoundInfo) then
 		return
 	end
-	self.HUDRoundInfo:SetVisible(enabled)
+	self.HUDRoundInfo:SetVisible(true)
 	self.HUDRoundInfo:SetDisplayInfo(infoType, params)
 end
