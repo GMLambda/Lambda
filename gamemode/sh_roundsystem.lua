@@ -95,23 +95,36 @@ if SERVER then
 		self.ScheduledRestartTime = self.RestartStartTime + restartTime
 		self.RealTimeScale = game.GetTimeScale()
 
-		if IsValid(self.LambdaFailureMessage) then
-			self.LambdaFailureMessage:Fire("ShowMessage")
-		end
-
 		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_ROUNDRESTART, {
 			StartTime = self.RestartStartTime,
 			Timeout = restartTime,
 		})
 
-		local filter = RecipientFilter()
-		filter:AddAllPlayers()
+		if restartTime > 0 then
 
-		local snd = CreateSound(game.GetWorld(), "lambda/roundover.mp3", filter)
-		snd:SetSoundLevel(0)
-		snd:Play()
+			if IsValid(self.LambdaFailureMessage) then
+				self.LambdaFailureMessage:Fire("ShowMessage")
+			end
 
-		self.RoundOverSound = snd
+			-- Stop all the current playing sounds.
+			for k,v in pairs(player.GetAll()) do
+				v:ConCommand("stopsoundscape")
+				v:ConCommand("stopsound")
+				v:SetDSP(0, true)
+			end
+
+			-- We have to delay this otherwise it will be cancalced by stopsound.
+			util.RunNextFrame(function()
+				local filter = RecipientFilter()
+				filter:AddAllPlayers()
+
+				local snd = CreateSound(game.GetWorld(), "lambda/roundover.mp3", filter)
+				snd:SetSoundLevel(0)
+				snd:Play()
+			end)
+
+		end
+
     end
 
     function GM:CleanUpMap()
