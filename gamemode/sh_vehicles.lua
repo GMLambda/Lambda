@@ -156,7 +156,7 @@ if SERVER then
 		if ply:IsSprinting() == true then
 			ply:StopSprinting()
 		end
-		
+
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
 		   vehicle:GetClass() == "prop_vehicle_jalopy"
@@ -430,11 +430,12 @@ else -- CLIENT
 			viewPos = ply:GetBonePosition(headBone)
 		end
 
+		view.origin = ply:EyePos()
+
 		if ply.VehicleSteeringView == true then
-			view.origin = viewPos + (view.angles:Forward() * 1)
+			view.origin = viewPos + (view.angles:Forward() * 3)
 		end
 
-		view.origin = ply:EyePos()
 
 		return view
 	end
