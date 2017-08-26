@@ -344,20 +344,11 @@ if SERVER then
 	        return
 	    end
 
-		if IsValid(ply.SelectedSpawnpoint) then
-			ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
-			ply.SelectedSpawnpoint = nil
-		end
-
 		ply:EndSpectator()
 
 		self:InitializePlayerSpeech(ply)
 		self:PlayerSetColors(ply)
 		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
-
-		if not IsValid(ply.TrackerEntity) then
-			ply.TrackerEntity = ents.Create("lambda_player_tracker")
-		end
 
 		-- Lets remove whatever the player left on vehicles behind before he got killed.
 		self:RemovePlayerVehicles(ply)
@@ -383,7 +374,6 @@ if SERVER then
 		end
 
 		ply.LambdaSpawnTime = CurTime()
-
 		ply:SetSuitPower(100)
 		ply:SetSuitEnergy(100)
 		ply:SetGeigerRange(1000)
@@ -410,6 +400,7 @@ if SERVER then
 		end
 
 		local transitionData = ply.TransitionData
+		local useSpawnpoint = true
 
 		if transitionData ~= nil then
 
@@ -419,9 +410,10 @@ if SERVER then
 
 			if transitionData.Include == true then
 				DbgPrint("Player " .. tostring(ply) .. " uses transition data!")
-				ply:SetPos(transitionData.Pos)
+				ply:TeleportPlayer(transitionData.Pos)
 				ply:SetAngles(transitionData.Ang)
 				ply:SetEyeAngles(transitionData.EyeAng)
+				useSpawnpoint = false
 			end
 
 			if transitionData.Vehicle ~= nil and transitionData.Include == true then
@@ -439,11 +431,13 @@ if SERVER then
 					-- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
 					util.RunNextFrame(function()
 						if IsValid(ply) and IsValid(vehicle) then
-							ply:SetPos(vehicle:GetPos())
+							ply:TeleportPlayer(vehicle:GetPos())
 							ply:EnterVehicle(vehicle)
 							ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
 						end
 					end)
+
+					useSpawnpoint = false
 
 				else
 					DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))
@@ -452,14 +446,17 @@ if SERVER then
 
 		end
 
-		if SERVER then
-			DbgPrint("Selecting best weapon for " .. tostring(ply))
-			if ply.ScheduledActiveWeapon ~= nil then
-				ply:SelectWeapon(ply.ScheduledActiveWeapon)
-				ply.ScheduledActiveWeapon = nil
-			else
-				self:SelectBestWeapon(ply)
-			end
+		if useSpawnpoint == true and IsValid(ply.SelectedSpawnpoint) then
+			ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
+			ply.SelectedSpawnpoint = nil
+		end
+
+		DbgPrint("Selecting best weapon for " .. tostring(ply))
+		if ply.ScheduledActiveWeapon ~= nil then
+			ply:SelectWeapon(ply.ScheduledActiveWeapon)
+			ply.ScheduledActiveWeapon = nil
+		else
+			self:SelectBestWeapon(ply)
 		end
 
 		util.RunNextFrame(function()
@@ -476,7 +473,10 @@ if SERVER then
 		-- Adjust difficulty, we want later some dynamic system that adjusts depending on the players.
 		self:AdjustDifficulty()
 
-		ply.TrackerEntity:AttachToPlayer(ply)
+		if not IsValid(ply.TrackerEntity) then
+			ply.TrackerEntity = ents.Create("lambda_player_tracker")
+			ply.TrackerEntity:AttachToPlayer(ply)
+		end
 
 	end
 

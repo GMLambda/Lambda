@@ -823,7 +823,6 @@ else -- CLIENT
 			LAMBDA_TRIGGERS[entIndex].Center = center
 			LAMBDA_TRIGGERS[entIndex].Maxs = maxs
 			LAMBDA_TRIGGERS[entIndex].Mins = mins
-			PrintTable(LAMBDA_TRIGGERS[entIndex])
 			DbgPrint("Trigger(" .. entIndex .. ") now blocked")
 		else
 			-- What shall we do about this?
@@ -999,7 +998,6 @@ else -- CLIENT
 		local mesh = data.Mesh
 
 		if mesh == nil then
-			print("Creating new mesh")
 			mesh = Mesh(MAT_BLOCKED)
 
 			local bounds = data.Maxs - data.Mins
@@ -1009,7 +1007,6 @@ else -- CLIENT
 				meshData[k].v = math.Remap(rel.y, data.Mins.y, data.Maxs.y, 0, 1)
 				meshData[k].u = math.Remap(rel.x, data.Mins.x, data.Maxs.x, 0, 1)
 				meshData[k].tangent = Vector(1, 1, 1)
-				print(meshData[k].u, meshData[k].v)
 			end
 
 			mesh:BuildFromTriangles(meshData)

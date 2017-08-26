@@ -91,7 +91,7 @@ if SERVER then
 			if delay == 0 then
 				triggerOutput()
 			else
-				timer.Simple(delay, triggerOutput)
+				util.RunDelayed(triggerOutput, CurTime() + delay)
 			end
 
 			if times > 0 and called >= times then
@@ -133,7 +133,7 @@ if SERVER then
 			--times = outputs[k].Times
 			DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. caller:GetName() .. ") -> (Target: " .. entname .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
 
-			timer.Simple(delay, function()
+			util.RunDelayed(function()
 
 				local targetents
 
@@ -163,7 +163,7 @@ if SERVER then
 					end
 				end
 
-			end)
+			end, CurTime() + delay)
 
 			if times > 0 and called >= times then
 				--DbgPrint("Removing output")

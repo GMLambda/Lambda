@@ -360,8 +360,35 @@ function GM:OnNewGame()
 		failureMessage:SetKeyValue("spawnflags", "2")
 		failureMessage:SetKeyValue("message", "GAMEOVER_ALLY")
 		failureMessage:Spawn()
-
 		self.LambdaFailureMessage = failureMessage
+
+		local mapData = game.GetMapData()
+		if mapData ~= nil and mapData.Entities ~= nil then
+			local worldData = mapData.Entities[1]
+			if worldData ~= nil and worldData["chaptertitle"] ~= nil then
+
+				local chapterText = worldData["chaptertitle"]
+				local dupe = false
+				-- Lets not do it if it already exists in env_message.
+				for _,v in pairs(ents.FindByClass("env_message")) do
+					local keyvalues = v:GetKeyValues()
+					if keyvalues ~= nil and keyvalues["message"] ~= nil and keyvalues["message"]:iequals(chapterText) then
+						dupe = true
+						break
+					end
+				end
+				-- Garry's Mod never shows the chapter title, but it is identical to env_message.
+				if dupe == false then
+					local chapterMessage = ents.Create("env_message")
+					chapterMessage:SetKeyValue("spawnflags", "2")
+					chapterMessage:SetKeyValue("message", worldData["chaptertitle"])
+					chapterMessage:Spawn()
+					self.LambdaChapterMessage = chapterMessage
+				else
+					print("env_message with chapter already exists")
+				end
+			end
+		end
 
 		util.RunNextFrame(function()
 			GAMEMODE:PostRoundSetup()
@@ -395,6 +422,10 @@ function GM:PostRoundSetup()
 
 		if self.MapScript.OnNewGame then
 			self.MapScript:OnNewGame()
+		end
+
+		if IsValid(self.LambdaChapterMessage) then
+			self.LambdaChapterMessage:Fire("ShowMessage")
 		end
 
 	end)
