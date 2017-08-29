@@ -429,6 +429,7 @@ if SERVER then
 					local eyeAng = vehicle:WorldToLocalAngles(transitionData.EyeAng)
 
 					-- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
+					-- FIXME: I noticed that delaying it until the next frame won't always work, we use a fixed delay now.
 					util.RunDelayed(function()
 						spawnInVehicle = true
 						if IsValid(ply) and IsValid(vehicle) then
