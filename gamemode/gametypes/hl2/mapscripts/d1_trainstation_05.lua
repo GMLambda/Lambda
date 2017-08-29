@@ -62,6 +62,7 @@ function MAPSCRIPT:PostInit()
 			for _,v in pairs(player.GetAll()) do
 				-- Equip suit.
 				v:EquipSuit()
+				v:SetHealth(100)
 
 				-- Update model.
 				GAMEMODE:PlayerSetModel(v)
