@@ -71,38 +71,66 @@ function GM:UpdateCheckoints()
 
 	for _,v in pairs(player.GetAll()) do
 
-		if v:Alive() == false or v:OnGround() == false or v:GetMoveType() ~= MOVETYPE_WALK then
+		if v:Alive() == false  then
 			continue
 		end
 
-		local groundEnt = v:GetGroundEntity()
-		if groundEnt:IsWorld() == false then
-			-- Only solid world brush.
-			continue
+		local pos
+		local groundEnt
+		local vehicle = v:GetVehicle()
+		local filter
+
+		if not IsValid(vehicle) then
+			if v:OnGround() == false then
+				return
+			end
+			groundEnt = v:GetGroundEntity()
+			pos = v:GetPos()
+			filter = { v }
+			if groundEnt != game.GetWorld() then
+				continue
+			end
+		else
+			pos = vehicle:GetPos()
+			groundEnt = vehicle:GetGroundEntity()
+			filter = { v, vehicle }
 		end
-
-		local pos = v:GetPos()
-		centerPos = centerPos + pos
-
-		local tr = util.TraceHull({
-			start = pos,
-			endpos = pos,
-			filter = v,
-			mins = CHECKPOINT_MINS,
-			maxs = CHECKPOINT_MAXS,
-			mask = MASK_PLAYERSOLID,
-		})
 
 		-- Only update if players have enough distance to the previous checkpoint.
 		if self.CurrentCheckpointPos ~= nil and pos:Distance(self.CurrentCheckpointPos) < MIN_CHECKPOINT_DISTANCE then
 			continue
 		end
 
-		if tr.Fraction == 1 then
-			table.insert(plys, v)
-		end
+		centerPos = centerPos + pos
 
-		DbgPrint(tr.Fraction, tr.Entity)
+		local tr = util.TraceHull({
+			start = pos,
+			endpos = pos,
+			filter = filter,
+			mins = CHECKPOINT_MINS,
+			maxs = CHECKPOINT_MAXS,
+			mask = MASK_PLAYERSOLID,
+		})
+
+		if tr.Fraction == 1 then
+			local tr = util.TraceLine({
+				start = pos,
+				endpos = pos - Vector(0, 0, 128),
+				filter = filter,
+				mask = MASK_PLAYERSOLID,
+			})
+
+			local contents = util.PointContents(tr.HitPos - Vector(0, 0, 1))
+			local slime = bit.band(contents, CONTENTS_SLIME) ~= 0
+			if slime == true then
+				continue
+			end
+			
+			local dist = pos:Distance(tr.HitPos)
+			if tr.HitWorld == true and dist <= 45 then
+				table.insert(plys, v)
+			end
+		end
 
 	end
 
@@ -114,6 +142,8 @@ function GM:UpdateCheckoints()
 
 	-- See which player is closest to the center.
 	local nearestCenter = 999999
+	local selectedPlayer = nil
+
 	for _,v in pairs(plys) do
 
 		local pos = v:GetPos()
@@ -122,6 +152,7 @@ function GM:UpdateCheckoints()
 		if dist < nearestCenter then
 			bestPos = pos
 			nearestCenter = dist
+			selectedPlayer = v
 		end
 
 	end
@@ -153,6 +184,13 @@ function GM:UpdateCheckoints()
 
 	if data.checkpoint == false and enemyNearby == false then
 
+		local vehicle = selectedPlayer:GetVehicle()
+		if IsValid(vehicle) and vehicle.AllowVehicleCheckpoint == true then
+			local pos = vehicle:GetPos()
+			local ang = vehicle:GetAngles()
+			self:SetVehicleCheckpoint(pos, ang)
+		end
+
 		local cp = ents.Create("lambda_checkpoint")
 		cp:SetPos(bestPos)
 		cp:Spawn()
@@ -165,5 +203,18 @@ function GM:UpdateCheckoints()
 
 		DbgPrint("Assigned checkpoint")
 	end
+
+end
+
+function GM:SetVehicleCheckpoint(pos, ang)
+
+	self.VehicleCheckpoint = { Pos = pos, Ang = ang }
+	DbgPrint("Assigned vehicle checkpoint")
+
+end
+
+function GM:ResetVehicleCheckpoint()
+
+	self.VehicleCheckpoint = nil
 
 end
