@@ -430,8 +430,9 @@ if SERVER then
 
 					-- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
 					util.RunNextFrame(function()
+						spawnInVehicle = true
 						if IsValid(ply) and IsValid(vehicle) then
-							ply:TeleportPlayer(vehicle:GetPos())
+							ply:SetPos(vehicle:GetPos())
 							ply:EnterVehicle(vehicle)
 							ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
 						end
