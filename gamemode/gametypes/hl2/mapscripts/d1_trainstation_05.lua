@@ -74,6 +74,13 @@ function MAPSCRIPT:PostInit()
 			v:EnableRespawn(true)
 		end
 
+		local allowPlayerClip = false
+		GAMEMODE:WaitForInput("brush_soda_clip_player_2", "Enable", function(ent)
+			if allowPlayerClip == false then
+				return true -- Suppress
+			end
+		end)
+
 		-- Close the door once everyone is inside.
 		-- -6754.733398 -1360.082764 0.031250
 		local doorTrigger = ents.Create("trigger_once")
@@ -86,6 +93,7 @@ function MAPSCRIPT:PostInit()
 		)
 		doorTrigger:SetName("door_trigger")
 		doorTrigger.OnTrigger = function()
+			allowPlayerClip = true
 			TriggerOutputs({
 				{"brush_soda_clip_player", "Enable", 0.0, ""},
 				{"BarneyEnter_song", "PlaySound", 0.0, ""},
