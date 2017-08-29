@@ -57,18 +57,6 @@ if SERVER then
 
 	end
 
-	function GM:SetVehicleCheckpoint(pos, ang)
-
-		self.VehicleCheckpoint = { Pos = pos, Ang = ang }
-
-	end
-
-	function GM:ResetVehicleCheckpoint()
-
-		self.VehicleCheckpoint = nil
-
-	end
-
 	function GM:HandleVehicleCreation(vehicle)
 
 		DbgPrint("HandleVehicleCreation")
@@ -114,6 +102,7 @@ if SERVER then
 					ply.OwnedVehicle = nil
 				end
 			end)
+			vehicle.AllowVehicleCheckpoint = true
 
 			local tracker = ents.Create("lambda_vehicle_tracker")
 			tracker:AttachToVehicle(vehicle)
