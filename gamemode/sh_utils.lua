@@ -87,7 +87,7 @@ if SERVER then
 				end
 			end
 
-			-- With 0 it must be called this frame, timer.Simple delays everything.
+			-- With 0 it must be called this frame.
 			if delay == 0 then
 				triggerOutput()
 			else
