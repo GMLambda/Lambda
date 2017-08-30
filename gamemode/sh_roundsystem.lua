@@ -493,10 +493,9 @@ function GM:StartRound(cleaned)
 
 	if self.WaitingForRoundStart == false then
 		local self = self
-		util.RunNextFrame(function()
+		util.RunDelayed(function()
 			self:OnNewGame()
-		end)
-
+		end, CurTime() + 2)
     else
         if SERVER then
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()

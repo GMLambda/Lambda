@@ -113,7 +113,7 @@ function GM:UpdateCheckoints()
 		})
 
 		if tr.Fraction == 1 then
-			local tr = util.TraceLine({
+			tr = util.TraceLine({
 				start = pos,
 				endpos = pos - Vector(0, 0, 128),
 				filter = filter,
@@ -125,7 +125,7 @@ function GM:UpdateCheckoints()
 			if slime == true then
 				continue
 			end
-			
+
 			local dist = pos:Distance(tr.HitPos)
 			if tr.HitWorld == true and dist <= 45 then
 				table.insert(plys, v)

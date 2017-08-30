@@ -423,9 +423,6 @@ if SERVER then
 					DbgPrint("Putting player " .. tostring(ply) .. " back in vehicle: " .. tostring(vehicle))
 
 					-- Sometimes does crazy things to the view angles, this only helps to a certain amount.
-					vehicle:SetVehicleEntryAnim(false)
-					vehicle.ResetVehicleEntryAnim = true
-
 					local eyeAng = vehicle:WorldToLocalAngles(transitionData.EyeAng)
 
 					-- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
@@ -433,10 +430,12 @@ if SERVER then
 					util.RunDelayed(function()
 						spawnInVehicle = true
 						if IsValid(ply) and IsValid(vehicle) then
+							vehicle:SetVehicleEntryAnim(false)
+							vehicle.ResetVehicleEntryAnim = true
 							ply:EnterVehicle(vehicle)
 							ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
 						end
-					end, CurTime() + 0.1)
+					end, CurTime() + 0.2)
 					useSpawnpoint = false
 				else
 					DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))

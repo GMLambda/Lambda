@@ -57,7 +57,7 @@ if SERVER then
 			if IsValid(caller) then
 				callerName = caller:GetName()
 			end
-			DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. entname .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
+			--DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. entname .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
 
 			local triggerOutput = function()
 				local targetents
@@ -79,7 +79,7 @@ if SERVER then
 
 				for _,ent in pairs(targetents) do
 					if IsValid(ent) then
-						DbgPrint("Firing " .. tostring(ent) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
+						--DbgPrint("Firing " .. tostring(ent) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
 						ent:Input(cmd, activator, caller, param)
 					else
 						--DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
