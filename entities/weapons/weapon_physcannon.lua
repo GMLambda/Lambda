@@ -468,6 +468,10 @@ function SWEP:PrimaryAttack()
 		return self:DryFire()
 	end
 
+	if owner:InVehicle() == true then
+		return self:DryFire()
+	end
+
 	return self:PuntVPhysics(ent, fwd, tr)
 
 end
@@ -676,6 +680,10 @@ function SWEP:CanPickupObject(ent, massLimit, sizeLimit)
 	-- Hooks
 	local pickupAllowed = hook.Call("GravGunPickupAllowed", GAMEMODE, owner, ent)
 	if pickupAllowed == false then
+		return false
+	end
+
+	if ent:IsVehicle() then
 		return false
 	end
 

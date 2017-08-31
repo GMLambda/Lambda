@@ -172,7 +172,7 @@ function PANEL:PaintInfoWaitingForPlayers()
 	local fullyConnected = self.Parameters["FullyConnected"]
 	local total = connecting + fullyConnected
 
-	text = string.upper("Waiting for players " .. tostring(connecting) .. " / " .. tostring(total))
+	text = string.upper("Waiting for players " .. tostring(fullyConnected) .. " / " .. tostring(total))
 	local _,y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
 	text = string.format("%0.2f", remain)
 	self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)

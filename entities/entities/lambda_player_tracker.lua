@@ -174,7 +174,7 @@ if CLIENT then
 	function ENT:Draw()
 
 		local ply = self:GetParent()
-		if ply == LocalPlayer() or ply:Alive() == false then
+		if not IsValid(ply) or ply == LocalPlayer() or ply:Alive() == false then
 			return
 		end
 
