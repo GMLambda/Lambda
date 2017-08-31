@@ -2,6 +2,8 @@ if SERVER then
 	AddCSLuaFile()
 end
 
+local DbgPrint = GetLogging("motioncontroller")
+
 DEFINE_BASECLASS("lambda_entity")
 
 ENT.Base = "lambda_entity"
@@ -150,7 +152,6 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
 	if useGrabPos == true then
 		-- Find the nearest child.
 		physObj = self:FindNearestChildObject(obj, grabPos)
-		print("Closest phys obj: " .. tostring(physObj))
 	end
 
 	if not IsValid(physObj) then

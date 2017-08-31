@@ -3,6 +3,8 @@ if SERVER then
 	AddCSLuaFile()
 end
 
+local DbgPrint = GetLogging("physcannon")
+
 SWEP.PrintName = "#HL2_GravityGun"
 SWEP.Author = "Zeh Matt"
 SWEP.Instructions = ""
@@ -291,8 +293,6 @@ function SWEP:Supercharge()
 end
 
 function SWEP:AcceptInput(inputName, activator, callee, data)
-	print(self, "AcceptInput: " .. inputName)
-
 	if inputName:iequals("Supercharge") then
 		self:Supercharge()
 		return true
@@ -1957,7 +1957,6 @@ function SWEP:Holster(ent)
 
 	local controller = self:GetMotionController()
 	if controller:IsObjectAttached() == true then
-		print("Cant holster")
 		return false
 	end
 
