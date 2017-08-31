@@ -57,7 +57,10 @@ end
 local ENEMY_CLASS_WHITELIST =
 {
 	["npc_barnacle"] = true,
-	["npc_antlion"] = true,
+	["npc_bullseye"] = true,
+	["npc_furniture"] = true,
+	["npc_turret"] = true,
+	["npc_turret_floor"] = true,
 }
 
 function GM:UpdateCheckoints()
@@ -173,19 +176,31 @@ function GM:UpdateCheckoints()
 		if entPos:Distance(bestPos) >= MIN_ENEMY_DISTANCE then
 			continue
 		end
-		local class = v:GetClass()
-		if v:IsNPC() == true and class ~= "npc_bullseye" and IsFriendEntityName(class) == false and ENEMY_CLASS_WHITELIST[class] ~= true then
-			enemyNearby = true
-			DbgPrint("Enemie nearby " .. tostring(v) .. ", can not create checkpoint.")
-			break
-		elseif class == "npc_maker" or class == "npc_template_maker" and v.GetNPCClass ~= nil then
-			local npcclass = v:GetNPCClass()
-			if npctype ~= nil and IsFriendEntityName(npcclass) == false and ENEMY_CLASS_WHITELIST[npcclass] ~= true then
+
+		local entClass = v:GetClass()
+		local npcClass = nil
+
+		if v:IsNPC() == true then
+			npcClass = entClass
+		elseif entClass == "npc_maker" or entClass == "npc_template_maker" and v.GetNPCClass ~= nil then
+			npcClass = v:GetNPCClass()
+		end
+
+		if npcClass ~= nil and IsFriendEntityName(npcClass) == false and ENEMY_CLASS_WHITELIST[npcClass] ~= true then
+			-- Special case, they can become allies.
+			if npcClass == "npc_antlion" then
+				if game.GetGlobalState("antlion_allied") ~= GLOBAL_ON then
+					enemyNearby = true
+				end
+			else
 				enemyNearby = true
-				DbgPrint("Enemy spawner nearby, can not create checkpoint.")
+			end
+			if enemyNearby == true then
+				DbgPrint("Enemie nearby " .. tostring(v) .. " -> " .. tostring(npcClass) .. ", can not create checkpoint.")
 				break
 			end
 		end
+
 	end
 
 	if data.checkpoint == false and enemyNearby == false then
