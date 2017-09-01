@@ -121,11 +121,15 @@ function PANEL:PaintInfoRoundRestart()
 	local remain = timeEnd - GetSyncedTimestamp()
 	remain = math.Clamp(remain, 0, 127)
 
-	text = string.upper("Restarting Round in...")
-	local _,y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
-	text = string.format("%0.2f", remain)
-	self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
-	self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
+	if remain <= 0 then
+		text = string.upper("Restarting Round in...")
+		local _,y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
+		text = string.format("%0.2f", remain)
+		self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
+		self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
+	else
+		text = string.upper("Restarting Round ...")
+	end
 
 	local reverse = timeout - remain
 	local ralpha = 1 - (remain / timeout)
