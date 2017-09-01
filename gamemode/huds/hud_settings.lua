@@ -3,6 +3,9 @@ local PANEL = {}
 local W = 375
 local H = 440
 
+local COLOR_PANEL_W = 267
+local COLOR_PANEL_H = 206
+
 function PANEL:Init()
 
 	self:SetSkin("Lambda")
@@ -26,7 +29,7 @@ function PANEL:Init()
 	local PanelHelp = self.Sheet:Add("DPanel")
 	self.Sheet:AddSheet("Help",PanelHelp, "lambda/icons/help.png")
 
-	 PanelSelect = self.Sheet:Add("DPanelSelect")
+	PanelSelect = self.Sheet:Add("DPanelSelect")
 
 	local mdls = GAMEMODE:GetAvailablePlayerModels()
 
@@ -47,19 +50,12 @@ function PANEL:Init()
 		PanelSelect:AddPanel(icon, { lambda_playermdl = name })
 	end
 
-	local plycolb = vgui.Create("DImageButton", PanelSelect)
-	plycolb:SetPos(W - 45 , 5)
-	plycolb:SetImage("lambda/icons/palette.png")
-	plycolb:SizeToContents()
-	plycolb:SetTooltip("Change player color")
-	plycolb.DoClick = function() if !IsValid(self.CMFrame) then self:ShowColorMixer(1) else self.CMFrame:Remove() end end
-
-	local wepcolb = vgui.Create("DImageButton", PanelSelect)
-	wepcolb:SetPos(W - 45, 35)
-	wepcolb:SetImage("lambda/icons/palette.png")
-	wepcolb:SizeToContents()
-	wepcolb:SetTooltip("Change weapon color")
-	wepcolb.DoClick = function() if !IsValid(self.CMFrame) then self:ShowColorMixer(2) else self.CMFrame:Remove() end end
+	local colsetb = vgui.Create("DImageButton", PanelSelect)
+	colsetb:SetPos(W - 45 , 5)
+	colsetb:SetImage("lambda/icons/palette.png")
+	colsetb:SizeToContents()
+	colsetb:SetTooltip("Edit colors")
+	colsetb.DoClick = function() if !IsValid(self.CMFrame) then self:ShowColorOption() else self.CMFrame:Remove() end end
 
 	self.Sheet:AddSheet( "Player", PanelSelect, "lambda/icons/player_settings.png" )
 
@@ -186,7 +182,7 @@ function PANEL:Init()
 		end
 
 		local ply_track = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_track:SetPos( 5, 6*nwh+30 )
+		ply_track:SetPos(5, 6 * nwh + 30)
 		ply_track:SetText("Player tracking")
 		ply_track:SizeToContents()
 		ply_track:SetValue(cvars.Number("lambda_player_tracker"))
@@ -197,7 +193,7 @@ function PANEL:Init()
 		end
 
 		local ply_friendlyfire = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_friendlyfire:SetPos(5, 7*nwh+30)
+		ply_friendlyfire:SetPos(5, 7 * nwh + 30)
 		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on.")
 		ply_friendlyfire:SizeToContents()
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
@@ -208,7 +204,7 @@ function PANEL:Init()
 		end
 
 		local dynamic_checkpoints = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		dynamic_checkpoints:SetPos(5, 8*nwh+30)
+		dynamic_checkpoints:SetPos(5, 8 * nwh + 30)
 		dynamic_checkpoints:SetText("Dynamic checkpoints")
 		dynamic_checkpoints:SizeToContents()
 		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
@@ -234,42 +230,92 @@ function PANEL:OnClose()
 
 end
 
-function PANEL:ShowColorMixer(type)
-
+function PANEL:ShowColorOption()
+	self.Tabs = {}
+	self.CMs = {}
 
 	self.CMFrame = vgui.Create("DFrame")
 	self.CMFrame:SetPos(395, ScrH() / 2 - (H / 2))
-	self.CMFrame:SetSize(267, 186)
+	self.CMFrame:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
 	self.CMFrame:SetSkin("Lambda")
 	self.CMFrame:ShowCloseButton(false)
 	self.CMFrame:SetDraggable(false)
+	self.CMFrame:SetTitle("Color Settings")
 
-	self.ColorMixer = vgui.Create("DColorMixer", self.CMFrame)
-	self.ColorMixer:Dock(FILL)
-	self.ColorMixer:SetAlphaBar(false)
+	local function strColorToVector(str)
+		local color = string.Explode(" ", str)
+		return Color(color[1] , color[2],color[3])
+	end
+
+	local function retrieveColor(k)
+		if k == "hudBG" then
+			return strColorToVector(lambda_hud_bg_color:GetString())
+		else
+			return strColorToVector(lambda_hud_text_color:GetString())
+		end
+	end
+
+	local function retrieveVec(k)
+		if k == "ply" then
+			return LocalPlayer():GetPlayerColor()
+		else
+			return LocalPlayer():GetWeaponColor()
+		end
+	end
+
+
+	self.CMSheet = vgui.Create("DPropertySheet", self.CMFrame)
+	self.CMSheet:Dock(FILL)
+
+	self.Tabs.ply =  vgui.Create("DPanel", self.CMSheet)
+	self.CMSheet:AddSheet("Player", self.Tabs.ply)
+
+	self.Tabs.wep =  vgui.Create("DPanel", self.CMSheet)
+	self.CMSheet:AddSheet("Weapon", self.Tabs.wep)
+
+	self.Tabs.hudBG =  vgui.Create("DPanel", self.CMSheet)
+	self.CMSheet:AddSheet("Hud BG", self.Tabs.hudBG)
+
+	self.Tabs.hudTXT =  vgui.Create("DPanel", self.CMSheet)
+	self.CMSheet:AddSheet("Hud TEXT", self.Tabs.hudTXT)
+
+	for k,v in pairs(self.Tabs) do
+		self.CMs[k] = vgui.Create("DColorMixer", self.Tabs[k])
+		self.CMs[k]:SetAlphaBar(false)
+		self.CMs[k]:SetPalette(false)
+		self.CMs[k]:Dock(FILL)
+
+		if k == "hudTXT" or k == "hudBG" then
+			self.CMs[k]:SetColor(retrieveColor(k))
+		else
+			self.CMs[k]:SetVector(retrieveVec(k))
+		end
+
+		self.CMs[k].ValueChanged = function()
+			if k == "hudTXT" or k == "hudBG" then
+				self:UpdateColorSettings(k, self.CMs[k]:GetColor())
+			else
+				self:UpdateColorSettings(k, self.CMs[k]:GetVector())
+			end
+		end
+	end
 
 	self.CMFrame:MakePopup()
 
-	if ( type == 1 ) then
-		self.ColorMixer:SetVector(LocalPlayer():GetPlayerColor())
-		self.CMFrame:SetTitle("Player color")
-	else
-		self.ColorMixer:SetVector(LocalPlayer():GetWeaponColor())
-		self.CMFrame:SetTitle("Weapon color")
-	end
-
-	self.ColorMixer.ValueChanged = function() self:UpdatePlayerColor(type, self.ColorMixer:GetVector()) end
-
 end
 
-function PANEL:UpdatePlayerColor(type,color)
+function PANEL:UpdateColorSettings(val,color)
 
-	if type == 1 then
+	if val == "ply" then
 		LocalPlayer():SetPlayerColor(color)
 		lambda_player_color:SetString(util.TypeToString(color))
-	else
+	elseif val == "wep" then
 		LocalPlayer():SetWeaponColor(color)
 		lambda_weapon_color:SetString(util.TypeToString(color))
+	elseif val == "hudBG" then
+		lambda_hud_bg_color:SetString(string.FromColor(color))
+	elseif val == "hudTXT" then
+		lambda_hud_text_color:SetString(string.FromColor(color))
 	end
 
 	net.Start("LambdaPlayerColorChanged")
