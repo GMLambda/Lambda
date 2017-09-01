@@ -3,6 +3,9 @@ local PANEL = {}
 local W = 375
 local H = 440
 
+local COLOR_PANEL_W = 267
+local COLOR_PANEL_H = 206
+
 function PANEL:Init()
 
 	self:SetSkin("Lambda")
@@ -233,7 +236,7 @@ function PANEL:ShowColorOption()
 
 	self.CMFrame = vgui.Create("DFrame")
 	self.CMFrame:SetPos(395, ScrH() / 2 - (H / 2))
-	self.CMFrame:SetSize(267, 206)
+	self.CMFrame:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
 	self.CMFrame:SetSkin("Lambda")
 	self.CMFrame:ShowCloseButton(false)
 	self.CMFrame:SetDraggable(false)
