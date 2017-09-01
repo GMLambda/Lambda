@@ -40,9 +40,6 @@ function surfacedata.load(f, groups)
 				b2 = f:Read(1)
 			end
 			groupName = group
-			if groupName == "default" then
-				print("Group: " .. groupName)
-			end
 		elseif b1 == "{" then
 			-- Group content
 			local b2 = f:Read(1)

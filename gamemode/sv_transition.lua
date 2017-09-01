@@ -953,7 +953,7 @@ function GM:CreateTransitionObjects()
 		end
 
 		ent.SourceMap = data.SourceMap
-		ent.DispatchSpawn = dispatchSpawn
+		ent.ShouldDispatchSpawn = dispatchSpawn
 
 		-- Do key values first because we might override a few things with setters.
 		local keyIndex = 0
@@ -1117,7 +1117,7 @@ function GM:CreateTransitionObjects()
 	DbgPrint("Spawning objects...")
 	for _,ent in pairs(self.CreatedTransitionObjects) do
 		DbgPrint("Spawning: " .. tostring(ent))
-		if ent.DispatchSpawn ~= true then
+		if ent.ShouldDispatchSpawn ~= true then
 			continue
 		end
 		ent:Spawn()
