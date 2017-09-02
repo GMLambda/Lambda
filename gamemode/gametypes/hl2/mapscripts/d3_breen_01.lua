@@ -24,6 +24,7 @@ MAPSCRIPT.InputFilters =
 MAPSCRIPT.EntityFilterByClass =
 {
 	--["env_global"] = true,
+	["logic_auto"] = true,
 	["env_fade"] = true,
 }
 

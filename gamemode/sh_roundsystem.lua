@@ -307,17 +307,29 @@ end
 
 function GM:RoundSystemEntityKeyValue(ent, key, val)
 
+	local overrideEvent = true
+	if self.MapScript ~= nil and self.MapScript.EntityFilterByClass ~= nil and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
+		DbgPrint("Blocked override by mapscript.")
+		overrideEvent = false
+	end
+	
 	if key:iequals("OnNewGame") then
 	    DbgPrint(tostring(ent) .. ": Overriding OnNewGame event")
-	    self:RegisterNewGameEvent(val)
+		if overrideEvent == true then
+	    	self:RegisterNewGameEvent(val)
+		end
 	    return ""
 	elseif key:iequals("OnMapSpawn") then
 		DbgPrint(tostring(ent) .. ": Overriding OnMapSpawn event")
-		self:RegisterMapSpawnEvent(val)
+		if overrideEvent == true then
+			self:RegisterMapSpawnEvent(val)
+		end
 		return ""
 	elseif key:iequals("OnMapTransition") then
 		DbgPrint(tostring(ent) .. ": Overriding OnMapTransition event")
-		self:RegisterMapTransitionEvent(val)
+		if overrideEvent == true then
+			self:RegisterMapTransitionEvent(val)
+		end
 		return ""
 	end
 
