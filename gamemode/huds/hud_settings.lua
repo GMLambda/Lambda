@@ -26,9 +26,6 @@ function PANEL:Init()
 	self.Sheet:Dock(LEFT)
 	self.Sheet:SetSize(W - 10, H)
 
-	local PanelHelp = self.Sheet:Add("DPanel")
-	self.Sheet:AddSheet("Help",PanelHelp, "lambda/icons/help.png")
-
 	PanelSelect = self.Sheet:Add("DPanelSelect")
 
 	local mdls = GAMEMODE:GetAvailablePlayerModels()
@@ -51,7 +48,7 @@ function PANEL:Init()
 	end
 
 	local colsetb = vgui.Create("DImageButton", PanelSelect)
-	colsetb:SetPos(W - 45 , 5)
+	colsetb:SetPos(W - 43 , 5)
 	colsetb:SetImage("lambda/icons/palette.png")
 	colsetb:SizeToContents()
 	colsetb:SetTooltip("Edit colors")
@@ -100,6 +97,14 @@ function PANEL:Init()
 		resp_time_label:SetText("Respawn time")
 		resp_time_label:SizeToContents()
 
+		local no_resp = vgui.Create("DCheckBoxLabel", PanelAdmin)
+		no_resp:SetPos(nww + 100, 7)
+		no_resp:SetText("No respawn")
+		no_resp:SizeToContents()
+		function no_resp:OnChange(val)
+			if val then resp_time:SetValue(-1) else resp_time:SetValue(GetConVar("lambda_max_respawn_timeout"):GetDefault()) end
+		end
+
 		---
 
 		local rest_time = vgui.Create("DNumberWang", PanelAdmin)
@@ -114,7 +119,7 @@ function PANEL:Init()
 		local rest_time_label = vgui.Create("DLabel", PanelAdmin)
 		rest_time_label:SetPos(nww + 10 , 32)
 		rest_time_label:SetTextColor(Color(255,255,255,150))
-		rest_time_label:SetText("Restart timeout")
+		rest_time_label:SetText("Restart time")
 		rest_time_label:SizeToContents()
 
 		---
@@ -161,7 +166,7 @@ function PANEL:Init()
 
 		local player_god = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		player_god:SetPos(5, 4 * nwh + 30)
-		player_god:SetText("God Mode.")
+		player_god:SetText("Godmode")
 		player_god:SizeToContents()
 		player_god:SetValue(cvars.Number("lambda_player_god"))
 		function player_god:OnChange(val)
@@ -172,7 +177,7 @@ function PANEL:Init()
 
 		local ply_coll = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		ply_coll:SetPos(5, 5 * nwh + 30)
-		ply_coll:SetText("Player collision.")
+		ply_coll:SetText("Player collision")
 		ply_coll:SizeToContents()
 		ply_coll:SetValue(cvars.Number("lambda_playercollision"))
 		function ply_coll:OnChange(val)
@@ -194,7 +199,7 @@ function PANEL:Init()
 
 		local ply_friendlyfire = vgui.Create("DCheckBoxLabel", PanelAdmin)
 		ply_friendlyfire:SetPos(5, 7 * nwh + 30)
-		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on.")
+		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on")
 		ply_friendlyfire:SizeToContents()
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
 		function ply_friendlyfire:OnChange(val)
