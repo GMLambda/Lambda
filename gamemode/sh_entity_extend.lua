@@ -278,7 +278,6 @@ end
 function ENTITY_META:CanBecomeRagdoll()
 	local seq = self:SelectWeightedSequence(ACT_DIERAGDOLL)
 	if seq == ACT_INVALID then
-		print("Invalid act")
 		return false
 	end
 	if self:IsFlagSet(FL_TRANSRAGDOLL) then

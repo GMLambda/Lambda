@@ -111,7 +111,7 @@ end
 
 function GM:Initialize()
 
-	print("GM:Initialize")
+	DbgPrint("GM:Initialize")
 	DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
 	self:LoadGameTypes()

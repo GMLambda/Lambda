@@ -385,7 +385,7 @@ function GM:OnNewGame()
 					chapterMessage:Spawn()
 					self.LambdaChapterMessage = chapterMessage
 				else
-					print("env_message with chapter already exists")
+					DbgPrint("env_message with chapter already exists")
 				end
 			end
 		end

@@ -66,7 +66,6 @@ function GM:ProcessTriggerWeaponDissolve(ent)
 	-- OnChargingPhyscannon
 	-- UGLY HACK! But thats the only way we can tell when to upgrade.
 	ent:Fire("AddOutput", "OnChargingPhyscannon lambda_physcannon,Supercharge,,0")
-	print("Adding output for physcannon")
 end
 
 local ENTITY_PROCESSORS =

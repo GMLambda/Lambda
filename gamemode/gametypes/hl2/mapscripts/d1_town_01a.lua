@@ -39,9 +39,6 @@ MAPSCRIPT.EntityFilterByName =
 }
 
 function MAPSCRIPT:Init()
-
-	DbgPrint("-- Mapscript: Template loaded --")
-
 end
 
 function MAPSCRIPT:PostInit()

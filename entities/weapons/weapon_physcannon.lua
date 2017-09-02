@@ -2509,5 +2509,5 @@ function SWEP:DrawWeaponSelection( x, y, wide, tall, alpha )
 
 	surface.SetFont( "LambdaPhyscannonFont" )
 	surface.DrawText( "m" )
-	
+
 end

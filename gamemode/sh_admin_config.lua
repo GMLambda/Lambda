@@ -1,3 +1,5 @@
+local DbgPrint = GetLogging("Admin")
+
 if SERVER then
 	AddCSLuaFile()
 
@@ -5,22 +7,22 @@ if SERVER then
 
 	function GM:ChangeAdminConfiguration(ply, token, cvar, val)
 		if ply:IsAdmin() == false then
+			DbgPrint("Player " .. tostring(ply) .. " attempted to change settings without the correct permissions.")
 			return
 		end
 		if self:ValidateUserToken(ply, token) == false then
+			DbgPrint("Player " .. tostring(ply) .. " attempted to change settings with invalid auth token.")
 			return
 		end
 		local registeredCvar = self:GetRegisteredConVar(cvar)
 		if registeredCvar == nil then
-			print("Attempted to access unregistered cvar: " .. cvar .. ", player: " .. tostring(ply))
+			DbgPrint("Attempted to access unregistered cvar: " .. tostring(cvar) .. ", player: " .. tostring(ply))
 			return
 		end
 		registeredCvar:SetString(val)
 	end
 
 	net.Receive("LambdaAdminSetting", function(len, ply)
-
-		print("Received admin setting changes")
 
 		local token = net.ReadString()
 		local cvar = net.ReadString()
@@ -30,7 +32,7 @@ if SERVER then
 
 	end)
 
-else
+else -- CLIENT
 
 	function GM:ChangeAdminConfiguration(cvar, val)
 		local ply = LocalPlayer()
