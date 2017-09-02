@@ -1,5 +1,5 @@
 if SERVER then
-    AddCSLuaFile()
+	AddCSLuaFile()
 	util.AddNetworkString("LambdaRoundInfo")
 end
 
@@ -71,26 +71,26 @@ if SERVER then
 
 	end
 
-    function GM:IncludePlayerInRound(ply)
+	function GM:IncludePlayerInRound(ply)
 
 		DbgPrint("GM:IncludePlayerInRound(" .. tostring(ply) .. ")")
 		self:NotifyPlayerListChanged()
 
-    end
+	end
 
-    function GM:RestartRound()
+	function GM:RestartRound()
 
-        DbgPrint("Requested restart")
+		DbgPrint("Requested restart")
 
-        local restartTime = lambda_map_restart_timeout:GetInt()
+		local restartTime = lambda_map_restart_timeout:GetInt()
 		restartTime = math.Clamp(restartTime, 0, 127)
 
-        if self.RoundState ~= STATE_RUNNING then
-            DbgPrint("Attempted to restart while restart is pending")
-            return
-        end
+		if self.RoundState ~= STATE_RUNNING then
+			DbgPrint("Attempted to restart while restart is pending")
+			return
+		end
 
-        self.RoundState = STATE_RESTART_REQUESTED
+		self.RoundState = STATE_RESTART_REQUESTED
 		self.RestartStartTime = GetSyncedTimestamp()
 		self.ScheduledRestartTime = self.RestartStartTime + restartTime
 		self.RealTimeScale = game.GetTimeScale()
@@ -125,11 +125,11 @@ if SERVER then
 
 		end
 
-    end
+	end
 
-    function GM:CleanUpMap()
+	function GM:CleanUpMap()
 
-        DbgPrint("GM:CleanUpMap")
+		DbgPrint("GM:CleanUpMap")
 
 		-- Make sure nothing is going to create new things now
 		self.RoundState = STATE_RESTARTING
@@ -137,13 +137,13 @@ if SERVER then
 		-- Remove vehicles
 		self:CleanUpVehicles()
 
-        -- Check what we have to cleanup
-        local filter = {}
-        hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
+		-- Check what we have to cleanup
+		local filter = {}
+		hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
 
-        game.CleanUpMap(false, filter)
+		game.CleanUpMap(false, filter)
 
-    end
+	end
 
 	function GM:RoundStateBooting()
 		DbgUniquePrint("Waiting for boot")
@@ -209,14 +209,14 @@ if SERVER then
 		[STATE_RUNNING] = GM.RoundStateRunning,
 	}
 
-    function GM:RoundThink()
+	function GM:RoundThink()
 
 		local fn = ROUND_STATE_LOGIC[self.RoundState]
 		if fn ~= nil then
 			fn(self)
 		end
 
-    end
+	end
 
 else
 
@@ -226,7 +226,7 @@ else
 		local params = net.ReadTable()
 
 		DbgPrint("Received round state info: " .. tostring(infoType))
-		PrintTable(params)
+		--PrintTable(params)
 
 		GAMEMODE:SetRoundDisplayInfo(infoType, params)
 
@@ -268,7 +268,6 @@ function GM:PostCleanupMap()
 		return
 	end
 
-	local self = self
 	util.RunNextFrame(function()
 		self:StartRound(true)
 	end)
@@ -277,13 +276,13 @@ end
 
 function GM:IsRoundRestarting()
 
-    if self.RoundState == STATE_RESTART_REQUESTED or
-       self.RoundState == STATE_RESTARTING
-    then
-        return true
-    end
+	if self.RoundState == STATE_RESTART_REQUESTED or
+	   self.RoundState == STATE_RESTARTING
+	then
+	    return true
+	end
 
-    return false
+	return false
 
 end
 
@@ -295,23 +294,23 @@ function GM:CleanUpGameEvents()
 end
 
 function GM:RegisterNewGameEvent(v)
-    table.insert(self.OnNewGameEvents, { v, 0 })
+	table.insert(self.OnNewGameEvents, { v, 0 })
 end
 
 function GM:RegisterMapTransitionEvent(v)
-    table.insert(self.OnMapTransitionEvents, { v, 0 })
+	table.insert(self.OnMapTransitionEvents, { v, 0 })
 end
 
 function GM:RegisterMapSpawnEvent(v)
-    table.insert(self.OnMapSpawnEvents, { v, 0 })
+	table.insert(self.OnMapSpawnEvents, { v, 0 })
 end
 
 function GM:RoundSystemEntityKeyValue(ent, key, val)
 
 	if key:iequals("OnNewGame") then
-        DbgPrint(tostring(ent) .. ": Overriding OnNewGame event")
-        self:RegisterNewGameEvent(val)
-        return ""
+	    DbgPrint(tostring(ent) .. ": Overriding OnNewGame event")
+	    self:RegisterNewGameEvent(val)
+	    return ""
 	elseif key:iequals("OnMapSpawn") then
 		DbgPrint(tostring(ent) .. ": Overriding OnMapSpawn event")
 		self:RegisterMapSpawnEvent(val)
@@ -320,24 +319,24 @@ function GM:RoundSystemEntityKeyValue(ent, key, val)
 		DbgPrint(tostring(ent) .. ": Overriding OnMapTransition event")
 		self:RegisterMapTransitionEvent(val)
 		return ""
-    end
+	end
 
 end
 
 -- Called as soon players are ready to play or a new round has begun.
 function GM:OnNewGame()
 
-    DbgPrint("GM:OnNewGame")
+	DbgPrint("GM:OnNewGame")
 
-    if self.WaitingForRoundStart == true then
-        Error("Critical flaw: Called OnNewGame before NewRound == false")
-    end
+	if self.WaitingForRoundStart == true then
+	    Error("Critical flaw: Called OnNewGame before NewRound == false")
+	end
 
 	-- This should be the right spot.
 	self.RoundState = STATE_RUNNING
 	self.RoundStartTime = GetSyncedTimestamp()
 
-    if SERVER then
+	if SERVER then
 
 		-- FIXME: Don't ignore the delay time.
 		self:CreateTransitionObjects()
@@ -353,7 +352,7 @@ function GM:OnNewGame()
 			v:Spawn()
 		end
 
-        -- Notify clients.
+	    -- Notify clients.
 		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
 
 		local failureMessage = ents.Create("env_message")
@@ -434,19 +433,19 @@ end
 
 function GM:StartRound(cleaned)
 
-    -- Initialize map script.
-    DbgPrint("GM:StartRound")
+	-- Initialize map script.
+	DbgPrint("GM:StartRound")
 
-    if CLIENT then
-        hook.Remove("HUDPaint", "LambdaRoundRestart")
-        hook.Remove("Think", "LambdaRoundRestart")
+	if CLIENT then
+	    hook.Remove("HUDPaint", "LambdaRoundRestart")
+	    hook.Remove("Think", "LambdaRoundRestart")
 
 		self:SetSoundSuppressed(false)
-    end
+	end
 
-    if SERVER then
+	if SERVER then
 
-        game.SetTimeScale(1)
+	    game.SetTimeScale(1)
 
 		if self.InitPostEntityDone ~= true then
 			DbgError("Unfinished booting")
@@ -460,31 +459,31 @@ function GM:StartRound(cleaned)
 			self:CleanUpVehicles()
 		end
 
-    end
+	end
 
-    self.WaitingForRoundStart = false
+	self.WaitingForRoundStart = false
 
-    if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
-        self.WaitingForRoundStart = true
-    elseif player.GetCount() == 0 then
-        self.WaitingForRoundStart = true
-    end
+	if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
+	    self.WaitingForRoundStart = true
+	elseif player.GetCount() == 0 then
+	    self.WaitingForRoundStart = true
+	end
 
 	self.RoundState = STATE_RESTARTING
 
 	if self.MapScript.Init ~= nil then
-    	self.MapScript:Init()
+		self.MapScript:Init()
 	end
 
-    if SERVER then
-        local count = 0
-        for k,t in pairs(self.MapScript.InputFilters) do
-            for _,v in pairs(t) do
-                self:FilterEntityInput(k, v)
-                count = count + 1
-            end
-        end
-        DbgPrint("Loaded " .. tostring(count) .. " input filter for current map")
+	if SERVER then
+	    local count = 0
+	    for k,t in pairs(self.MapScript.InputFilters) do
+	        for _,v in pairs(t) do
+	            self:FilterEntityInput(k, v)
+	            count = count + 1
+	        end
+	    end
+	    DbgPrint("Loaded " .. tostring(count) .. " input filter for current map")
 	end
 
 	if SERVER then
@@ -492,16 +491,15 @@ function GM:StartRound(cleaned)
 	end
 
 	if self.WaitingForRoundStart == false then
-		local self = self
 		util.RunDelayed(function()
 			self:OnNewGame()
 		end, CurTime() + 0.5)
-    else
-        if SERVER then
+	else
+	    if SERVER then
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 			self:NotifyPlayerListChanged()
-        end
-    end
+	    end
+	end
 
 end
 

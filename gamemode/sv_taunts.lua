@@ -22,7 +22,7 @@ function PlaceRunPointer(ply)
 			effectdata:SetRadius(50)
 		util.Effect( "lambda_pointer", effectdata, true )
 
-		local effectdata = EffectData()
+		effectdata = EffectData()
 			effectdata:SetOrigin( trace.HitPos )
 			effectdata:SetStart( ply:GetShootPos() - Vector(0,0,5) )
 			effectdata:SetAttachment( 1 )

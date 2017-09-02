@@ -85,7 +85,7 @@ function GetSyncedTimestamp()
 	local res = CURRENT_TIMESTAMP
 
 	if CLIENT then
-		local delta = (SysTime() - TIMESTAMP_UPDATE_TIME)
+		local delta = SysTime() - TIMESTAMP_UPDATE_TIME
 		res = res + delta
 	end
 

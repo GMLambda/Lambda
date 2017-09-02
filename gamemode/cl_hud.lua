@@ -23,7 +23,6 @@ function GM:HUDTick()
 		return
 	end
 
-	local viewlock = ply:GetViewLock()
 	-- FIXME: Show the hud only when in color customization.
 	local hideHud = false
 
@@ -50,7 +49,7 @@ function GM:HUDTick()
 
 end
 
-function GM:HUDShouldDraw( name )
+function GM:HUDShouldDraw( hudName )
 
 	local ply = LocalPlayer()
 	if not IsValid(ply) then
@@ -63,7 +62,7 @@ function GM:HUDShouldDraw( name )
 		return false
 	end
 
-	if name == "CHudCrosshair"  then
+	if hudName == "CHudCrosshair"  then
 		if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
 			--return false
 		end
@@ -74,22 +73,22 @@ function GM:HUDShouldDraw( name )
 		if lambda_dynamic_crosshair:GetBool() == true and wep.DoDrawCrosshair == nil then
 			return false
 		end
-	elseif name == "CHudGeiger" then
+	elseif hudName == "CHudGeiger" then
 		if not ply:IsSuitEquipped() then
 			return false
 		end
-	elseif name == "CHudBattery" then
+	elseif hudName == "CHudBattery" then
 		return false
-	elseif name == "CHudHealth" or
-		name == "CHudAmmo" or
-		name == "CHudSecondaryAmmo" then
+	elseif hudName == "CHudHealth" or
+		hudName == "CHudAmmo" or
+		hudName == "CHudSecondaryAmmo" then
 		return false
-	elseif name == "CHudDamageIndicator" then
+	elseif hudName == "CHudDamageIndicator" then
 		-- We include the lifetime because theres some weird thing going with the damage indicator.
 		if ply:Alive() == false or ply:GetLifeTime() < 1.0 then
 			return false
 		end
-	elseif name == "CHudHistoryResource" then
+	elseif hudName == "CHudHistoryResource" then
 		return false
 	end
 

@@ -218,10 +218,10 @@ if SERVER then
 
 		self:PreChangelevel(map, landmark, playersInTrigger)
 
-		local map = map
+		local nextMap = map
 		if g_debug_transitions:GetBool() ~= true then
 			--timer.Simple(0.1, function()
-				game.ConsoleCommand("changelevel " .. map .. "\n")
+				game.ConsoleCommand("changelevel " .. nextMap .. "\n")
 			--end)
 		end
 

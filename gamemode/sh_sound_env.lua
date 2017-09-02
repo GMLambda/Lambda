@@ -31,10 +31,8 @@ function GM:EntityEmitSound(data)
 
 	local ent = data.Entity
 
-	if IsValid(ent) and ent:IsNPC() and string.sub(data.SoundName, 1, 16):iequals("player/footsteps") then
-		if self:NPCFootstep(ent, data) == false then
-			return false
-		end
+	if IsValid(ent) and ent:IsNPC() and string.sub(data.SoundName, 1, 16):iequals("player/footsteps") and self:NPCFootstep(ent, data) == false then
+		return false
 	end
 
 	return true

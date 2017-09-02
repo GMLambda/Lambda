@@ -38,8 +38,6 @@ end
 
 function PANEL:SetDisplayInfo(infoType, parameters)
 
-	DbgPrint("PANEL:SetDisplayInfo")
-
 	if infoType ~= ROUND_INFO_NONE then
 		self:SetVisible(true)
 	else

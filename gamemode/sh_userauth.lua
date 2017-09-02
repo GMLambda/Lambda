@@ -1,3 +1,5 @@
+local DbgPrint = GetLogging("Auth")
+
 if SERVER then
 	AddCSLuaFile()
 	util.AddNetworkString("LambdaPlayerToken")
@@ -41,7 +43,6 @@ else
 
 	net.Receive("LambdaPlayerToken", function(len)
 
-		local ply = LocalPlayer()
 		local token = net.ReadString()
 
 		LAMBDA_PLAYER_AUTH_TOKEN = token

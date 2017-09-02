@@ -197,10 +197,8 @@ local function EmitPlayerSpeech(ply, group, minWait)
 	if ply.NextSpeechTime > curTime then
 		return false -- Busy
 	end
-	if minWait ~= nil and ply.LastSpeechTime ~= nil then
-		if CurTime() - ply.LastSpeechTime < minWait then
-			return false -- Busy
-		end
+	if minWait ~= nil and ply.LastSpeechTime ~= nil and CurTime() - ply.LastSpeechTime < minWait then
+		return false -- Busy
 	end
 
 	local groupData = SPEECH_GROUPS[group]
@@ -209,8 +207,7 @@ local function EmitPlayerSpeech(ply, group, minWait)
 	end
 
 	local vos = groupData.VO[ply:GetGender()]
-
-	local vo = table.Random(groupData.VO[ply:GetGender()])
+	local vo = table.Random(vos)
 	local dur = SoundDuration(vo)
 
 	timer.Simple(0.2, function()
@@ -402,14 +399,13 @@ function GM:UpdatePlayerSpeech(ply)
 	end
 
 	local pos = ply:GetPos()
-	local dir = ply:GetAimVector()
 
 	ply.FriendlyInSight = false
 	ply.FriendlyNearby = false
 	ply.EnemyInSight = false
 	ply.EnemyNearby = false
 
-	local nearbyEnts = ents.FindInBox(ply:GetPos() - Vector(500, 500, 0), ply:GetPos() + Vector(500, 500, 164))
+	local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 164))
 	local actions = {}
 
 	for k,v in pairs(nearbyEnts) do

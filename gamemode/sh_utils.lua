@@ -57,7 +57,7 @@ if SERVER then
 			if IsValid(caller) then
 				callerName = caller:GetName()
 			end
-			--DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. entname .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
+			--DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. tostring(cmd) .. ", Delay:" .. tostring(delay) .. ", Param:" .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 
 			local triggerOutput = function()
 				local targetents
