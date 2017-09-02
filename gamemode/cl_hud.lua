@@ -24,7 +24,8 @@ function GM:HUDTick()
 	end
 
 	local viewlock = ply:GetViewLock()
-	local hideHud = viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE
+	-- FIXME: Show the hud only when in color customization.
+	local hideHud = false
 
 	local wep = ply:GetActiveWeapon()
 	local CHudHealth = (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false and not hideHud
@@ -64,7 +65,7 @@ function GM:HUDShouldDraw( name )
 
 	if name == "CHudCrosshair"  then
 		if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then
-			return false
+			--return false
 		end
 		local wep = ply:GetActiveWeapon()
 		if not IsValid(wep) then

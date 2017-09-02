@@ -495,7 +495,7 @@ function GM:StartRound(cleaned)
 		local self = self
 		util.RunDelayed(function()
 			self:OnNewGame()
-		end, CurTime() + 2)
+		end, CurTime() + 0.5)
     else
         if SERVER then
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()

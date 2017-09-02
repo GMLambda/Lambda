@@ -30,6 +30,11 @@ SWEP.UseHands = true
 SWEP.ViewModel = "models/weapons/c_superphyscannon.mdl"
 SWEP.WorldModel = "models/weapons/w_Physics.mdl"
 
+SWEP.WepSelectFont		= "WeaponIconsSelected"
+SWEP.WepSelectLetter	= "m"
+SWEP.IconFont			= "WeaponIconsSelected"
+SWEP.IconLetter			= "m"
+
 if CLIENT then
 	SWEP.Slot = 0
 	SWEP.SlotPos = 2
@@ -37,10 +42,32 @@ if CLIENT then
 	SWEP.DrawCrosshair = true
 	SWEP.DrawWeaponInfoBox = false
 	SWEP.BounceWeaponIcon = false
-	SWEP.WepSelectIcon = surface.GetTextureID( "weapons/swep" )
 	SWEP.RenderGroup = RENDERGROUP_BOTH
 	SWEP.EffectParameters = {}
 	SWEP.ViewModelFOV = 54
+
+	surface.CreateFont("LambdaPhyscannonFont",
+	{
+		font = "HalfLife2",
+		size = util.ScreenScaleH(64),
+		weight = 0,
+		blursize = 0,
+		scanlines = 0,
+		antialias = true,
+		additive = true,
+	})
+
+	surface.CreateFont("LambdaPhyscannonFont2",
+	{
+		font = "HalfLife2",
+		size = util.ScreenScaleH(64),
+		weight = 0,
+		blursize = util.ScreenScaleH(4),
+		scanlines = 2,
+		antialias = true,
+		additive = true,
+	})
+
 end
 
 --
@@ -2462,4 +2489,25 @@ end
 
 function SWEP:ViewModelDrawn(vm)
 	self:DrawEffects()
+end
+
+function SWEP:DrawWeaponSelection( x, y, wide, tall, alpha )
+
+	surface.SetTextColor( 255, 220, 0, alpha )
+
+	surface.SetFont( "LambdaPhyscannonFont" )
+	local w, h = surface.GetTextSize( "m" )
+
+	surface.SetTextPos( x + ( wide / 2 ) - ( w / 2 ),
+						y + ( tall / 2 ) - ( h / 2 ) )
+
+	surface.SetFont( "LambdaPhyscannonFont2" )
+	surface.DrawText( "m" )
+
+	surface.SetTextPos( x + ( wide / 2 ) - ( w / 2 ),
+						y + ( tall / 2 ) - ( h / 2 ) )
+
+	surface.SetFont( "LambdaPhyscannonFont" )
+	surface.DrawText( "m" )
+	
 end

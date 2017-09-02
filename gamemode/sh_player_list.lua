@@ -163,6 +163,7 @@ if SERVER then
 
 else -- CLIENT
 
+	-- FIXME: Move this out into sh_lambda_player.lua
 	hook.Add("StartCommand", "LambdaPlayerReady", function(ply, cmd)
 
 		-- NOTE: Just making sure its us.
@@ -172,8 +173,14 @@ else -- CLIENT
 
 		-- Auto-reload
 		if ply.SignaledConnection ~= true then
-			net.Start("LambdaPlayerReady")
-			net.SendToServer()
+
+			-- Delay this a little, I noticed that clients aren't fully ready at this point
+			-- causing them glitch when put in vehicles.
+			timer.Simple(2, function()
+				net.Start("LambdaPlayerReady")
+				net.SendToServer()
+			end)
+
 			ply.SignaledConnection = true
 		end
 
