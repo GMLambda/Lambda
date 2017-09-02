@@ -36,7 +36,7 @@ function SB_PING_METER:Setup(ply)
 end
 
 function SB_PING_METER:Think()
-	if !IsValid(self.Player) then return end
+	if not IsValid(self.Player) then return end
 	self.PlyPing = self.Player:Ping()
 	self.PingNum:SetText("   " .. self.PlyPing)
 end

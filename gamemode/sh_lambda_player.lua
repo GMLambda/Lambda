@@ -212,7 +212,6 @@ if SERVER then
 			gender = "female"
 		end
 		ply:SetNW2String("Gender", gender)
-		print("New Gender: " .. gender)
 
 		util.PrecacheModel(mdl)
 		ply:SetModel(mdl)

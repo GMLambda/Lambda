@@ -34,9 +34,6 @@ MAPSCRIPT.EntityFilterByName =
 }
 
 function MAPSCRIPT:Init()
-
-	DbgPrint("-- Mapscript: Template loaded --")
-
 end
 
 function MAPSCRIPT:PostInit()
@@ -70,7 +67,7 @@ function MAPSCRIPT:PostInit()
 					continue
 				end
 				if v:HasWeapon("weapon_physcannon") then
-					print("Stripping on player: " .. tostring(v))
+					DbgPrint("Stripping on player: " .. tostring(v))
 					v:StripWeapon("weapon_physcannon")
 				end
 			end
@@ -81,7 +78,6 @@ function MAPSCRIPT:PostInit()
 			weaponTrigger:Remove()
 
 			for k,v in pairs(ents.FindByClass("weapon_physcannon")) do
-				print("Turning on mega: " .. tostring(v))
 				v:Supercharge()
 			end
 

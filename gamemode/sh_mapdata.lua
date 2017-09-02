@@ -102,15 +102,15 @@ local function LoadMapData()
 
 end
 
-local mapdata = nil
+local cachedMapdata = nil
 
 function game.GetMapData()
 
-	if mapdata == nil then
-		mapdata = LoadMapData()
+	if cachedMapdata == nil then
+		cachedMapdata = LoadMapData()
 	end
 
-	return mapdata
+	return cachedMapdata
 
 end
 

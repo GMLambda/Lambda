@@ -57,7 +57,6 @@ MAPSCRIPT.EntityFilterByName =
 
 function MAPSCRIPT:Init()
 
-	DbgPrint("-- Mapscript: Template loaded --")
 	self.PlayerQueue = {}
 
 end

@@ -17,9 +17,6 @@ MAPSCRIPT.InputFilters =
 }
 
 function MAPSCRIPT:Init()
-
-	DbgPrint("-- Mapscript: d1_trainstation_02 --")
-
 end
 
 function MAPSCRIPT:PostInit()

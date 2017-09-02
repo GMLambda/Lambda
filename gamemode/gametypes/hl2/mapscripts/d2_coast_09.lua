@@ -54,9 +54,6 @@ MAPSCRIPT.EntityFilterByName =
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:Init()
-
-	DbgPrint("-- Mapscript: Template loaded --")
-
 end
 
 function MAPSCRIPT:PostInit()

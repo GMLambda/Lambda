@@ -37,9 +37,6 @@ MAPSCRIPT.InputFilters =
 }
 
 function MAPSCRIPT:Init()
-
-	DbgPrint("-- Mapscript: d1_trainstation_01 --")
-
 end
 
 function MAPSCRIPT:ResetPlayerPos(ply)

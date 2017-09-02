@@ -506,7 +506,7 @@ function GM:TransitionObjects(landmarkEnt, objects, objectTable, playerTable, pl
 
 	local processed = {}
 	local transitionTable = {}
-	local debugTransition = true
+	local debugTransition = false -- FIXME: Make this part of the debug logging.
 	local processedPlayers = {}
 
 	for _, touchingEnt in pairs(objects) do

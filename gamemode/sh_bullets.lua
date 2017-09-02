@@ -29,7 +29,6 @@ if CLIENT then
 
 		local offset
 		for i = 0, newAmount, BULLET_STEP_DISTANCE do
-
 			offset = curPos + (dir * (distance / newAmount) * i) + (VectorRand() * 2.5)
 
 			if offset:Distance(bullet.StartPos) >= bullet.Dist then

@@ -96,7 +96,7 @@ function GM:UpdateCheckoints()
 			groundEnt = v:GetGroundEntity()
 			pos = v:GetPos()
 			filter = { v }
-			if groundEnt != game.GetWorld() then
+			if groundEnt ~= game.GetWorld() then
 				continue
 			end
 		else

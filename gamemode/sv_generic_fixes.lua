@@ -5,7 +5,7 @@ local function ReplaceFuncTankVolume(ent, volname)
 	--DbgPrint("Replacing control volume: " .. volname)
 
 	local ent = ent
-	local newName = "coop" .. volname
+	local newName = "Lambda" .. volname
 
 	ents.WaitForEntityByName(volname, function(vol)
 

@@ -289,7 +289,6 @@ function GM:HUDDrawPickupHistory()
 		if ( !istable( v ) ) then
 
 			Msg( tostring( v ) .."\n" )
-			PrintTable( self.PickupHistory )
 			self.PickupHistory[ k ] = nil
 			return
 

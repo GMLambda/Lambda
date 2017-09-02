@@ -4,9 +4,9 @@ end
 
 surfacedata = {}
 
-function surfacedata.load(f, groups)
+function surfacedata.load(file, groups)
 
-	local f = file.Open(f, "r", "GAME")
+	local f = file.Open(file, "r", "GAME")
 	if f == nil then
 		error("Unable to open file")
 		return false
@@ -84,8 +84,8 @@ function surfacedata.load(f, groups)
 		baseChain = table.Reverse(baseChain)
 
 		-- Now merge the base chains into the data.
-		for _, baseGroupName in pairs(baseChain) do
-			local base = groups[baseGroupName]
+		for _, baseGroupNameIt in pairs(baseChain) do
+			local base = groups[baseGroupNameIt]
 			if base == nil then
 				print("Base missing: " .. baseGroup)
 			else

@@ -60,7 +60,7 @@ end
 
 function GM:EntityRemoved(ent)
 	-- Burning sounds are annoying.
-    ent:StopSound("General.BurningFlesh")
+	ent:StopSound("General.BurningFlesh")
 	ent:StopSound("General.BurningObject")
 end
 
@@ -95,7 +95,7 @@ function GM:Think()
 end
 
 function GM:OnGamemodeLoaded()
-    self.ServerStartupTime = GetSyncedTimestamp()
+	self.ServerStartupTime = GetSyncedTimestamp()
 end
 
 function GM:OnReloaded()
@@ -111,7 +111,7 @@ end
 
 function GM:Initialize()
 
-	print("GM:Initialize")
+	DbgPrint("GM:Initialize")
 	DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
 	self:LoadGameTypes()
