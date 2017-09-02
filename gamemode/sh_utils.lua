@@ -15,8 +15,9 @@ if SERVER then
 			local delay = out[3] or 0
 			local param = out[4] or ""
 			local targetents = ents.FindByName(entname) or {}
+			local times = -1
 			for k,v in pairs(targetents) do
-				DbgPrint("Firing " .. tostring(v) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
+				DbgPrint("Firing " .. tostring(v) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 				v:Fire(cmd, param, delay)
 			end
 		end
@@ -79,7 +80,7 @@ if SERVER then
 
 				for _,ent in pairs(targetents) do
 					if IsValid(ent) then
-						--DbgPrint("Firing " .. tostring(ent) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
+						--DbgPrint("Firing " .. tostring(ent) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 						ent:Input(cmd, activator, caller, param)
 					else
 						--DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
@@ -131,7 +132,7 @@ if SERVER then
 
 			--[k].Times = outputs[k].Times or times
 			--times = outputs[k].Times
-			DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. caller:GetName() .. ") -> (Target: " .. entname .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
+			--DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. caller:GetName() .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
 
 			util.RunDelayed(function()
 
