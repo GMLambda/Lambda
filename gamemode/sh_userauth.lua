@@ -12,7 +12,7 @@ if SERVER then
 
 	local function GenerateToken()
 		local tokens = {}
-		local seed = math.Round(os.time() + system.UpTime() + SysTime() + CurTime() + math.random())
+		local seed = math.Round(os.time())
 		math.randomseed(seed)
 		local tokenTableLen = #TOKEN_TABLE
 		for i = 1, TOKEN_LEN do
