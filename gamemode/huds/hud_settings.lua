@@ -102,6 +102,7 @@ function PANEL:Init()
 		no_resp:SetText("No respawn")
 		no_resp:SizeToContents()
 		function no_resp:OnChange(val)
+			resp_time:SetVisible(val == false)
 			if val then resp_time:SetValue(-1) else resp_time:SetValue(GetConVar("lambda_max_respawn_timeout"):GetDefault()) end
 		end
 
