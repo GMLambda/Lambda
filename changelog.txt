@@ -31,11 +31,15 @@
 - Improved: Precision on GetSyncedTimestamp. 
 - Improved: Minor performance improvements. 
 - Improved: Reduced distance of player stats.
+- Improved: Player tracking option.
 - Improved: Modified player tracker to be less annoying when barely visible.
 - Feature: Custom gravity gun rewritten from scratch with support of the mega gravity gun and prediction support.
 - Feature: Dynamic checkpoint selection. 
+- Feature: Players will consider their souroundings and use shout outs accordingly.
 - Feature: Made the player timeout a convar.
+- Feature: Custom HUD colors.
 - Feature: Settings menu for player models, admin settings etc. on F1.
 - Feature: Teleport heuristic to allow changes on collision rules.
 - Feature: Allow player collisions.
 - Feature: Friendly fire support.
+- Feature: No respawn support.
