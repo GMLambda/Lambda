@@ -309,10 +309,10 @@ function GM:RoundSystemEntityKeyValue(ent, key, val)
 
 	local overrideEvent = true
 	if self.MapScript ~= nil and self.MapScript.EntityFilterByClass ~= nil and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
-		DbgPrint("Blocked override by mapscript.")
+		DbgPrint("Blocked override by mapscript: " .. key)
 		overrideEvent = false
 	end
-	
+
 	if key:iequals("OnNewGame") then
 	    DbgPrint(tostring(ent) .. ": Overriding OnNewGame event")
 		if overrideEvent == true then

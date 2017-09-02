@@ -4,9 +4,9 @@ end
 
 surfacedata = {}
 
-function surfacedata.load(file, groups)
+function surfacedata.load(filename, groups)
 
-	local f = file.Open(file, "r", "GAME")
+	local f = file.Open(filename, "r", "GAME")
 	if f == nil then
 		error("Unable to open file")
 		return false
