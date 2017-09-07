@@ -92,7 +92,7 @@ function GM:OnEntityCreated(ent)
 			return
 		end
 
-		if ent:IsWeapon() then
+		if ent:IsWeapon() == true then
 			self:TrackWeapon(ent)
 		end
 

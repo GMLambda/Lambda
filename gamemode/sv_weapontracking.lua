@@ -13,7 +13,7 @@ function GM:WeaponTrackingThink()
 
 	local curTime = CurTime()
 
-	if self.NextWeaponCheck < curTime then
+	if self.NextWeaponCheck == nil or self.NextWeaponCheck < curTime then
 		return
 	end
 

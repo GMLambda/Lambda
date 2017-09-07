@@ -268,22 +268,24 @@ if SERVER then
 			-- Weapons
 			DbgPrint("Giving player " .. tostring(ply) .. " default weapons")
 
-			for k,v in pairs(self.MapScript.DefaultLoadout.Weapons) do
+			local gameType = self:GetGameType()
+			local loadout = gameType:GetPlayerLoadout() or {}
+			for k,v in pairs(loadout.Weapons or {}) do
 				DbgPrint("Give(" .. tostring(ply) .. "): " .. v)
 				ply:Give(v, false)
 			end
 
 			-- Ammo
-			for k,v in pairs(self.MapScript.DefaultLoadout.Ammo) do
+			for k,v in pairs(loadout.Ammo or {}) do
 				DbgPrint("GiveAmmo(" .. tostring(ply) .. "): " .. k .. " -> " .. v)
 				ply:GiveAmmo(v, k, true)
 			end
 
 			-- Armor
-			ply:SetArmor(self.MapScript.DefaultLoadout.Armor)
+			ply:SetArmor(loadout.Armor or 0)
 
 			-- HEV
-			if self.MapScript.DefaultLoadout.HEV then
+			if loadout.HEV then
 				DbgPrint("EquipSuit(" .. tostring(ply) .. ")")
 				ply:EquipSuit()
 			else
@@ -605,23 +607,19 @@ if SERVER then
 		ply:SetTeam(LAMBDA_TEAM_DEAD)
 		ply:LockPosition(false, false)
 
-		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
-		local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
-		local total = player.GetCount() - 1
-		if total <= 0 then total = 1 end
-		local timeoutAmount = math.Round(alive / total * timeout)
+		local gameType = self:GetGameType()
+		local respawnTime = gameType:GetPlayerRespawnTime()
 
-		ply.RespawnTime = ply.DeathTime + timeoutAmount
+		ply.RespawnTime = ply.DeathTime + respawnTime
 
-		if timeout == -1 then timeoutAmount = -1 end
-
-		if self:IsRoundRestarting() == false and alive > 0 then
+		if self:IsRoundRestarting() == false and gameType:ShouldRestartRound() == false then
+			DbgPrint("Notifying respawn")
 			self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
 			{
 				EntIndex = ply:EntIndex(),
 				Respawn = true,
 				StartTime = ply.DeathTime,
-				Timeout = timeoutAmount,
+				Timeout = respawnTime,
 			})
 		end
 
@@ -631,7 +629,7 @@ if SERVER then
 
 	    --DbgPrint("GM:PlayerDeathThink")
 
-		if self:IsRoundRestarting() then
+		if self:IsRoundRestarting() == true then
 	        --DbgPrint("Round is restarting")
 			return false
 		end
@@ -651,7 +649,8 @@ if SERVER then
 	        return false
 	    end
 
-		local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 127)
+		local gameType = self:GetGameType()
+		local timeout = gameType:GetPlayerRespawnTime()
 		if timeout == -1 then
 			return false
 		end
@@ -862,7 +861,9 @@ if SERVER then
 
 		DbgPrint("PlayerCanPickupWeapon", ply, wep)
 
-		if ply.LambdaDisablePickupDuplication == true then
+		local gameType = self:GetGameType()
+		local pickupMode = gameType:GetPlayerItemPickupMode()
+		if ply.LambdaDisablePickupDuplication == true or pickupMode == GAMETYPE_PLAYERITEMPICKUP_SIMPLE then
 			return true
 		end
 

@@ -6,6 +6,7 @@ end
 
 include("gametypes/hl2.lua")
 include("gametypes/hl2ep1.lua")
+include("gametypes/hl2dm.lua")
 
 local DEFAULT_MAPSCRIPT = {}
 DEFAULT_MAPSCRIPT.InputFilters = {}
@@ -51,6 +52,10 @@ DEFAULT_MAPSCRIPT.PrePlayerSpawn = function(self, ply) end
 DEFAULT_MAPSCRIPT.PostPlayerSpawn = function(self, ply) end
 DEFAULT_MAPSCRIPT.OnNewGame = function(self) end
 
+-- Shared constants
+GAMETYPE_PLAYERITEMPICKUP_SIMPLE = 0
+GAMETYPE_PLAYERITEMPICKUP_DUPLICATE = 1
+
 GameTypes = GameTypes or {}
 GameTypes.Registered = {}
 
@@ -69,6 +74,12 @@ end
 
 function GM:LoadGameTypes()
 	hook.Run("LambdaLoadGameTypes", GameTypes)
+	if SERVER then
+		print("-- Loaded GameTypes --")
+		for k,v in pairs(GameTypes.Registered) do
+			print("> " .. k)
+		end
+	end
 end
 
 function GM:SetGameType(gametype)
@@ -78,8 +89,6 @@ function GM:SetGameType(gametype)
 		error("Unable to find gametype: " .. gametype)
 		return
 	end
-
-	--gametype:LoadMapScript()
 
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)

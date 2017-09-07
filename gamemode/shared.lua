@@ -74,7 +74,7 @@ function GM:Think()
 		self:WeaponTrackingThink()
 	end
 
-	if self.MapScript.Think then
+	if self.MapScript and self.MapScript.Think then
 		self.MapScript:Think()
 	end
 

@@ -6,6 +6,7 @@ local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 local MAPSCRIPT_FILE = "hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
 
+GAMETYPE.Name = "Half-Life 2"
 GAMETYPE.MapScript = include(MAPSCRIPT_FILE)
 GAMETYPE.MapList =
 {
@@ -130,6 +131,19 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_mossman"] = true,
 }
 
+function GAMETYPE:GetPlayerRespawnTime()
+
+	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+	local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
+	local total = player.GetCount() - 1
+	if total <= 0 then
+		total = 1
+	end
+	local timeoutAmount = math.Round(alive / total * timeout)
+	return timeoutAmount
+
+end
+
 function GAMETYPE:ShouldRestartRound()
 
     local playerCount = 0
@@ -151,6 +165,14 @@ function GAMETYPE:ShouldRestartRound()
 
 	return false
 
+end
+
+function GAMETYPE:GetPlayerLoadout()
+	return self.MapScript.DefaultLoadout
+end
+
+function GAMETYPE:GetPlayerItemPickupMode()
+	return GAMETYPE_WEAPONPICKUPMODE_DUPLICATE
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
