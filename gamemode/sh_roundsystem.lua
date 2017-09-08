@@ -487,7 +487,7 @@ function GM:StartRound(cleaned)
 		self.MapScript:Init()
 	end
 
-	if SERVER then
+	if SERVER and self.MapScript and self.MapScript.InputFilters then
 	    local count = 0
 	    for k,t in pairs(self.MapScript.InputFilters) do
 	        for _,v in pairs(t) do

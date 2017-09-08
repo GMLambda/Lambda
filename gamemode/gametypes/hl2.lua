@@ -4,10 +4,11 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-local MAPSCRIPT_FILE = "hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
 
 GAMETYPE.Name = "Half-Life 2"
-GAMETYPE.MapScript = include(MAPSCRIPT_FILE)
+GAMETYPE.MapScript = {}
+GAMETYPE.PlayerSpawnClass = "info_player_start"
+GAMETYPE.UsingCheckpoints = true
 GAMETYPE.MapList =
 {
 	"d1_trainstation_01",
@@ -169,6 +170,16 @@ end
 
 function GAMETYPE:GetPlayerLoadout()
 	return self.MapScript.DefaultLoadout
+end
+
+function GAMETYPE:LoadMapScript()
+	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
+	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
+		self.MapScript = include(MAPSCRIPT_FILE)
+	else
+		DbgPrint("No mapscript available.")
+		self.MapScript = {}
+	end
 end
 
 function GAMETYPE:GetPlayerItemPickupMode()

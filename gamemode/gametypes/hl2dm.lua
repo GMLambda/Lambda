@@ -6,6 +6,10 @@ local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 
 GAMETYPE.Name = "Deathmatch"
+GAMETYPE.MapScript = {}
+GAMETYPE.UsingCheckpoints = false
+GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
+
 GAMETYPE.MapList =
 {
 }

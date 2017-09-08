@@ -2,7 +2,7 @@ if SERVER then
 	AddCSLuaFile()
 end
 
---local DbgPrint = GetLogging("GameType")
+local DbgPrint = GetLogging("GameType")
 
 include("gametypes/hl2.lua")
 include("gametypes/hl2ep1.lua")
@@ -83,13 +83,15 @@ function GM:LoadGameTypes()
 end
 
 function GM:SetGameType(gametype)
-
+	DbgPrint("SetGameType: " .. tostring(gametype))
 	local gametypeData = GameTypes:Get(gametype)
 	if gametypeData == nil then
 		error("Unable to find gametype: " .. gametype)
 		return
 	end
-
+	if gametypeData.LoadMapScript ~= nil then
+		gametypeData:LoadMapScript()
+	end
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 

@@ -5,8 +5,7 @@ end
 local GAMETYPE = {}
 
 GAMETYPE.Name = "Half-Life 2: Episode 1"
-// Include Mapscript.
-GAMETYPE.MapScript = include("hl2/mapscripts/" .. game.GetMap():lower() .. ".lua")
+GAMETYPE.MapScript = {}
 GAMETYPE.MapList =
 {
 	"d1_trainstation_01",
@@ -168,6 +167,16 @@ end
 
 function GAMETYPE:GetPlayerItemPickupMode()
 	return GAMETYPE_WEAPONPICKUPMODE_DUPLICATE
+end
+
+function GAMETYPE:LoadMapScript()
+	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2ep1/mapscripts/" .. game.GetMap():lower() .. ".lua"
+	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
+		self.MapScript = include(MAPSCRIPT_FILE)
+	else
+		DbgPrint("No mapscript available.")
+		self.MapScript = {}
+	end
 end
 
 function GAMETYPE:GetPlayerLoadout()

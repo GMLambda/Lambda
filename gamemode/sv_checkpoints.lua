@@ -46,6 +46,10 @@ function GM:ResetCheckpoints()
 end
 
 function GM:SetPlayerCheckpoint(checkpoint)
+	local gameType = self:GetGameType()
+	if gameType.UsingCheckpoints == false then
+		return
+	end
 	DbgPrint("Assigned new checkpoint to: " .. tostring(checkpoint))
 	self.CurrentCheckpoint = checkpoint
 	local cpPos = checkpoint:GetPos()
@@ -64,6 +68,10 @@ local ENEMY_CLASS_WHITELIST =
 }
 
 function GM:UpdateCheckoints()
+	local gameType = self:GetGameType()
+	if gameType.UsingCheckpoints == false then
+		return
+	end
 
 	if self.NextCheckpointTest ~= nil and CurTime() < self.NextCheckpointTest then
 		return

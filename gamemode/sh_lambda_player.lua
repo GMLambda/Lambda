@@ -148,13 +148,13 @@ if SERVER then
 			return self.CurrentCheckpoint
 		end
 
-		local spawnpoints = ents.FindByClass("info_player_start")
+		local gameType = self:GetGameType()
+		local spawnClass = gameType.PlayerSpawnClass
+
+		local spawnpoints = ents.FindByClass(spawnClass)
 		local spawnpoint = nil
 
 		for _,v in pairs(spawnpoints) do
-
-			-- Initial spawnpoint if none set.
-			spawnpoint = spawnpoint or v
 
 			-- If set by us then this is the absolute.
 			if v.MasterSpawn == true then
@@ -168,6 +168,10 @@ if SERVER then
 				spawnpoint = v
 			end
 
+		end
+
+		if spawnpoint == nil and #spawnpoints > 0 then
+			spawnpoint = table.Random(spawnpoints)
 		end
 
 		DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))
