@@ -1,14 +1,13 @@
+if SERVER then
+	AddCSLuaFile()
+end
+
 ENT.Base = "lambda_entity"
-ENT.Type = "point"
+ENT.Type = "anim"
 
 DEFINE_BASECLASS("lambda_entity")
 
 local DEFAULT_RESPAWN_TIME = 60.0
-
-function ENT:PreInitialize()
-	BaseClass.PreInitialize(self)
-	self:SetupNWVar("RespawnTime", "string", { Default = "", KeyValue = "RespawnTime"} )
-end
 
 function ENT:SpawnProp()
 
@@ -22,6 +21,7 @@ function ENT:SpawnProp()
 			self:PropDestroyed(ent)
 		end
 	end)
+	ent:EmitSound("AlyxEmp.Charge")
 
 	self.OriginalSpawnPos = ent:GetPos()
 	self.OriginalSpawnAng = ent:GetAngles()
@@ -41,23 +41,33 @@ function ENT:PropDestroyed(ent)
 	self.Think = self.RespawnThink
 end
 
-function ENT:Initialize()
-
-    BaseClass.Initialize(self)
-
-	self:SpawnProp()
-
+function ENT:PreInitialize()
+	BaseClass.PreInitialize(self)
+	self:SetupNWVar("RespawnTime", "float", { Default = DEFAULT_RESPAWN_TIME, KeyValue = "RespawnTime"} )
 end
 
-function ENT:OnRemove()
+function ENT:Initialize()
+    BaseClass.Initialize(self)
+	if SERVER then
+		self:SpawnProp()
+	end
+	self:DrawShadow(false)
+	self:AddEffects(EF_NODRAW)
+end
+
+function ENT:Think()
 end
 
 function ENT:IdleThink()
+	self:NextThink(CurTime() + 10)
+	return true
 end
 
 function ENT:RespawnThink()
+	self:NextThink(CurTime() + 0.5)
+
 	if self.NextRespawnTime == 0 or CurTime() < self.NextRespawnTime then
-		return
+		return true
 	end
 
 	local tr = util.TraceHull(
@@ -77,6 +87,7 @@ function ENT:RespawnThink()
 	end
 
 	self:SpawnProp()
+	return true
 end
 
 function ENT:KeyValue(key, val)
@@ -86,5 +97,14 @@ function ENT:KeyValue(key, val)
 	-- NOTE: This causes the overwrite the class of the entity, remove it.
 	if key:iequals("classname") == false then
 		table.insert(self.StoredKeyValues, { Key = key, Val = val })
+	end
+end
+
+if CLIENT then
+	function ENT:Draw()
+		-- Do nothing in here, we are just a proxy object but to keep compatibility
+		-- this needs to be anim, we could do a fancy materialisation effect in here if
+		-- we really want to.
+		-- self:DrawModel()
 	end
 end

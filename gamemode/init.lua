@@ -94,6 +94,9 @@ function GM:OnEntityCreated(ent)
 
 		if ent:IsWeapon() == true then
 			self:TrackWeapon(ent)
+			if ent:CreatedByMap() == true then
+				print("Weapon created by map: " .. tostring(ent))
+			end
 		end
 
 		if self.MapScript then

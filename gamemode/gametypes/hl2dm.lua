@@ -64,8 +64,12 @@ function GAMETYPE:GetPlayerLoadout()
 	}
 end
 
+function GAMETYPE:Think()
+
+end
+
 function GAMETYPE:GetPlayerItemPickupMode()
-	return GAMETYPE_WEAPONPICKUPMODE_SIMPLE
+	return GAMETYPE_PLAYERITEMPICKUP_SIMPLE
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)

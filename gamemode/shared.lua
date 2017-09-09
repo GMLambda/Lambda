@@ -92,6 +92,11 @@ function GM:Think()
 		end
 	end
 
+	local gameType = self:GetGameType()
+	if gameType.Think then
+		gameType:Think()
+	end
+
 end
 
 function GM:OnGamemodeLoaded()
