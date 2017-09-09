@@ -18,7 +18,6 @@ function ENT:SpawnProp()
 	end
 	ent:Spawn()
 	ent:CallOnRemove(self, function()
-		print("Ent removed")
 		if IsValid(self) then
 			self:PropDestroyed(ent)
 		end
@@ -38,7 +37,7 @@ end
 
 function ENT:PropDestroyed(ent)
 	local respawnTime = self:GetNWVar("RespawnTime", DEFAULT_RESPAWN_TIME)
-	self.NextRespawnTime = CurTime() + 0
+	self.NextRespawnTime = CurTime() + respawnTime
 	self.Think = self.RespawnThink
 end
 
@@ -72,7 +71,8 @@ function ENT:RespawnThink()
 	})
 
 	if tr.StartSolid == true or tr.AllSolid == true then
-		self.NextRespawnTime = CurTime() + 1
+		-- Try again in a second.
+		self.NextRespawnTime = CurTime() + 1.0
 		return
 	end
 
@@ -83,6 +83,7 @@ function ENT:KeyValue(key, val)
 	BaseClass.KeyValue(self, key, val)
 
 	self.StoredKeyValues = self.StoredKeyValues or {}
+	-- NOTE: This causes the overwrite the class of the entity, remove it.
 	if key:iequals("classname") == false then
 		table.insert(self.StoredKeyValues, { Key = key, Val = val })
 	end
