@@ -828,7 +828,7 @@ if SERVER then
 
 		-- Maps have the annoying template spawner for all weapons so give it a slight chance to pick it up
 		-- those items arent usually cleaned up so let the player have it, for now..
-		if CurTime() - ply.LambdaSpawnTime <= 1 then
+		if CurTime() - ply.LambdaSpawnTime <= 0.1 then
 			return true
 		end
 
@@ -887,12 +887,12 @@ if SERVER then
 
 		-- Maps have the annoying template spawner for all weapons so give it a slight chance to pick it up
 		-- those items arent usually cleaned up so let the player have it, for now..
-		if CurTime() - ply.LambdaSpawnTime <= 2 then
+		if CurTime() - ply.LambdaSpawnTime <= 0.1 then
 			return true
 		end
 
 		local class = wep:GetClass()
-			
+
 		if wep.DroppedByPlayerDeath == true then
 			if ply:HasWeapon(class) == true then
 				-- Already has it.
