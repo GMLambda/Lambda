@@ -39,6 +39,37 @@ function ENTITY_META:GetModelInfo()
 
 end
 
+local ITEM_CLASSES =
+{
+	["item_ammo_357"] = true,
+	["item_ammo_357_large"] = true,
+	["item_ammo_ar2"] = true,
+	["item_ammo_ar2_altfire"] = true,
+	["item_ammo_ar2_large"] = true,
+	["item_ammo_crate"] = true,
+	["item_ammo_crossbow"] = true,
+	["item_ammo_pistol"] = true,
+	["item_ammo_pistol_large"] = true,
+	["item_ammo_smg1"] = true,
+	["item_ammo_smg1_grenade"] = true,
+	["item_ammo_smg1_large"] = true,
+	["item_battery"] = true,
+	["item_box_buckshot"] = true,
+	["item_dynamic resupply"] = true,
+	["item_healthcharger"] = true,
+	["item_healthkit"] = true,
+	["item_healthvial"] = true,
+	["item_item_crate"] = true,
+	["item_rpg_round"] = true,
+	["item_suit"] = true,
+	["item_suitcharger"] = true,
+}
+
+function ENTITY_META:IsItem()
+	local class = self:GetClass()
+	return ITEM_CLASSES[class] == true
+end
+
 function ENTITY_META:PhysicsImpactSound(chan, vol, speed)
 
 	local mdlInfo = self:GetModelInfo()

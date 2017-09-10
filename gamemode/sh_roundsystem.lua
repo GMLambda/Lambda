@@ -254,6 +254,7 @@ function GM:PreCleanupMap()
 		self:ResetCheckpoints()
 		self:InitializeGlobalSpeechContext()
 		self:InitializeWeaponTracking()
+		self:ClearLevelDesignerPlacedObjects()
 	end
 end
 

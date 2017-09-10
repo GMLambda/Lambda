@@ -52,10 +52,6 @@ DEFAULT_MAPSCRIPT.PrePlayerSpawn = function(self, ply) end
 DEFAULT_MAPSCRIPT.PostPlayerSpawn = function(self, ply) end
 DEFAULT_MAPSCRIPT.OnNewGame = function(self) end
 
--- Shared constants
-GAMETYPE_PLAYERITEMPICKUP_SIMPLE = 0
-GAMETYPE_PLAYERITEMPICKUP_DUPLICATE = 1
-
 GameTypes = GameTypes or {}
 GameTypes.Registered = {}
 

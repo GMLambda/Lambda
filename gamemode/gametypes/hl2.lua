@@ -168,6 +168,34 @@ function GAMETYPE:ShouldRestartRound()
 
 end
 
+function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
+	return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
+end
+
+function GAMETYPE:PlayerCanPickupItem(ply, item)
+	return true
+end
+
+function GAMETYPE:GetWeaponRespawnTime()
+	return 0
+end
+
+function GAMETYPE:GetItemRespawnTime()
+	return -1
+end
+
+function GAMETYPE:ShouldRespawnWeapon(ent)
+	if ent:GetClass() == "weapon_frag" then
+		-- Consider this an item and not some weapon.
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:ShouldRespawnItem(ent)
+	return false
+end
+
 function GAMETYPE:GetPlayerLoadout()
 	return self.MapScript.DefaultLoadout
 end

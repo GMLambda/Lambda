@@ -16,11 +16,6 @@ GAMETYPE.MapList =
 
 GAMETYPE.ClassesEnemyNPC =
 {
-	["npc_metropolice"] = true,
-	["npc_combine"] = true,
-	["npc_combine_s"] = true,
-	["npc_zombie"] = true,
-	["npc_headcrab"] = true,
 }
 
 GAMETYPE.ImportantPlayerNPCNames =
@@ -33,15 +28,12 @@ GAMETYPE.ImportantPlayerNPCClasses =
 
 function GAMETYPE:GetPlayerRespawnTime()
 
-	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), 0, 255)
 	return timeout
 
 end
 
 function GAMETYPE:ShouldRestartRound()
-
-    local playerCount = 0
-    local aliveCount = 0
 
 	return false
 
@@ -64,12 +56,38 @@ function GAMETYPE:GetPlayerLoadout()
 	}
 end
 
-function GAMETYPE:Think()
-
+function GAMETYPE:GetWeaponRespawnTime()
+	-- ConVar sv_hl2mp_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+	return 20
 end
 
-function GAMETYPE:GetPlayerItemPickupMode()
-	return GAMETYPE_PLAYERITEMPICKUP_SIMPLE
+function GAMETYPE:GetItemRespawnTime()
+	-- ConVar sv_hl2mp_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+	return 30
+end
+
+local SF_NORESPAWN = 1073741824 -- 1 << 30
+
+function GAMETYPE:ShouldRespawnWeapon(ent)
+	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false then
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:ShouldRespawnItem(ent)
+	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false then
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
+	return true
+end
+
+function GAMETYPE:PlayerCanPickupItem(ply, item)
+	return true
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)

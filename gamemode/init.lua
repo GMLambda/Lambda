@@ -85,6 +85,13 @@ function GM:OnEntityCreated(ent)
 		entityProcessor.Fn(self, ent)
 	end
 
+	-- Used to track the entity in case we respawn it.
+	if ent.UniqueEntityId == nil then
+		self.UniqueEntityId = self.UniqueEntityId or 1
+		self.UniqueEntityId = self.UniqueEntityId + 1
+		ent.UniqueEntityId = self.UniqueEntityId
+	end
+	
 	-- Run this next frame so we can safely remove entities and have their actual names assigned.
 	util.RunNextFrame(function()
 
@@ -92,10 +99,25 @@ function GM:OnEntityCreated(ent)
 			return
 		end
 
+		-- Required information for respawning some things.
+		ent.InitialSpawnData =
+		{
+			Pos = ent:GetPos(),
+			Ang = ent:GetAngles(),
+			Mins = ent:OBBMins(),
+			Maxs = ent:OBBMaxs(),
+		}
+
 		if ent:IsWeapon() == true then
 			self:TrackWeapon(ent)
 			if ent:CreatedByMap() == true then
-				print("Weapon created by map: " .. tostring(ent))
+				DbgPrint("Level designer created weapon: " .. tostring(ent))
+				self:InsertLevelDesignerPlacedObject(ent)
+			end
+		elseif ent:IsItem() == true then
+			if ent:CreatedByMap() == true then
+				DbgPrint("Level designer created item: " .. tostring(ent))
+				self:InsertLevelDesignerPlacedObject(ent)
 			end
 		end
 
@@ -130,6 +152,32 @@ function GM:OnEntityCreated(ent)
 		self:HandleVehicleCreation(ent)
 	end
 
+end
+
+function GM:InsertLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects or {}
+	objects[obj] = true
+	self.LevelRelevantObjects = objects
+end
+
+function GM:IsLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects
+	if objects == nil then
+		return false
+	end
+	return objects[obj] == true
+end
+
+function GM:RemoveLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects
+	if objects == nil then
+		return
+	end
+	objects[obj] = nil
+end
+
+function GM:ClearLevelDesignerPlacedObjects()
+	self.LevelRelevantObjects = {}
 end
 
 function GM:ApplyCorrectedDamage(dmginfo)
