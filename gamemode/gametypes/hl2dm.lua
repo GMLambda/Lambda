@@ -39,17 +39,40 @@ function GAMETYPE:ShouldRestartRound()
 
 end
 
+function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
+	ply:AddDeaths( 1 )
+
+	-- Suicide?
+	if inflictor == ply or attacker == ply then
+		attacker:AddFrags(-1)
+		return
+	end
+
+	if IsValid(attacker) and attacker:IsPlayer() then
+		attacker:AddFrags( 1 )
+	elseif IsValid(inflictor) and inflictor:IsPlayer() then
+		inflictor:AddFrags( 1 )
+	end
+end
+
+function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
+	-- TODO: In case of TDM we need to check the team.
+	return true
+end
+
 function GAMETYPE:GetPlayerLoadout()
 	return {
 		Weapons =
 		{
 			"weapon_crowbar",
 			"weapon_physcannon",
+			"weapon_smg1",
 			"weapon_pistol",
 		},
 		Ammo =
 		{
 			["Pistol"] = 20,
+			["SMG1"] = 60,
 		},
 		Armor = 0,
 		HEV = true,
@@ -65,8 +88,6 @@ function GAMETYPE:GetItemRespawnTime()
 	-- ConVar sv_hl2mp_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
 	return 30
 end
-
-local SF_NORESPAWN = 1073741824 -- 1 << 30
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
 	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false then

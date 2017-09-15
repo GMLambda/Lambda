@@ -169,7 +169,14 @@ function GAMETYPE:ShouldRestartRound()
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
-	return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
+	if ply:HasWeapon(wep:GetClass()) == true then
+		-- Only allow a new pickup once if there is ammo in the weapon.
+		if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then
+			return false
+		end
+		return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
+	end
+	return true
 end
 
 function GAMETYPE:PlayerCanPickupItem(ply, item)
@@ -187,6 +194,32 @@ end
 function GAMETYPE:ShouldRespawnWeapon(ent)
 	if ent:GetClass() == "weapon_frag" then
 		-- Consider this an item and not some weapon.
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
+	ply:AddDeaths( 1 )
+
+	-- Suicide?
+	if inflictor == ply or attacker == ply then
+		attacker:AddFrags(-1)
+		return
+	end
+
+	-- Friendly kill?
+	if IsValid(attacker) and attacker:IsPlayer() then
+		attacker:AddFrags( -1 )
+	elseif IsValid(inflictor) and inflictor:IsPlayer() then
+		inflictor:AddFrags( -1 )
+	end
+end
+
+function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
+	local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
+	-- Friendly fire is controlled by convar in this case.
+	if playerAttacking == true and lambda_friendlyfire:GetBool() == false then
 		return false
 	end
 	return true

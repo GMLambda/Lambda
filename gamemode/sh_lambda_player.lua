@@ -592,17 +592,8 @@ if SERVER then
 
 		end
 
-		ply:AddDeaths( 1 )
-
-		if attacker:IsValid() and attacker:IsPlayer() then
-
-			if attacker == ply then
-				attacker:AddFrags( -1 )
-			else
-				attacker:AddFrags( 1 )
-			end
-
-		end
+		local gameType = self:GetGameType()
+		gameType:PlayerDeath(ply, attacker, inflictor)
 
 		BaseClass.PlayerDeath(self, ply, attacker, inflictor)
 
@@ -859,7 +850,6 @@ if SERVER then
 		end
 
 		if self:PlayerCanPickupAmmo(ply, item) == false then
-			print("Not allowing item pickup")
 			res = false
 		end
 
@@ -880,6 +870,9 @@ if SERVER then
 	function GM:PlayerCanPickupWeapon(ply, wep)
 
 		DbgPrint("PlayerCanPickupWeapon", ply, wep)
+
+		-- OnEntityCreated is not called for everything.
+		wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
 
 		if ply.LambdaDisablePickupDuplication == true then
 			return true
@@ -910,16 +903,17 @@ if SERVER then
 			end
 		elseif class == "weapon_annabelle" then
 			return false -- Not supposed to have this.
-		else
-			if ply:HasWeapon(class) == true then
-				if self:PlayerCanPickupAmmo(ply, wep) == false then
-					return false
-				end
-			end
-			if gameType:PlayerCanPickupWeapon(ply, wep) == false then
-				DbgPrint("GameType prevented pickup")
+		end
+
+		if ply:HasWeapon(class) == true then
+			if self:PlayerCanPickupAmmo(ply, wep) == false then
 				return false
 			end
+		end
+
+		if gameType:PlayerCanPickupWeapon(ply, wep) == false then
+			DbgPrint("GameType prevented pickup")
+			return false
 		end
 
 		if gameType:ShouldRespawnWeapon(wep) == true then
@@ -1738,7 +1732,9 @@ function GM:OnPlayerAmmoDepleted(ply, wep)
 	DbgPrint("Ammo Depleted: " .. tostring(ply) .. " - " .. tostring(wep) )
 
 	if SERVER then
-		self:SelectBestWeapon(ply)
+		util.RunDelayed(function()
+			self:SelectBestWeapon(ply)
+		end, CurTime() + 1.5)
 	end
 
 	if CLIENT then

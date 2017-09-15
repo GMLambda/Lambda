@@ -76,6 +76,12 @@ local ENTITY_PROCESSORS =
 	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
 }
 
+function GM:GetNextUniqueEntityId()
+	self.UniqueEntityId = self.UniqueEntityId or 0
+	self.UniqueEntityId = self.UniqueEntityId + 1
+	return self.UniqueEntityId
+end
+
 function GM:OnEntityCreated(ent)
 
 	local class = ent:GetClass()
@@ -86,12 +92,8 @@ function GM:OnEntityCreated(ent)
 	end
 
 	-- Used to track the entity in case we respawn it.
-	if ent.UniqueEntityId == nil then
-		self.UniqueEntityId = self.UniqueEntityId or 1
-		self.UniqueEntityId = self.UniqueEntityId + 1
-		ent.UniqueEntityId = self.UniqueEntityId
-	end
-	
+	ent.UniqueEntityId = ent.UniqueEntityId or self:GetNextUniqueEntityId()
+
 	-- Run this next frame so we can safely remove entities and have their actual names assigned.
 	util.RunNextFrame(function()
 
@@ -249,10 +251,13 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
-		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and lambda_friendlyfire:GetBool() == false and attacker ~= target then
-			return true
+		local gameType = self:GetGameType()
+		if target ~= attacker and target ~= inflictor then
+			if gameType:PlayerShouldTakeDamage(target, attacker, inflictor) == false then
+				return true
+			end
 		end
-
+		
 		local dmg = dmginfo:GetDamage()
 		if dmg > 0 then
 			local hitGroup = HITGROUP_GENERIC
