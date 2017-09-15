@@ -142,22 +142,24 @@ if SERVER then
 
 		DbgPrint("PlayerSelectSpawn")
 
-		-- Check if players reached a checkpoint.
-		if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
-			ply.SelectedSpawnpoint = self.CurrentCheckpoint
-			return self.CurrentCheckpoint
+		local gameType = self:GetGameType()
+		if gameType.UsingCheckpoints == true then
+			-- Check if players reached a checkpoint.
+			if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
+				ply.SelectedSpawnpoint = self.CurrentCheckpoint
+				return self.CurrentCheckpoint
+			end
 		end
 
-		local gameType = self:GetGameType()
 		local spawnClass = gameType.PlayerSpawnClass
-
 		local spawnpoints = ents.FindByClass(spawnClass)
 		if #spawnpoints == 0 then
 			-- Always use a fallback.
 			spawnpoints = ents.FindByClass("info_player_start")
 		end
-		local spawnpoint = nil
 
+		local spawnpoint = nil
+		local possibleSpawns = {}
 		for _,v in pairs(spawnpoints) do
 
 			-- If set by us then this is the absolute.
@@ -172,16 +174,60 @@ if SERVER then
 				spawnpoint = v
 			end
 
+			if gameType:CanPlayerSpawn(ply, v) == true then
+				table.insert(possibleSpawns, v)
+			end
+
 		end
 
-		if spawnpoint == nil and #spawnpoints > 0 then
-			spawnpoint = table.Random(spawnpoints)
+		if spawnpoint == nil and #possibleSpawns > 0 then
+			spawnpoint = table.Random(possibleSpawns)
 		end
 
 		DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))
 
 		ply.SelectedSpawnpoint = spawnpoint
 		return spawnpoint
+
+	end
+
+	function GM:CanPlayerSpawn(ply)
+
+		local gameType = self:GetGameType()
+
+		if gameType.UsingCheckpoints == true then
+			-- Check if players reached a checkpoint.
+			if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
+				return true
+			end
+		end
+
+		local spawnClass = gameType.PlayerSpawnClass
+		local spawnpoints = ents.FindByClass(spawnClass)
+		if #spawnpoints == 0 then
+			-- Always use a fallback.
+			spawnpoints = ents.FindByClass("info_player_start")
+		end
+
+		for _,v in pairs(spawnpoints) do
+
+			-- If set by us then this is the absolute.
+			if v.MasterSpawn == true then
+				return true
+			end
+
+			-- If master flag is set it has priority.
+			if v:HasSpawnFlags(1) then
+				return true
+			end
+
+			if gameType:CanPlayerSpawn(ply, v) == true then
+				return true
+			end
+
+		end
+
+		return false
 
 	end
 
@@ -354,6 +400,7 @@ if SERVER then
 	    end
 
 		ply:EndSpectator()
+		ply.SpawnBlocked = false
 
 		self:InitializePlayerSpeech(ply)
 		self:PlayerSetColors(ply)
@@ -655,6 +702,36 @@ if SERVER then
 			return false
 		end
 
+		if self:CanPlayerSpawn(ply) == false then
+			if ply.SpawnBlocked ~= true then
+				DbgPrint("Notifying spawn blocked")
+				self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
+				{
+					EntIndex = ply:EntIndex(),
+					Respawn = true,
+					StartTime = ply.DeathTime,
+					Timeout = 0,
+					SpawnBlocked = true,
+				})
+				ply.SpawnBlocked = true
+			end
+			return false
+		end
+
+		if ply.SpawnBlocked == true then
+			DbgPrint("Notifying spawn free")
+			self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
+			{
+				EntIndex = ply:EntIndex(),
+				Respawn = true,
+				StartTime = ply.DeathTime,
+				Timeout = 0,
+				SpawnBlocked = false,
+			})
+		end
+
+		ply.SpawnBlocked = false
+		
 	    if ply:KeyReleased(IN_JUMP) then
 	        ply:Spawn()
 	    end

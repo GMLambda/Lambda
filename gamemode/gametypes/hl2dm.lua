@@ -111,6 +111,20 @@ function GAMETYPE:PlayerCanPickupItem(ply, item)
 	return true
 end
 
+function GAMETYPE:CanPlayerSpawn(ply, spawn)
+	local tr = util.TraceHull({
+		start = spawn:GetPos(),
+		endpos = spawn:GetPos(),
+		mins = ply:OBBMins(),
+		maxs = ply:OBBMaxs(),
+		mask = MASK_SOLID,
+	})
+	if tr.Fraction ~= 1 then 
+		return false
+	end
+	return true
+end
+
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
 	gametypes:Add("hl2dm", GAMETYPE)
 end)

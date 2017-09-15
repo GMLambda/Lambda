@@ -225,6 +225,10 @@ function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
 	return true
 end
 
+function GAMETYPE:CanPlayerSpawn(ply, spawn)
+	return true
+end
+
 function GAMETYPE:ShouldRespawnItem(ent)
 	return false
 end
@@ -241,10 +245,6 @@ function GAMETYPE:LoadMapScript()
 		DbgPrint("No mapscript available.")
 		self.MapScript = {}
 	end
-end
-
-function GAMETYPE:GetPlayerItemPickupMode()
-	return GAMETYPE_WEAPONPICKUPMODE_DUPLICATE
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
