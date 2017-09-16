@@ -82,6 +82,7 @@ function PANEL:PaintInfoPlayerRespawn()
 
 	local startTime = self.Parameters["StartTime"]
 	local timeout = self.Parameters["Timeout"]
+	local spawnBlocked = self.Parameters["SpawnBlocked"]
 
 	timeout = math.Clamp(timeout, -1, 127)
 	if timeout == -1 then
@@ -98,9 +99,14 @@ function PANEL:PaintInfoPlayerRespawn()
 			self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
 			self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
 		else
-			local keyName = input.LookupBinding("+jump", true)
-			text = string.format("Press <%s> to respawn", keyName)
-			x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+			if spawnBlocked == true then
+				text = "Spawn currently blocked, waiting..."
+				x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+			else
+				local keyName = input.LookupBinding("+jump", true)
+				text = string.format("Press <%s> to respawn", keyName)
+				x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+			end
 		end
 	end
 end
@@ -119,7 +125,7 @@ function PANEL:PaintInfoRoundRestart()
 	local remain = timeEnd - GetSyncedTimestamp()
 	remain = math.Clamp(remain, 0, 127)
 
-	if remain <= 0 then
+	if remain > 0 then
 		text = string.upper("Restarting Round in...")
 		local _,y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
 		text = string.format("%0.2f", remain)

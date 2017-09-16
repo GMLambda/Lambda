@@ -76,6 +76,12 @@ local ENTITY_PROCESSORS =
 	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
 }
 
+function GM:GetNextUniqueEntityId()
+	self.UniqueEntityId = self.UniqueEntityId or 0
+	self.UniqueEntityId = self.UniqueEntityId + 1
+	return self.UniqueEntityId
+end
+
 function GM:OnEntityCreated(ent)
 
 	local class = ent:GetClass()
@@ -85,6 +91,9 @@ function GM:OnEntityCreated(ent)
 		entityProcessor.Fn(self, ent)
 	end
 
+	-- Used to track the entity in case we respawn it.
+	ent.UniqueEntityId = ent.UniqueEntityId or self:GetNextUniqueEntityId()
+
 	-- Run this next frame so we can safely remove entities and have their actual names assigned.
 	util.RunNextFrame(function()
 
@@ -92,8 +101,26 @@ function GM:OnEntityCreated(ent)
 			return
 		end
 
-		if ent:IsWeapon() then
+		-- Required information for respawning some things.
+		ent.InitialSpawnData =
+		{
+			Pos = ent:GetPos(),
+			Ang = ent:GetAngles(),
+			Mins = ent:OBBMins(),
+			Maxs = ent:OBBMaxs(),
+		}
+
+		if ent:IsWeapon() == true then
 			self:TrackWeapon(ent)
+			if ent:CreatedByMap() == true then
+				DbgPrint("Level designer created weapon: " .. tostring(ent))
+				self:InsertLevelDesignerPlacedObject(ent)
+			end
+		elseif ent:IsItem() == true then
+			if ent:CreatedByMap() == true then
+				DbgPrint("Level designer created item: " .. tostring(ent))
+				self:InsertLevelDesignerPlacedObject(ent)
+			end
 		end
 
 		if self.MapScript then
@@ -127,6 +154,32 @@ function GM:OnEntityCreated(ent)
 		self:HandleVehicleCreation(ent)
 	end
 
+end
+
+function GM:InsertLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects or {}
+	objects[obj] = true
+	self.LevelRelevantObjects = objects
+end
+
+function GM:IsLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects
+	if objects == nil then
+		return false
+	end
+	return objects[obj] == true
+end
+
+function GM:RemoveLevelDesignerPlacedObject(obj)
+	local objects = self.LevelRelevantObjects
+	if objects == nil then
+		return
+	end
+	objects[obj] = nil
+end
+
+function GM:ClearLevelDesignerPlacedObjects()
+	self.LevelRelevantObjects = {}
 end
 
 function GM:ApplyCorrectedDamage(dmginfo)
@@ -198,10 +251,13 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
-		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and lambda_friendlyfire:GetBool() == false and attacker ~= target then
-			return true
+		local gameType = self:GetGameType()
+		if target ~= attacker and target ~= inflictor then
+			if gameType:PlayerShouldTakeDamage(target, attacker, inflictor) == false then
+				return true
+			end
 		end
-
+		
 		local dmg = dmginfo:GetDamage()
 		if dmg > 0 then
 			local hitGroup = HITGROUP_GENERIC

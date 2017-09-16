@@ -4,9 +4,11 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-local MAPSCRIPT_FILE = "hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
 
-GAMETYPE.MapScript = include(MAPSCRIPT_FILE)
+GAMETYPE.Name = "Half-Life 2"
+GAMETYPE.MapScript = {}
+GAMETYPE.PlayerSpawnClass = "info_player_start"
+GAMETYPE.UsingCheckpoints = true
 GAMETYPE.MapList =
 {
 	"d1_trainstation_01",
@@ -130,6 +132,19 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_mossman"] = true,
 }
 
+function GAMETYPE:GetPlayerRespawnTime()
+
+	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+	local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
+	local total = player.GetCount() - 1
+	if total <= 0 then
+		total = 1
+	end
+	local timeoutAmount = math.Round(alive / total * timeout)
+	return timeoutAmount
+
+end
+
 function GAMETYPE:ShouldRestartRound()
 
     local playerCount = 0
@@ -151,6 +166,85 @@ function GAMETYPE:ShouldRestartRound()
 
 	return false
 
+end
+
+function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
+	if ply:HasWeapon(wep:GetClass()) == true then
+		-- Only allow a new pickup once if there is ammo in the weapon.
+		if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then
+			return false
+		end
+		return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
+	end
+	return true
+end
+
+function GAMETYPE:PlayerCanPickupItem(ply, item)
+	return true
+end
+
+function GAMETYPE:GetWeaponRespawnTime()
+	return 0
+end
+
+function GAMETYPE:GetItemRespawnTime()
+	return -1
+end
+
+function GAMETYPE:ShouldRespawnWeapon(ent)
+	if ent:GetClass() == "weapon_frag" then
+		-- Consider this an item and not some weapon.
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
+	ply:AddDeaths( 1 )
+
+	-- Suicide?
+	if inflictor == ply or attacker == ply then
+		attacker:AddFrags(-1)
+		return
+	end
+
+	-- Friendly kill?
+	if IsValid(attacker) and attacker:IsPlayer() then
+		attacker:AddFrags( -1 )
+	elseif IsValid(inflictor) and inflictor:IsPlayer() then
+		inflictor:AddFrags( -1 )
+	end
+end
+
+function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
+	local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
+	-- Friendly fire is controlled by convar in this case.
+	if playerAttacking == true and lambda_friendlyfire:GetBool() == false then
+		return false
+	end
+	return true
+end
+
+function GAMETYPE:CanPlayerSpawn(ply, spawn)
+	return true
+end
+
+function GAMETYPE:ShouldRespawnItem(ent)
+	return false
+end
+
+function GAMETYPE:GetPlayerLoadout()
+	return self.MapScript.DefaultLoadout
+end
+
+function GAMETYPE:LoadMapScript()
+	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
+	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
+		self.MapScript = include(MAPSCRIPT_FILE)
+	else
+		DbgPrint("No mapscript available.")
+		self.MapScript = {}
+	end
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)

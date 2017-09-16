@@ -74,7 +74,7 @@ function GM:Think()
 		self:WeaponTrackingThink()
 	end
 
-	if self.MapScript.Think then
+	if self.MapScript and self.MapScript.Think then
 		self.MapScript:Think()
 	end
 
@@ -90,6 +90,11 @@ function GM:Think()
 		if collisionChanged == true then
 			v:CollisionRulesChanged()
 		end
+	end
+
+	local gameType = self:GetGameType()
+	if gameType.Think then
+		gameType:Think()
 	end
 
 end

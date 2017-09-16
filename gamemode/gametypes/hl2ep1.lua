@@ -4,9 +4,8 @@ end
 
 local GAMETYPE = {}
 
-// Include Mapscript.
-GAMETYPE.MapScript = include("hl2/mapscripts/" .. game.GetMap():lower() .. ".lua")
-
+GAMETYPE.Name = "Half-Life 2: Episode 1"
+GAMETYPE.MapScript = {}
 GAMETYPE.MapList =
 {
 	"d1_trainstation_01",
@@ -130,6 +129,19 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_mossman"] = true,
 }
 
+function GAMETYPE:GetPlayerRespawnTime()
+
+	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+	local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
+	local total = player.GetCount() - 1
+	if total <= 0 then
+		total = 1
+	end
+	local timeoutAmount = math.Round(alive / total * timeout)
+	return timeoutAmount
+
+end
+
 function GAMETYPE:ShouldRestartRound()
 
     local playerCount = 0
@@ -153,8 +165,26 @@ function GAMETYPE:ShouldRestartRound()
 
 end
 
-hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
-	gametypes:Add("hl2", GAMETYPE)
+function GAMETYPE:GetPlayerItemPickupMode()
+	return GAMETYPE_WEAPONPICKUPMODE_DUPLICATE
+end
+
+function GAMETYPE:LoadMapScript()
+	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2ep1/mapscripts/" .. game.GetMap():lower() .. ".lua"
+	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
+		self.MapScript = include(MAPSCRIPT_FILE)
+	else
+		DbgPrint("No mapscript available.")
+		self.MapScript = {}
+	end
+end
+
+function GAMETYPE:GetPlayerLoadout()
+	return self.MapScript.DefaultLoadout
+end
+
+hook.Add("LambdaLoadGameTypes", "HL2EP1GameType", function(gametypes)
+	gametypes:Add("hl2ep1", GAMETYPE)
 end)
 
 if CLIENT then
