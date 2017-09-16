@@ -268,7 +268,7 @@ function SWEP:GetMotorSound()
 end
 
 function SWEP:StopLoopingSounds()
-	if self.SndMotor ~= nil and IsValid(self.SndMotor) then
+	if self.SndMotor ~= nil and self.SndMotor ~= NULL then
 		self.SndMotor:Stop()
 	end
 end
@@ -287,9 +287,11 @@ function SWEP:IsObjectAttached()
 end
 
 function SWEP:OnRemove()
+	DbgPrint(self, "OnRemove")
+	self:StopEffects()
+	self:StopLoopingSounds()
+	self:DetachObject()
 	if SERVER then
-		self:DetachObject()
-
 		local motionController = self:GetMotionController()
 		if IsValid(motionController) then
 			motionController:Remove()
@@ -1379,8 +1381,11 @@ end
 
 function SWEP:DetachObject(launched)
 
+	--assert(false)
+
 	local owner = self:GetOwner()
 	if owner == nil or owner == NULL then
+		DbgPrint("No owner")
 		return
 	end
 
@@ -1393,6 +1398,7 @@ function SWEP:DetachObject(launched)
 
 	local snd = self:GetMotorSound()
 	if snd ~= nil and snd ~= NULL then
+		print("Turning off looping sound.")
 		snd:ChangeVolume(0, 1.0)
 		snd:ChangePitch(50, 1.0)
 	end
@@ -1416,6 +1422,7 @@ function SWEP:DetachObject(launched)
 
 	local phys = ent:GetPhysicsObject()
 	if not IsValid(phys) then
+		DbgPrint("No physics object")
 		return
 	end
 
@@ -1976,17 +1983,22 @@ function SWEP:DrawWorldModelTranslucent()
 end
 
 function SWEP:Holster(ent)
+	DbgPrint(self, "Holster")
+
 	if not IsFirstTimePredicted() then
 		return
 	end
-
-	self.ShouldDrawGlow = false
 
 	local controller = self:GetMotionController()
 	if controller:IsObjectAttached() == true then
 		return false
 	end
 
+	self:StopLoopingSounds()
+	self:StopEffects()
+	self:DetachObject()
+	self.ShouldDrawGlow = false
+	
 	return true
 end
 
