@@ -58,7 +58,8 @@ if SERVER then
 			if IsValid(caller) then
 				callerName = caller:GetName()
 			end
-			--DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. tostring(cmd) .. ", Delay:" .. tostring(delay) .. ", Param:" .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
+			
+			DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. tostring(cmd) .. ", Delay:" .. tostring(delay) .. ", Param:" .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 
 			local triggerOutput = function()
 				local targetents
@@ -81,7 +82,7 @@ if SERVER then
 				if #targetents == 0 then
 					DbgPrint("Unable to find target entity: " .. entname)
 				end
-				
+
 				for _,ent in pairs(targetents) do
 					if IsValid(ent) then
 						DbgPrint("Firing " .. tostring(ent) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
