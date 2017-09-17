@@ -500,7 +500,11 @@ function GM:StartRound(cleaned)
 	end
 
 	if SERVER then
-		self:DisablePreviousMap()
+		local ignoreLandmark = false
+		if self.MapScript ~= nil and self.MapScript.IgnoreLandmark ~= nil then
+			ignoreLandmark = self.MapScript.IgnoreLandmark
+		end
+		self:DisablePreviousMap(ignoreLandmark)
 	end
 
 	if self.WaitingForRoundStart == false then

@@ -35,7 +35,6 @@ MAPSCRIPT.DefaultLoadout =
 	Armor = 60,
 	HEV = true,
 }
-
 MAPSCRIPT.InputFilters =
 {
 	["alyx_briefingroom_exitdoor"] = { "Close", "Lock" },
@@ -48,6 +47,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["player_items"] = true,
 	["pclip_gate1"] = true,
 }
 
@@ -57,6 +57,15 @@ end
 function MAPSCRIPT:PostInit()
 
     if SERVER then
+
+		-- Default starts have no master flag set.
+		ents.RemoveByClass("info_player_start")
+
+		local spawn = ents.Create("info_player_start")
+		spawn:SetKeyValue("spawnflags", "1")
+		spawn:SetPos(Vector(4423.918945, 1210.088379, 280.031250))
+		spawn:SetAngles(Angle(0, 0, 0))
+		spawn:Spawn()
 
 		-- 5487.663574 1408.772949 0.031250 10.626 -1.579 0.000
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(5329.144043, 1568.602905, 0.031250), Ang = Angle(0, 0, 0) })
@@ -85,13 +94,13 @@ function MAPSCRIPT:PostInit()
 			ent:Remove()
 		end)
 
-
+		-- New trigger to close the gate.
 		local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(7399.153809, 1336.154907, 0.031250), Ang = Angle(0, 0, 0) })
 		local checkpointTrigger2 = ents.Create("trigger_once")
 		checkpointTrigger2:SetupTrigger(
 			Vector(8031.499512, 1544.012939, -3.968811),
 			Angle(0, 0, 0),
-			Vector(-800, -1000, -600),
+			Vector(-680, -1000, -600),
 			Vector(2600, 1600, 200)
 		)
 		checkpointTrigger2:SetKeyValue("teamwait", "1")

@@ -152,6 +152,8 @@ if SERVER then
 		end
 
 		local spawnClass = gameType.PlayerSpawnClass
+		DbgPrint("Spawn class: " .. spawnClass)
+
 		local spawnpoints = ents.FindByClass(spawnClass)
 		if #spawnpoints == 0 then
 			-- Always use a fallback.
@@ -171,7 +173,9 @@ if SERVER then
 
 			-- If master flag is set it has priority.
 			if v:HasSpawnFlags(1) then
+				DbgPrint("Spawn uses master flag")
 				spawnpoint = v
+				break
 			end
 
 			if gameType:CanPlayerSpawn(ply, v) == true then
@@ -731,7 +735,7 @@ if SERVER then
 		end
 
 		ply.SpawnBlocked = false
-		
+
 	    if ply:KeyReleased(IN_JUMP) then
 	        ply:Spawn()
 	    end
@@ -888,6 +892,8 @@ if SERVER then
 		end, CurTime() + delay)
 	end
 
+	local DbgPrintPickup = GetLogging("Pickup")
+
 	function GM:PlayerCanPickupItem(ply, item)
 
 		if ply.LambdaDisablePickupDuplication == true then
@@ -902,7 +908,7 @@ if SERVER then
 
 		local gameType = self:GetGameType()
 		if gameType:PlayerCanPickupItem(ply, item) == false then
-			DbgPrint("GameType prevented pickup")
+			DbgPrintPickup("GameType prevented pickup")
 			return false
 		end
 
@@ -946,7 +952,7 @@ if SERVER then
 
 	function GM:PlayerCanPickupWeapon(ply, wep)
 
-		DbgPrint("PlayerCanPickupWeapon", ply, wep)
+		DbgPrintPickup("PlayerCanPickupWeapon", ply, wep)
 
 		-- OnEntityCreated is not called for everything.
 		wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
@@ -989,7 +995,7 @@ if SERVER then
 		end
 
 		if gameType:PlayerCanPickupWeapon(ply, wep) == false then
-			DbgPrint("GameType prevented pickup")
+			--DbgPrint("GameType prevented pickup")
 			return false
 		end
 

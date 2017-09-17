@@ -42,6 +42,8 @@ function GM:DisablePreviousMap()
 
 	local landmark = self:GetEntryLandmark()
 	local prevMap = self:GetPreviousMap()
+	local changelevelPrev = nil
+	local disabledPrev = false
 
 	for _,v in pairs(ents.FindByClass("trigger_changelevel")) do
 
@@ -49,29 +51,38 @@ function GM:DisablePreviousMap()
 			continue
 		end
 
-		if v:HasSpawnFlags(SF_CHANGELEVEL_NOTOUCH) then
+		if v:HasSpawnFlags(SF_CHANGELEVEL_NOTOUCH) == true then
+			DbgPrint("Skipping trigger_changelevel, has SF_CHANGELEVEL_NOTOUCH")
 			continue
 		end
 
-		if landmark ~= nil then
+		if v.TargetMap == prevMap then
+			changelevelPrev = v
+		end
+
+		if landmark ~= nil and ignoreLandmark ~= true then
 			if v.Landmark ~= nil and v.Landmark ~= "" then
+				DbgPrint(v, "Landmark: " .. v.Landmark .. " == " .. landmark)
 				if v.Landmark == landmark then
 					DbgPrint("Disabling previous changelevel: " .. v.Landmark)
 					v:SetBlocked(true)
+					disabledPrev = true
 				end
 			else
 				if v.TargetMap == prevMap then
 					DbgPrint("Disabling previous changelevel: " .. v.Landmark)
 					v:SetBlocked(true)
+					disabledPrev = true
 				end
-			end
-		else
-			if v.TargetMap == prevMap then
-				DbgPrint("Blocking previous map (assumed): " .. prevMap)
-				v:SetBlocked(true)
 			end
 		end
 
+	end
+
+	-- If we are unable to find a landmark that points back we will assume its the previous map.
+	if disabledPrev ~= true and IsValid(changelevelPrev) then
+		DbgPrint("Blocking previous map (assumed): " .. prevMap)
+		changelevelPrev:SetBlocked(true)
 	end
 
 end
