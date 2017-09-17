@@ -316,8 +316,8 @@ if SERVER then
 
 			--
 			-- HACKHACK: Sometimes the player slips thru the trigger so it stops calling Touch.
-			if CurTime() - v >= 0.2 then
-				DbgPrint("Enforcing Touch")
+			if CurTime() - v >= 0.2 and ent:IsPlayer() == true then
+				DbgPrint(self, "Enforcing Touch")
 				self:Touch(ent)
 			end
 
