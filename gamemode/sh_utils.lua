@@ -80,20 +80,15 @@ if SERVER then
 
 				for _,ent in pairs(targetents) do
 					if IsValid(ent) then
-						--DbgPrint("Firing " .. tostring(ent) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
+						DbgPrint("Firing " .. tostring(ent) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 						ent:Input(cmd, activator, caller, param)
 					else
-						--DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
+						DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
 					end
 				end
 			end
 
-			-- With 0 it must be called this frame.
-			if delay == 0 then
-				triggerOutput()
-			else
-				util.RunDelayed(triggerOutput, CurTime() + delay)
-			end
+			util.RunDelayed(triggerOutput, CurTime() + delay)
 
 			if times > 0 and called >= times then
 				--DbgPrint("Removing output")
