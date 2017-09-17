@@ -239,8 +239,14 @@ end
 
 function GAMETYPE:LoadMapScript()
 	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
+	self.MapScript = nil
 	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
 		self.MapScript = include(MAPSCRIPT_FILE)
+		if self.MapScript ~= nil then
+			DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
+		else
+			self.MapScript = {}
+		end
 	else
 		DbgPrint("No mapscript available.")
 		self.MapScript = {}
