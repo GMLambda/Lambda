@@ -78,6 +78,10 @@ if SERVER then
 					targetents = ents.FindByName(entname)
 				end
 
+				if #targetents == 0 then
+					DbgPrint("Unable to find target entity: " .. entname)
+				end
+				
 				for _,ent in pairs(targetents) do
 					if IsValid(ent) then
 						DbgPrint("Firing " .. tostring(ent) .. "(" .. tostring(entname) .. ") -> Cmd: " .. tostring(cmd) .. ", Delay: " .. tostring(delay) .. ", Param: " .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
@@ -86,6 +90,7 @@ if SERVER then
 						DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
 					end
 				end
+
 			end
 
 			util.RunDelayed(triggerOutput, CurTime() + delay)
