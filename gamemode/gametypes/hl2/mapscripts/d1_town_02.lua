@@ -54,6 +54,16 @@ function MAPSCRIPT:PostInit()
 			-- -3764.476807 -332.874481 -3327.968750
 			local checkpointTransfer = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-3764.476807, -332.874481, -3327.968750), Ang = Angle(0, 90, 0) })
 			GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
+
+			-- If players fall they should rather die.
+			local triggerHurt1 = ents.Create("trigger_hurt")
+			triggerHurt1:SetupTrigger(
+				Vector(-3212.359131, 344.832214, -3572.259033),
+				Angle(0, 0, 0),
+				Vector(-480, -500, 0),
+				Vector(500, 780, 115)
+			)
+			triggerHurt1:SetKeyValue("damage", "200")
 		end
 
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1808.973267, 721.884277, -3071.968750), Ang = Angle(0, -180, 0) })
