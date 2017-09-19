@@ -35,7 +35,7 @@ if SERVER then
 
 		for k, data in pairs(outputs) do
 
-			out = string.Split(data[1], ",")
+			local out = string.Split(data[1], ",")
 
 			local entname = out[1] or ""
 			local cmd = out[2] or ""
@@ -58,7 +58,7 @@ if SERVER then
 			if IsValid(caller) then
 				callerName = caller:GetName()
 			end
-			
+
 			DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. callerName .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. tostring(cmd) .. ", Delay:" .. tostring(delay) .. ", Param:" .. tostring(param) .. ", Times: " .. tostring(times) .. ")")
 
 			local triggerOutput = function()
@@ -114,7 +114,7 @@ if SERVER then
 
 		for k, data in pairs(outputs) do
 
-			out = string.Split(data, ",")
+			local out = string.Split(data, ",")
 
 			local entname = out[1] or ""
 			local cmd = out[2] or ""
