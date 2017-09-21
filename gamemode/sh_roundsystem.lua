@@ -76,6 +76,7 @@ if SERVER then
 		DbgPrint("GM:IncludePlayerInRound(" .. tostring(ply) .. ")")
 		self:NotifyPlayerListChanged()
 
+
 	end
 
 	function GM:RestartRound()
@@ -106,6 +107,9 @@ if SERVER then
 				self.LambdaFailureMessage:Fire("ShowMessage")
 			end
 
+			-- FIXME: This only works on listen server, we should setup a new message
+			--        and run this on the client only.
+			
 			-- Stop all the current playing sounds.
 			for k,v in pairs(player.GetAll()) do
 				v:ConCommand("stopsoundscape")

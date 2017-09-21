@@ -5,6 +5,7 @@
 - Fix: Player being left behind after battle in d3_c17_07.
 - Fix: Missing changelevel blockade in d3_c17_07.
 - Fix: Prevent player from going back in d1_town_02
+- Fix: NPC's sometimes not playing the scene under unknown situations.
 - Add: Experimental hl2dm gametype, set lambda_gametype convar to 'hl2dm' to try it out.
 
 0.9:

@@ -205,6 +205,11 @@ function GM:EntityKeyValue(ent, key, val)
 		end
 	end
 
+	-- HACKHACK: Having it set to 1 causes some NPCs to fail playing their scene.
+	if ent:GetClass() == "logic_choreographed_scene" and key:iequals("busyactor") then
+		return "0"
+	end
+
 end
 
 function GM:EntityRemoved(ent)
