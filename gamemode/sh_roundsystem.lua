@@ -109,7 +109,7 @@ if SERVER then
 
 			-- FIXME: This only works on listen server, we should setup a new message
 			--        and run this on the client only.
-			
+
 			-- Stop all the current playing sounds.
 			for k,v in pairs(player.GetAll()) do
 				v:ConCommand("stopsoundscape")
@@ -517,6 +517,7 @@ function GM:StartRound(cleaned)
 		end, CurTime() + 0.5)
 	else
 	    if SERVER then
+			self.RoundState = STATE_IDLE
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 			self:NotifyPlayerListChanged()
 	    end
