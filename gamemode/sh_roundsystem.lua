@@ -76,7 +76,6 @@ if SERVER then
 		DbgPrint("GM:IncludePlayerInRound(" .. tostring(ply) .. ")")
 		self:NotifyPlayerListChanged()
 
-
 	end
 
 	function GM:RestartRound()
@@ -518,6 +517,7 @@ function GM:StartRound(cleaned)
 	else
 	    if SERVER then
 			self.RoundState = STATE_IDLE
+			self.RoundStartTime = GetSyncedTimestamp()
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 			self:NotifyPlayerListChanged()
 	    end

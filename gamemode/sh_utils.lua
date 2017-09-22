@@ -441,12 +441,11 @@ local funcQueue = {}
 hook.Add("Think", "LambdaRunNextFrame", function()
 
 	for k,v in pairs(funcQueue) do
-		if v.thinkId ~= nil then
-			if v.thinkId == thinkCount then
-				-- In case it was added before Think was called.
-				continue
-			end
-		elseif v.timestamp ~= nil then
+		if v.thinkId == thinkCount then
+			-- In case it was added before Think was called.
+			continue
+		end
+		if v.timestamp ~= nil then
 			if CurTime() < v.timestamp then
 				continue
 			end
@@ -482,6 +481,7 @@ function util.RunDelayed(func, ts)
 	{
 		func = func,
 		timestamp = ts,
+		thinkId = thinkCount,
 	}
 	table.insert(funcQueue, data)
 
