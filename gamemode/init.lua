@@ -258,7 +258,7 @@ function GM:EntityTakeDamage(target, dmginfo)
 				return true
 			end
 		end
-		
+
 		local dmg = dmginfo:GetDamage()
 		if dmg > 0 then
 			local hitGroup = HITGROUP_GENERIC
@@ -283,6 +283,12 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
+	elseif target:IsWeapon() == true or target:IsItem() == true then
+		if lambda_prevent_item_move:GetBool() == true then
+			if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
+				dmginfo:SetDamageForce(Vector(0, 0, 0))
+			end
+		end 
 	end
 
 	if target.FilterDamage == true then
