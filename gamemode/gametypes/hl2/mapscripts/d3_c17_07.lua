@@ -47,7 +47,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
-	["player_items"] = true,
+	["player_items_template"] = true,
 	["pclip_gate1"] = true,
 }
 
@@ -66,6 +66,12 @@ function MAPSCRIPT:PostInit()
 		spawn:SetPos(Vector(4423.918945, 1210.088379, 280.031250))
 		spawn:SetAngles(Angle(0, 0, 0))
 		spawn:Spawn()
+
+		-- Prevent infinite npc spawning.
+		for k,v in pairs(ents.FindByName("alyxfight_soldier_makers")) do
+			v:SetKeyValue("spawnflags", "16")
+			v:SetKeyValue("MaxNPCCount", "3")
+		end
 
 		-- 5487.663574 1408.772949 0.031250 10.626 -1.579 0.000
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(5329.144043, 1568.602905, 0.031250), Ang = Angle(0, 0, 0) })

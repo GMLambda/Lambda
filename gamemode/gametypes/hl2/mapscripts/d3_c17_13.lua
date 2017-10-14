@@ -49,6 +49,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["player_spawn_items"] = true,
 	["escape_attempt_killtrigger"] = true,
 	["ss_dog_drop"] = true,
 }

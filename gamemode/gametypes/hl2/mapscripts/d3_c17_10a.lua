@@ -57,6 +57,13 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+		-- Make sure the player spawns at the correct spot.
+		local spawn = ents.Create("info_player_start")
+		spawn:SetPos(Vector(-3936.260010, 6800.509766, 0.031250))
+		spawn:SetAngles(Angle(0, 0, 0))
+		spawn:SetKeyValue("spawnflags", "1")
+		spawn:Spawn()
+
 		-- -2672.437500 6479.918945 512.031250
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-2672.437500, 6479.918945, 512.031250), Ang = Angle(0, 0, 0) })
 		local checkpointTrigger1 = ents.Create("trigger_once")
@@ -100,16 +107,23 @@ function MAPSCRIPT:PostInit()
 
 end
 
-function MAPSCRIPT:OnNewGame()
+function MAPSCRIPT:OnMapTransition()
 
-	DbgPrint("OnNewGame")
+	DbgPrint("OnMapTransition")
 
-	-- TODO: Validate me.
-	if not IsValid(ents.FindFirstByName("barney")) then
-		ents.WaitForEntityByName("player_spawn_items_maker", function(ent)
-			ent:Fire("ForceSpawn")
-		end)
-	end
+	-- Make sure we have barney around.
+	util.RunDelayed(function()
+		local foundBarney = false
+		for k,v in pairs(ents.FindByName("barney")) do
+			foundBarney = true
+			break
+		end
+		if foundBarney == false then
+			ents.WaitForEntityByName("player_spawn_items_maker", function(ent)
+				ent:Fire("ForceSpawn")
+			end)
+		end
+	end, CurTime() + 0.1)
 
 end
 

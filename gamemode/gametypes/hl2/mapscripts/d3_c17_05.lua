@@ -48,6 +48,7 @@ MAPSCRIPT.EntityFilterByClass =
 MAPSCRIPT.EntityFilterByName =
 {
 	["pclip_gate1"] = true,
+	["spawn_items_template"] = true,
 }
 
 function MAPSCRIPT:Init()
