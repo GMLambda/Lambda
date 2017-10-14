@@ -60,6 +60,12 @@ function MAPSCRIPT:PostInit()
 			--- 3304.103271 5262.621094 1536.031250
 			local checkpointTransfer = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(3304.103271, 5262.621094, 1536.031250), Ang = Angle(0, 90, 0) })
 			GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
+			ents.WaitForEntityByName("village_squad", function(ent)
+				ent:Fire("ForceSpawn")
+			end)
+			ents.WaitForEntityByName("assault_trigger", function(ent)
+				ent:Fire("Enable")
+			end)
 		end
 		-- -1074.218628 9386.666016 1664.031250
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1469.086060, 9136.386719, 1666.920044), Ang = Angle(0, 0, 0) })
