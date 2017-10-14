@@ -1,35 +1,31 @@
--- TODO: Detect this dynamically.
-if true then
-	-- Listen server/standalone setup.
-	resource.AddFile("materials/lambda/blockade.png")
-	resource.AddFile("materials/lambda/blocked.vmt")
-	resource.AddFile("materials/lambda/blocked.vtf")
-	resource.AddFile("materials/lambda/death_point.png")
-	resource.AddFile("materials/lambda/icons")
-	resource.AddFile("materials/lambda/logo_512.png")
-	resource.AddFile("materials/lambda/ring1.png")
-	resource.AddFile("materials/lambda/ring2.png")
-	resource.AddFile("materials/lambda/ring3.png")
-	resource.AddFile("materials/lambda/run_point.png")
-	resource.AddFile("materials/lambda/trigger.png")
-	resource.AddFile("materials/lambda/vehicle.png")
-	resource.AddFile("materials/lambda/icons/admin_settings.png")
-	resource.AddFile("materials/lambda/icons/close.png")
-	resource.AddFile("materials/lambda/icons/help.png")
-	resource.AddFile("materials/lambda/icons/palette.png")
-	resource.AddFile("materials/lambda/icons/player_settings.png")
-	resource.AddFile("materials/lambda/icons/settings.png")
-	resource.AddFile("materials/lambda/icons/sort2.png")
-	resource.AddFile("materials/lambda/icons/sort3.png")
-	resource.AddFile("materials/lambda/icons/tick.png")
-	resource.AddFile("materials/sprites/physcannon_beam.vmt")
-	resource.AddFile("materials/sprites/physcannon_blast.vmt")
-	resource.AddFile("materials/sprites/physcannon_core.vmt")
-	resource.AddFile("materials/sprites/physcannon_glow1.vmt")
-	resource.AddFile("materials/sprites/physcannon_glow1noz.vmt")
-	resource.AddFile("materials/sprites/physcannon_glow2.vmt")
-	resource.AddFile("sound/lambda/roundover.mp3")
-else
-	-- Workshop.
-	resource.AddWorkshop("780244493")
+local DbgPrint = GetLogging("Resource")
+
+function GM:AddResourceDir(dir)
+
+	if true then
+		local resourceDir = "lambda/content"
+		local foundDir = false
+		local files, folders = file.Find("gamemodes/" .. resourceDir .. "/" .. dir .. "/*", "GAME")
+
+		for k, v in pairs(files) do
+			local f = dir .. "/" .. v
+			DbgPrint("Added: " .. f)
+			resource.AddFile(f)
+		end
+
+		for k, v in pairs(folders) do
+			local f = dir .. "/" .. v
+			if file.IsDir(resourceDir .. "/" .. f, "LUA") then
+				foundDir = true
+				self:AddResourceDir(f)
+			end
+		end
+
+		if !foundDir then
+			DbgPrint("Directory " .. dir .. " was added successfully")
+		end
+	else
+		resource.AddWorkshop("780244493")
+	end
+
 end

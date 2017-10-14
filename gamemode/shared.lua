@@ -136,6 +136,8 @@ function GM:Initialize()
 		end
 		self:InitializeCurrentLevel()
 		self:TransferPlayers()
+		self:AddResourceDir("materials")
+		self:AddResourceDir("sound")
 	end
 
 end

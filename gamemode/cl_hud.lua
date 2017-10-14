@@ -3,6 +3,7 @@ include("huds/hud_suit.lua")
 include("huds/hud_pickup.lua")
 include("huds/hud_roundinfo.lua")
 include("huds/hud_settings.lua")
+include("huds/hud_hint.lua")
 
 --local DbgPrint = GetLogging("HUD")
 
