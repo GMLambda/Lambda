@@ -47,6 +47,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["player_items_template"] = true,
 	["pclip_gate1"] = true,
 }
 

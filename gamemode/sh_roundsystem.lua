@@ -430,20 +430,26 @@ function GM:PostRoundSetup()
 		if self.IsChangeLevel == false then
 			DbgPrint("Firing OnNewGame events")
 			util.TriggerOutputs(self.OnNewGameEvents)
+
+			if self.MapScript.OnNewGame then
+				self.MapScript:OnNewGame()
+			end
 		else
 			DbgPrint("Firing OnMapTransition events")
 			util.TriggerOutputs(self.OnMapTransitionEvents)
-		end
 
-		if self.MapScript.OnNewGame then
-			self.MapScript:OnNewGame()
-		end
-
-		if IsValid(self.LambdaChapterMessage) then
-			self.LambdaChapterMessage:Fire("ShowMessage")
+			if self.MapScript.OnMapTransition then
+				self.MapScript:OnMapTransition()
+			end
 		end
 
 	end)
+
+	util.RunDelayed(function()
+		if IsValid(self.LambdaChapterMessage) then
+			self.LambdaChapterMessage:Fire("ShowMessage")
+		end
+	end, CurTime() + 1)
 
 end
 

@@ -47,7 +47,8 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
-
+	["global_newgame_template_local_items"] = true,
+	["global_newgame_template_ammo"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -56,6 +57,14 @@ end
 function MAPSCRIPT:PostInit()
 
     if SERVER then
+
+		-- 1386.760010 946.409973 385.000000
+		-- Make sure the player spawns at the correct spot.
+		local spawn = ents.Create("info_player_start")
+		spawn:SetPos(Vector(1386.760010, 946.409973, 385.000000))
+		spawn:SetAngles(Angle(0, -180, 0))
+		spawn:SetKeyValue("spawnflags", "1")
+		spawn:Spawn()
 
         -- setpos -497.127838 29.422707 576.030090;setang 1.708000 -178.566528 0.000000
         local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-497.127838, 29.422707, 512.03009), Ang = Angle(0, 0, 0) })

@@ -49,6 +49,10 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["global_newgame_template_base_items"] = true,
+	["global_newgame_template_local_items"] = true,
+	["global_newgame_template_ammo"] = true,
+	
 	["relationship_turret_vs_combine_hate"] = true,
 	["relationship_turret_vs_alyx_like"] = true,
 	["relationship_turret_vs_manhack_hate"] = true,
