@@ -175,8 +175,8 @@ function SWEP:Initialize()
 	self.GlowSprites = {}
 	self.BeamSprites = {}
 
-	self:SetElementOpen(true)
-	self:SetElementDestination(1)
+	--self:SetElementOpen(true)
+	--self:SetElementDestination(1)
 
 	self.ElementOpen = nil
 	self.OldOpen = false
@@ -1043,11 +1043,10 @@ function SWEP:Equip()
 	self:CloseElements()
 	self:StartEffects()
 	self.ShouldDrawGlow = true
+	self:CloseElements()
 
 	if self:IsMegaPhysCannon() == true then
 		self:OpenElements()
-	else
-		self:CloseElements()
 	end
 end
 
@@ -1058,11 +1057,10 @@ function SWEP:Deploy()
 	self:CloseElements()
 	self:StartEffects()
 	self.ShouldDrawGlow = true
+	self:CloseElements()
 
 	if self:IsMegaPhysCannon() == true then
 		self:OpenElements()
-	else
-		self:CloseElements()
 	end
 
 	return true
@@ -1090,6 +1088,10 @@ function SWEP:WeaponIdle()
 	--DbgPrint(self, self:GetOwner(), "WeaponIdle")
 	local controller = self:GetMotionController()
 
+	if self:IsMegaPhysCannon() == true then
+		self:SetElementDestination(1)
+	end
+
 	if controller:IsObjectAttached() == true then
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 	else
@@ -1112,7 +1114,6 @@ function SWEP:UpdateElementPosition()
 	end
 
 	local elemPos = self.ElementPosition:Interp(CurTime())
-
 	if self:ShouldDrawUsingViewModel() == true then
 		local owner = self:GetOwner()
 		if owner == nil then
@@ -1125,6 +1126,9 @@ function SWEP:UpdateElementPosition()
 			vm:SetPoseParameter("active", elemPos)
 		end
 	else
+		if self:IsMegaPhysCannon() == true then
+			elemPos = 1
+		end 
 		self:SetPoseParameter("active", elemPos)
 		if CLIENT then
 			self:InvalidateBoneCache()
@@ -1998,7 +2002,7 @@ function SWEP:Holster(ent)
 	self:StopEffects()
 	self:DetachObject()
 	self.ShouldDrawGlow = false
-	
+
 	return true
 end
 
