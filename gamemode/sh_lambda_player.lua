@@ -777,6 +777,10 @@ if SERVER then
 
 	function GM:LimitPlayerAmmo(ply)
 
+		if lambda_limit_default_ammo:GetBool() == false then
+			return
+		end
+
 		local curTime = CurTime()
 
 		ply.LastAmmoCheck = ply.LastAmmoCheck or curTime
@@ -816,6 +820,9 @@ if SERVER then
 	function GM:PlayerCanPickupAmmo(ply, ent, extendSize)
 
 		-- Limit the ammo to pickup based on the sk convars.
+		if lambda_limit_default_ammo:GetBool() == false then
+			return true
+		end
 
 		local res = true
 		local capacity = 0

@@ -55,3 +55,5 @@ lambda_connect_timeout = GM:RegisterConVar("connect_timeout", 120, bit.bor(0, FC
 lambda_playercollision = GM:RegisterConVar("playercollision", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Enables or disables collisions between players.")
 lambda_friendlyfire = GM:RegisterConVar("friendlyfire", 0, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Enables friendly fire, only works if player collisions enabled.")
 lambda_playertracker = GM:RegisterConVar("player_tracker", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Allows to see players through walls")
+lambda_prevent_item_move = GM:RegisterConVar("weapon_strip_force", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Prevents players from moving weapons and items from by shooting.")
+lambda_limit_default_ammo = GM:RegisterConVar("limit_default_ammo", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "If enabled weapons default ammo will use the sk_* settings for max limit.")
