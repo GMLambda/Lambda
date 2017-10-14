@@ -47,6 +47,9 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["global_newgame_template_base_items"] = true,
+	["global_newgame_template_local_items"] = true,
+	["global_newgame_template_ammo"] = true,
 	["NClip_sec_tp_door_1"] = true,
 	["PClip_sec_tp_door_1"] = true,
 }

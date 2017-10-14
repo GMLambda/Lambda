@@ -47,6 +47,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+	["player_spawn_items"] = true,
 	["pclip_gate1"] = true,
 }
 
@@ -56,6 +57,14 @@ end
 function MAPSCRIPT:PostInit()
 
     if SERVER then
+
+		-- 1200.359985 3379.639893 768.816528
+		-- Make sure the player spawns at the correct spot.
+		local spawn = ents.Create("info_player_start")
+		spawn:SetPos(Vector(1200.359985, 3379.639893, 768.816528))
+		spawn:SetAngles(Angle(0, -130, 0))
+		spawn:SetKeyValue("spawnflags", "1")
+		spawn:Spawn()
 
 		-- -1550.889771 7297.707520 128.031250
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1505.414917, 7372.614258, -59.968750), Ang = Angle(0, 180, 0) })

@@ -103,16 +103,23 @@ function MAPSCRIPT:PostInit()
 
 end
 
-function MAPSCRIPT:OnNewGame()
+function MAPSCRIPT:OnMapTransition()
 
-	DbgPrint("OnNewGame")
+	DbgPrint("OnMapTransition")
 
-	-- TODO: Validate me.
-	if not IsValid(ents.FindFirstByName("barney")) then
-		ents.WaitForEntityByName("player_spawn_items_maker", function(ent)
-			ent:Fire("ForceSpawn")
-		end)
-	end
+	-- Make sure we have barney around.
+	util.RunDelayed(function()
+		local foundBarney = false
+		for k,v in pairs(ents.FindByName("barney")) do
+			foundBarney = true
+			break
+		end
+		if foundBarney == false then
+			ents.WaitForEntityByName("player_spawn_items_maker", function(ent)
+				ent:Fire("ForceSpawn")
+			end)
+		end
+	end, CurTime() + 0.1)
 
 end
 
