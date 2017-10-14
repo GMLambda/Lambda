@@ -1,8 +1,15 @@
 local DbgPrint = GetLogging("Resource")
 
-function GM:AddResourceDir(dir)
-
+function GM:InitializeResources()
 	if true then
+		self:AddResourceDir("materials")
+		self:AddResourceDir("sound")
+	else
+		resource.AddWorkshop("780244493")
+	end
+end
+
+function GM:AddResourceDir(dir)
 		local resourceDir = "lambda/content"
 		local foundDir = false
 		local files, folders = file.Find("gamemodes/" .. resourceDir .. "/" .. dir .. "/*", "GAME")
@@ -24,8 +31,4 @@ function GM:AddResourceDir(dir)
 		if !foundDir then
 			DbgPrint("Directory " .. dir .. " was added successfully")
 		end
-	else
-		resource.AddWorkshop("780244493")
-	end
-
 end
