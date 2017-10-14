@@ -136,6 +136,7 @@ function GM:Initialize()
 		end
 		self:InitializeCurrentLevel()
 		self:TransferPlayers()
+		self:InitializeResources()
 	end
 
 end
