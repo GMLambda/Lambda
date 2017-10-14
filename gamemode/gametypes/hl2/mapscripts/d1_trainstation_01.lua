@@ -53,7 +53,9 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
-		local self = self
+		-- Override env_global so combines dont flip shit on everyone
+		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
+		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
 
 		self.PlayersLocked = true
 
@@ -164,19 +166,6 @@ function MAPSCRIPT:PostInit()
 		local mark_barneyroom_comblock_4 = ents.FindFirstByName("mark_barneyroom_comblock_4")
 		mark_barneyroom_comblock_4:SetPos(Vector(-3588, 3, -31))
 	end
-
-	-- Override env_global so combines dont flip shit on everyone
-	local gordon_invulnerable = ents.Create("env_global")
-	gordon_invulnerable:SetKeyValue("globalstate", "gordon_invulnerable")
-	gordon_invulnerable:SetKeyValue("initialstate", "0")
-	gordon_invulnerable:Spawn()
-	gordon_invulnerable:Fire("TurnOn")
-
-	local gordon_precriminal = ents.Create("env_global")
-	gordon_precriminal:SetKeyValue("globalstate", "gordon_precriminal")
-	gordon_precriminal:SetKeyValue("initialstate", "0")
-	gordon_precriminal:Spawn()
-	gordon_precriminal:Fire("TurnOn")
 
 end
 

@@ -38,6 +38,10 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		-- Override env_global so combines dont flip shit on everyone
+		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
+		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
+		
 		-- FIX: The cop would stand there annoying players that have not yet passed through.
 		GAMEMODE:WaitForInput("brush_breakin_blockplayer1", "Kill", function()
 			ents.WaitForEntityByName("npc_breakincop3", function(ent) ent:SetName("lambda_npc_breakincop3") DbgPrint("Changed name") end)
