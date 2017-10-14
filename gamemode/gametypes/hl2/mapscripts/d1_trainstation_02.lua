@@ -23,6 +23,10 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		-- Override env_global so combines dont flip shit on everyone
+		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
+		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
+
 		local cupcop_can = nil
 		local cupcop = nil
 		local cupcopSpeech =
@@ -110,7 +114,7 @@ function MAPSCRIPT:PostInit()
 			end
 			DbgPrint("Starting to nag the cop")
 
-			timer.Simple(4, function()
+			util.RunDelayed(function()
 
 				cupcop_can:SetModel("models/gibs/hgibs.mdl")
 				cupcop_can:Ignite(999999)
@@ -131,11 +135,9 @@ function MAPSCRIPT:PostInit()
 					end
 
 					local cupcopFwd = cupcop:EyeAngles():Forward()
-					local cupcopBck = -cupcopFwd
 					local cupcopPos = cupcop:EyePos() + (cupcopFwd * 50)
 
 					local dist = cupcop:EyePos():Distance(cupcop_can:GetPos())
-					local accumulator = dist / 100
 					local power = dist * 0.8
 
 					local vecDir = cupcopPos - cupcop_can:GetPos()
@@ -145,8 +147,6 @@ function MAPSCRIPT:PostInit()
 					local angFwd = ang:Forward()
 					local vel = angFwd * (Vector(1, 1, 1) * power)
 					local minDistance = 150
-					local runAhead = 160
-					local curTime = CurTime()
 
 					--DbgPrint("Power: " .. tostring(power))
 					cupcop.LastAction = cupcop.LastAction or 0
@@ -183,24 +183,11 @@ function MAPSCRIPT:PostInit()
 					phys:SetAngles(angLook)
 
 				end)
-			end)
+			end, CurTime() + 4)
 
     	end)
 
     end
-
-	-- Override env_global so combines dont flip shit on everyone
-	local gordon_invulnerable = ents.Create("env_global")
-	gordon_invulnerable:SetKeyValue("globalstate", "gordon_invulnerable")
-	gordon_invulnerable:SetKeyValue("initialstate", "0")
-	gordon_invulnerable:Spawn()
-	gordon_invulnerable:Fire("TurnOn")
-
-	local gordon_precriminal = ents.Create("env_global")
-	gordon_precriminal:SetKeyValue("globalstate", "gordon_precriminal")
-	gordon_precriminal:SetKeyValue("initialstate", "0")
-	gordon_precriminal:Spawn()
-	gordon_precriminal:Fire("TurnOn")
 
 end
 
