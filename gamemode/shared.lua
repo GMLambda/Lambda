@@ -30,6 +30,7 @@ include("sh_vehicles.lua")
 include("sh_sound_env.lua")
 include("sh_temp.lua")
 include("sh_bullets.lua")
+include("sh_hudhint.lua")
 
 include("sh_lambda.lua")
 include("sh_lambda_npc.lua")
