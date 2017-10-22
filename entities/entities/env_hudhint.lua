@@ -31,7 +31,7 @@ if SERVER then
 
 	    BaseClass.KeyValue(self, key, val)
 
-		if key == "message" then
+		if key:iequals("message") == true then
 			self.Message = val
 		end
 
@@ -39,22 +39,16 @@ if SERVER then
 
 	function ENT:InputShowHudHint(data, activator, caller)
 
-		return self:Command(data, activator, caller)
+		GAMEMODE:AddHint(self.Message, 20)
 
+	end
+
+	function ENT:UpdateTransmitState()
+	    return TRANSMIT_NEVER
 	end
 
 	function ENT:InputHideHudHint(data, activator, caller)
-
-		return self:Command(data, activator, caller)
-
+		-- We don't need this.
 	end
-
-	function ENT:Command(data, activator, caller)
-		-- Stub
-	end
-
-else -- CLIENT
-
-
 
 end

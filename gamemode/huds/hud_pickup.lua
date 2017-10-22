@@ -3,6 +3,7 @@ GM.PickupHistoryLast = 0
 GM.PickupHistoryWide = 300
 GM.PickupHistoryCorner = surface.GetTextureID( "gui/corner8" )
 GM.PickupHistoryMax = 6
+GM.PickupHistoryTop = 0
 
 GM.SymbolLookupTable =
 {
