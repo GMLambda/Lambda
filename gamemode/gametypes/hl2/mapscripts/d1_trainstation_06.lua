@@ -28,7 +28,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
-	--["test_name"] = true,
+	["player_spawn_items"] = true,
 }
 
 function MAPSCRIPT:Init()
