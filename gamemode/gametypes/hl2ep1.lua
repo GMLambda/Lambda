@@ -5,6 +5,7 @@ end
 local GAMETYPE = {}
 
 GAMETYPE.Name = "Half-Life 2: Episode 1"
+GAMETYPE.BaseGameType = "hl2"
 GAMETYPE.MapScript = {}
 GAMETYPE.MapList =
 {

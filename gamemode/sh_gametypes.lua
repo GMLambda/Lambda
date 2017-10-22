@@ -60,7 +60,8 @@ function GameTypes:Add(name, tbl)
 	if self.Registered[mappedName] ~= nil then
 		error("GameType name is already taken: " .. name)
 	end
-	self.Registered[mappedName] = tbl
+	-- Don't reference the table.
+	self.Registered[mappedName] = table.Copy(tbl)
 end
 
 function GameTypes:Get(name)
@@ -76,7 +77,39 @@ function GM:LoadGameTypes()
 			print("> " .. k)
 		end
 	end
+	for k,v in pairs(GameTypes.Registered) do
+		if v.BaseGameType ~= nil then
+			local base = GameTypes.Registered[v.BaseGameType]
+			if base == nil then
+				print("GameType '" .. k .. "' references missing base: '" .. tostring(v.BaseGameType) .. "'")
+				continue
+			end
+			v.Base = base
+		end
+	end
 end
+
+function GM:CallGameTypeFunc(name, ...)
+	local base = self:GetGameType()
+	while base ~= nil do
+		if base[name] ~= nil and isfunction(base[name]) then
+			return base[name](base, ...)
+		end
+		base = base.Base
+	end
+	return nil
+end
+
+function GM:GetGameTypeData(name)
+	local base = self:GetGameType()
+	while base ~= nil do
+		if base[name] ~= nil and not isfunction(base[name]) then
+			return base[name]
+		end
+		base = base.Base
+	end
+	return nil
+end 
 
 function GM:SetGameType(gametype)
 	DbgPrint("SetGameType: " .. tostring(gametype))

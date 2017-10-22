@@ -92,10 +92,9 @@ if SERVER then
 		npc:SetLagCompensated(true)
 
 		self.EnemyNPCs = self.EnemyNPCs or {}
-
-		local gametype = self:GetGameType()
-
-		if gametype and gametype.ClassesEnemyNPC and gametype.ClassesEnemyNPC[npc:GetClass()] == true then
+		
+		local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC") or {}
+		if enemyClasses[npc:GetClass()] == true then
 			table.insert(self.EnemyNPCs, npc)
 		end
 

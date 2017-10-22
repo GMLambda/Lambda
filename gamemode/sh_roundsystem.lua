@@ -195,7 +195,7 @@ if SERVER then
 		local gameType = self:GetGameType()
 
 		--DbgUniquePrint("Round Logic")
-		if gameType.ShouldRestartRound ~= nil and gameType:ShouldRestartRound() == true then
+		if self:CallGameTypeFunc("ShouldRestartRound") == true then
 			DbgPrint("All players are dead, restart required")
 			self:RestartRound()
 			self:RegisterRoundLost()

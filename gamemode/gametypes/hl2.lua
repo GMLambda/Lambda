@@ -179,6 +179,10 @@ function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
 	return true
 end
 
+function GAMETYPE:TestFn(a, b, c)
+	print(self, self.Name, a, b, c)
+end
+
 function GAMETYPE:PlayerCanPickupItem(ply, item)
 	return true
 end

@@ -143,7 +143,7 @@ end
 function GM:GetNextMap()
 
 	local gameType = self:GetGameType()
-	local mapList = gameType.MapList
+	local mapList = self:GetGameTypeData("MapList")
 
 	local current = self:GetCurrentMapIndex()
 	if current + 1 > #mapList then
@@ -156,7 +156,7 @@ end
 function GM:GetPreviousMap()
 
 	local gameType = self:GetGameType()
-	local mapList = gameType.MapList
+	local mapList = self:GetGameTypeData("MapList")
 
 	local current = self:GetCurrentMapIndex()
 	if current - 1 < 0 then
@@ -178,7 +178,7 @@ end
 function GM:GetMapIndex(prevMap, currentMap)
 
 	local gameType = self:GetGameType()
-	local mapList = gameType.MapList
+	local mapList = self:GetGameTypeData("MapList")
 
 	DbgPrint("Getting Map Index, Prev: " .. tostring(prevMap) .. ", Cur: " .. currentMap)
 	local foundPrev = false
