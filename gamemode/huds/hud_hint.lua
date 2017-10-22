@@ -4,10 +4,33 @@ GM.HintHistoryMax = 3
 
 local FONT_TEXT = "LambdaHintFont"
 local FONT_TEXT_GLOW = "LambdaHintFontGlow"
+local TEXT_SIZE = 10
 local TEXT_OFFSET_X = 4
 local TEXT_OFFSET_Y = 4
 local HINT_HEIGHT = 32
 local HINT_SPACING = 4
+
+surface.CreateFont(FONT_TEXT,
+{
+	font = "Verdana",
+	size = util.ScreenScaleH(TEXT_SIZE),
+	weight = 0,
+	blursize = 0,
+	scanlines = 0,
+	antialias = true,
+	additive = true,
+})
+
+surface.CreateFont(FONT_TEXT_GLOW,
+{
+	font = "Verdana",
+	size = util.ScreenScaleH(TEXT_SIZE),
+	weight = 0,
+	blursize = util.ScreenScaleH(2),
+	scanlines = 2,
+	antialias = true,
+	additive = true,
+})
 
 local function GetTextColor()
 	local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
@@ -42,7 +65,6 @@ function GM:DrawHintHistory(x, y, w, h, data, alpha)
 
 		local a = 1 - (data.elapsed / 2)
 		local blur = 3.5 * a
-		DbgPrint(blur)
 		for i = blur, 0, -1.0 do
 
 			surface.SetTextColor(colText.r, colText.g, colText.b, (colText.a * i) * a)
@@ -145,11 +167,11 @@ function GM:AddHint(text, time)
 	hint.holdtime = time
 	hint.fadein = 0.04
 	hint.fadeout = 0.03
-	hint.text = text
+	hint.text = string.upper(text)
 	hint.y = (ScrH() * 0.8) - ((count + 1) * (HINT_HEIGHT + HINT_SPACING))
 
 	surface.SetFont( FONT_TEXT_GLOW )
-	local w, h = surface.GetTextSize( text )
+	local w, h = surface.GetTextSize( hint.text )
 	hint.theight = h
 	hint.twidth = w
 	hint.height = HINT_HEIGHT
