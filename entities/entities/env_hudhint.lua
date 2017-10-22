@@ -31,7 +31,6 @@ if SERVER then
 
 	    BaseClass.KeyValue(self, key, val)
 
-		--DbgPrint(self, key, val)
 		if key:iequals("message") == true then
 			self.Message = val
 		end
@@ -40,20 +39,16 @@ if SERVER then
 
 	function ENT:InputShowHudHint(data, activator, caller)
 
-		DbgPrint("Showing hint")
+		GAMEMODE:AddHint(self.Message, 20)
 
-		GAMEMODE:AddHint(self.Message, 10)
+	end
 
+	function ENT:UpdateTransmitState()
+	    return TRANSMIT_NEVER
 	end
 
 	function ENT:InputHideHudHint(data, activator, caller)
-
-
-
-	end
-
-	function ENT:Command(data, activator, caller)
-
+		-- We don't need this.
 	end
 
 end
