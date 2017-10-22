@@ -184,7 +184,7 @@ function GAMETYPE:PlayerCanPickupItem(ply, item)
 end
 
 function GAMETYPE:GetWeaponRespawnTime()
-	return 0
+	return 1
 end
 
 function GAMETYPE:GetItemRespawnTime()
@@ -194,6 +194,9 @@ end
 function GAMETYPE:ShouldRespawnWeapon(ent)
 	if ent:GetClass() == "weapon_frag" then
 		-- Consider this an item and not some weapon.
+		return false
+	end
+	if ent:IsItem() == true then
 		return false
 	end
 	return true

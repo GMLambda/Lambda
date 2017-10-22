@@ -63,6 +63,8 @@ local ITEM_CLASSES =
 	["item_rpg_round"] = true,
 	["item_suit"] = true,
 	["item_suitcharger"] = true,
+	["weapon_frag"] = true,
+	["weapon_slam"] = true,
 }
 
 function ENTITY_META:IsItem()
