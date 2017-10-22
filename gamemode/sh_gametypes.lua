@@ -109,21 +109,23 @@ function GM:GetGameTypeData(name)
 		base = base.Base
 	end
 	return nil
-end 
+end
 
-function GM:SetGameType(gametype)
+function GM:SetGameType(gametype, isFallback)
 	DbgPrint("SetGameType: " .. tostring(gametype))
 	local gametypeData = GameTypes:Get(gametype)
 	if gametypeData == nil then
 		error("Unable to find gametype: " .. gametype)
-		return
+		if isFallback ~= true then
+			DbgPrint("Fallback: hl2")
+			return self:SetGameType("hl2", true)
+		end
 	end
 	if gametypeData.LoadMapScript ~= nil then
 		gametypeData:LoadMapScript()
 	end
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
-
 end
 
 function GM:ReloadGameType()
