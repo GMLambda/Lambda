@@ -1128,7 +1128,7 @@ function SWEP:UpdateElementPosition()
 	else
 		if self:IsMegaPhysCannon() == true then
 			elemPos = 1
-		end 
+		end
 		self:SetPoseParameter("active", elemPos)
 		if CLIENT then
 			self:InvalidateBoneCache()
@@ -1402,7 +1402,6 @@ function SWEP:DetachObject(launched)
 
 	local snd = self:GetMotorSound()
 	if snd ~= nil and snd ~= NULL then
-		print("Turning off looping sound.")
 		snd:ChangeVolume(0, 1.0)
 		snd:ChangePitch(50, 1.0)
 	end
@@ -1420,7 +1419,7 @@ function SWEP:DetachObject(launched)
 
 	local ent = controller:GetAttachedObject()
 	if not IsValid(ent) then
-			DbgPrint(self, "Invalid attached object")
+		DbgPrint(self, "Invalid attached object")
 		return
 	end
 
