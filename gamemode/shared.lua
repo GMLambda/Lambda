@@ -15,6 +15,7 @@ include("sh_convars.lua")
 include("sh_string_extend.lua")
 include("sh_interpvalue.lua")
 include("sh_timestamp.lua")
+include("sh_gma.lua")
 
 include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
@@ -139,6 +140,8 @@ function GM:Initialize()
 		self:TransferPlayers()
 		self:InitializeResources()
 	end
+
+	self:CallGameTypeFunc("LoadGameContent")
 
 end
 
