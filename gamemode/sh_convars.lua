@@ -4,7 +4,7 @@ end
 
 GM.ConVars = {}
 
-function GM:RegisterConVar(name, value, flags, helptext)
+function GM:RegisterConVar(name, value, flags, helptext, fn)
 	local prefix = "lambda_"
 	local actualName = prefix .. name
 	local actualValue = ""
@@ -20,16 +20,31 @@ function GM:RegisterConVar(name, value, flags, helptext)
 	local convar = CreateConVar(actualName, actualValue, flags, helptext)
 	self.ConVars[name] = convar
 
-	return convar
+	if fn ~= nil and isfunction(fn) then
+		cvars.AddChangeCallback(actualName, fn)
+	end
 
+	return convar
 end
 
 function GM:GetRegisteredConVar(name)
 	return self.ConVars[name]
 end
 
+local size = 5
+local width = 2
+local space = 5
+
 if CLIENT then
-	lambda_dynamic_crosshair = GM:RegisterConVar("dynamic_crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")
+	lambda_crosshair = GM:RegisterConVar("crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Lambda Crosshair")
+	lambda_crosshair_size = GM:RegisterConVar("crosshair_size", 8, bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_width = GM:RegisterConVar("crosshair_width", 2, bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_space = GM:RegisterConVar("crosshair_space", 4, bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_outline = GM:RegisterConVar("crosshair_outline", 1, bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_adaptive = GM:RegisterConVar("crosshair_adaptive", 1, bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_color = GM:RegisterConVar("crosshair_color", "0 128 0", bit.bor(0, FCVAR_ARCHIVE), "")
+	lambda_crosshair_alpha = GM:RegisterConVar("crosshair_alpha", 255, bit.bor(0, FCVAR_ARCHIVE), "")
+
 	lambda_postprocess = GM:RegisterConVar("postprocess", 1, bit.bor(0, FCVAR_ARCHIVE), "Postprocessing")
 	lambda_hud_text_color = GM:RegisterConVar("hud_text_color", "255 208 64", bit.bor(0, FCVAR_ARCHIVE), "HUD Text Color R(0-255), G(0-255), B(0-255)")
 	lambda_hud_bg_color = GM:RegisterConVar("hud_bg_color", "0 0 0", bit.bor(0, FCVAR_ARCHIVE), "HUD BG Color R(0-255), G(0-255), B(0-255)")

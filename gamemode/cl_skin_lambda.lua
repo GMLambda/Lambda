@@ -505,6 +505,10 @@ function SKIN:PaintPropertySheet( panel, w, h )
 	surface.DrawRect(0,0,w,h)
 
 	local ActiveTab = panel:GetActiveTab()
+	if ActiveTab == nil then
+		return
+	end
+	
 	local Offset = 0
 	if ( ActiveTab ) then Offset = ActiveTab:GetTall()-8 end
 
@@ -898,7 +902,7 @@ end
 
 function SKIN:PaintNumSlider( panel, w, h )
 
-	surface.SetDrawColor( Color( 0, 0, 0, 100 ) )
+	surface.SetDrawColor( Color( 128, 128, 128, 100 ) )
 	surface.DrawRect( 8, h / 2 - 1, w - 15, 1 )
 
 	PaintNotches( 8, h / 2 - 1, w - 16, 1, panel.m_iNotches )

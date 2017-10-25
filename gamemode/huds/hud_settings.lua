@@ -57,20 +57,149 @@ function PANEL:Init()
 	self.Sheet:AddSheet( "Player", PanelSelect, "lambda/icons/player_settings.png" )
 
 	local PanelSettings = self.Sheet:Add("DPanel")
+	do
+		local sheetSettings = vgui.Create("DPropertySheet", PanelSettings)
+		sheetSettings:Dock(LEFT)
+		sheetSettings:SetSize(W - 10, H)
 
-		local dyn_cross = vgui.Create("DCheckBoxLabel", PanelSettings)
-		dyn_cross:SetPos(5, 5)
-		dyn_cross:SetText("Dynamic crosshair")
-		dyn_cross:SetConVar("lambda_dynamic_crosshair")
-		dyn_cross:SetValue(cvars.Number("lambda_dynamic_crosshair"))
+		local PanelCrosshair = sheetSettings:Add("DPanel")
+		do
+			local dyn_cross = vgui.Create("DCheckBoxLabel", PanelCrosshair)
+			dyn_cross:SetPos(5, 5)
+			dyn_cross:SetText("Enhanced Crosshair")
+			dyn_cross:SetConVar("lambda_crosshair")
+			dyn_cross:SetValue(cvars.Number("lambda_crosshair"))
 
-		local postproc = vgui.Create("DCheckBoxLabel", PanelSettings)
-		postproc:SetPos(5, 25)
-		postproc:SetText("Post Processing (Custom effects)")
-		postproc:SizeToContents()
-		postproc:SetConVar("lambda_postprocess")
-		postproc:SetValue(cvars.Number("lambda_postprocess"))
+			local bgColor = Color(0, 0, 0, 255)
 
+			local chPreview = vgui.Create("DImage", PanelCrosshair)
+			chPreview:SetPos(180, 135)
+			chPreview:SetSize(128, 128)
+			chPreview:SetMaterial(GAMEMODE:GetCrosshairMaterial(128, 128, bgColor), true)
+			chPreview:SetPaintBorderEnabled(true)
+
+			local function UpdateCrosshairPreview()
+				chPreview:SetMaterial(GAMEMODE:GetCrosshairMaterial(128, 128, bgColor), true)
+			end
+
+			local chSize = vgui.Create("DNumSlider", PanelCrosshair)
+			chSize:SetPos(5, 30)
+			chSize:SetSize(300, 20)
+			chSize:SetText("Size")
+			chSize:SetMin(0)
+			chSize:SetMax(128)
+			chSize:SetDecimals(0)
+			chSize:SetValue(cvars.Number("lambda_crosshair_size"))
+			function chSize:OnValueChanged(val)
+				lambda_crosshair_size:SetInt(tonumber(val))
+				UpdateCrosshairPreview()
+			end
+
+			local chWidth = vgui.Create("DNumSlider", PanelCrosshair)
+			chWidth:SetPos(5, 55)
+			chWidth:SetSize(300, 20)
+			chWidth:SetText("Width")
+			chWidth:SetMin(0)
+			chWidth:SetMax(64)
+			chWidth:SetDecimals(0)
+			chWidth:SetValue(cvars.Number("lambda_crosshair_width"))
+			function chWidth:OnValueChanged(val)
+				lambda_crosshair_width:SetInt(tonumber(val))
+				UpdateCrosshairPreview()
+			end
+
+			local chSpace = vgui.Create("DNumSlider", PanelCrosshair)
+			chSpace:SetPos(5, 80)
+			chSpace:SetSize(300, 20)
+			chSpace:SetText("Space")
+			chSpace:SetMin(0)
+			chSpace:SetMax(24)
+			chSpace:SetDecimals(0)
+			chSpace:SetValue(cvars.Number("lambda_crosshair_space"))
+			function chSpace:OnValueChanged(val)
+				lambda_crosshair_space:SetInt(tonumber(val))
+				UpdateCrosshairPreview()
+			end
+
+			local labelColor = vgui.Create("DLabel", PanelCrosshair)
+			labelColor:SetPos(5, 105)
+			labelColor:SetText("Color")
+
+			local labelR = vgui.Create("DLabel", PanelCrosshair)
+			labelR:SetPos(135, 105)
+			labelR:SetText("R")
+
+			local crosshairColor = GAMEMODE:GetCrosshairColor()
+
+			local numCrosshairR = vgui.Create("DNumberWang", PanelCrosshair)
+			numCrosshairR:SetSize(36, 20)
+			numCrosshairR:SetPos(150, 105)
+			numCrosshairR:SetMin(0)
+			numCrosshairR:SetMax(255)
+			numCrosshairR:SetDecimals(0)
+			numCrosshairR:SetValue(crosshairColor.r)
+			function numCrosshairR:OnValueChange(val)
+				local color = GAMEMODE:GetCrosshairColor()
+				color.r = math.Clamp(tonumber(val) or 0, 0, 255)
+				GAMEMODE:SetCrosshairColor(color)
+				UpdateCrosshairPreview()
+			end
+
+			local labelG = vgui.Create("DLabel", PanelCrosshair)
+			labelG:SetPos(195, 105)
+			labelG:SetText("G")
+
+			local numCrosshairG = vgui.Create("DNumberWang", PanelCrosshair)
+			numCrosshairG:SetSize(36, 20)
+			numCrosshairG:SetPos(210, 105)
+			numCrosshairG:SetMin(0)
+			numCrosshairG:SetMax(255)
+			numCrosshairG:SetDecimals(0)
+			numCrosshairG:SetValue(crosshairColor.g)
+			function numCrosshairG:OnValueChange(val)
+				local color = GAMEMODE:GetCrosshairColor()
+				color.g = math.Clamp(tonumber(val) or 0, 0, 255)
+				GAMEMODE:SetCrosshairColor(color)
+				UpdateCrosshairPreview()
+			end
+
+			local labelB = vgui.Create("DLabel", PanelCrosshair)
+			labelB:SetPos(255, 105)
+			labelB:SetText("B")
+
+			local numCrosshairB = vgui.Create("DNumberWang", PanelCrosshair)
+			numCrosshairB:SetSize(36, 20)
+			numCrosshairB:SetPos(270, 105)
+			numCrosshairB:SetMin(0)
+			numCrosshairB:SetMax(255)
+			numCrosshairB:SetDecimals(0)
+			numCrosshairB:SetValue(crosshairColor.b)
+			function numCrosshairB:OnValueChange(val)
+				local color = GAMEMODE:GetCrosshairColor()
+				color.b = math.Clamp(tonumber(val) or 0, 0, 255)
+				GAMEMODE:SetCrosshairColor(color)
+				UpdateCrosshairPreview()
+			end
+
+			local chAdaptive = vgui.Create("DCheckBoxLabel", PanelCrosshair)
+			chAdaptive:SetPos(5, 135)
+			chAdaptive:SetText("Adaptive Colors")
+			chAdaptive:SetConVar("lambda_crosshair_adaptive")
+			chAdaptive:SetValue(cvars.Number("lambda_crosshair_adaptive"))
+		end
+		sheetSettings:AddSheet("Crosshair", PanelCrosshair)
+
+		local PanelPostFx = sheetSettings:Add("DPanel")
+		do
+			local postproc = vgui.Create("DCheckBoxLabel", PanelPostFx)
+			postproc:SetPos(5, 5)
+			postproc:SetText("Post Processing (Custom effects)")
+			postproc:SizeToContents()
+			postproc:SetConVar("lambda_postprocess")
+			postproc:SetValue(cvars.Number("lambda_postprocess"))
+		end
+		sheetSettings:AddSheet("Post Processing", PanelPostFx)
+	end
 	self.Sheet:AddSheet("Settings", PanelSettings, "lambda/icons/settings.png")
 
 	local pl = LocalPlayer()
