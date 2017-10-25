@@ -1,4 +1,4 @@
-# Lambda
+![Lambda](https://github.com/ZehMatt/Lambda/blob/develop/logo.png?raw=true)
 
 Have you ever wanted to play the Half-Life 2 series with your friends online? Then Lambda is exactly what you are looking for. Lambda aims to provide seamless multiplayer support for the Half-Life 2 campaign maps, as well as user-created campaigns.
 
