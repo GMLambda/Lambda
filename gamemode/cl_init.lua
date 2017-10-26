@@ -348,7 +348,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 		local vehicle = ply:GetVehicle()
 		if IsValid( vehicle ) then
-			return hook.Run( "CalcVehicleView", Vehicle, ply, view )
+			return hook.Run( "CalcVehicleView", vehicle, ply, view )
 		end
 
 	end

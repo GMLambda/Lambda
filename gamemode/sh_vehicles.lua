@@ -160,12 +160,17 @@ if SERVER then
 				vehicle.LambdaPlayer = ply
 				ply.OwnedVehicle = vehicle
 
-				ply:SetNW2Entity("LambdaOwnedVehicle", vehicle)
+				ply:SetNWEntity("LambdaOwnedVehicle", vehicle)
 
 			end
 
 		end
 
+	end
+
+	function GM:CanExitVehicle(vehicle, ply)
+		DbgPrint("CanPlayerExitVehicle", vehicle, ply)
+	    return true
 	end
 
 	function GM:PlayerLeaveVehicle(ply, vehicle)
@@ -189,7 +194,7 @@ if SERVER then
 					vehicle.LambdaAllowEnter = passenger
 
 					ply.OwnedVehicle = nil
-					ply:SetNW2Entity("LambdaOwnedVehicle", nil)
+					ply:SetNWEntity("LambdaOwnedVehicle", nil)
 
 				end
 			end
@@ -205,9 +210,7 @@ if SERVER then
 			-- Look towards the seat.
 			local exitang = (pos - exitpos):Angle()
 
-			ply:SetPos(exitpos)
-			ply:SetEyeAngles(exitang)
-			--ply:SetAllowWeaponsInVehicle(false)
+			ply:TeleportPlayer(exitpos, exitang)
 
 			vehicle:GetParent().Passenger = nil
 
@@ -278,7 +281,7 @@ if SERVER then
 		end
 
 		ply.OwnedVehicle = nil
-		ply:SetNW2Entity("LambdaOwnedVehicle", nil)
+		ply:SetNWEntity("LambdaOwnedVehicle", nil)
 
 	end
 
@@ -384,49 +387,75 @@ if SERVER then
 				end
 			end
 
+			if util.IsInWorld(vehicle:GetPos()) == false then
+				DbgPrint("Removing out of world vehicle")
+				vehicle:Remove()
+			end
+
+
 		end
 
 	end
 
 else -- CLIENT
 
-	function GM:RenderVehicleStatus()
-
-		local ply = LocalPlayer()
-		if not IsValid(ply) then
-			return
-		end
-
-		local vehicle = ply:GetNW2Entity("LambdaOwnedVehicle")
-		if IsValid(vehicle) then
-			-- Show vehicle of player if not inside.
-			if ply:InVehicle() and ply:GetVehicle() == vehicle then
-				return
-			end
-		else
-			-- Show all available vehicles.
-
-		end
-
-	end
-
-	function GM:CalcVehicleView(Vehicle, ply, view)
-
-		local viewPos = view.origin
-		local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
-
-		if headBone ~= nil then
-			viewPos = ply:GetBonePosition(headBone)
-		end
-
-		view.origin = ply:EyePos()
+	function GM:CalcVehicleView(vehicle, ply, view)
 
 		if ply.VehicleSteeringView == true then
+			local viewPos = view.origin
+			local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
+
+			if headBone ~= nil then
+				viewPos = ply:GetBonePosition(headBone)
+			end
+
 			view.origin = viewPos + (view.angles:Forward() * 3)
 		end
 
+		if ( vehicle.GetThirdPersonMode == nil || ply:GetViewEntity() != ply ) then
+			-- This hsouldn't ever happen.
+			return
+		end
+
+		--
+		-- If we're not in third person mode - then get outa here stalker
+		--
+		if ( !vehicle:GetThirdPersonMode() ) then return view end
+
+		-- Don't roll the camera
+		-- view.angles.roll = 0
+
+		local mn, mx = vehicle:GetRenderBounds()
+		local radius = ( mn - mx ):Length()
+		local radius = radius + radius * vehicle:GetCameraDistance()
+
+		-- Trace back from the original eye position, so we don't clip through walls/objects
+		local TargetOrigin = view.origin + ( view.angles:Forward() * -radius )
+		local WallOffset = 4
+
+		local tr = util.TraceHull( {
+			start = view.origin,
+			endpos = TargetOrigin,
+			filter = function( e )
+				local c = e:GetClass() -- Avoid contact with entities that can potentially be attached to the vehicle. Ideally, we should check if "e" is constrained to "Vehicle".
+				return !c:StartWith( "prop_physics" ) &&!c:StartWith( "prop_dynamic" ) && !c:StartWith( "prop_ragdoll" ) && !e:IsVehicle() && !c:StartWith( "gmod_" )
+			end,
+			mins = Vector( -WallOffset, -WallOffset, -WallOffset ),
+			maxs = Vector( WallOffset, WallOffset, WallOffset ),
+		} )
+
+		view.origin = tr.HitPos
+		view.drawviewer = true
+
+		--
+		-- If the trace hit something, put the camera there.
+		--
+		if ( tr.Hit && !tr.StartSolid) then
+			view.origin = view.origin + tr.HitNormal * WallOffset
+		end
 
 		return view
+
 	end
 
 end
