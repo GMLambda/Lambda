@@ -151,7 +151,7 @@ if SERVER then
 			end
 		end
 
-		local spawnClass = gameType.PlayerSpawnClass
+		local spawnClass = self:GetGameTypeData("PlayerSpawnClass")
 		DbgPrint("Spawn class: " .. spawnClass)
 
 		local spawnpoints = ents.FindByClass(spawnClass)
@@ -178,14 +178,14 @@ if SERVER then
 				break
 			end
 
-			if gameType:CanPlayerSpawn(ply, v) == true then
+			if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then
 				table.insert(possibleSpawns, v)
 			end
 
 		end
 
 		if spawnpoint == nil and #possibleSpawns > 0 then
-			spawnpoint = table.Random(possibleSpawns)
+			spawnpoint = self:CallGameTypeFunc("PlayerSelectSpawn", possibleSpawns)
 		end
 
 		DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))
@@ -206,7 +206,7 @@ if SERVER then
 			end
 		end
 
-		local spawnClass = gameType.PlayerSpawnClass
+		local spawnClass = self:GetGameTypeData("PlayerSpawnClass")
 		local spawnpoints = ents.FindByClass(spawnClass)
 		if #spawnpoints == 0 then
 			-- Always use a fallback.
@@ -225,7 +225,7 @@ if SERVER then
 				return true
 			end
 
-			if gameType:CanPlayerSpawn(ply, v) == true then
+			if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then
 				return true
 			end
 
@@ -326,8 +326,7 @@ if SERVER then
 			-- Weapons
 			DbgPrint("Giving player " .. tostring(ply) .. " default weapons")
 
-			local gameType = self:GetGameType()
-			local loadout = gameType:GetPlayerLoadout() or {}
+			local loadout = self:CallGameTypeFunc("GetPlayerLoadout") or {}
 			for k,v in pairs(loadout.Weapons or {}) do
 				DbgPrint("Give(" .. tostring(ply) .. "): " .. v)
 				ply:Give(v, false)
@@ -644,7 +643,7 @@ if SERVER then
 		end
 
 		local gameType = self:GetGameType()
-		gameType:PlayerDeath(ply, attacker, inflictor)
+		self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
 
 		BaseClass.PlayerDeath(self, ply, attacker, inflictor)
 
@@ -659,11 +658,10 @@ if SERVER then
 		ply:LockPosition(false, false)
 
 		local gameType = self:GetGameType()
-		local respawnTime = gameType:GetPlayerRespawnTime()
-
+		local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
 		ply.RespawnTime = ply.DeathTime + respawnTime
 
-		if self:IsRoundRestarting() == false and gameType:ShouldRestartRound() == false then
+		if self:IsRoundRestarting() == false and self:CallGameTypeFunc("ShouldRestartRound") == false then
 			DbgPrint("Notifying respawn")
 			self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
 			{
@@ -700,8 +698,7 @@ if SERVER then
 	        return false
 	    end
 
-		local gameType = self:GetGameType()
-		local timeout = gameType:GetPlayerRespawnTime()
+		local timeout = self:CallGameTypeFunc("GetPlayerRespawnTime")
 		if timeout == -1 then
 			return false
 		end
@@ -914,7 +911,7 @@ if SERVER then
 		end
 
 		local gameType = self:GetGameType()
-		if gameType:PlayerCanPickupItem(ply, item) == false then
+		if self:CallGameTypeFunc("PlayerCanPickupItem", ply, item) == false then
 			DbgPrintPickup("GameType prevented pickup")
 			return false
 		end
@@ -943,8 +940,9 @@ if SERVER then
 			res = false
 		end
 
-		if res == true and gameType:ShouldRespawnItem(item) == true then
-			self:RespawnObject(item, gameType:GetItemRespawnTime())
+		if res == true and self:CallGameTypeFunc("ShouldRespawnItem", item) == true then
+			local respawnTime = self:CallGameTypeFunc("GetItemRespawnTime") or -1
+			self:RespawnObject(item, respawnTime)
 		end
 
 		if res == true then
@@ -1001,13 +999,14 @@ if SERVER then
 			end
 		end
 
-		if gameType:PlayerCanPickupWeapon(ply, wep) == false then
+		if self:CallGameTypeFunc("PlayerCanPickupWeapon", ply, wep) == false then
 			--DbgPrint("GameType prevented pickup")
 			return false
 		end
 
-		if gameType:ShouldRespawnWeapon(wep) == true then
-			self:RespawnObject(wep, gameType:GetWeaponRespawnTime())
+		if self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
+			local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0
+			self:RespawnObject(wep, respawnTime)
 		end
 
 		ply.ObjectPickupTable[wep.UniqueEntityId] = true

@@ -688,6 +688,10 @@ function SWEP:CanPickupObject(ent, massLimit, sizeLimit)
 		return false
 	end
 
+	if ent:IsNPC() == true and IsFriendEntityName(ent:GetClass()) == true then
+		return false
+	end
+
 	if ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
 		return false
 	end
@@ -1196,9 +1200,9 @@ function SWEP:Think()
 
 	if SERVER then
 		if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
-			self:SetNW2Bool("MegaEnabled", true)
+			self:SetMegaEnabled(true)
 		else
-			self:SetNW2Bool("MegaEnabled", false)
+			self:SetMegaEnabled(false)
 		end
 	end
 
@@ -1488,6 +1492,10 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
 	DbgPrint("PuntNonVPhysics")
 
 	if hook.Call("GravGunPunt", GAMEMODE, self:GetOwner(), ent) == false then
+		return
+	end
+
+	if ent:IsNPC() == true and IsFriendEntityName(ent:GetClass()) == true then
 		return
 	end
 

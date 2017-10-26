@@ -29,14 +29,16 @@ concommand.Add("lambda_restart", RestartLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD
 
 local function PreviousLevel(ply, cmd, args)
 	if whoisrunning(ply) == false then return end
-	local prevmap = table.FindPrev(GAMEMODE.MapList, game.GetMap())
+	local mapList = self:GetGameTypeData("MapList")
+	local prevmap = table.FindPrev(mapList, game.GetMap())
 	game.ConsoleCommand("changelevel " .. prevmap .. "\n")
 end
 concommand.Add("lambda_prevmap", PreviousLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
 
 local function NextLevel(ply, cmd, args)
 	if whoisrunning(ply) == false then return end
-	local nextmap = table.FindNext(GAMEMODE.MapList, game.GetMap())
+	local mapList = self:GetGameTypeData("MapList")
+	local nextmap = table.FindNext(mapList, game.GetMap())
 	game.ConsoleCommand("changelevel " .. nextmap .. "\n")
 end
 concommand.Add("lambda_nextmap", NextLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))

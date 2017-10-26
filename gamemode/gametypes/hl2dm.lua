@@ -125,6 +125,10 @@ function GAMETYPE:CanPlayerSpawn(ply, spawn)
 	return tr.Fraction == 1.0
 end
 
+function GAMETYPE:PlayerSelectSpawn(spawns)
+	return table.Random(spawns)
+end
+
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
 	gametypes:Add("hl2dm", GAMETYPE)
 end)

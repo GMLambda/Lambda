@@ -4,6 +4,7 @@ end
 
 local DbgPrint = GetLogging("GameType")
 
+include("gametypes/gametype_base.lua")
 include("gametypes/hl2.lua")
 include("gametypes/hl2ep1.lua")
 include("gametypes/hl2dm.lua")
@@ -60,7 +61,25 @@ function GameTypes:Add(name, tbl)
 	if self.Registered[mappedName] ~= nil then
 		error("GameType name is already taken: " .. name)
 	end
-	self.Registered[mappedName] = tbl
+	-- Don't reference the table.
+	local data = table.Copy(tbl)
+	data.GameType = mappedName
+
+	local meta = {}
+	meta.__index = function(i, k)
+		local base = i
+		while base ~= nil do
+			local v = rawget(base, k)
+			if v ~= nil then
+				return v
+			end
+			base = rawget(base, "Base")
+		end
+	end
+
+	setmetatable(data, meta)
+
+	self.Registered[mappedName] = data
 end
 
 function GameTypes:Get(name)
@@ -76,28 +95,66 @@ function GM:LoadGameTypes()
 			print("> " .. k)
 		end
 	end
+	for k,v in pairs(GameTypes.Registered) do
+		if v.BaseGameType ~= nil then
+			local base = GameTypes.Registered[v.BaseGameType]
+			if base == nil then
+				print("GameType '" .. k .. "' references missing base: '" .. tostring(v.BaseGameType) .. "'")
+				continue
+			end
+			v.Base = base
+		end
+	end
 end
 
-function GM:SetGameType(gametype)
+function GM:CallGameTypeFunc(name, ...)
+	local base = self:GetGameType()
+	while base ~= nil do
+		if base[name] ~= nil and isfunction(base[name]) then
+			return base[name](base, ...)
+		end
+		base = base.Base
+	end
+	return nil
+end
+
+function GM:GetGameTypeData(name)
+	local base = self:GetGameType()
+	while base ~= nil do
+		if base[name] ~= nil and not isfunction(base[name]) then
+			return base[name]
+		end
+		base = base.Base
+	end
+	return nil
+end
+
+function GM:SetGameType(gametype, isFallback)
 	DbgPrint("SetGameType: " .. tostring(gametype))
 	local gametypeData = GameTypes:Get(gametype)
 	if gametypeData == nil then
 		error("Unable to find gametype: " .. gametype)
-		return
+		if isFallback ~= true then
+			DbgPrint("Fallback: hl2")
+			return self:SetGameType("hl2", true)
+		end
 	end
-	if gametypeData.LoadMapScript ~= nil then
-		gametypeData:LoadMapScript()
+
+	if gametypeData.LoadCurrentMapScript ~= nil then
+		gametypeData:LoadCurrentMapScript()
 	end
+
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
-
 end
 
 function GM:ReloadGameType()
 
 	if self.GameType ~= nil then
 		local gametype = self.GameType
-		gametype:LoadMapScript()
+		if gametype.LoadCurrentMapScript ~= nil then
+			gametype:LoadCurrentMapScript()
+		end
 		self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 	end
 

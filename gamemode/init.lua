@@ -232,11 +232,14 @@ function GM:EntityTakeDamage(target, dmginfo)
 
 	if target:IsNPC() then
 
-		local isFriendly = gameType.ImportantPlayerNPCNames[target:GetName()] or gameType.ImportantPlayerNPCClasses[targetClass]
+		local restrictedNPCNames = self:GetGameTypeData("ImportantPlayerNPCNames") or {}
+		local restrictedNPCClasses = self:GetGameTypeData("ImportantPlayerNPCClasses") or {}
+		local npcName = target:GetName()
+		local isRestricted = restrictedNPCNames[npcName] == true or restrictedNPCClasses[targetClass] == true
 
 		-- Check if player is attacking friendlies.
-		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and isFriendly == true then
-			DbgPrint("Filtering damage on friendly")
+		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and isRestricted == true then
+			DbgPrint("Filtering damage on restricted NPC")
 			dmginfo:ScaleDamage(0)
 			return true
 		end
@@ -255,7 +258,7 @@ function GM:EntityTakeDamage(target, dmginfo)
 
 		local gameType = self:GetGameType()
 		if target ~= attacker and target ~= inflictor then
-			if gameType:PlayerShouldTakeDamage(target, attacker, inflictor) == false then
+			if self:CallGameTypeFunc("PlayerShouldTakeDamage", target, attacker, inflictor) == false then
 				return true
 			end
 		end

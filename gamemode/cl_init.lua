@@ -145,7 +145,7 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 	local right = oldAng:Right()
 
 	local newPos = oldPos + (fwd * (vertBob * 0.1))
-	newPos.z = newPos.z + (vertBob * 0.1)
+	newPos.z = (newPos.z or 0) + (vertBob * 0.1)
 
 	local newAng = oldAng
 	newAng.roll = newAng.roll + (vertBob * 0.5)

@@ -15,6 +15,7 @@ include("sh_convars.lua")
 include("sh_string_extend.lua")
 include("sh_interpvalue.lua")
 include("sh_timestamp.lua")
+include("sh_gma.lua")
 
 include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
@@ -115,6 +116,43 @@ function GM:OnReloaded()
 
 end
 
+function GM:MountRequiredContent()
+
+	local gametype = self:GetGameType()
+	local filename = "lambda_mount_" .. gametype.GameType .. ".dat"
+	local mountFiles = gametype.MountContent or {}
+
+	if table.Count(mountFiles) == 0 then
+		return true
+	end
+
+	if file.Exists(filename, "DATA") == false then
+		print("Creating new GMA mount package...")
+		if GMA.CreatePackage(mountFiles, filename) == false then
+			print("Unable to create GMA archive, make sure you have the required content mounted.")
+			return
+		end
+		print("OK.")
+	else
+		print("Found pre-existing GMA archive, no need to generate.")
+	end
+
+	if file.Exists(filename, "DATA") == false then
+		-- What?
+		print("Unable to find the GMA archive, unable to mount.")
+		return
+	end
+
+	local res, mountedList = game.MountGMA("data/" .. filename)
+	if res == false then
+		print("Unable to mount the required GMA, you may be unable to play.")
+		return
+	end
+
+	print("Mounted content!")
+
+end
+
 function GM:Initialize()
 
 	DbgPrint("GM:Initialize")
@@ -139,6 +177,8 @@ function GM:Initialize()
 		self:TransferPlayers()
 		self:InitializeResources()
 	end
+
+	self:MountRequiredContent()
 
 end
 
