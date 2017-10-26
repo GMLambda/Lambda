@@ -1593,10 +1593,13 @@ function GM:UpdateSuit(ply, mv)
 			ply:RemoveSuitDevice(SUIT_DEVICE_BREATHER)
 		end
 
-		if powerLoad > 0 and self:DrainSuit(ply, powerLoad * frameTime) == false then
+		if powerLoad > 0 then
 			ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
-			if ply:GetSprinting() == true then
-				self:PlayerEndSprinting(ply, mv)
+			if self:DrainSuit(ply, powerLoad * frameTime) == false then
+				ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
+				if ply:GetSprinting() == true then
+					self:PlayerEndSprinting(ply, mv)
+				end
 			end
 		end
 
