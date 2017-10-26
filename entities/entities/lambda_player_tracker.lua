@@ -2,7 +2,7 @@ AddCSLuaFile()
 
 ENT.Base = "base_anim"
 ENT.Type = "anim"
-ENT.RenderGroup = RENDERGROUP_BOTH
+ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 function ENT:Initialize()
 	if CLIENT then
@@ -165,10 +165,6 @@ if CLIENT then
 		if restoreIgnoreZ == true then
 			cam.IgnoreZ(false)
 		end
-
-	end
-
-	function ENT:Draw()
 
 	end
 
