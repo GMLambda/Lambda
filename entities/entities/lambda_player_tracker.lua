@@ -17,7 +17,7 @@ function ENT:Initialize()
 		end)
 
 		hook.Add("HUDPaint", self, function(ent)
-			ent:RenderPlayerStats()
+			--ent:RenderPlayerStats()
 		end)
 	end
 	self:DrawShadow(false)
@@ -102,9 +102,6 @@ if CLIENT then
 	end
 
 	function ENT:RenderPlayerStats()
-	end
-
-	function ENT:RenderPlayerStats2()
 
 		surface.SetFont(font)
 
@@ -119,7 +116,7 @@ if CLIENT then
 
 		local dir = (ply:EyePos() - EyePos()):GetNormal()
 		local dot = dir:Dot(EyeAngles():Forward())
-		local alphaScale = (dot - 0.9) / 0.1
+		local alphaScale = (dot - 0.8) / 0.2
 		if alphaScale < 0 then
 			return
 		end
@@ -132,8 +129,8 @@ if CLIENT then
 			restoreIgnoreZ = true
 		end
 
-		draw.SimpleText( text, font, x + 1 - (w / 2), y + 1, Color( 0, 0, 0, 120 * alphaScale ) )
-		draw.SimpleText( text, font, x + 2 - (w / 2), y + 2, Color( 0, 0, 0, 50 * alphaScale ) )
+		draw.SimpleText( text, font, x - 1 - (w / 2), y + 1, Color( 0, 0, 0, 120 * alphaScale ) )
+		draw.SimpleText( text, font, x + 1 - (w / 2), y + 2, Color( 0, 0, 0, 50 * alphaScale ) )
 		draw.SimpleText( text, font, x - (w / 2), y, teamColor )
 
 		y = y + h + pad
@@ -173,16 +170,24 @@ if CLIENT then
 
 	function ENT:Draw()
 
+	end
+
+	function ENT:DrawTranslucent()
+
+		local localPly = LocalPlayer()
+		if IsValid(localPly) == false then
+			return
+		end
+
 		local ply = self:GetParent()
 		if not IsValid(ply) or ply == LocalPlayer() or ply:Alive() == false then
 			return
 		end
 
 		local text = ply:Nick()
-		local pos = ply:EyePos() + Vector(0, 0, 12)
-
+		local pos
 		local boneIdx = ply:LookupBone("ValveBiped.Bip01_Head1")
-		if boneIdx == nil then
+		if boneIdx ~= nil then
 			pos = ply:GetBonePosition(boneIdx) + Vector(0, 0, 14)
 		else
 			pos = ply:GetPos() + Vector(0, 0, ply:OBBMaxs().z + 4)
@@ -193,13 +198,17 @@ if CLIENT then
 		ang:RotateAroundAxis( ang:Forward(), 90 )
 		ang:RotateAroundAxis( ang:Right(), 90 )
 
-		cam.Start3D2D(pos + Vector(0, 0, 10), ang, 0.24)
-		self:RenderPlayerStats2()
+		local dist = pos:Distance(localPly:GetPos())
+		dist = math.Clamp(dist, 0, 3000)
+
+		local distScale = (2 * (dist / 3000))
+		local distZ = distScale * 50
+		local scale = 0.12 + distScale
+
+		cam.Start3D2D(pos + Vector(0, 0, 10 + distZ), ang, scale)
+		self:RenderPlayerStats()
 		cam.End3D2D()
 
-	end
-
-	function ENT:DrawTranslucent()
 	end
 
 end

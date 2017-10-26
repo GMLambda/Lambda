@@ -409,10 +409,10 @@ function PANEL:ShowColorOption()
 	self.CMSheet:AddSheet("Weapon", self.Tabs.wep)
 
 	self.Tabs.hudBG =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("Hud BG", self.Tabs.hudBG)
+	self.CMSheet:AddSheet("HUD Background", self.Tabs.hudBG)
 
 	self.Tabs.hudTXT =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("Hud TEXT", self.Tabs.hudTXT)
+	self.CMSheet:AddSheet("HUD Text", self.Tabs.hudTXT)
 
 	for k,v in pairs(self.Tabs) do
 		self.CMs[k] = vgui.Create("DColorMixer", self.Tabs[k])

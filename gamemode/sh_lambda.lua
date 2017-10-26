@@ -222,8 +222,8 @@ GM.AITranslatedGameWeapons =
 
 function GM:CreateTeams()
 
-	team.SetUp(LAMBDA_TEAM_ALIVE, "Alive", Color(0, 0, 255), true)
-	team.SetUp(LAMBDA_TEAM_DEAD, "Dead", Color(255, 0, 0), true)
+	team.SetUp(LAMBDA_TEAM_ALIVE, "Alive", Color(255, 130, 0), true)
+	team.SetUp(LAMBDA_TEAM_DEAD, "Dead", Color(255, 30, 0), true)
 	team.SetUp(LAMBDA_TEAM_SPECTATOR, "Spectating", Color(100, 100, 100), true)
 	team.SetUp(LAMBDA_TEAM_CONNECTING, "Connecting", Color(100, 100, 100), true)
 
