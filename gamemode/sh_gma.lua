@@ -6,8 +6,6 @@ GMA = {}
 
 local GMA_MAGIC = 0x44414D47
 local GMA_VERSION = 3
-local GMA_APPID = 4000
-local GMA_COMPRESSIONSIG = 0xBEEFCACE
 
 local function GetFileContent(filepath, gamepath)
 	local f = file.Open(filepath, "rb", gamepath)
@@ -83,6 +81,10 @@ function GMA.CreatePackage(filelist, outpath)
 		local filepath = v[1]
 		local gamepath = v[2]
 		local info = GetFileInfo(filepath, gamepath)
+		if info == nil then
+			print("Missing file: " .. filepath .. " : " .. gamepath)
+			return false
+		end
 
 		-- File id.
 		f:WriteLong(fileNum)
@@ -113,6 +115,9 @@ function GMA.CreatePackage(filelist, outpath)
 		local data = GetFileContent(filepath, gamepath)
 		if data ~= nil then
 			f:Write(data)
+		else
+			print("Unable to read file: " .. filepath .. " : " .. gamepath)
+			return false
 		end
 
 	end
@@ -124,4 +129,6 @@ function GMA.CreatePackage(filelist, outpath)
 
 	f:Close()
 
+	return true
+	
 end

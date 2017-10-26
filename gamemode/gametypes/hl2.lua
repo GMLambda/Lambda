@@ -6,6 +6,7 @@ local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 
 GAMETYPE.Name = "Half-Life 2"
+GAMETYPE.BaseGameType = "lambda_base"
 GAMETYPE.MapScript = {}
 GAMETYPE.PlayerSpawnClass = "info_player_start"
 GAMETYPE.UsingCheckpoints = true
@@ -179,10 +180,6 @@ function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
 	return true
 end
 
-function GAMETYPE:TestFn(a, b, c)
-	print(self, self.Name, a, b, c)
-end
-
 function GAMETYPE:PlayerCanPickupItem(ply, item)
 	return true
 end
@@ -240,24 +237,16 @@ function GAMETYPE:ShouldRespawnItem(ent)
 	return false
 end
 
+function GAMETYPE:PlayerSelectSpawn(spawns)
+	return spawns[1]
+end
+
 function GAMETYPE:GetPlayerLoadout()
 	return self.MapScript.DefaultLoadout
 end
 
-function GAMETYPE:LoadMapScript()
-	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/hl2/mapscripts/" .. game.GetMap():lower() .. ".lua"
-	self.MapScript = nil
-	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
-		self.MapScript = include(MAPSCRIPT_FILE)
-		if self.MapScript ~= nil then
-			DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
-		else
-			self.MapScript = {}
-		end
-	else
-		DbgPrint("No mapscript available.")
-		self.MapScript = {}
-	end
+function GAMETYPE:LoadCurrentMapScript()
+	self.Base.LoadMapScript(self, "hl2", game.GetMap():lower())
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)

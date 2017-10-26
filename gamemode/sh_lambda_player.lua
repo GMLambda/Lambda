@@ -185,7 +185,7 @@ if SERVER then
 		end
 
 		if spawnpoint == nil and #possibleSpawns > 0 then
-			spawnpoint = table.Random(possibleSpawns)
+			spawnpoint = self:CallGameTypeFunc("PlayerSelectSpawn", possibleSpawns)
 		end
 
 		DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))

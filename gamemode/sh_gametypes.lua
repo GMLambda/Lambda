@@ -4,6 +4,7 @@ end
 
 local DbgPrint = GetLogging("GameType")
 
+include("gametypes/gametype_base.lua")
 include("gametypes/hl2.lua")
 include("gametypes/hl2ep1.lua")
 include("gametypes/hl2dm.lua")
@@ -61,7 +62,24 @@ function GameTypes:Add(name, tbl)
 		error("GameType name is already taken: " .. name)
 	end
 	-- Don't reference the table.
-	self.Registered[mappedName] = table.Copy(tbl)
+	local data = table.Copy(tbl)
+	data.GameType = mappedName
+
+	local meta = {}
+	meta.__index = function(i, k)
+		local base = i
+		while base ~= nil do
+			local v = rawget(base, k)
+			if v ~= nil then
+				return v
+			end
+			base = rawget(base, "Base")
+		end
+	end
+
+	setmetatable(data, meta)
+
+	self.Registered[mappedName] = data
 end
 
 function GameTypes:Get(name)
@@ -121,9 +139,11 @@ function GM:SetGameType(gametype, isFallback)
 			return self:SetGameType("hl2", true)
 		end
 	end
-	if gametypeData.LoadMapScript ~= nil then
-		gametypeData:LoadMapScript()
+
+	if gametypeData.LoadCurrentMapScript ~= nil then
+		gametypeData:LoadCurrentMapScript()
 	end
+
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 end
@@ -132,7 +152,9 @@ function GM:ReloadGameType()
 
 	if self.GameType ~= nil then
 		local gametype = self.GameType
-		gametype:LoadMapScript()
+		if gametype.LoadCurrentMapScript ~= nil then
+			gametype:LoadCurrentMapScript()
+		end
 		self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 	end
 
