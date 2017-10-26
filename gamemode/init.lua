@@ -17,6 +17,7 @@ AddCSLuaFile("huds/hud_pickup.lua")
 AddCSLuaFile("huds/hud_roundinfo.lua")
 AddCSLuaFile("huds/hud_settings.lua")
 AddCSLuaFile("huds/hud_hint.lua")
+AddCSLuaFile("huds/hud_crosshair.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -288,7 +289,7 @@ function GM:EntityTakeDamage(target, dmginfo)
 			if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
 				dmginfo:SetDamageForce(Vector(0, 0, 0))
 			end
-		end 
+		end
 	end
 
 	if target.FilterDamage == true then
