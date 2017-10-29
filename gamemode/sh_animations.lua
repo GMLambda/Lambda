@@ -7,7 +7,6 @@ end
 function GM:HandlePlayerJumping(ply, velocity)
 	if (ply:GetMoveType() == MOVETYPE_NOCLIP) then
 		ply.m_bJumping = false
-
 		return
 	end
 
@@ -290,6 +289,15 @@ function GM:CalcMainActivity(ply, velocity)
 	ply.CalcSeqOverride = -1
 	self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
 
+	-- HACKHACK: People on moving platforms will moonwalk if we rely on then
+	-- clientside velocity. Because clientside its an estimate we rather not
+	-- use it.
+	if SERVER then
+		ply:SetNW2Vector("ActAbsVelocity", velocity)
+	else
+		velocity = ply:GetNW2Vector("ActAbsVelocity", velocity)
+	end
+
 	if (self:HandlePlayerNoClipping(ply, velocity) or
 		self:HandlePlayerDriving(ply) or
 		self:HandlePlayerVaulting(ply, velocity) or
@@ -298,7 +306,6 @@ function GM:CalcMainActivity(ply, velocity)
 		self:HandlePlayerDucking(ply, velocity)) then
 	else
 		local len2d = velocity:Length2DSqr()
-
 		if (len2d > 300) then
 			ply.CalcIdeal = ACT_MP_RUN
 		elseif (len2d > 1) then
