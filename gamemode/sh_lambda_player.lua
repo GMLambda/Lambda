@@ -120,6 +120,8 @@ if SERVER then
 			Model = model,
 		}
 
+		ply.LambdaLastModel = model
+
 		local transitionData = self:GetPlayerTransitionData(ply)
 		if transitionData ~= nil then
 			ply:SetFrags(transitionData.Frags)
@@ -161,27 +163,12 @@ if SERVER then
 		end
 
 		local spawnpoint = nil
+
 		local possibleSpawns = {}
 		for _,v in pairs(spawnpoints) do
-
-			-- If set by us then this is the absolute.
-			if v.MasterSpawn == true then
-				DbgPrint("Spawn using MasterSpawn variable: " .. tostring(v))
-				spawnpoint = v
-				break
-			end
-
-			-- If master flag is set it has priority.
-			if v:HasSpawnFlags(1) then
-				DbgPrint("Spawn uses master flag")
-				spawnpoint = v
-				break
-			end
-
 			if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then
 				table.insert(possibleSpawns, v)
 			end
-
 		end
 
 		if spawnpoint == nil and #possibleSpawns > 0 then
@@ -277,7 +264,7 @@ if SERVER then
 		if IsValid(ply.TrackerEntity) then
 			ply.TrackerEntity:AttachToPlayer(ply)
 		end
-		
+
 	end
 
 	function GM:PlayerSetColors(ply)
@@ -1705,13 +1692,10 @@ function GM:PlayerThink(ply)
 
 		self:UpdatePlayerSpeech(ply)
 
-		-- I don't really like this, however there is no way to tell if we just equipped the suit
-		local lastMdl = ply.LambdaLastModel or ""
 		local curMdl = ply:GetInfo("lambda_playermdl")
-
-		local prevSuitEquipped = ply.LambdaSuitEquipped or false
 		local suitEquipped = ply:IsSuitEquipped()
-		if (suitEquipped ~= prevSuitEquipped) or (curMdl ~= lastMdl) then
+
+		if (suitEquipped ~= ply.LambdaSuitEquipped) or (curMdl ~= ply.LambdaLastModel) then
 			self:PlayerSetModel(ply)
 		end
 
@@ -1732,7 +1716,7 @@ function GM:PlayerThink(ply)
 	local disablePlayerCollide = ply:GetNW2Bool("DisablePlayerCollide", false)
 
 	if SERVER then
-		if disablePlayerCollide == true and CurTime() >= ply:GetNW2Float("NextPlayerCollideTest") and ply:IsPositionLocked() == false then
+		if disablePlayerCollide == true and CurTime() >= ply.NextPlayerCollideTest and ply:IsPositionLocked() == false then
 
 			local hullMin, hullMax = ply:GetHull()
 

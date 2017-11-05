@@ -3,7 +3,7 @@ AddCSLuaFile()
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 
-MAPSCRIPT.PlayersLocked = true
+MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
 	Weapons = {},

@@ -210,10 +210,10 @@ local function EmitPlayerSpeech(ply, group, minWait)
 	local vo = table.Random(vos)
 	local dur = SoundDuration(vo)
 
-	timer.Simple(0.2, function()
+	util.RunDelayed(function()
 		if not IsValid(ply) then return end
 		ply:EmitSound(vo)
-	end)
+	end, CurTime() + 0.2)
 
 	if dur ~= nil and dur > 0 then
 		ply.NextSpeechTime = curTime + dur
@@ -234,6 +234,7 @@ end
 
 function GM:InitializePlayerSpeech(ply)
 
+	ply.LastSpeechUpdate = CurTime()
 	ply.NextSpeechTime = CurTime()
 	ply.EnemyInSight = false
 	ply.EnemyNearby = false
@@ -398,6 +399,12 @@ function GM:UpdatePlayerSpeech(ply)
 		return
 	end
 
+	local curTime = CurTime()
+	if curTime - ply.LastSpeechUpdate < 0.5 then
+		return
+	end
+	ply.LastSpeechUpdate = curTime
+	
 	local pos = ply:GetPos()
 
 	ply.FriendlyInSight = false

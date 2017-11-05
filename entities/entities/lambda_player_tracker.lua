@@ -181,7 +181,6 @@ if CLIENT then
 			return
 		end
 
-		local text = ply:Nick()
 		local pos
 		local boneIdx = self.BoneIndex
 		if boneIdx ~= nil then

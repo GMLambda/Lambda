@@ -242,6 +242,8 @@ function GAMETYPE:PlayerSelectSpawn(spawns)
 		if v.MasterSpawn == true then
 			return v
 		end
+	end
+	for k,v in pairs(spawns) do
 		if v:HasSpawnFlags(1) == true then
 			return v
 		end

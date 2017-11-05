@@ -25,9 +25,11 @@ if SERVER then
 
 	function PLAYER_META:DisablePlayerCollide(state, temporarily)
 		if state == true then
-			self:SetNW2Float("NextPlayerCollideTest", CurTime() + 2)
+			self.NextPlayerCollideTest = CurTime() + 2
 		end
-		if temporarily == nil then temporarily = true end
+		if temporarily == nil then
+			temporarily = true
+		end
 		self:SetNW2Bool("DisablePlayerCollide", state)
 		self.DisablePlayerCollisionTemporarily = temporarily
 		self:CollisionRulesChanged()
