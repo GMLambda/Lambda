@@ -1439,6 +1439,10 @@ function GM:FinishMove(ply, mv)
 
 	if SERVER then
 
+		-- Network velocity to every client to properly sync animations.
+		ply:SetNW2Vector("LambdaAbsVelocity", mv:GetVelocity())
+
+		-- Teleport queue.
 		local modifiedPlayer = false
 
 		if ply.TeleportQueue ~= nil and #ply.TeleportQueue > 0 then
@@ -1469,6 +1473,7 @@ function GM:FinishMove(ply, mv)
 		if modifiedPlayer == true then
 			return modifiedPlayer
 		end
+
 	end
 
 end

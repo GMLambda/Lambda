@@ -55,7 +55,7 @@ function GM:HandlePlayerDucking(ply, velocity)
 		return false
 	end
 
-	if (velocity:Length2DSqr() > 0.25) then
+	if (velocity:Length2DSqr() > 1000) then
 		ply.CalcIdeal = ACT_MP_CROUCHWALK
 	else
 		ply.CalcIdeal = ACT_MP_CROUCH_IDLE
@@ -182,6 +182,12 @@ Name: gamemode:UpdateAnimation()
 Desc: Animation updates (pose params etc) should be done here
 -----------------------------------------------------------]]
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
+
+	if CLIENT and ply ~= LocalPlayer() then
+		-- We use the accurate server velocity instead of estimations.
+		velocity = ply:GetNW2Vector("LambdaAbsVelocity", velocity)
+	end
+
 	local len = velocity:Length()
 	local movement = 1.0
 	local curWep = ply:GetActiveWeapon()
@@ -285,30 +291,29 @@ end
 
 function GM:CalcMainActivity(ply, velocity)
 
+	if CLIENT and ply ~= LocalPlayer() then
+		-- We use the accurate server velocity instead of estimations.
+		velocity = ply:GetNW2Vector("LambdaAbsVelocity", velocity)
+	end
+
 	ply.CalcIdeal = ACT_MP_STAND_IDLE
 	ply.CalcSeqOverride = -1
-	self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
 
-	-- HACKHACK: People on moving platforms will moonwalk if we rely on then
-	-- clientside velocity. Because clientside its an estimate we rather not
-	-- use it.
-	if SERVER then
-		ply:SetNW2Vector("ActAbsVelocity", velocity)
-	else
-		velocity = ply:GetNW2Vector("ActAbsVelocity", velocity)
-	end
+	self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
 
 	if (self:HandlePlayerNoClipping(ply, velocity) or
 		self:HandlePlayerDriving(ply) or
 		self:HandlePlayerVaulting(ply, velocity) or
 		self:HandlePlayerJumping(ply, velocity) or
 		self:HandlePlayerSwimming(ply, velocity) or
-		self:HandlePlayerDucking(ply, velocity)) then
+		self:HandlePlayerDucking(ply, velocity))
+	then
+		-- Handled.
 	else
 		local len2d = velocity:Length2DSqr()
-		if (len2d > 300) then
+		if len2d > 22500 then
 			ply.CalcIdeal = ACT_MP_RUN
-		elseif (len2d > 1) then
+		elseif len2d > 1500 then
 			ply.CalcIdeal = ACT_MP_WALK
 		end
 	end
@@ -337,14 +342,11 @@ IdleActivityTranslate[ACT_LAND] = ACT_LAND
 
 -- it is preferred you return ACT_MP_* in CalcMainActivity, and if you have a specific need to not tranlsate through the weapon do it here
 function GM:TranslateActivity(ply, act)
+	local newact = ply:TranslateWeaponActivity( act )
 
-	local newact = ply:TranslateWeaponActivity(act)
 	-- select idle anims if the weapon didn't decide
-	if (act == newact) then
-		newact = IdleActivityTranslate[act]
-		if newact == nil then
-			--DbgError("Unhandled activity: " .. act)
-		end
+	if ( act == newact ) then
+		return IdleActivityTranslate[ act ]
 	end
 
 	return newact
