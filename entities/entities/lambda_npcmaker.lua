@@ -1,9 +1,5 @@
 local DbgPrint = GetLogging("NPC")
 
-if SERVER then
-
-AddCSLuaFile()
-
 DEFINE_BASECLASS("lambda_entity")
 
 ENT.Base = "lambda_entity"
@@ -100,22 +96,6 @@ function ENT:OnChangedMaxValues()
 end
 
 function ENT:KeyValue(key, val)
-
-	--DbgPrint(self, "Key: " .. key .. ", Val: " .. val)
-
-	--[[
-	if key:iequals("StartDisabled") then
-		self.Disabled = tobool(val)
-	elseif key:iequals("SpawnFrequency") then
-		self.SpawnFrequency = tonumber(val)
-	elseif key:iequals("MaxLiveChildren") then
-		self.MaxLiveChildren = tonumber(val)
-	elseif key:iequals("MaxNPCCount") then
-		self.MaxNPCCount = tonumber(val)
-	elseif key:iequals("DisableScaling") then
-		self.DisableScaling = tobool(val)
-	end
-	]]
 
 	return BaseClass.KeyValue(self, key, val)
 
@@ -524,7 +504,5 @@ end
 function ENT:UpdateTransmitState()
 
 	return TRANSMIT_NEVER
-
-end
 
 end

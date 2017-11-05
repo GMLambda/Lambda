@@ -74,6 +74,8 @@ function GM:Think()
 		self:VehiclesThink()
 		self:NPCThink()
 		self:WeaponTrackingThink()
+	else
+		self:ClientThink()
 	end
 
 	if self.MapScript and self.MapScript.Think then

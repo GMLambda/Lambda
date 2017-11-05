@@ -33,8 +33,7 @@ function GM:OnResolutionChanged(oldW, oldH, newW, newH)
 	self:HUDInit()
 end
 
-function GM:Think()
-
+function GM:ClientThink()
 	local scrW = ScrW()
 	local scrH = ScrH()
 
@@ -64,11 +63,6 @@ function GM:Think()
 	end
 
 	self:BulletsThink()
-
-	for _,v in pairs(player.GetAll()) do
-		self:PlayerThink(v)
-	end
-
 end
 
 local HL2_BOB_CYCLE_MAX = 0.40
