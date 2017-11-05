@@ -238,6 +238,14 @@ function GAMETYPE:ShouldRespawnItem(ent)
 end
 
 function GAMETYPE:PlayerSelectSpawn(spawns)
+	for k,v in pairs(spawns) do
+		if v.MasterSpawn == true then
+			return v
+		end
+		if v:HasSpawnFlags(1) == true then
+			return v
+		end
+	end
 	return spawns[1]
 end
 
