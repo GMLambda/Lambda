@@ -31,7 +31,6 @@ function ENT:AttachToPlayer(ply)
 	self:AddEffects(EF_BONEMERGE)
 	self:DrawShadow(false)
 	self.Player = ply
-	self.BoneIndex = ply:LookupBone("ValveBiped.Bip01_Head1")
 end
 
 function ENT:UpdateTransmitState()
@@ -182,7 +181,7 @@ if CLIENT then
 		end
 
 		local pos
-		local boneIdx = self.BoneIndex
+		local boneIdx = ply:LookupBone("ValveBiped.Bip01_Head1")
 		if boneIdx ~= nil then
 			pos = ply:GetBonePosition(boneIdx) + Vector(0, 0, 14)
 		else

@@ -222,6 +222,126 @@ function GM:ShouldCollide(ent1, ent2)
 
 end
 
+function GM:ProcessEnvHudHint(ent)
+	DbgPrint(ent, "Enabling env_hudhint for all players")
+	ent:AddSpawnFlags(1) -- SF_HUDHINT_ALLPLAYERS
+end
+
+function GM:ProcessEnvMessage(ent)
+	DbgPrint(ent, "Enabling env_message for all players")
+	ent:AddSpawnFlags(2) -- SF_MESSAGE_ALL
+end
+
+function GM:ProcessFuncAreaPortal(ent)
+	DbgPrint(ent, "Opening func_areaportal")
+	-- TODO: This is not ideal at all on larger maps, however can can not get a position for them.
+	ent:SetKeyValue("StartOpen", "1")
+	ent:Fire("Open")
+	ent:SetName("Lambda_" .. ent:GetName())
+end
+
+function GM:ProcessFuncAreaPortalWindow(ent)
+	DbgPrint(ent, "Extending func_areaportalwindow")
+	-- I know this is ugly, but its better than white windows everywhere, this is not 2004 anymore.
+	local saveTable = ent:GetSaveTable()
+	local fadeStartDist = tonumber(saveTable["FadeStartDist"] or "0") * 3
+	local fadeDist = tonumber(saveTable["FadeDist"] or "0") * 3
+	ent:SetKeyValue("FadeDist", fadeDist)
+	ent:SetKeyValue("FadeStartDist", fadeStartDist)
+end
+
+function GM:ProcessTriggerWeaponDissolve(ent)
+	-- OnChargingPhyscannon
+	-- UGLY HACK! But thats the only way we can tell when to upgrade.
+	ent:Fire("AddOutput", "OnChargingPhyscannon lambda_physcannon,Supercharge,,0")
+end
+
+local ENTITY_PROCESSORS =
+{
+	["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
+	["env_message"] = { PostFrame = true, Fn = GM.ProcessEnvMessage },
+	["func_areaportal"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortal },
+	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
+}
+
+function GM:OnEntityCreated(ent)
+
+	if SERVER then
+		local class = ent:GetClass()
+		local entityProcessor = ENTITY_PROCESSORS[class]
+
+		if entityProcessor ~= nil and entityProcessor.PostFrame == false then
+			entityProcessor.Fn(self, ent)
+		end
+
+		-- Used to track the entity in case we respawn it.
+		ent.UniqueEntityId = ent.UniqueEntityId or self:GetNextUniqueEntityId()
+
+		-- Run this next frame so we can safely remove entities and have their actual names assigned.
+		util.RunNextFrame(function()
+
+			if not IsValid(ent) then
+				return
+			end
+
+			-- Required information for respawning some things.
+			ent.InitialSpawnData =
+			{
+				Pos = ent:GetPos(),
+				Ang = ent:GetAngles(),
+				Mins = ent:OBBMins(),
+				Maxs = ent:OBBMaxs(),
+			}
+
+			if ent:IsWeapon() == true then
+				self:TrackWeapon(ent)
+				if ent:CreatedByMap() == true then
+					DbgPrint("Level designer created weapon: " .. tostring(ent))
+					self:InsertLevelDesignerPlacedObject(ent)
+				end
+			elseif ent:IsItem() == true then
+				if ent:CreatedByMap() == true then
+					DbgPrint("Level designer created item: " .. tostring(ent))
+					self:InsertLevelDesignerPlacedObject(ent)
+				end
+			end
+
+			if self.MapScript then
+				-- Monitor scripts that we have filtered by class name.
+				if self.MapScript.EntityFilterByClass and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
+					DbgPrint("Removing filtered entity by class: " .. tostring(ent))
+					ent:Remove()
+					return
+				end
+
+				-- Monitor scripts that have filtered by name.
+				if self.MapScript.EntityFilterByName and self.MapScript.EntityFilterByName[ent:GetName()] == true then
+					DbgPrint("Removing filtered entity by name: " .. tostring(ent) .. " (" .. ent:GetName() .. ")")
+					ent:Remove()
+					return
+				end
+			end
+
+			if entityProcessor ~= nil and entityProcessor.PostFrame == true then
+				entityProcessor.Fn(self, ent)
+			end
+
+		end)
+
+		if ent:IsNPC() then
+			self:RegisterNPC(ent)
+		end
+
+		-- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
+		if ent:IsVehicle() then
+			self:HandleVehicleCreation(ent)
+		end
+	else
+		-- Nothing for now.
+	end
+
+end
+
 function GM:EntityKeyValue(ent, key, val)
 
 	ent.LambdaKeyValues = ent.LambdaKeyValues or {}

@@ -134,6 +134,8 @@ if SERVER then
 			ply:SetInactive(true)
 		end
 
+		--ply:SetNetworkAbsVelocity(Vector(0, 0, 0))
+
 		self:AssignPlayerAuthToken(ply)
 
 		BaseClass.PlayerInitialSpawn( self, ply )
@@ -1431,7 +1433,7 @@ function GM:FinishMove(ply, mv)
 	if SERVER then
 
 		-- Network velocity to every client to properly sync animations.
-		ply:SetNW2Vector("LambdaAbsVelocity", mv:GetVelocity())
+		--ply:SetNetworkAbsVelocity(mv:GetVelocity())
 
 		-- Teleport queue.
 		local modifiedPlayer = false
@@ -1691,6 +1693,8 @@ function GM:PlayerThink(ply)
 	if SERVER then
 
 		self:UpdatePlayerSpeech(ply)
+
+		ply:SetNWVector("LambdaAbsVector", ply:GetAbsVelocity())
 
 		local curMdl = ply:GetInfo("lambda_playermdl")
 		local suitEquipped = ply:IsSuitEquipped()

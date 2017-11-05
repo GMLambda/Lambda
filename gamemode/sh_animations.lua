@@ -185,7 +185,7 @@ function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 
 	if CLIENT and ply ~= LocalPlayer() then
 		-- We use the accurate server velocity instead of estimations.
-		velocity = ply:GetNW2Vector("LambdaAbsVelocity", velocity)
+		velocity = ply:GetNWVector("LambdaAbsVector")
 	end
 
 	local len = velocity:Length()
@@ -293,7 +293,7 @@ function GM:CalcMainActivity(ply, velocity)
 
 	if CLIENT and ply ~= LocalPlayer() then
 		-- We use the accurate server velocity instead of estimations.
-		velocity = ply:GetNW2Vector("LambdaAbsVelocity", velocity)
+		velocity = ply:GetNWVector("LambdaAbsVector")
 	end
 
 	ply.CalcIdeal = ACT_MP_STAND_IDLE
