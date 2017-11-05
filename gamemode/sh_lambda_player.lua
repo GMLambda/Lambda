@@ -274,6 +274,10 @@ if SERVER then
 		util.PrecacheModel(mdl)
 		ply:SetModel(mdl)
 
+		if IsValid(ply.TrackerEntity) then
+			ply.TrackerEntity:AttachToPlayer(ply)
+		end
+		
 	end
 
 	function GM:PlayerSetColors(ply)
