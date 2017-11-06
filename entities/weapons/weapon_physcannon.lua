@@ -97,6 +97,7 @@ local EFFECT_CLOSED = 1
 local EFFECT_READY = 2
 local EFFECT_HOLDING = 3
 local EFFECT_LAUNCH = 4
+local EFFECT_IDLE = 5
 
 --
 -- Object Find Result
@@ -542,7 +543,6 @@ function SWEP:SecondaryAttack()
 		self.Secondary.Automatic = true
 
 		self:DetachObject(false)
-
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
 		return true
@@ -560,16 +560,20 @@ function SWEP:SecondaryAttack()
 			self:WeaponSound("Weapon_PhysCannon.Pickup")
 			self:SetNextSecondaryFire(CurTime() + 0.5)
 			self:SetNextPrimaryFire(CurTime() + 0.5)
+			self:DoEffect(EFFECT_HOLDING)
 		elseif res == OBJECT_NOT_FOUND then
 			self:SetNextSecondaryFire(CurTime() + 0.1)
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 			self.Secondary.Automatic = true
 			self:CloseElements()
+			self:DoEffect(EFFECT_READY)
+			self.NextIdleTime = CurTime() + 0.2
 		elseif res == OBJECT_BEING_DETACHED then
 			self:SetNextSecondaryFire(CurTime() + 0.01)
 			self.Secondary.Automatic = true
+			self:DoEffect(EFFECT_HOLDING)
 		end
 
-		self:DoEffect(EFFECT_HOLDING)
 	end
 
 end
@@ -1073,12 +1077,6 @@ end
 
 function SWEP:WeaponIdle()
 
-	if CurTime() < self.NextIdleTime then
-		return
-	end
-
-	self.NextIdleTime = CurTime() + 0.2
-
 	local owner = self:GetOwner()
 	if owner == nil or owner == NULL then
 		return
@@ -1087,7 +1085,6 @@ function SWEP:WeaponIdle()
 	if owner:GetActiveWeapon() ~= self then
 		return
 	end
-	self.LastDenySoundPlayed = false
 
 	--DbgPrint(self, self:GetOwner(), "WeaponIdle")
 	local controller = self:GetMotionController()
@@ -1095,6 +1092,17 @@ function SWEP:WeaponIdle()
 	if self:IsMegaPhysCannon() == true then
 		self:SetElementDestination(1)
 	end
+
+	if self.NextIdleTime == -1 then
+		return
+	end
+
+	if CurTime() < self.NextIdleTime then
+		return
+	end
+
+	self.NextIdleTime = -1
+	self.LastDenySoundPlayed = false
 
 	if controller:IsObjectAttached() == true then
 		self:SendWeaponAnim(ACT_VM_RELOAD)
@@ -1104,7 +1112,6 @@ function SWEP:WeaponIdle()
 		else
 			self:SendWeaponAnim(ACT_VM_IDLE)
 		end
-		self:DoEffect(EFFECT_READY)
 	end
 
 end
@@ -1254,9 +1261,9 @@ function SWEP:Think()
 		end
 	end
 
-	if owner:KeyDown(IN_ATTACK2) == false and self:IsObjectAttached() == false then
+	--if owner:KeyDown(IN_ATTACK2) == false and controller:IsObjectAttached() == false then
 		self:WeaponIdle()
-	end
+	--end
 
 	return true
 
@@ -1366,6 +1373,7 @@ function SWEP:AttachObject(ent, tr)
 
 	self:DoEffect(EFFECT_HOLDING)
 	self:OpenElements()
+	self.NextIdleTime = CurTime() + 0.2
 
 	local snd = self:GetMotorSound()
 	if snd ~= nil and snd ~= NULL then
@@ -1377,9 +1385,6 @@ function SWEP:AttachObject(ent, tr)
 		snd:ChangePitch(100, 0.5)
 		snd:ChangeVolume(0.8, 0.5)
 
-		--(CSoundEnvelopeController::GetController()).Play( GetMotorSound(), 0.0f, 50 );
---(CSoundEnvelopeController::GetController()).SoundChangePitch( GetMotorSound(), 100, 0.5f );
---(CSoundEnvelopeController::GetController()).SoundChangeVolume( GetMotorSound(), 0.8f, 0.5f );
 		DbgPrint(self, "Playing sound")
 	end
 
@@ -1451,6 +1456,7 @@ function SWEP:DetachObject(launched)
 	end
 
 	self:DoEffect(EFFECT_READY)
+	self.NextIdleTime = CurTime() + 0.2
 
 	if launched ~= true and ent:GetClass() == "prop_combine_ball" and IsValid(phys) then
 		-- If we just release it then it will be simply stuck mid air.
@@ -1467,6 +1473,9 @@ function SWEP:DryFire()
 
 	self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
 	self:EmitSound("Weapon_PhysCannon.DryFire")
+
+	self:DoEffect(EFFECT_READY)
+	self.NextIdleTime = CurTime() + 0.2
 
 end
 
@@ -1516,6 +1525,7 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
 
 		ent:DispatchTraceAttack(dmgInfo, tr, fwd)
 		self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+		self.NextIdleTime = CurTime() + 0.2
 
 	end
 
@@ -1647,6 +1657,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 	self.CheckSuppressTime = CurTime() + 0.25
 
 	self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+	self.NextIdleTime = CurTime() + 0.2
 
 	self:SetNextPrimaryFire(CurTime() + 0.5)
 	self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -1698,6 +1709,7 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
 	self.CheckSuppressTime = CurTime() + 0.25
 
 	self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+	self.NextIdleTime = CurTime() + 0.2
 
 	self:SetNextPrimaryFire(CurTime() + 0.5)
 	self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -1806,11 +1818,11 @@ end
 
 function SWEP:DoEffectHolding(pos)
 
+	DbgPrint("DoEffectHolding")
+
 	if SERVER then
 		return
 	end
-
-	DbgPrint("DoEffectHolding")
 
 	if self:ShouldDrawUsingViewModel() == true then
 
@@ -1874,6 +1886,7 @@ function SWEP:DoEffectHolding(pos)
 	local core2 = self.EffectParameters[PHYSCANNON_CORE_2]
 	core2.Scale:InitFromCurrent(18.0, 0.1)
 	core2.Alpha:InitFromCurrent(220, 0.2)
+
 end
 
 function SWEP:DoEffectLaunch(pos)
@@ -1931,6 +1944,10 @@ function SWEP:DoEffectLaunch(pos)
 
 end
 
+function SWEP:DoEffectIdle()
+
+end
+
 local EFFECT_NAME =
 {
 	[EFFECT_NONE] = "EFFECT_NONE",
@@ -1938,6 +1955,7 @@ local EFFECT_NAME =
 	[EFFECT_READY] = "EFFECT_READY",
 	[EFFECT_HOLDING] = "EFFECT_HOLDING",
 	[EFFECT_LAUNCH] = "EFFECT_LAUNCH",
+	[EFFECT_IDLE] = "EFFECT_IDLE",
 }
 
 local EFFECT_TABLE =
@@ -1947,6 +1965,7 @@ local EFFECT_TABLE =
 	[EFFECT_READY] = SWEP.DoEffectReady,
 	[EFFECT_HOLDING] = SWEP.DoEffectHolding,
 	[EFFECT_LAUNCH] = SWEP.DoEffectLaunch,
+	[EFFECT_IDLE] = SWEP.DoEffectIdle,
 }
 
 function SWEP:DoEffect(effect, pos)
@@ -2500,7 +2519,7 @@ function SWEP:UpdateEffects()
 		local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
 		local beamdata = self.BeamParameters[i]
 
-		if self:IsObjectAttached() == false and math.random(0, 100) == 0 then
+		if self.CurrentEffect != EFFECT_HOLDING and self:IsObjectAttached() == false and math.random(0, 100) == 0 then
 			self:EmitSound( "Weapon_MegaPhysCannon.ChargeZap" );
 			beamdata.Scale:InitFromCurrent(0.5, 0.1)
 			beamdata.Lifetime = 0.05 + (math.random() * 0.1)

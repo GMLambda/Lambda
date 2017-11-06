@@ -134,6 +134,9 @@ function SB_PLY_LINE:Think()
 end
 
 function SB_PLY_LINE:Paint(w, h)
+	if not IsValid(self.Player) then
+		return
+	end 
 	if self.Player:Team() == TEAM_CONNECTING then
 		draw.RoundedBox(0, 0, 0, 4, h, Color(93, 93, 93, 230))
 		draw.RoundedBox(0, 4, 0, w, h, Color(0, 0, 0, 170))

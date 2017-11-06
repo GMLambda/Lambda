@@ -58,22 +58,13 @@ function GM:Tick()
 		self:UpdateCheckoints()
 	end
 
-end
-
-function GM:EntityRemoved(ent)
-	-- Burning sounds are annoying.
-	ent:StopSound("General.BurningFlesh")
-	ent:StopSound("General.BurningObject")
-end
-
-function GM:Think()
-
 	if SERVER then
 		self:CheckPlayerTimeouts()
 		self:RoundThink()
 		self:VehiclesThink()
 		self:NPCThink()
 		self:WeaponTrackingThink()
+		self:CheckStuckScenes()
 	else
 		self:ClientThink()
 	end
@@ -103,8 +94,61 @@ function GM:Think()
 
 end
 
+function GM:EntityRemoved(ent)
+	-- HACK: Fix fire sounds never stopping if packet loss happened, we just force it to stop on deletion.
+	ent:StopSound("General.BurningFlesh")
+	ent:StopSound("General.BurningObject")
+
+	local class = ent:GetClass()
+	if class == "logic_choreographed_scene" then
+		self.LogicChoreographedScenes[ent] = nil
+	end
+end
+
+function GM:CheckStuckScenes()
+
+	for ent,_ in pairs(self.LogicChoreographedScenes or {}) do
+
+		if not IsValid(ent) then
+			table.remove(self.LogicChoreographedScenes, ent)
+			continue
+		end
+
+		local savetable = ent:GetSaveTable()
+		if savetable.m_bWaitingForActor == true then
+			if ent.WaitingForActor ~= true then
+				print(ent, "now waiting for actor")
+				ent.WaitingForActorTime = CurTime()
+				ent.WaitingForActor = true
+			elseif ent.WaitingForActor == true then
+				local delta = CurTime() - ent.WaitingForActorTime
+				if delta > 30 then
+					print("Long waiting logic_choreographed_scene")
+				end
+			end
+		else
+			if ent.WaitingForActor == true then
+				print(ent, "no longer waiting")
+			end
+			ent.WaitingForActor = false
+		end
+
+	end
+
+end
+
+function GM:Think()
+
+
+end
+
 function GM:OnGamemodeLoaded()
 	self.ServerStartupTime = GetSyncedTimestamp()
+
+	self:LoadGameTypes()
+	self:SetGameType(lambda_gametype:GetString())
+	self:MountRequiredContent()
+
 end
 
 function GM:OnReloaded()
@@ -115,7 +159,6 @@ function GM:OnReloaded()
 
 	self:LoadGameTypes()
 	self:SetGameType(lambda_gametype:GetString())
-
 end
 
 function GM:MountRequiredContent()
@@ -160,13 +203,11 @@ function GM:Initialize()
 	DbgPrint("GM:Initialize")
 	DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
-	self:LoadGameTypes()
-	self:SetGameType(lambda_gametype:GetString())
-
 	self:InitializePlayerList()
 	self:InitializeRoundSystem()
 
 	if SERVER then
+		self:ResetSceneCheck()
 		self:InitializeGlobalSpeechContext()
 		self:InitializeWeaponTracking()
 		self:InitializeGlobalStates()
@@ -179,9 +220,10 @@ function GM:Initialize()
 		self:TransferPlayers()
 		self:InitializeResources()
 	end
+end
 
-	self:MountRequiredContent()
-
+function GM:ResetSceneCheck()
+	self.LogicChoreographedScenes = {}
 end
 
 function GM:InitPostEntity()
@@ -256,12 +298,20 @@ function GM:ProcessTriggerWeaponDissolve(ent)
 	ent:Fire("AddOutput", "OnChargingPhyscannon lambda_physcannon,Supercharge,,0")
 end
 
+function GM:ProcessLogicChoreographedScene(ent)
+
+	self.LogicChoreographedScenes = self.LogicChoreographedScenes or {}
+	self.LogicChoreographedScenes[ent] = true
+
+end
+
 local ENTITY_PROCESSORS =
 {
 	["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
 	["env_message"] = { PostFrame = true, Fn = GM.ProcessEnvMessage },
 	["func_areaportal"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortal },
 	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
+	["logic_choreographed_scene"] = { PostFrame = true, Fn = GM.ProcessLogicChoreographedScene },
 }
 
 function GM:OnEntityCreated(ent)
@@ -371,13 +421,7 @@ function GM:EntityKeyValue(ent, key, val)
 
 	-- HACKHACK: Having it set to 1 causes some NPCs to fail playing their scene.
 	if ent:GetClass() == "logic_choreographed_scene" and key:iequals("busyactor") then
-		return "0"
+		--return "0"
 	end
 
-end
-
-function GM:EntityRemoved(ent)
-	-- HACK: Fix fire sounds never stopping if packet loss happened, we just force it to stop on deletion.
-	ent:StopSound("General.BurningFlesh")
-	ent:StopSound("General.BurningObject")
 end
