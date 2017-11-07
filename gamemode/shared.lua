@@ -122,8 +122,10 @@ function GM:CheckStuckScenes()
 				ent.WaitingForActor = true
 			elseif ent.WaitingForActor == true then
 				local delta = CurTime() - ent.WaitingForActorTime
-				if delta > 30 then
+				if delta >= 10 then
 					print("Long waiting logic_choreographed_scene")
+					ent:SetKeyValue("busyactor", "0")
+					ent.WaitingForActor = false
 				end
 			end
 		else
