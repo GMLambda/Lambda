@@ -100,12 +100,18 @@ function GM:EntityRemoved(ent)
 	ent:StopSound("General.BurningObject")
 
 	local class = ent:GetClass()
-	if class == "logic_choreographed_scene" then
+	if class == "logic_choreographed_scene" and self.LogicChoreographedScenes ~= nil then
 		self.LogicChoreographedScenes[ent] = nil
 	end
 end
 
 function GM:CheckStuckScenes()
+
+	local curTime = CurTime()
+	if self.LastStuckScenesCheck ~= nil and curTime - self.LastStuckScenesCheck < 0.5 then
+		return
+	end
+	self.LastStuckScenesCheck = curTime
 
 	for ent,_ in pairs(self.LogicChoreographedScenes or {}) do
 
@@ -114,6 +120,7 @@ function GM:CheckStuckScenes()
 			continue
 		end
 
+		-- This probably performs like horseshit. Sadly GetInternalVariable doesn't work on this one.
 		local savetable = ent:GetSaveTable()
 		if savetable.m_bWaitingForActor == true then
 			if ent.WaitingForActor ~= true then
@@ -122,7 +129,7 @@ function GM:CheckStuckScenes()
 				ent.WaitingForActor = true
 			elseif ent.WaitingForActor == true then
 				local delta = CurTime() - ent.WaitingForActorTime
-				if delta >= 10 then
+				if delta >= 5 then
 					print("Long waiting logic_choreographed_scene")
 					ent:SetKeyValue("busyactor", "0")
 					ent.WaitingForActor = false
@@ -226,6 +233,7 @@ end
 
 function GM:ResetSceneCheck()
 	self.LogicChoreographedScenes = {}
+	self.LastStuckScenesCheck = CurTime()
 end
 
 function GM:InitPostEntity()

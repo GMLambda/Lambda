@@ -302,10 +302,12 @@ function GM:EntityFireBullets(ent, data)
 			velLen = math.Clamp(velLen, 0, 380)
 
 			local spread = data.Spread
-			if velLen > 50 then
-				spread = spread * (velLen * 0.0035)
-			else
-				spread = spread * 0.3
+			if data.Num == 1 then
+				if velLen > 50 then
+					spread = spread * (velLen * 0.0035)
+				else
+					spread = spread * 0.3
+				end
 			end
 			data.Spread = spread
 

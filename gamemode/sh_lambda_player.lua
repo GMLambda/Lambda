@@ -870,7 +870,12 @@ if SERVER then
 	function GM:RespawnObject(obj, delay)
 		DbgPrint("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
 		local class = obj:GetClass()
-		local data = obj.InitialSpawnData or { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
+		local data
+		if self:IsLevelDesignerPlacedObject(obj) then
+			data = obj.InitialSpawnData or { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
+		else
+			data = { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
+		end
 		local outputs = table.Copy(obj.EntityOutputs or {})
 		local objName = obj:GetName()
 		local uniqueId = obj.UniqueEntityId
@@ -882,8 +887,14 @@ if SERVER then
 			copy.EntityOutputs = outputs
 			copy.UniqueEntityId = uniqueId
 			copy:Spawn()
-			if delay >= 1 then
+			if delay > 0 then
 				copy:EmitSound("AlyxEmp.Charge")
+
+				local effectdata = EffectData()
+				effectdata:SetOrigin( data.Pos )
+				effectdata:SetScale(1)
+				effectdata:SetMagnitude(5)
+				util.Effect( "ElectricSpark", effectdata )
 			end
 			self:InsertLevelDesignerPlacedObject(copy) -- Keep relevant.
 		end, CurTime() + delay)
@@ -1009,43 +1020,37 @@ if SERVER then
 
 	end
 
-	function GM:WeaponEquip(wep)
+	function GM:WeaponEquip(wep, owner)
 
-		util.RunNextFrame(function()
-			if not IsValid(wep) then
-				return
+		local ply = owner
+		if IsValid(ply) then
+
+			if wep.CreatedForPlayer == ply then
+				ply.WeaponDuplication[wep.OriginalWeapon] = nil
 			end
 
-			local ply = wep:GetOwner()
-			if IsValid(ply) then
+			if ply.LastDuplicatedWeapon == wep then
+				-- Lets see if we should actually select it.
+				local activeWep = ply:GetActiveWeapon()
 
-				if wep.CreatedForPlayer == ply then
-					ply.WeaponDuplication[wep.OriginalWeapon] = nil
+				local selectWeapon = true
+				if (IsValid(activeWep) and
+				activeWep:GetClass() == "weapon_physcannon" and
+				activeWep:IsMegaPhysCannon() == true) then
+					selectWeapon = false
 				end
 
-				if ply.LastDuplicatedWeapon == wep then
-					-- Lets see if we should actually select it.
-					local activeWep = ply:GetActiveWeapon()
-
-					local selectWeapon = true
-					if (IsValid(activeWep) and
-					activeWep:GetClass() == "weapon_physcannon" and
-					activeWep:IsMegaPhysCannon() == true) then
-						selectWeapon = false
-					end
-
-					if selectWeapon == true then
-						ply:SelectWeapon(wep:GetClass())
-					end
+				if selectWeapon == true then
+					ply:SelectWeapon(wep:GetClass())
 				end
-
-				for k,v in pairs(wep.EntityOutputs or {}) do
-					util.SimpleTriggerOutputs(v, ply, ply, wep )
-				end
-
-				ply:EmitSound("Player.PickupWeapon")
 			end
-		end)
+
+			for k,v in pairs(wep.EntityOutputs or {}) do
+				util.SimpleTriggerOutputs(v, ply, ply, wep )
+			end
+
+			ply:EmitSound("Player.PickupWeapon")
+		end
 
 	end
 
