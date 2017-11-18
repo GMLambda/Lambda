@@ -1,4 +1,10 @@
 0.9.1:
+- Feature: Dynamic crosshair overhaul, no longer requires capturing the framebuffer, can be changed in the options menu.
+- Feature: Native game hints.
+- Feature: Experimental hl2dm gametype, set lambda_gametype convar to 'hl2dm' to try it out.
+- Add: Game content mounting for episodic content, automatically creates and mounts GMA based on gametype.
+- Add: ConVar to block moving weapons/items by shooting them, 'lambda_prevent_item_move <bool>'.
+- Add: ConVar to disable ammo limits, 'lambda_limit_default_ammo <bool>'.
 - Fix: Physcannon not stopping looping sounds and not detaching on player death.
 - Fix: Weapons can only be picked up once now per player.
 - Fix: Player not spawning properly when starting with d3_c17_07.
@@ -7,7 +13,17 @@
 - Fix: Prevent player from going back in d1_town_02
 - Fix: NPC's sometimes not playing the scene under unknown situations.
 - Fix: Server sometimes not starting a new round 
-- Add: Experimental hl2dm gametype, set lambda_gametype convar to 'hl2dm' to try it out.
+- Fix: Scripted scenes getting stuck, forced playback after timeout.
+- Fix: Physcannon spamming animation events.
+- Fix: Networked velocity per client, no longer using estimates on player animations.
+- Fix: Enemies not enabled when going back from d2_coast_08 to d2_coast_07.
+- Fix: Remove more default map spawn items, managed by Lambda.
+- Fix: Reset global state on d1_trainstation_01 to d1_trainstation_05.
+- Fix: Prevent non-players enforcing touch events on triggers.
+- Fix: Settings not replicating.
+- Fix: d3_c17_07 creating infinite soldiers when player does not meet alyx.
+- Fix: Barney to appear twice on d3_c17_10a.
+- Fix: Barney to appear twice on d3_c17_10b.
 
 0.9:
 - Removed: Freezing physics when trying to jump off them.
