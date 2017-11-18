@@ -30,6 +30,9 @@ Half-Life 2: Episode 1
 Half-Life 2: Episode 2
 - Planned 
 
+Half-Life 2: Deathmatch
+- Partial support, mapcycle missing.
+
 ## Campaign/Story Creation
 This is currently a work-in-progress, but will be documented soon. Here are the current specifications:
 1. Whatever Half-Life 2 uses already works
