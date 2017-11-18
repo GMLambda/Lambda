@@ -871,7 +871,8 @@ if SERVER then
 		DbgPrint("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
 		local class = obj:GetClass()
 		local data
-		if self:IsLevelDesignerPlacedObject(obj) then
+		local levelDesignerPlaced = self:IsLevelDesignerPlacedObject(obj)
+		if levelDesignerPlaced == true then
 			data = obj.InitialSpawnData or { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
 		else
 			data = { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
@@ -896,7 +897,9 @@ if SERVER then
 				effectdata:SetMagnitude(5)
 				util.Effect( "ElectricSpark", effectdata )
 			end
-			self:InsertLevelDesignerPlacedObject(copy) -- Keep relevant.
+			if levelDesignerPlaced == true then
+				self:InsertLevelDesignerPlacedObject(copy) -- Keep relevant.
+			end
 		end, CurTime() + delay)
 	end
 
