@@ -1187,7 +1187,7 @@ end
 local GEIGER_DELAY = 0.25
 local GEIGER_SOUND_DELAY = 0.06
 
-function GM:UpdateGeigerCounter(ply)
+function GM:UpdateGeigerCounter(ply, mv, ucmd)
 
 	local curTime = CurTime()
 
@@ -1207,7 +1207,8 @@ function GM:UpdateGeigerCounter(ply)
 			range = math.Clamp(range * 4, 0, 1000)
 		end
 
-		if math.random(0, 5) == 0 then
+		local randChance = math.random(0, 5)
+		if randChance == 0 then
 			ply:SetGeigerRange(1000)
 			ply:SetNearestRadiationRange(1000, true)
 		else
@@ -1403,12 +1404,6 @@ function GM:StartCommand(ply, cmd)
 		cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
 	end
 
-	if cmd:KeyDown(IN_DUCK) then
-		ply:SetNW2Bool("InDuck", true)
-	else
-		ply:SetNW2Bool("InDuck", false)
-	end
-
 end
 
 function GM:SetupMove(ply, mv, cmd)
@@ -1568,7 +1563,7 @@ function GM:ShouldChargeSuitPower(ply)
 
 end
 
-function GM:UpdateSuit(ply, mv)
+function GM:UpdateSuit(ply, mv, ucmd)
 
 	if ply:IsSuitEquipped() == false then
 		return
@@ -1629,6 +1624,8 @@ function GM:UpdateSuit(ply, mv)
 		end
 
 	end
+
+	self:UpdateGeigerCounter(ply, mv, ucmd)
 
 end
 
@@ -1706,7 +1703,8 @@ end
 function GM:PlayerTick(ply, mv)
 
 	-- Predicted, must be called here.
-	self:UpdateSuit(ply, mv)
+	local ucmd = ply:GetCurrentCommand()
+	self:UpdateSuit(ply, mv, ucmd)
 
 	if SERVER then
 		self:LimitPlayerAmmo(ply)
@@ -1736,7 +1734,7 @@ function GM:PlayerThink(ply)
 		-- Make sure we reset the view lock if we are in release mode.
 		local viewlock = ply:GetViewLock()
 		if viewlock == VIEWLOCK_SETTINGS_RELEASE then
-			local viewlockTime = ply:GetNW2Float("ViewLockTime")
+			local viewlockTime = ply:GetNWFloat("ViewLockTime")
 			if viewlockTime + VIEWLOCK_RELEASE_TIME < CurTime() then
 				ply:LockPosition(false)
 			end
@@ -1744,7 +1742,7 @@ function GM:PlayerThink(ply)
 
 	end
 
-	local disablePlayerCollide = ply:GetNW2Bool("DisablePlayerCollide", false)
+	local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
 
 	if SERVER then
 		if disablePlayerCollide == true and CurTime() >= ply.NextPlayerCollideTest and ply:IsPositionLocked() == false then
@@ -1774,9 +1772,6 @@ function GM:PlayerThink(ply)
 			ply.LastDisablePlayerCollide = disablePlayerCollide
 		end
 	end
-
-	--DbgPrint(CurTime())
-	self:UpdateGeigerCounter(ply)
 
 end
 

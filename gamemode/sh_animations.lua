@@ -51,7 +51,7 @@ end
 
 function GM:HandlePlayerDucking(ply, velocity)
 
-	if ply:InVehicle() == true or (ply:KeyDown(IN_DUCK) == false and ply:GetNW2Bool("InDuck", false) == false) then
+	if ply:Crouching() == false then 
 		return false
 	end
 

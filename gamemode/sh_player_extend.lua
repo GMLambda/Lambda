@@ -30,7 +30,7 @@ if SERVER then
 		if temporarily == nil then
 			temporarily = true
 		end
-		self:SetNW2Bool("DisablePlayerCollide", state)
+		self:SetNWBool("DisablePlayerCollide", state)
 		self.DisablePlayerCollisionTemporarily = temporarily
 		self:CollisionRulesChanged()
 		DbgPrint(self, "DisablePlayerCollide", tostring(state))
@@ -58,15 +58,15 @@ if SERVER then
 		self.ViewLock = viewlock
 		self.LockedViewAngles = viewdata
 		self:SetNoTarget(poslock)
-		self:SetNW2Bool("PositionLocked", poslock)
-		self:SetNW2Int("ViewLock", viewlock)
-		self:SetNW2Float("ViewLockTime", CurTime())
+		self:SetNWBool("PositionLocked", poslock)
+		self:SetNWInt("ViewLock", viewlock)
+		self:SetNWFloat("ViewLockTime", CurTime())
 		self:DisablePlayerCollide(poslock)
 
 		if viewlock == VIEWLOCK_ANGLE then
-			self:SetNW2Angle("LockedViewAngles", viewdata)
+			self:SetNWAngle("LockedViewAngles", viewdata)
 		elseif viewlock == VIEWLOCK_NPC then
-			self:SetNW2Entity("LockedViewEntity", viewdata)
+			self:SetNWEntity("LockedViewEntity", viewdata)
 		elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
 			-- Dealt within sh_lambda_player:PlayerThink
 		end
@@ -86,16 +86,16 @@ function PLAYER_META:IsPositionLocked()
 		return self.PositionLocked
 	end
 
-	return self:GetNW2Bool("PositionLocked", false)
+	return self:GetNWBool("PositionLocked", false)
 
 end
 
 function PLAYER_META:GetViewLockTime()
-	return self:GetNW2Float("ViewLockTime", CurTime())
+	return self:GetNWFloat("ViewLockTime", CurTime())
 end
 
 function PLAYER_META:GetGender()
-	return self:GetNW2String("Gender", "male")
+	return self:GetNWString("Gender", "male")
 end
 
 function PLAYER_META:GetViewLock()
@@ -105,12 +105,12 @@ function PLAYER_META:GetViewLock()
 		return self.ViewLock
 	end
 
-	return self:GetNW2Int("ViewLock", VIEWLOCK_NONE)
+	return self:GetNWInt("ViewLock", VIEWLOCK_NONE)
 
 end
 
 function PLAYER_META:GetNearestRadiationRange()
-	return self:GetNW2Int("LambdaRadiationRange", 1000)
+	return self:GetNWInt("LambdaRadiationRange", 1000)
 end
 
 function PLAYER_META:SetNearestRadiationRange(range, override)
@@ -125,16 +125,16 @@ function PLAYER_META:SetNearestRadiationRange(range, override)
 		end
 	end
 
-	self:SetNW2Int("LambdaRadiationRange", current)
+	self:SetNWInt("LambdaRadiationRange", current)
 
 end
 
 function PLAYER_META:SetGeigerRange(range)
-	self:SetNW2Int("LambdaGeigerRange", range)
+	self:SetNWInt("LambdaGeigerRange", range)
 end
 
 function PLAYER_META:GetGeigerRange()
-	return self:GetNW2Int("LambdaGeigerRange", 1000)
+	return self:GetNWInt("LambdaGeigerRange", 1000)
 end
 
 function PLAYER_META:AddSuitDevice(device)
@@ -188,14 +188,13 @@ function PLAYER_META:GetLifeTime()
 end
 
 function PLAYER_META:IsInactive()
-	return self:GetNW2Bool("Inactive", true)
+	return self:GetNWBool("Inactive", true)
 end
 
 function PLAYER_META:SetInactive(state)
-	self:SetNW2Bool("Inactive", state)
+	self:SetNWBool("Inactive", state)
 end
 
--- 		ply:NetworkVar("Float", 0, "SuitPower")
 function PLAYER_META:SetSuitPower(val)
 	self:SetNW2Float("SuitPower", val)
 end
@@ -203,7 +202,6 @@ function PLAYER_META:GetSuitPower()
 	return self:GetNW2Float("SuitPower", 0.0)
 end
 
---		ply:NetworkVar("Float", 1, "SuitEnergy")
 function PLAYER_META:SetSuitEnergy(val)
 	self:SetNW2Float("SuitEnergy", val)
 end
@@ -211,7 +209,6 @@ function PLAYER_META:GetSuitEnergy()
 	return self:GetNW2Float("SuitEnergy", 0.0)
 end
 
---		ply:NetworkVar("Bool", 0, "Sprinting")
 function PLAYER_META:SetSprinting(val)
 	self:SetNW2Bool("Sprinting", val)
 end
@@ -219,7 +216,6 @@ function PLAYER_META:GetSprinting()
 	return self:GetNW2Bool("Sprinting", false)
 end
 
---		ply:NetworkVar("Bool", 1, "StateSprinting")
 function PLAYER_META:SetStateSprinting(val)
 	self:SetNW2Bool("StateSprinting", val)
 end

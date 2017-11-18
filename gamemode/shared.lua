@@ -261,7 +261,7 @@ function GM:ShouldCollide(ent1, ent2)
 		if lambda_playercollision:GetBool() == false then
 			return false
 		end
-		if ent1:GetNW2Bool("DisablePlayerCollide") == true or ent2:GetNW2Bool("DisablePlayerCollide") == true then
+		if ent1:GetNWBool("DisablePlayerCollide", false) == true or ent2:GetNWBool("DisablePlayerCollide", false) == true then
 			return false
 		end
 	elseif (ent1:IsNPC() and ent2:GetClass() == "trigger_changelevel") or

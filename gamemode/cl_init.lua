@@ -266,14 +266,14 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 	if viewlock == VIEWLOCK_ANGLE then
 
-		view.angles = ply:GetNW2Angle("LockedViewAngles")
+		view.angles = ply:GetNWAngle("LockedViewAngles")
 		view.fov = fov
 		view.origin = pos
 		return view
 
 	elseif viewlock == VIEWLOCK_NPC or viewlock == VIEWLOCK_PLAYER then
 
-		local npc = ply:GetNW2Entity("LockedViewEntity")
+		local npc = ply:GetNWEntity("LockedViewEntity")
 		if IsValid(npc) then
 			view.angles = (npc:EyePos() - ply:EyePos()):Angle()
 			view.fov = fov
@@ -283,7 +283,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 	elseif viewlock == VIEWLOCK_SETTINGS_ON then
 
-		local timeSet = ply:GetNW2Float("ViewLockTime", CurTime())
+		local timeSet = ply:GetNWFloat("ViewLockTime", CurTime())
 		local elapsed = CurTime() - timeSet
 		local p = elapsed / VIEWLOCK_RELEASE_TIME
 
@@ -313,7 +313,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 	elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
 
-		local timeSet = ply:GetNW2Float("ViewLockTime", CurTime())
+		local timeSet = ply:GetNWFloat("ViewLockTime", CurTime())
 		local elapsed = CurTime() - timeSet
 		local p = elapsed / VIEWLOCK_RELEASE_TIME
 
