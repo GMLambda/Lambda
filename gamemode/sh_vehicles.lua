@@ -166,10 +166,18 @@ if SERVER then
 
 		end
 
+		if self.MapScript ~= nil and self.MapScript.OnEnteredVehicle ~= nil then
+			self.MapScript:OnEnteredVehicle(ply, vehicle, role)
+		end
+
 	end
 
 	function GM:CanExitVehicle(vehicle, ply)
 		DbgPrint("CanPlayerExitVehicle", vehicle, ply)
+		local saveTable = vehicle:GetSaveTable()
+		if saveTable.vehiclelocked ~= nil then
+			return saveTable.vehiclelocked == false
+		end 
 	    return true
 	end
 
@@ -219,6 +227,8 @@ if SERVER then
 	end
 
 	function GM:CanPlayerEnterVehicle(ply, vehicle, role)
+
+		print("CanPlayerEnterVehicle", ply, vehicle)
 
 		if ply.OwnedVehicle ~= nil and IsValid(ply.OwnedVehicle) == false then
 			-- Just to make sure, its possible it might error somewhere and did not unassign it.

@@ -1139,6 +1139,25 @@ if SERVER then
 
 	end
 
+	function GM:PlayerUse(ply, ent)
+	    if self.MapScript ~= nil and self.MapScript.PlayerUse ~= nil then
+			local res = self.MapScript:PlayerUse(ply, ent)
+			if res == false then
+				return false
+			end
+		end
+		return true
+	end
+
+	function GM:FindUseEntity(ply, engineEnt)
+		if self.MapScript ~= nil and self.MapScript.FindUseEntity ~= nil then
+			local res = self.MapScript:FindUseEntity(ply, engineEnt)
+			if res ~= nil then
+				return res
+			end
+		end
+		return engineEnt
+	end
 
 else -- CLIENT
 
