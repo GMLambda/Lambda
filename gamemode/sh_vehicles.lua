@@ -3,8 +3,8 @@ local DbgPrint = GetLogging("Vehicle")
 
 local VEHICLE_THINK = 1
 
-local VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
-local VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
+VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
+VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
 
 local VEHICLE_JEEP = 0
 local VEHICLE_AIRBOAT = 1
@@ -177,7 +177,7 @@ if SERVER then
 		local saveTable = vehicle:GetSaveTable()
 		if saveTable.vehiclelocked ~= nil then
 			return saveTable.vehiclelocked == false
-		end 
+		end
 	    return true
 	end
 
@@ -386,6 +386,26 @@ if SERVER then
 
 		end
 
+		local playerPosTable = {}
+		local centerPos = Vector(0, 0, 0)
+		local inVehicle = 0
+		local alivePlayers = 0
+		for _,v in pairs(player.GetAll()) do
+			if v:Alive() == false then
+				continue
+			end
+			alivePlayers = alivePlayers + 1
+			if v:InVehicle() == true then
+				inVehicle = inVehicle + 1
+			end
+			local pos = v:GetPos()
+			table.insert(playerPosTable, pos)
+			centerPos = centerPos + pos
+		end
+		if #playerPosTable > 0 then
+			centerPos = centerPos / #playerPosTable
+		end
+
 		-- Make sure we clean up vehicles from disconnected players.
 		for vehicle,_ in pairs(self.ActiveVehicles or {}) do
 
@@ -395,13 +415,36 @@ if SERVER then
 					DbgPrint("Removing player vehicle")
 					vehicle:Remove()
 				end
+			else
+				-- If the player is too far away from an unowned vehicle remove it.
+				if #playerPosTable > 0 and inVehicle < alivePlayers then
+					local vehiclePos = vehicle:GetPos()
+					local centerDist = centerPos:Distance(vehiclePos)
+					local nearby = false
+					if centerDist > 1024 then
+						for _,p in pairs(playerPosTable) do
+							local dist = p:Distance(vehiclePos)
+							if dist < 1000 then
+								nearby = true
+								break
+							end
+						end
+						-- If no player is nearby we can remove the old unowned vehicle.
+						if nearby == false then
+							vehicle:Remove()
+							continue
+						end
+					end
+				end
 			end
 
+			-- Commented, util.IsInWorld is not reliable at all.
+			--[[
 			if util.IsInWorld(vehicle:GetPos()) == false then
 				DbgPrint("Removing out of world vehicle")
 				vehicle:Remove()
 			end
-
+			]]
 
 		end
 

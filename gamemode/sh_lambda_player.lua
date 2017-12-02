@@ -402,6 +402,9 @@ if SERVER then
 		self:PlayerSetColors(ply)
 		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
 
+		-- Update vehicle checkpoints
+		self:UpdateQueuedVehicleCheckpoints()
+
 		-- Lets remove whatever the player left on vehicles behind before he got killed.
 		self:RemovePlayerVehicles(ply)
 
