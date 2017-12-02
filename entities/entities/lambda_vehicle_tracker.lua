@@ -29,9 +29,8 @@ function ENT:AttachToVehicle(vehicle)
 
 	self.Vehicle = vehicle
 	self.Player = vehicle.LambdaPlayer
-	self:SetNW2Entity("LambdaVehicleOwner", self.Player)
-	self:SetNW2Bool("LambdaVehicleTaken", IsValid(self.Player))
-
+	self:SetNWEntity("LambdaVehicleOwner", self.Player)
+	self:SetNWBool("LambdaVehicleTaken", IsValid(self.Player))
 end
 
 function ENT:UpdateTransmitState()
@@ -50,8 +49,8 @@ if SERVER then
 
 		if self.Player ~= vehicle.LambdaPlayer then
 			self.Player = vehicle.LambdaPlayer
-			self:SetNW2Entity("LambdaVehicleOwner", self.Player)
-			self:SetNW2Bool("LambdaVehicleTaken", IsValid(self.Player))
+			self:SetNWEntity("LambdaVehicleOwner", self.Player)
+			self:SetNWBool("LambdaVehicleTaken", IsValid(self.Player))
 			DbgPrint("Owner changed")
 		end
 
@@ -108,7 +107,7 @@ elseif CLIENT then
 		if IsValid(plyVeh) then
 			return
 		end
-		
+
 		local plyPos = localPly:GetPos()
 		local alphaDist = 1.0 - (plyPos:Distance(pos) / 1500)
 		if alphaDist <= 0.0 then
@@ -120,21 +119,19 @@ elseif CLIENT then
 			return
 		end
 
-		local ownedVehicle = localPly:GetNW2Entity("LambdaOwnedVehicle")
-		local isTaken = self:GetNW2Bool("LambdaVehicleTaken")
-		local vehiclePly = self:GetNW2Entity("LambdaVehicleOwner")
+		local ownedVehicle = localPly:GetNWEntity("LambdaOwnedVehicle")
+		local isTaken = self:GetNWBool("LambdaVehicleTaken")
+		local vehiclePly = self:GetNWEntity("LambdaVehicleOwner")
 		local displayIcon = false
 
 		if isTaken == false then
-			displayIcon = true
-		else
-			if localPly:GetVehicle() ~= vehicle and vehiclePly == localPly then
+			if IsValid(ownedVehicle) == false then
 				displayIcon = true
 			end
-		end
-
-		if (ownedVehicle ~= nil and ownedVehicle ~= NULL) and ownedVehicle ~= vehicle then
-			displayIcon = false
+		else
+			if vehiclePly == localPly then
+				displayIcon = true
+			end
 		end
 
 		if displayIcon ~= true then
