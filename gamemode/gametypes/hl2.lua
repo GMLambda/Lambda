@@ -259,6 +259,44 @@ function GAMETYPE:LoadCurrentMapScript()
 	self.Base.LoadMapScript(self, "hl2", game.GetMap():lower())
 end
 
+local function GetFileContent(filepath, gamepath)
+	local f = file.Open(filepath, "rb", gamepath)
+	if f == nil then
+		return nil
+	end
+
+	local data = f:Read(f:Size())
+	f:Close()
+	return data
+end
+
+function GAMETYPE:LoadLocalisation(lang, gmodLang)
+	-- Well looks like this is a pitty with GLua, UCS2-BOM encoded file.
+	--[[
+	local data = GetFileContent("resource/hl2_" .. lang .. ".txt", "hl2")
+	print("Len", string.len(data))
+	-- Ugh.
+	local newData = ""
+	for i = 1, string.len(data) do
+		local b = string.sub(data, i, i)
+		if b == string.char(0xFF) or b == string.char(0xFE) then
+			continue
+		end
+		b = string.sub(b, 1, 1)
+		if string.byte(b) == 0 then
+			continue
+		end
+		print(i, b, string.byte(b))
+		newData = newData .. b
+		--if(i > 10) then break end
+	end
+	print(newData)
+	--PrintTable(data)
+	--PrintTable(newData)
+	--PrintTable(util.KeyValuesToTable( newData ))
+	]]
+end
+
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
 	gametypes:Add("hl2", GAMETYPE)
 end)

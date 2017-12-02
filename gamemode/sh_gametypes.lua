@@ -144,6 +144,37 @@ function GM:SetGameType(gametype, isFallback)
 		gametypeData:LoadCurrentMapScript()
 	end
 
+	if CLIENT and gametypeData.LoadLocalisation ~= nil then
+		local lang = "english"
+		local gmodLang = GetConVarString("gmod_language")
+		if gmodLang == "en" then
+			lang = "english"
+		elseif gmodLang == "cz" then
+			lang = "czech"
+		elseif gmodLang == "nl" then
+			lang = "dutch"
+		elseif gmodLang == "de" then
+			lang = "german"
+		elseif gmodLang == "it" then
+			lang = "italian"
+		elseif gmodLang == "pl" then
+			lang = "polish"
+		elseif gmodLang == "ru" then
+			lang = "russian"
+		elseif gmodLang == "fr" then
+			lang = "french"
+		elseif gmodLang == "ko" then
+			lang = "korean"
+		elseif gmodLang == "sp" then
+			lang = "spanish"
+		elseif gmodLang == "ja" then
+			lang = "japanese"
+		else
+			gmodLang = "en"
+		end
+		gametypeData:LoadLocalisation(lang, gmodLang)
+	end
+
 	self.GameType = gametypeData
 	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 end

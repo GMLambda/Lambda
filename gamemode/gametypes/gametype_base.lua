@@ -91,6 +91,10 @@ function GAMETYPE:LoadMapScript(path, name)
 	end
 end
 
+function GAMETYPE:LoadLocalisation(lang)
+	-- Stub
+end
+
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
 	gametypes:Add("lambda_base", GAMETYPE)
 end)
