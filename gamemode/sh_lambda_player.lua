@@ -402,6 +402,9 @@ if SERVER then
 		self:PlayerSetColors(ply)
 		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
 
+		-- Update vehicle checkpoints
+		self:UpdateQueuedVehicleCheckpoints()
+
 		-- Lets remove whatever the player left on vehicles behind before he got killed.
 		self:RemovePlayerVehicles(ply)
 
@@ -1402,6 +1405,12 @@ function GM:StartCommand(ply, cmd)
 
 	if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() >= 1) and ply:InVehicle() == false then
 		cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
+	end
+
+	-- HACKHACK: When the player is crouched and releases IN_DUCK but can't stand up it would
+	-- offset the player for a short moment when pressing IN_DUCK again. We suppress this.
+	if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then
+		cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK)))
 	end
 
 end
