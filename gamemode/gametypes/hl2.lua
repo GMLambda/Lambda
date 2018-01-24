@@ -197,7 +197,7 @@ function GAMETYPE:ShouldRespawnWeapon(ent)
 		-- Consider this an item and not some weapon.
 		return false
 	end
-	if ent:IsItem() == true then
+	if ent:IsItem() == true or bit.band(ent:GetSolidFlags(), FSOLID_TRIGGER) == 0 then
 		return false
 	end
 	return true

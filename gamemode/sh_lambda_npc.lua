@@ -92,7 +92,7 @@ if SERVER then
 		npc:SetLagCompensated(true)
 
 		self.EnemyNPCs = self.EnemyNPCs or {}
-		
+
 		local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC") or {}
 		if enemyClasses[npc:GetClass()] == true then
 			table.insert(self.EnemyNPCs, npc)
@@ -147,9 +147,22 @@ if SERVER then
 		end
 
 		local wep = npc:GetActiveWeapon()
-		if npc:HasSpawnFlags(8192) == true and IsValid(wep) then
+		if not IsValid(wep) then
+			wep = nil
+		end
+		if npc:HasSpawnFlags(8192) == true and wep ~= nil then
 			--wep:Remove()
 			DissolveEntity(wep)
+			wep = nil
+		end
+		if wep ~= nil then
+			-- FIXME: https://github.com/Facepunch/garrysmod-issues/issues/3377
+			if IsEnemyEntityName(npc:GetClass()) == true then
+				wep.HeldByEnemy = true
+			else
+				wep.HeldByFriendly = true
+			end
+			print("Marked weapon: " .. tostring(wep))
 		end
 
 		self:RegisterNPCDeath(npc, attacker, inflictor)

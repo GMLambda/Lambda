@@ -402,9 +402,6 @@ if SERVER then
 		self:PlayerSetColors(ply)
 		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
 
-		-- Update vehicle checkpoints
-		self:UpdateQueuedVehicleCheckpoints()
-
 		-- Lets remove whatever the player left on vehicles behind before he got killed.
 		self:RemovePlayerVehicles(ply)
 
@@ -969,6 +966,10 @@ if SERVER then
 
 		DbgPrintPickup("PlayerCanPickupWeapon", ply, wep)
 
+		if bit.band(wep:GetSolidFlags(), FSOLID_TRIGGER) == 0 then
+			return false
+		end
+
 		-- OnEntityCreated is not called for everything.
 		wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
 
@@ -1014,14 +1015,6 @@ if SERVER then
 			return false
 		end
 
-		if self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
-			local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0
-			self:RespawnObject(wep, respawnTime)
-		end
-
-		ply.ObjectPickupTable[wep.UniqueEntityId] = true
-		self:RemoveLevelDesignerPlacedObject(wep)
-
 		return true
 
 	end
@@ -1030,6 +1023,17 @@ if SERVER then
 
 		local ply = owner
 		if IsValid(ply) then
+
+			-- OnEntityCreated is not called for everything.
+			wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
+
+			if owner.LambdaDisablePickupDuplication ~= true and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
+				local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0.5
+				self:RespawnObject(wep, respawnTime)
+			end
+
+			ply.ObjectPickupTable[wep.UniqueEntityId] = true
+			self:RemoveLevelDesignerPlacedObject(wep)
 
 			if wep.CreatedForPlayer == ply then
 				ply.WeaponDuplication[wep.OriginalWeapon] = nil
