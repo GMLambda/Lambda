@@ -350,8 +350,6 @@ function GM:OnNewGame()
 	end
 
 	-- This should be the right spot.
-	self.RoundState = STATE_RUNNING
-	self.RoundStartTime = GetSyncedTimestamp()
 
 	if SERVER then
 
@@ -361,12 +359,6 @@ function GM:OnNewGame()
 		-- Create/Replace things for the map.
 		if self.MapScript.PostInit ~= nil then
 			self.MapScript:PostInit()
-		end
-
-		DbgPrint("Spawning players")
-		for _,v in pairs(player.GetAll()) do
-			v.TransitionData = self:GetPlayerTransitionData(v)
-			v:Spawn()
 		end
 
 	    -- Notify clients.
@@ -418,6 +410,15 @@ function GM:PostRoundSetup()
 
 	DbgPrint("PostRoundSetup")
 	DbgPrint("Game Events: " .. tostring(#self.OnNewGameEvents))
+
+	self.RoundState = STATE_RUNNING
+	self.RoundStartTime = GetSyncedTimestamp()
+	
+	DbgPrint("Spawning players")
+	for _,v in pairs(player.GetAll()) do
+		v.TransitionData = self:GetPlayerTransitionData(v)
+		v:Spawn()
+	end
 
 	self:ResetGlobalStates()
 

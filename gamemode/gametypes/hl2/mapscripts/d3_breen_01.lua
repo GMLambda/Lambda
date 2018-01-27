@@ -51,6 +51,8 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+		DbgPrint("Startup")
+
 		self.AllowPhyscannon = false
 
 		-- Remove default spawns.
