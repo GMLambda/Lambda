@@ -170,9 +170,18 @@ function GAMETYPE:ShouldRestartRound()
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
+	local class = wep:GetClass()
+	if class == "weapon_frag" then
+		if ply:HasWeapon(class) and ply:GetAmmoCount("grenade") >= sk_max_grenade:GetInt() then
+			return false
+		end
+	elseif class == "weapon_annabelle" then
+		return false -- Not supposed to have this.
+	end
 	if ply:HasWeapon(wep:GetClass()) == true then
 		-- Only allow a new pickup once if there is ammo in the weapon.
-		if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then
+		if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -2 then
+			print("wep has no ammo")
 			return false
 		end
 		return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
@@ -185,7 +194,7 @@ function GAMETYPE:PlayerCanPickupItem(ply, item)
 end
 
 function GAMETYPE:GetWeaponRespawnTime()
-	return 1
+	return 0.5
 end
 
 function GAMETYPE:GetItemRespawnTime()
@@ -193,13 +202,11 @@ function GAMETYPE:GetItemRespawnTime()
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-	if ent:GetClass() == "weapon_frag" then
-		-- Consider this an item and not some weapon.
+
+	if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then
 		return false
 	end
-	if ent:IsItem() == true then
-		return false
-	end
+
 	return true
 end
 
@@ -252,7 +259,37 @@ function GAMETYPE:PlayerSelectSpawn(spawns)
 end
 
 function GAMETYPE:GetPlayerLoadout()
-	return self.MapScript.DefaultLoadout
+	return self.MapScript.DefaultLoadout or
+	{
+		Weapons =
+		{
+			"weapon_crowbar",
+			"weapon_pistol",
+			"weapon_smg1",
+			"weapon_357",
+			"weapon_physcannon",
+			"weapon_frag",
+			"weapon_shotgun",
+			"weapon_ar2",
+			"weapon_rpg",
+			"weapon_crossbow",
+	        "weapon_bugbait",
+		},
+		Ammo =
+		{
+			["Pistol"] = 20,
+			["SMG1"] = 45,
+			["357"] = 6,
+			["Grenade"] = 3,
+			["Buckshot"] = 12,
+			["AR2"] = 50,
+			["RPG_Round"] = 8,
+			["SMG1_Grenade"] = 3,
+			["XBowBolt"] = 4,
+		},
+		Armor = 60,
+		HEV = true,
+	}
 end
 
 function GAMETYPE:LoadCurrentMapScript()

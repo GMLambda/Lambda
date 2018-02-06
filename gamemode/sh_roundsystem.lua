@@ -256,8 +256,6 @@ function GM:PreCleanupMap()
 		self:ResetVehicleCheckpoint()
 		self:ResetCheckpoints()
 		self:ResetSceneCheck()
-		self:InitializeGlobalSpeechContext()
-		self:InitializeWeaponTracking()
 		self:ClearLevelDesignerPlacedObjects()
 	end
 end
@@ -265,9 +263,6 @@ end
 function GM:PostCleanupMap()
 
 	DbgPrint("GM:PostCleanupMap")
-	if SERVER then
-		--self:PostInitializeSkybox()
-	end
 
 	if self.RoundState ~= STATE_RESTARTING then
 		return
@@ -413,7 +408,7 @@ function GM:PostRoundSetup()
 
 	self.RoundState = STATE_RUNNING
 	self.RoundStartTime = GetSyncedTimestamp()
-	
+
 	DbgPrint("Spawning players")
 	for _,v in pairs(player.GetAll()) do
 		v.TransitionData = self:GetPlayerTransitionData(v)
@@ -468,6 +463,9 @@ function GM:StartRound(cleaned)
 	end
 
 	if SERVER then
+
+		self:InitializeGlobalSpeechContext()
+		self:InitializeWeaponTracking()
 
 	    game.SetTimeScale(1)
 

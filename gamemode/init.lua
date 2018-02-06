@@ -33,6 +33,7 @@ include("sv_playerspeech.lua")
 include("sv_commands.lua")
 include("sv_checkpoints.lua")
 include("sv_weapontracking.lua")
+include("sv_player_pickup.lua")
 
 local DbgPrint = GetLogging("Server")
 
@@ -44,7 +45,7 @@ end
 
 function GM:InsertLevelDesignerPlacedObject(obj)
 	local objects = self.LevelRelevantObjects or {}
-	objects[obj] = true
+	objects[obj] = { pos = obj:GetPos(), ang = obj:GetAngles() }
 	self.LevelRelevantObjects = objects
 end
 
@@ -53,7 +54,12 @@ function GM:IsLevelDesignerPlacedObject(obj)
 	if objects == nil then
 		return false
 	end
-	return objects[obj] == true
+	return objects[obj] ~= nil
+end
+
+function GM:GetLevelDesignerPlacedData(obj)
+	local objects = self.LevelRelevantObjects
+	return objects[obj]
 end
 
 function GM:RemoveLevelDesignerPlacedObject(obj)
@@ -69,6 +75,8 @@ function GM:ClearLevelDesignerPlacedObjects()
 end
 
 function GM:ApplyCorrectedDamage(dmginfo)
+
+	DbgPrint("ApplyCorrectedDamage")
 
 	local attacker = dmginfo:GetAttacker()
 
@@ -184,7 +192,6 @@ function GM:EntityTakeDamage(target, dmginfo)
 		dmginfo:ScaleDamage(0)
 		return true
 	end
-
 
 end
 

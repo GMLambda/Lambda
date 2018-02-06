@@ -185,7 +185,6 @@ if SERVER then
 	end
 
 	function GM:CanPlayerSpawn(ply)
-
 		local gameType = self:GetGameType()
 
 		if gameType.UsingCheckpoints == true then
@@ -285,13 +284,13 @@ if SERVER then
 
 		DbgPrint("PlayerLoadout: " .. tostring(ply))
 
-		ply.LambdaDisablePickupDuplication = true
-
+		local loadout = self:CallGameTypeFunc("GetPlayerLoadout") or {}
 		local transitionData = ply.TransitionData
 		if transitionData ~= nil and transitionData.Include == true then
 
 			for _,v in pairs(ply.TransitionData.Weapons) do
 				ply:Give(v.Class, true)
+
 				ply:SetAmmo(v.Ammo1.Count, v.Ammo1.Id)
 				ply:SetAmmo(v.Ammo2.Count, v.Ammo2.Id)
 
@@ -316,21 +315,6 @@ if SERVER then
 			end
 
 		else
-			-- Weapons
-			DbgPrint("Giving player " .. tostring(ply) .. " default weapons")
-
-			local loadout = self:CallGameTypeFunc("GetPlayerLoadout") or {}
-			for k,v in pairs(loadout.Weapons or {}) do
-				DbgPrint("Give(" .. tostring(ply) .. "): " .. v)
-				ply:Give(v, false)
-			end
-
-			-- Ammo
-			for k,v in pairs(loadout.Ammo or {}) do
-				DbgPrint("GiveAmmo(" .. tostring(ply) .. "): " .. k .. " -> " .. v)
-				ply:GiveAmmo(v, k, true)
-			end
-
 			-- Armor
 			ply:SetArmor(loadout.Armor or 0)
 
@@ -345,7 +329,46 @@ if SERVER then
 
 		end
 
-		ply.LambdaDisablePickupDuplication = false
+		-- Give player the default weapons and ammo.
+		local ammoTable = loadout.Ammo or {}
+
+		for k,v in pairs(loadout.Weapons or {}) do
+			if ply:HasWeapon(v) == true then
+				continue
+			end
+
+			local weapon = ply:Give(v, true)
+
+			local ammoType1 = weapon:GetPrimaryAmmoType()
+			if ammoType1 ~= -1 then
+				local ammoName = game.GetAmmoName(ammoType1)
+				local ammoNum = ammoTable[ammoName]
+				if ammoNum ~= nil then
+					ply:GiveAmmo(ammoNum, ammoName, true)
+				end
+			end
+
+			local ammoType2 = weapon:GetSecondaryAmmoType()
+			if ammoType2 ~= -1 then
+				local ammoName = game.GetAmmoName(ammoType2)
+				local ammoNum = ammoTable[ammoName]
+				if ammoNum ~= nil then
+					ply:GiveAmmo(ammoNum, ammoName, true)
+				end
+			end
+
+			-- We make sure the weapon is loaded.
+			local ammo1 = ply:GetAmmoCount(weapon:GetPrimaryAmmoType())
+			if ammo1 ~= -1 then
+				local maxClip = weapon:GetMaxClip1()
+				local newAmmo = maxClip
+				if newAmmo > ammo1 then
+					newAmmo = ammo1
+				end
+				weapon:SetClip1(newAmmo)
+				ply:SetAmmo(ammo1 - newAmmo, weapon:GetPrimaryAmmoType())
+			end
+		end
 
 	end
 
@@ -397,7 +420,10 @@ if SERVER then
 
 		ply:EndSpectator()
 		ply.SpawnBlocked = false
+		ply.LambdaSpawnTime = CurTime()
+		ply.IsCurrentlySpawning = true
 
+		self:InitializePlayerPickup(ply)
 		self:InitializePlayerSpeech(ply)
 		self:PlayerSetColors(ply)
 		self:NotifyRoundStateChanged(ply, ROUND_INFO_NONE, {})
@@ -417,7 +443,6 @@ if SERVER then
 		ply:SetTeam(LAMBDA_TEAM_ALIVE)
 		ply:SetCustomCollisionCheck(true)
 		ply:RemoveSuit()
-		ply.ObjectPickupTable = {}
 
 		-- We call this first in order to call PlayerLoadout, once we enter a vehicle we can not
 		-- get any weapons.
@@ -429,7 +454,6 @@ if SERVER then
 			self.MapScript:PrePlayerSpawn(ply)
 		end
 
-		ply.LambdaSpawnTime = CurTime()
 		ply:SetSuitPower(100)
 		ply:SetSuitEnergy(100)
 		ply:SetGeigerRange(1000)
@@ -532,6 +556,8 @@ if SERVER then
 			ply.TrackerEntity:AttachToPlayer(ply)
 		end
 
+		ply.IsCurrentlySpawning = false
+
 	end
 
 	function GM:CheckPlayerNotStuck(ply)
@@ -545,13 +571,105 @@ if SERVER then
 
 	end
 
+	local AMMO_TO_ITEM =
+	{
+		["RPG_Round"] = "item_rpg_round",
+		["Grenade"] = "weapon_frag",
+	}
+
 	function GM:DoPlayerDeath(ply, attacker, dmg)
 
 		DbgPrint("GM:DoPlayerDeath", ply)
 
-		ply.LastDmgPos = dmg:GetDamagePosition()
-		ply.LastDmgForce = dmg:GetDamageForce()
-		ply.LastDmgExplosive = dmg:IsExplosionDamage()
+		if ply.LastWeaponsDropped ~= nil then
+			for _,v in pairs(ply.LastWeaponsDropped) do
+				if IsValid(v) and not IsValid(v:GetOwner()) then
+					v:Remove()
+				end
+			end
+		end
+
+		local weps = {}
+		for _,v in pairs(ply:GetWeapons()) do
+			weps[v] = true
+		end
+
+		local activeWep = ply:GetActiveWeapon()
+		if IsValid(activeWep) then
+			weps[activeWep] = true
+		end
+
+		ply.LastWeaponsDropped = {}
+		for v,_ in pairs(weps) do
+
+			local ammoType1 = v:GetPrimaryAmmoType()
+			local ammoType2 = v:GetSecondaryAmmoType()
+
+			-- Only drop relevant stuff, except the crowbar.
+			if ammoType1 == -1 and ammoType2 == -1 and v:GetClass() ~= "weapon_crowbar" then
+				continue
+			end
+
+			local dropAmmo = false
+			local ammo1 = -1
+			local ammo2 = -1
+
+			if v:Clip1() == -1 and v:Clip2() == -1 then
+				ammo1 = ply:GetAmmoCount(ammoType1)
+				if ammo1 > 0 then
+					dropAmmo = true
+				end
+				ammo2 = ply:GetAmmoCount(ammoType2)
+				if ammo2 > 0 then
+					dropAmmo = true
+				end
+			end
+
+			local drop
+			if dropAmmo == true then
+				if ammo1 > 0 then
+					local ammoDropType1 = game.GetAmmoName(ammoType1)
+					local dropClass = AMMO_TO_ITEM[ammoDropType1]
+					if dropClass ~= nil then
+						for i = 1, ammo1 do
+							drop = ents.Create(dropClass)
+							drop:SetPos(v:GetPos())
+							drop:Spawn()
+							drop.DroppedByPlayer = ply
+						end
+					end
+				end
+			else
+				drop = ents.Create(v:GetClass())
+				drop:SetClip1(v:Clip1())
+				drop:SetClip2(v:Clip2())
+				drop:SetPos(v:GetPos())
+				drop:SetAngles(v:GetAngles())
+				drop:Spawn()
+				drop.DroppedByPlayer = ply
+				drop.UniqueEntityId = v.UniqueEntityId
+
+				if drop:GetClass() == "weapon_crowbar" then
+					-- Damage players if it gets thrown their way and they already have a crowbar
+					drop:SetSolidFlags(FSOLID_CUSTOMBOXTEST)
+					drop:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+				end
+
+				table.insert(ply.LastWeaponsDropped, drop)
+			end
+
+			-- Remove the weapon the player holds.
+			v:Remove()
+
+		end
+
+		local force = dmg:GetDamageForce()
+		for _,v in ipairs(ply.LastWeaponsDropped) do
+			local phys = v:GetPhysicsObject()
+			if IsValid(phys) then
+				phys:SetVelocity(force)
+			end
+		end
 
 		local gender = ply:GetGender()
 		local snd = table.Random(self.HurtSounds[gender][HITGROUP_GENERIC])
@@ -578,65 +696,6 @@ if SERVER then
 		util.Effect( "lambda_death", effectdata, true )
 
 		self:RegisterPlayerDeath(ply, attacker, inflictor)
-
-		if ply.LastWeaponsDropped ~= nil then
-			for _,v in pairs(ply.LastWeaponsDropped) do
-				if IsValid(v) and v:GetOwner() ~= ply then
-					v:Remove()
-				end
-			end
-		end
-
-		local weps = {}
-		for _,v in pairs(ply:GetWeapons()) do
-			weps[v] = true
-		end
-
-		local activeWep = ply:GetActiveWeapon()
-		if IsValid(activeWep) then
-			weps[activeWep] = true
-		end
-
-		ply.LastWeaponsDropped = {}
-		for v,_ in pairs(weps) do
-
-			local ammoType1 = v:GetPrimaryAmmoType()
-			local ammoType2 = v:GetSecondaryAmmoType()
-
-			-- Only drop relevant stuff, except the crowbar.
-			if ply:GetAmmoCount(ammoType1) == 0 and ply:GetAmmoCount(ammoType2) == 0 and v:GetClass() ~= "weapon_crowbar" then
-				continue
-			end
-
-			--DbgPrint("Weapon Drop: " .. tostring(v))
-
-			v.DroppedByPlayerDeath = true
-			ply:DropWeapon(v)
-
-			if v:GetClass() == "weapon_crowbar" then
-				-- Damage players if it gets thrown their way
-				v:SetSolidFlags(FSOLID_CUSTOMBOXTEST)
-				v:SetCollisionGroup(COLLISION_GROUP_PLAYER)
-			end
-
-			table.insert(ply.LastWeaponsDropped, v)
-
-		end
-
-		-- Because the weapons are attached to the player at the time the explosion happened they did
-		-- not receive the force, we gonna apply it so things go flying.
-		if ply.LastDmgExplosive == true then
-
-			local force = ply.LastDmgForce * 0.05
-
-			for _,v in ipairs(ply.LastWeaponsDropped) do
-				local phys = v:GetPhysicsObject()
-				if IsValid(phys) then
-					phys:AddVelocity(force * Vector(math.random(-10, 10), math.random(-10, 10), 1))
-				end
-			end
-
-		end
 
 		local gameType = self:GetGameType()
 		self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
@@ -807,263 +866,6 @@ if SERVER then
 		ply.LastPickupTime = curTime
 
 		return true
-
-	end
-
-	function GM:PlayerCanPickupAmmo(ply, ent, extendSize)
-
-		-- Limit the ammo to pickup based on the sk convars.
-		if lambda_limit_default_ammo:GetBool() == false then
-			return true
-		end
-
-		local res = true
-		local capacity = 0
-		local skill = tostring(game.GetSkillLevel())
-		local class = ent:GetClass()
-		local primaryFull = false
-		local secondaryFull = false
-
-		local CheckAmmoFull = function(ammoType, clipSize)
-
-			if ammoType ~= -1 then
-				local ammoName = game.GetAmmoName(ammoType)
-				local cur = ply:GetAmmoCount(ammoType)
-				local ammoMax = self.MAX_AMMO_DEF[ammoName]
-				if clipSize == -1 then
-					clipSize = 0
-				end
-				if ammoMax ~= nil then
-					ammoMax = ammoMax:GetInt()
-				else
-					ammoMax = 9999
-				end
-				if cur >= ammoMax then
-					return true
-				end
-			end
-
-			return false
-		end
-
-		if ent:IsWeapon() then
-
-			primaryFull = CheckAmmoFull(ent:GetPrimaryAmmoType(), ent:Clip1())
-			secondaryFull = CheckAmmoFull(ent:GetSecondaryAmmoType(), ent:Clip2())
-
-		else
-
-			local ammo = self.ITEM_DEF[class]
-			if ammo ~= nil then
-				local cur = ply:GetAmmoCount(ammo.Type)
-				local amount = ammo[skill]
-				local ammoMax = ammo.Max:GetInt()
-				if cur >= ammoMax then
-					DbgPrint("Limited ammo pickup: " .. tostring(class) .. ", " .. ammo.Type)
-					primaryFull = true
-				end
-			end
-
-		end
-
-		return primaryFull == false and secondaryFull == false
-
-	end
-
-	function GM:RespawnObject(obj, delay)
-		DbgPrint("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
-		local class = obj:GetClass()
-		local data
-		local levelDesignerPlaced = self:IsLevelDesignerPlacedObject(obj)
-		if levelDesignerPlaced == true then
-			data = obj.InitialSpawnData or { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
-		else
-			data = { Pos = obj:GetPos(), Ang = obj:GetAngles(), Mins = obj:OBBMins(), obj:OBBMaxs() }
-		end
-		local outputs = table.Copy(obj.EntityOutputs or {})
-		local objName = obj:GetName()
-		local uniqueId = obj.UniqueEntityId
-		util.RunDelayed(function()
-			local copy = ents.Create(class)
-			copy:SetPos(data.Pos)
-			copy:SetAngles(data.Ang)
-			copy:SetName(objName)
-			copy.EntityOutputs = outputs
-			copy.UniqueEntityId = uniqueId
-			copy:Spawn()
-			if delay > 0 then
-				copy:EmitSound("AlyxEmp.Charge")
-
-				local effectdata = EffectData()
-				effectdata:SetOrigin( data.Pos )
-				effectdata:SetScale(1)
-				effectdata:SetMagnitude(5)
-				util.Effect( "ElectricSpark", effectdata )
-			end
-			if levelDesignerPlaced == true then
-				self:InsertLevelDesignerPlacedObject(copy) -- Keep relevant.
-			end
-		end, CurTime() + delay)
-	end
-
-	local DbgPrintPickup = GetLogging("Pickup")
-
-	function GM:PlayerCanPickupItem(ply, item)
-
-		if ply.LambdaDisablePickupDuplication == true then
-			return true
-		end
-
-		-- Maps have the annoying template spawner for all weapons so give it a slight chance to pick it up
-		-- those items arent usually cleaned up so let the player have it, for now..
-		if CurTime() - ply.LambdaSpawnTime <= 0.1 then
-			return true
-		end
-
-		local gameType = self:GetGameType()
-		if self:CallGameTypeFunc("PlayerCanPickupItem", ply, item) == false then
-			DbgPrintPickup("GameType prevented pickup")
-			return false
-		end
-
-		local class = item:GetClass()
-		local res = true
-
-		-- Dont pickup stuff if we dont need it.
-	    if class == "item_health" or class == "item_healthvial" or class == "item_healthkit" then
-			if ply:Health() >= ply:GetMaxHealth() then
-				return false
-			end
-		elseif class == "item_battery" then
-			if ply:Armor() >= 100 then
-				return false
-			end
-		elseif class == "item_suit" then
-			if ply:IsSuitEquipped() == true then
-				return false
-			else
-				return true
-			end
-		end
-
-		if self:PlayerCanPickupAmmo(ply, item) == false then
-			res = false
-		end
-
-		if res == true and self:CallGameTypeFunc("ShouldRespawnItem", item) == true then
-			local respawnTime = self:CallGameTypeFunc("GetItemRespawnTime") or -1
-			self:RespawnObject(item, respawnTime)
-		end
-
-		if res == true then
-			ply.ObjectPickupTable[item.UniqueEntityId] = true
-			self:RemoveLevelDesignerPlacedObject(item)
-		end
-
-		return res
-
-	end
-
-
-	function GM:PlayerCanPickupWeapon(ply, wep)
-
-		DbgPrintPickup("PlayerCanPickupWeapon", ply, wep)
-
-		if bit.band(wep:GetSolidFlags(), FSOLID_TRIGGER) == 0 then
-			return false
-		end
-
-		-- OnEntityCreated is not called for everything.
-		wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
-
-		if ply.LambdaDisablePickupDuplication == true then
-			return true
-		end
-
-		-- Maps have the annoying template spawner for all weapons so give it a slight chance to pick it up
-		-- those items arent usually cleaned up so let the player have it, for now..
-		if CurTime() - ply.LambdaSpawnTime <= 0.1 then
-			return true
-		end
-
-		local class = wep:GetClass()
-
-		if wep.DroppedByPlayerDeath == true then
-			if ply:HasWeapon(class) == true then
-				-- Already has it.
-				return false
-			end
-			-- Don't respawn dropped weapons.
-			return true
-		end
-
-		local gameType = self:GetGameType()
-
-		if class == "weapon_frag" then
-			if ply:HasWeapon(class) and ply:GetAmmoCount("grenade") >= sk_max_grenade:GetInt() then
-				return false
-			end
-		elseif class == "weapon_annabelle" then
-			return false -- Not supposed to have this.
-		end
-
-		if ply:HasWeapon(class) == true then
-			if self:PlayerCanPickupAmmo(ply, wep) == false then
-				return false
-			end
-		end
-
-		if self:CallGameTypeFunc("PlayerCanPickupWeapon", ply, wep) == false then
-			--DbgPrint("GameType prevented pickup")
-			return false
-		end
-
-		return true
-
-	end
-
-	function GM:WeaponEquip(wep, owner)
-
-		local ply = owner
-		if IsValid(ply) then
-
-			-- OnEntityCreated is not called for everything.
-			wep.UniqueEntityId = wep.UniqueEntityId or self:GetNextUniqueEntityId()
-
-			if owner.LambdaDisablePickupDuplication ~= true and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
-				local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0.5
-				self:RespawnObject(wep, respawnTime)
-			end
-
-			ply.ObjectPickupTable[wep.UniqueEntityId] = true
-			self:RemoveLevelDesignerPlacedObject(wep)
-
-			if wep.CreatedForPlayer == ply then
-				ply.WeaponDuplication[wep.OriginalWeapon] = nil
-			end
-
-			if ply.LastDuplicatedWeapon == wep then
-				-- Lets see if we should actually select it.
-				local activeWep = ply:GetActiveWeapon()
-
-				local selectWeapon = true
-				if (IsValid(activeWep) and
-				activeWep:GetClass() == "weapon_physcannon" and
-				activeWep:IsMegaPhysCannon() == true) then
-					selectWeapon = false
-				end
-
-				if selectWeapon == true then
-					ply:SelectWeapon(wep:GetClass())
-				end
-			end
-
-			for k,v in pairs(wep.EntityOutputs or {}) do
-				util.SimpleTriggerOutputs(v, ply, ply, wep )
-			end
-
-			ply:EmitSound("Player.PickupWeapon")
-		end
 
 	end
 

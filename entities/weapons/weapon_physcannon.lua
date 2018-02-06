@@ -936,7 +936,6 @@ function SWEP:UpdateObject()
 	end
 
 	local controller = self:GetMotionController()
-
 	if controller:IsObjectAttached() == false then
 		return
 	end
@@ -948,7 +947,9 @@ function SWEP:UpdateObject()
 	end
 
 	local attachedObject = controller:GetAttachedObject()
-
+	if attachedObject:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
+		return false
+	end 
 	if owner:GetGroundEntity() == attachedObject then
 		return false
 	end
