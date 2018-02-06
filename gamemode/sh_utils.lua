@@ -450,8 +450,8 @@ hook.Add("Think", "LambdaRunNextFrame", function()
 				continue
 			end
 		end
-		v.func()
 		table.remove(funcQueue, k)
+		v.func()
 	end
 
 	thinkCount = thinkCount + 1

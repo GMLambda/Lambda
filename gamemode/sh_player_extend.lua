@@ -77,6 +77,58 @@ if SERVER then
 
 	end
 
+	function PLAYER_META:Give(class, noAmmo)
+		if self:Alive() == false then
+			return nil
+		end
+
+		local e = ents.Create(class)
+		if not IsValid(e) then
+			return nil
+		end
+
+		e:SetLocalPos(self:GetLocalPos())
+
+		local SF_NORESPAWN = 0x40000000
+		e:AddSpawnFlags(SF_NORESPAWN)
+
+		e:Spawn()
+		e.CreatedForPlayer = self
+
+		local resetAmmo = false
+		local primaryAmmo = -1
+		local secondaryAmmo = -1
+		local primaryType = -1
+		local secondaryType = -1
+		if noAmmo == true and e:IsWeapon() == true then
+			e:SetClip1(0)
+			e:SetClip2(0)
+			primaryType = e:GetPrimaryAmmoType()
+			if primaryType ~= -1 then
+				primaryAmmo = self:GetAmmoCount(primaryType)
+			end
+			secondaryType = e:GetSecondaryAmmoType()
+			if secondaryType ~= -1 then
+				secondaryAmmo = self:GetAmmoCount(secondaryType)
+			end
+			resetAmmo = true
+		end
+
+		-- Forces a touch.
+		e:Use(self, self, USE_ON, 1)
+
+		if noAmmo == true and resetAmmo == true then
+			if primaryType ~= -1 then
+				self:SetAmmo(primaryAmmo, primaryType)
+			end
+			if secondaryType ~= -1 then
+				self:SetAmmo(secondaryAmmo, secondaryType)
+			end
+		end
+
+		return e
+	end
+
 end -- SERVER
 
 function PLAYER_META:IsPositionLocked()
