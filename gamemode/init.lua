@@ -50,7 +50,7 @@ function GM:InsertLevelDesignerPlacedObject(obj)
 end
 
 function GM:IsLevelDesignerPlacedObject(obj)
-	local objects = self.LevelRelevantObjects
+	local objects = self.LevelRelevantObjects or {}
 	if objects == nil then
 		return false
 	end
@@ -58,12 +58,12 @@ function GM:IsLevelDesignerPlacedObject(obj)
 end
 
 function GM:GetLevelDesignerPlacedData(obj)
-	local objects = self.LevelRelevantObjects
+	local objects = self.LevelRelevantObjects or {}
 	return objects[obj]
 end
 
 function GM:RemoveLevelDesignerPlacedObject(obj)
-	local objects = self.LevelRelevantObjects
+	local objects = self.LevelRelevantObjects or {}
 	if objects == nil then
 		return
 	end
