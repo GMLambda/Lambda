@@ -121,6 +121,20 @@ function MAPSCRIPT:PostInit()
 			maker3:Fire("Enable")
 		end
 
+		local inputEnt = ents.Create("lambda_entity")
+		inputEnt:SetName("lambda_crowbar")
+		inputEnt.AcceptInput = function(s, input, caller, activator, param)
+			if input == "AddCrowbar" then
+				table.insert(self.DefaultLoadout.Weapons, "weapon_crowbar")
+				s:Remove()
+			end
+		end
+		inputEnt:Spawn()
+
+		ents.WaitForEntityByName("lcs_crowbar_intro", function(ent)
+			ent:Fire("AddOutput", "OnCompletion lambda_crowbar,AddCrowbar,,0.0,-1")
+		end)
+
 	end
 
 end
