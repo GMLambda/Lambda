@@ -77,7 +77,11 @@ function PANEL:Init()
 			chPreview:SetSize(128, 128)
 			chPreview:SetMaterial(GAMEMODE:GetCrosshairMaterial(128, 128, bgColor), true)
 			chPreview:SetPaintBorderEnabled(true)
-
+			local actualPaint = chPreview.Paint
+			chPreview.Paint = function()
+				chPreview:SetMaterial(GAMEMODE:GetCrosshairMaterial(128, 128, bgColor), true)
+				actualPaint(chPreview)
+			end
 			local function UpdateCrosshairPreview()
 				chPreview:SetMaterial(GAMEMODE:GetCrosshairMaterial(128, 128, bgColor), true)
 			end
@@ -186,6 +190,12 @@ function PANEL:Init()
 			chAdaptive:SetText("Adaptive Colors")
 			chAdaptive:SetConVar("lambda_crosshair_adaptive")
 			chAdaptive:SetValue(cvars.Number("lambda_crosshair_adaptive"))
+
+			local chAdaptive = vgui.Create("DCheckBoxLabel", PanelCrosshair)
+			chAdaptive:SetPos(5, 165)
+			chAdaptive:SetText("Dynamic")
+			chAdaptive:SetConVar("lambda_crosshair_dynamic")
+			chAdaptive:SetValue(cvars.Number("lambda_crosshair_dynamic"))
 		end
 		sheetSettings:AddSheet("Crosshair", PanelCrosshair)
 

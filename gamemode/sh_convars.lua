@@ -37,6 +37,7 @@ local space = 5
 
 if CLIENT then
 	lambda_crosshair = GM:RegisterConVar("crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Lambda Crosshair")
+	lambda_crosshair_dynamic = GM:RegisterConVar("crosshair_dynamic", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")
 	lambda_crosshair_size = GM:RegisterConVar("crosshair_size", 8, bit.bor(0, FCVAR_ARCHIVE), "")
 	lambda_crosshair_width = GM:RegisterConVar("crosshair_width", 2, bit.bor(0, FCVAR_ARCHIVE), "")
 	lambda_crosshair_space = GM:RegisterConVar("crosshair_space", 4, bit.bor(0, FCVAR_ARCHIVE), "")

@@ -76,6 +76,20 @@ function GM:DrawDynamicCrosshair(inRT)
 	local adaptive = lambda_crosshair_adaptive:GetBool()
 	local color = self:GetCrosshairColor()
 	local alpha = lambda_crosshair_alpha:GetInt()
+	local dynamic = lambda_crosshair_dynamic:GetBool()
+	local ply = LocalPlayer()
+
+	local movementRecoil = 0
+	if dynamic == true and IsValid(ply) then
+		if inRT == true then
+			local t = CurTime() * 2
+			movementRecoil = 1 + (math.sin(t) * math.cos(t))
+		else
+			movementRecoil = ply.MovementRecoil or 0
+		end
+		local gap = 4 * movementRecoil
+		space = space + gap
+	end
 
 	local scrH = ScrH()
 	local scrW = ScrW()
@@ -83,10 +97,6 @@ function GM:DrawDynamicCrosshair(inRT)
 	local centerY = (scrH / 2)
 	local sizeH = size / 2
 	local widthH = width / 2
-
-	if inRT == true then
-		print(scrH, scrW)
-	end
 
 	if lambda_crosshair_outline:GetBool() == true then
 		surface.SetDrawColor(0, 0, 0, alpha)
