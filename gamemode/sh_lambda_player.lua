@@ -1193,6 +1193,8 @@ function GM:StartCommand(ply, cmd)
 
 	--DbgPrint("StartCommand", ply)
 
+	self:CalculatePlayerMovementAccuracy(ply, cmd)
+
 	if ply:IsPositionLocked() == true then
 		local vel = ply:GetVelocity()
 		vel.x = 0
@@ -1528,6 +1530,25 @@ function GM:PlayerTick(ply, mv)
 		self:LimitPlayerAmmo(ply)
 		self:PlayerCheckDrowning(ply)
 	end
+
+end
+
+function GM:CalculatePlayerMovementAccuracy(ply, cmd)
+
+	local movementRecoil = ply.MovementRecoil or 0
+	ply.MovementRecoil = ply.MovementRecoil or 0
+
+	local vel = ply:GetVelocity()
+	local len = vel:Length()
+	local target = len / ply:GetWalkSpeed()
+	local scale = 100
+	if len > 0 then
+		scale = 20
+	end
+	movementRecoil = Lerp(FrameTime() * scale, movementRecoil, target)
+	movementRecoil = math.Clamp(movementRecoil, 0, 2)
+
+	ply.MovementRecoil = movementRecoil
 
 end
 

@@ -298,15 +298,11 @@ function GM:EntityFireBullets(ent, data)
 
 			end
 
-			local velLen = vel:Length2D()
-			velLen = math.Clamp(velLen, 0, 380)
-
 			local spread = data.Spread
 			if data.Num == 1 then
-				if velLen > 50 then
-					spread = spread * (velLen * 0.0035)
-				else
-					spread = spread * 0.3
+				if ent:IsPlayer() == true then
+					local p = spread * 0.5
+					spread = (spread * 0.3) + ( (spread * 0.5) * ent.MovementRecoil)
 				end
 			end
 			data.Spread = spread
