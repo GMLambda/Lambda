@@ -36,5 +36,22 @@ function ENT:Touch(ent)
 
 end
 
+function ENT:GetTouching()
+
+	local trList = {}
+	local tr = util.TraceEntity({
+		start = self:GetPos(),
+		endpos = self:GetPos(),
+		mask = MASK_ALL,
+		ignoreworld = true,
+		filter = function(ent)
+			table.insert(trList, ent)
+			return false
+		end,
+	}, self)
+	return trList
+
+end
+
 
 end

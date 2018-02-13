@@ -648,12 +648,12 @@ function GM:TransitionObjectsByVolumes(landmarkEnt, transitionTriggers, objectTa
 
 	for _,trigger in pairs(transitionTriggers) do
 
-		if trigger.GetTouchingObjects == nil then
+		if trigger.GetTouching == nil then
 			DbgPrint("Flawed trigger, does not have a member called GetTouchingObjects")
 			continue
 		end
 
-		local objects = trigger:GetTouchingObjects()
+		local objects = trigger:GetTouching()
 
 		-- Ensure we have always all players in the table.
 		for _,v in pairs(player.GetAll()) do
@@ -751,21 +751,6 @@ function GM:PostLoadTransitionData()
 			if deserializeFn then
 				self.TransitionData.Objects[objId][k] = deserializeFn(landmarkEnt, v)
 			end
-			--[[
-			if k == "Mdl" and v:sub(1, 1) == "*" and data.GlobalName ~= "" and data.SourceMap ~= self:GetCurrentMap() then
-				local mapEnt = game.FindEntityByGlobalNameInMapData(data.GlobalName)
-
-				if mapEnt ~= nil and mapEnt["model"] ~= nil then
-					DbgPrint("Translated old model " .. v .. " to new: " .. mapEnt["model"])
-					self.TransitionData.Objects[objId][k] = mapEnt["model"]
-				elseif mapEnt == nil then
-					-- Discard this one, we cant find the new model.
-					DbgPrint("Unable to translate model: " .. tostring(v) .. ", removing: " .. data.Class .. ", map: " .. data.SourceMap .. ", name: " .. data.Name .. ", globalname" .. data.GlobalName)
-					self.TransitionData.Objects[objId] = nil
-					objId = nil
-				end
-			end
-			]]
 		end
 	end
 
@@ -846,83 +831,98 @@ function GM:CreateTransitionObjects()
 	-- First iteration: We create the things.
 	local objects = self.TransitionData.Objects or {}
 	local objCount = table.Count(objects)
+	local curMap = self:GetCurrentMap()
 
 	-- We shall first remove everything that already exists.
 	DbgPrint("Removing duplicate global entities")
 
 	local objectsToRemove = {}
+	local fromMap = {}
 
 	for _,data in pairs(objects) do
 		if data.GlobalName ~= nil and isstring(data.GlobalName) then
 			local e = ents.FindByGlobalName(data.GlobalName)
 			if IsValid(e) then
-				--if data.SourceMap == self:GetCurrentMap() then
-					local oldMdl = data.Mdl
-					data.Mdl = e:GetModel() or oldMdl
-				--end
-				--e:SetSaveValue("globalname", "nope")
-				--DbgPrint("Deleting duplicate: " .. tostring(data.GlobalName), e:GetModel())
-				table.insert(objectsToRemove, e)
+				local oldMdl = data.Mdl
+				data.Mdl = e:GetModel() or oldMdl
 			else
 				local mapData = game.FindEntityByGlobalNameInMapData(data.GlobalName)
-				--PrintTable(mapData)
 				if mapData ~= nil and mapData["model"] ~= nil then
-					--PrintTable(mapData)
 					local oldMdl = data.Mdl
 					data.Mdl = mapData["model"]
 					DbgPrint("Old Model: " .. oldMdl .. ", new: " .. data.Mdl)
 				end
 			end
 		end
-
-		--if data.SourceMap == curMap and data.Name ~= "" then
-			for _,v in pairs(ents.FindByName(data.Name)) do
-				table.insert(objectsToRemove, v)
-			end
-		--end
 	end
 
-	-- Wipe the transition area clean if it has a volume.
+	-- R
 	local entryLandmark = self:GetEntryLandmark()
+	local landmarkEntities = {}
 	if entryLandmark ~= nil then
 		DbgPrint("Entry Landmark: " .. entryLandmark)
 		for _,v in pairs(ents.FindByName(entryLandmark)) do
-
 			if v:GetClass() ~= "trigger_transition" then
 				continue
 			end
-
-			--local objects = ents.FindInBox(v:GetPos() + v:OBBMins(), v:GetPos() + v:OBBMaxs())
-			local touchingObjects = v:GetTouchingObjects()
-			local remove = false
-
+			DbgPrint("Landmark Entity:", v)
+			local touchingObjects = v:GetTouching()
 			for _, obj in pairs(touchingObjects) do
 				if v:IsWorld() then
 					continue
 				end
-
 				if self:ShouldTransitionObject(obj) or obj.ForceTransition == true then
-					remove = true
-				end
-
-				if remove == true then
-					--DbgPrint("Removing old object: " .. tostring(obj))
-					--table.insert(objectsToRemove, obj)
+					landmarkEntities[obj:EntIndex()] = obj
+					DbgPrint("Entry landmark entity", obj, obj:GetName())
 				end
 			end
 		end
 	end
 
-	for _,v in pairs(objectsToRemove) do
-		if TRANSITION_BLACKLIST[v:GetClass()] ~= true then
-			DbgPrint("Removing old object: " .. tostring(v))
-			v:Remove()
+	local function findByGlobalName(name)
+		for k,v in pairs(landmarkEntities) do
+			local globalName = v:GetNW2String("GlobalName", v:GetInternalVariable("globalname"))
+			if globalName == name then
+				return k
+			end
+		end
+		return nil
+	end
+
+	local function findByName(name)
+		for k,v in pairs(landmarkEntities) do
+			if v:GetName() == name then
+				return k
+			end
+		end
+		return nil
+	end
+
+	-- Remove objects carried forth and back.
+	for _,data in pairs(objects) do
+		if data.SourceMap ~= curMap then
+			continue
+		end
+		local k
+		if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
+			k = findByGlobalName(data.GlobalName)
+		end
+		if k == nil and data.Name ~= nil and data.Name ~= "" then
+			k = findByName(data.Name)
+		end
+		if k ~= nil then
+			local obj = landmarkEntities[k]
+			DbgPrint("Removing duplicate entity", obj, data.Name or data.GlobalName or "")
+			obj:Remove()
+			landmarkEntities[k] = nil
+		else
+			-- We don't spawn things that already exist in this world and can't be referenced.
+			data.Ignored = true
 		end
 	end
 
 	DbgPrint("Creating " .. tostring(objCount) .. " transition Objects...")
 
-	local curMap = self:GetCurrentMap()
 	local entityTransitionData = {}
 
 	ignoreKeyIndex = -1 -- ignoreKeyIndex + 1
@@ -931,18 +931,21 @@ function GM:CreateTransitionObjects()
 
 	for _,data in pairs(objects) do
 
+		if data.Ignored == true then
+			continue
+		end
+
 		-- NOTE/FIXME: Observed different results on linux
 		if util.IsInWorld(data.Pos) == false then
 			DbgPrint("Ignoring creation of " .. data.Class .. ", position out of world: " .. tostring(data.Pos))
 			continue
 		end
 
-		if (data.Name == nil or data.Name == "") and (data.GlobalName == nil or data.GlobalName == "") and data.SourceMap == curMap then
-			DbgPrint("Ignoring creation of " .. data.Class .. ", originated from this map: " .. tostring(data.SourceMap))
-			continue
-		end
+		DbgPrint("Creating: " .. data.Class, data.Name, data.GlobalName)
 
-		DbgPrint("Creating: " .. data.Class)
+		if data.Name == "gunship_trigger_9" then
+			PrintTable(data)
+		end
 
 		local ent = ents.Create(data.Class)
 		local dispatchSpawn = true
@@ -997,6 +1000,7 @@ function GM:CreateTransitionObjects()
 		ent:SetVelocity(data.Vel)
 		if data.Mdl ~= nil then
 			ent:SetModel(data.Mdl)
+			DbgPrint(data.Mdl)
 		end
 		ent:SetName(data.Name)
 		ent:SetSkin(data.Skin)
