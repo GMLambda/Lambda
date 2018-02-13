@@ -60,7 +60,7 @@ function MAPSCRIPT:PostInit()
 
 		local createPhyscannon = ents.Create("lambda_clientcommand")
 		createPhyscannon:Spawn()
-		createPhyscannon.Command = function(self, data, activator, caller)
+		createPhyscannon.Command = function(s, data, activator, caller)
 
 			DbgPrint("Creating gravity gun")
 
@@ -81,6 +81,11 @@ function MAPSCRIPT:PostInit()
 			end
 
 			gravgun_prop:Remove()
+
+			table.insert(self.DefaultLoadout.Weapons, "weapon_physcannon")
+
+			-- No longer needed.
+			s:Remove()
 
 			return true
 
