@@ -300,8 +300,10 @@ if SERVER then
 					wep:SetClip2(v.Clip2)
 				end
 
-				if v.Active then
+				if v.Active == true then
 					ply.ScheduledActiveWeapon = v.Class
+				elseif v.Previous == true then
+					ply.ScheduledLastWeapon = v.Class
 				end
 			end
 
@@ -535,6 +537,13 @@ if SERVER then
 			ply.ScheduledActiveWeapon = nil
 		else
 			self:SelectBestWeapon(ply)
+		end
+
+		if ply.ScheduledLastWeapon ~= nil then
+			local wep = ply:GetWeapon(ply.ScheduledLastWeapon)
+			if IsValid(wep) then
+				ply:SetSaveValue("m_hLastWeapon", wep)
+			end
 		end
 
 		util.RunNextFrame(function()

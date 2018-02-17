@@ -271,8 +271,15 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 	-- Construct a weapon table that contains also info about the ammo.
 	local weapons = {}
 
+	local playerSaveTable = ply:GetSaveTable()
+	local prevWeapon = nil
+	if playerSaveTable ~= nil and IsValid(playerSaveTable.m_hLastWeapon) then
+		prevWeapon = playerSaveTable.m_hLastWeapon
+	end
+
 	for _, weapon in pairs(ply:GetWeapons()) do
 		local isActive = ply:GetActiveWeapon() == weapon
+		local isPrevious = prevWeapon == weapon
 		local weaponData =
 		{
 			Class = weapon:GetClass(),
@@ -289,6 +296,7 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 			Clip1 = weapon:Clip1(),
 			Clip2 = weapon:Clip2(),
 			Active = isActive,
+			Previous = isPrevious,
 		}
 		table.insert(weapons, weaponData)
 	end
