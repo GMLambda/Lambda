@@ -370,3 +370,18 @@ function GM:ShouldDrawLocalPlayer(ply)
 	end
 
 end
+
+function GM:OnContextMenuOpen()
+	self:ShowTauntSelection(true)
+end
+
+function GM:OnContextMenuClose()
+	self:ShowTauntSelection(false)
+end
+
+function GM:PlayerBindPress(ply, bind, pressed)
+	if self:IsTauntSelectionOpen() == true and
+	   self:TauntSelectionInput(ply, bind, pressed) == true then
+		return true
+	end
+end

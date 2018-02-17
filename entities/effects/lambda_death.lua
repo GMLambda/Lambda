@@ -48,6 +48,8 @@ function EFFECT:Render( )
 
 	if  (self.Alpha < 0 ) then return end
 
+	render.SuppressEngineLighting(true)
+
 	local Normal = self.Normal
 	local eyePos = EyePos()
 	local dir = Normal:Angle()
@@ -69,4 +71,6 @@ function EFFECT:Render( )
 
 	cam.IgnoreZ(false)
 
+	render.SuppressEngineLighting(false)
+	
 end

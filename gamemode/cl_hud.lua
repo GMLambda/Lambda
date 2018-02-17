@@ -117,7 +117,8 @@ function GM:HUDPaint()
 	hook.Run( "HUDDrawPickupHistory" )
 	hook.Run( "HUDDrawHintHistory" )
 	hook.Run( "DrawDeathNotice", 0.85, 0.04 )
-
+	hook.Run( "DrawTauntsMenu" )
+	
 	if lambda_crosshair:GetBool() == true and self:ShouldDrawCrosshair() == true then
 		hook.Run( "DrawDynamicCrosshair" )
 	end

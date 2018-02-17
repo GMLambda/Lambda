@@ -46,6 +46,8 @@ function EFFECT:Render( )
 
 	if  (self.Alpha < 0 ) then return end
 
+	render.SuppressEngineLighting(true)
+
 	local Normal = self.Normal
 	local dir = Normal:Angle()
 	local ply = LocalPlayer()
@@ -82,5 +84,7 @@ function EFFECT:Render( )
 						 signsize, signsize,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
 						 180)
+
+	render.SuppressEngineLighting(false)
 
 end
