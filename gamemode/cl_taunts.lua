@@ -1,8 +1,7 @@
 include("sh_taunts.lua")
 
 --local DbgPrint = GetLogging("Taunts")
-
-local TauntIndex = 1
+local TauntIndex = CreateClientConVar("_lambda_taunt_idx", "1", true)
 local TauntMaxDisplay = 3 -- Each direction
 local TauntSelection = false
 
@@ -94,24 +93,25 @@ function DrawTauntsMenu()
 		count = #taunts
 	end
 
-	if TauntIndex > count then
-		TauntIndex = count
+	local tauntIndex = TauntIndex:GetInt()
+	if tauntIndex > count then
+		tauntIndex = count
 	end
-	if TauntIndex < 1 then
-		TauntIndex = 1
+	if tauntIndex < 1 then
+		tauntIndex = 1
 	end
 
 	local x
 	local xpos = (3 * 20) + math.pow(3, 1.5)
 
 	-- Back
-	local back_max = TauntIndex - TauntMaxDisplay
+	local back_max = tauntIndex - TauntMaxDisplay
 	if back_max < 1 then
 		back_max = 1
 	end
 
 	x = 1
-	for i = (TauntIndex - 1), back_max, -1 do
+	for i = (tauntIndex - 1), back_max, -1 do
 		local taunt = Taunts[gender][i]
 		if not taunt then
 			break
@@ -125,7 +125,7 @@ function DrawTauntsMenu()
 	xpos = (3 * 20) + math.pow(3, 1.2) + 40
 
 	-- Current
-	local taunt = Taunts[gender][TauntIndex]
+	local taunt = Taunts[gender][tauntIndex]
 	if not taunt then
 		return
 	end
@@ -137,13 +137,13 @@ function DrawTauntsMenu()
 	xpos = xpos + 50
 
 	-- Front
-	local front_max = TauntIndex + TauntMaxDisplay
+	local front_max = tauntIndex + TauntMaxDisplay
 	if front_max > count then
 		front_max = count
 	end
 
 	x = 1
-	for i = (TauntIndex + 1), front_max do
+	for i = (tauntIndex + 1), front_max do
 		taunt = Taunts[gender][i]
 		if not taunt then
 			break
@@ -171,17 +171,18 @@ function SendSelectedTaunt()
 	local taunts = Taunts[gender]
 	local count = #taunts
 
-	if TauntIndex < 1 or TauntIndex > count then
+	local tauntIndex = TauntIndex:GetInt()
+	if tauntIndex < 1 or tauntIndex > count then
 		return false
 	end
 
-	local taunt = Taunts[gender][TauntIndex]
+	local taunt = Taunts[gender][tauntIndex]
 	if not taunt then
 		return false
 	end
 
 	net.Start("PlayerStartTaunt")
-	net.WriteFloat(TauntIndex)
+	net.WriteFloat(tauntIndex)
 	net.SendToServer()
 end
 
@@ -202,29 +203,21 @@ hook.Add( "OnContextMenuClose", "Lambda_Taunts", function()
 	hook.Remove("HUDPaint", "LambdaTaunts")
 end)
 
---[[
-concommand.Add("+showtaunts", function()
-	TauntSelection = true
-	hook.Add("HUDPaint", "LambdaTaunts", DrawTauntsMenu)
-end)
-
-concommand.Add("-showtaunts", function()
-	TauntSelection = false
-	SendSelectedTaunt()
-	hook.Remove("HUDPaint", "LambdaTaunts")
-end)
-]]
-
 hook.Add("PlayerBindPress", "LambdaTaunts", function(ply, bind, pressed)
-
+	local tauntIndex = TauntIndex:GetInt()
+	local update
 	if TauntSelection then
 		if bind == "invnext" and pressed then
-			TauntIndex = TauntIndex + 1
-			return true
+			tauntIndex = tauntIndex + 1
+			update = true
 		elseif bind == "invprev" and pressed then
-			TauntIndex = TauntIndex - 1
-			return true
+			tauntIndex = tauntIndex - 1
+			update = true
 		end
 	end
-
+	if update == true then
+		print("New taunt index:", tauntIndex)
+		TauntIndex:SetInt(tauntIndex)
+	end
+	return update
 end)
