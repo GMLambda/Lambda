@@ -99,27 +99,6 @@ if SERVER then
 
 		local model = "models/player/riot.mdl"
 		local name = "!player" -- Some stuff will fail if this is not set, not everything is ported.
-		local gender = "male"
-
-		local hash = tonumber(util.CRC(ply:SteamID64() or "LOCALPLAYER"))
-		math.randomseed(hash * 4) -- * 4 because im special! :v
-
-		-- We pick something random.
-		local genders = { "male", "female" }
-		gender = genders[math.random(1, #genders)]
-
-		local index = "0" .. tostring(math.random(1, 5))
-
-		model = gender .. "_" .. index .. ".mdl"
-		name = "!player"
-
-		ply.LambdaPlayerData =
-		{
-			Gender = gender,
-			Name = name,
-			Model = model,
-		}
-
 		ply.LambdaLastModel = model
 
 		local transitionData = self:GetPlayerTransitionData(ply)
@@ -128,13 +107,10 @@ if SERVER then
 			ply:SetDeaths(transitionData.Deaths)
 		end
 
-		ply:SetNW2String("Gender", gender)
-		ply:SetName(name) -- Some thing are triggered between PlayerInitialSpawn and PlayerSpawn
+		ply:SetName("!player") -- Some thing are triggered between PlayerInitialSpawn and PlayerSpawn
 		if ply:IsBot() == false then
 			ply:SetInactive(true)
 		end
-
-		--ply:SetNetworkAbsVelocity(Vector(0, 0, 0))
 
 		self:AssignPlayerAuthToken(ply)
 
@@ -257,7 +233,7 @@ if SERVER then
 		if mdl:find("female", 1, true) ~= nil then
 			gender = "female"
 		end
-		ply:SetNW2String("Gender", gender)
+		ply:SetGender(gender)
 
 		util.PrecacheModel(mdl)
 		ply:SetModel(mdl)
@@ -440,7 +416,6 @@ if SERVER then
 		ply.WeaponDuplication = {}
 		ply:StripAmmo()
 		ply:StripWeapons()
-		ply:SetName(ply.LambdaPlayerData.Name)
 		ply:SetupHands()
 		ply:SetTeam(LAMBDA_TEAM_ALIVE)
 		ply:SetCustomCollisionCheck(true)
@@ -954,7 +929,7 @@ if SERVER then
 			hitgroup = HITGROUP_GENERIC
 		end
 
-		local gender = ply:GetNW2String("Gender")
+		local gender = ply:GetGender()
 		local hurtsounds = self.HurtSounds[gender][hitgroup]
 
 		ply.NextHurtSound = ply.NextHurtSound or 0
