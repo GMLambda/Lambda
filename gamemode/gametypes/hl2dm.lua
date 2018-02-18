@@ -28,7 +28,7 @@ GAMETYPE.ImportantPlayerNPCClasses =
 
 function GAMETYPE:GetPlayerRespawnTime()
 
-	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), 0, 255)
+	local timeout = 2
 	return timeout
 
 end
