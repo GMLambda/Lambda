@@ -256,8 +256,8 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 	view.origin = pos
 	view.angles = ang
 	view.fov = fov
-	view.znear = znear
-	view.zfar = zfar
+	view.znear = nearZ
+	view.zfar = farZ
 	view.drawviewer	= false
 
 	local viewlock = ply:GetViewLock()
