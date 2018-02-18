@@ -188,7 +188,7 @@ function MAPSCRIPT:PostInit()
 				if IsValid(driver) and driver:Alive() then
 					driver:Kill()
 				end
-				local passengerSeat = ent.PassengerSeat
+				local passengerSeat = ent:GetNWEntity("PassengerSeat")
 				if IsValid(passengerSeat) then
 					local passenger = passengerSeat:GetDriver()
 					if IsValid(passenger) and passenger:Alive() then

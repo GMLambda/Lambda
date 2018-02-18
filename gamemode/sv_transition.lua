@@ -447,7 +447,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 			data.EnableGun = false
 		end
 		data.VehicleScript = ent:GetSaveTable()["VehicleScript"]
-		if ent.IsPassengerSeat == true then
+		if ent:GetNWBool("IsPassengerSeat", false) == true then
 			data.IsPassengerSeat = true
 		end
 
@@ -1026,7 +1026,7 @@ function GM:CreateTransitionObjects()
 		ent:SetSequence(data.Sequence)
 
 		if data.IsPassengerSeat == true then
-			ent.IsPassengerSeat = true
+			ent:SetNWBool("IsPassengerSeat", true)
 		end
 
 		if data.Type == ENT_TYPE_NPC then
@@ -1084,8 +1084,8 @@ function GM:CreateTransitionObjects()
 			if IsValid(parent) then
 				ent:SetParent(parent)
 				-- FIX: Make sure we assign the seat to the vehicle.
-				if ent.IsPassengerSeat == true then
-					parent.PassengerSeat = ent
+				if ent:GetNWBool("IsPassengerSeat", false) == true then
+					parent:SetNWEntity("PassengerSeat", ent)
 				end
 			end
 		end

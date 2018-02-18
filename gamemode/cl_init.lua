@@ -211,6 +211,22 @@ end
 
 function GM:CalcViewModelView( wep, vm, oldPos, oldAng, vm_origin, vm_angles )
 
+	local ply = wep:GetOwner()
+
+	if IsValid(ply) and IsValid(ply:GetVehicle()) then
+		local vehicle = ply:GetVehicle()
+		if vehicle:GetNWBool("IsPassengerSeat", false) == true then
+			local ang = oldAng
+			local eyeAng = ply:GetAimVector():Angle()
+			ang:Set(eyeAng + ply:GetViewPunchAngles())
+
+			local localvec, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
+			ang:RotateAroundAxis( ang:Forward() * -1, localang.r)
+
+			oldAng = ang
+		end
+	end
+
 	if not IsValid( wep ) then
 		 return
 	 end
@@ -267,7 +283,6 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 	if viewlock == VIEWLOCK_ANGLE then
 
 		view.angles = ply:GetNWAngle("LockedViewAngles")
-		view.fov = fov
 		view.origin = pos
 		return view
 
@@ -276,7 +291,6 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 		local npc = ply:GetNWEntity("LockedViewEntity")
 		if IsValid(npc) then
 			view.angles = (npc:EyePos() - ply:EyePos()):Angle()
-			view.fov = fov
 			view.origin = pos
 			return view
 		end
@@ -342,6 +356,17 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
 		local vehicle = ply:GetVehicle()
 		if IsValid( vehicle ) then
+
+			if vehicle:GetNWBool("IsPassengerSeat", false) == true then
+				local eyeAng = ply:GetAimVector():Angle()
+				ang:Set(eyeAng + ply:GetViewPunchAngles())
+
+				local localvec, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
+	 			ang:RotateAroundAxis( ang:Forward() * -1, localang.r)
+
+	 			view.angles = ang
+			end
+
 			return hook.Run( "CalcVehicleView", vehicle, ply, view )
 		end
 

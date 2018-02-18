@@ -120,7 +120,7 @@ if SERVER then
 
 	function GM:HandleJeepCreation(jeep)
 
-		if IsValid(jeep.PassengerSeat) then
+		if IsValid(jeep:GetNWEntity("PassengerSeat")) then
 			return
 		end
 
@@ -130,9 +130,9 @@ if SERVER then
 		seat:SetModel("models/nova/jeep_seat.mdl")
 		seat:SetParent(jeep)
 		seat:Spawn()
-		seat.IsPassengerSeat = true
+		seat:SetNWBool("IsPassengerSeat", true)
 
-		jeep.PassengerSeat = seat
+		jeep:SetNWEntity("PassengerSeat", seat)
 
 	end
 
@@ -166,6 +166,10 @@ if SERVER then
 
 		end
 
+		local ang = vehicle:GetForward():Angle()
+		ang = vehicle:WorldToLocalAngles(ang)
+		ply:SetEyeAngles(ang)
+
 		if self.MapScript ~= nil and self.MapScript.OnEnteredVehicle ~= nil then
 			self.MapScript:OnEnteredVehicle(ply, vehicle, role)
 		end
@@ -194,8 +198,9 @@ if SERVER then
 			DbgPrint("Player who left is now dead, we shall remove this")
 
 			-- We give the driver a chance to pick up this vehicle.
-			if IsValid(vehicle.PassengerSeat) then
-				local passenger = vehicle.PassengerSeat:GetDriver()
+			local passengerSeat = vehicle:GetNWEntity("PassengerSeat")
+			if IsValid(passengerSeat) then
+				local passenger = passengerSeat:GetDriver()
 				if IsValid(passenger) and passenger:IsPlayer() then
 					DbgPrint("Giving passenger temporary ownership of vehicle")
 					vehicle.LambdaPlayer = nil
@@ -203,13 +208,12 @@ if SERVER then
 
 					ply.OwnedVehicle = nil
 					ply:SetNWEntity("LambdaOwnedVehicle", nil)
-
 				end
 			end
 
 		end
 
-		if ply:Alive() and vehicle.IsPassengerSeat == true then
+		if ply:Alive() and vehicle:GetNWBool("IsPassengerSeat", false) == true then
 
 			local ang = vehicle:GetAngles()
 			local pos = vehicle:GetPos()
@@ -235,12 +239,15 @@ if SERVER then
 			ply.OwnedVehicle = nil
 		end
 
-		if vehicle.IsPassengerSeat == true then
+		if vehicle:GetNWBool("IsPassengerSeat", false) == true then
 			vehicle:SetKeyValue("limitview", "0")
 			ply:SetAllowWeaponsInVehicle(true)
 		else
 			ply:SetAllowWeaponsInVehicle(false)
 		end
+
+		vehicle.ResetVehicleEntryAnim = true
+		vehicle:SetVehicleEntryAnim(false)
 
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
@@ -453,6 +460,8 @@ if SERVER then
 else -- CLIENT
 
 	function GM:CalcVehicleView(vehicle, ply, view)
+
+		--print("CalcVehicleView")
 
 		if ply.VehicleSteeringView == true then
 			local viewPos = view.origin

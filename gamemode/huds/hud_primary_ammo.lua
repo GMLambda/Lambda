@@ -67,7 +67,7 @@ function PANEL:Think()
 	local ammo = 0
 	local ammotype = -1
 
-	if vehicle ~= nil and IsValid(vehicle) then
+	if vehicle ~= nil and IsValid(vehicle) and vehicle:GetNWBool("IsPassengerSeat", false) == false then
 
 		if vehicle.GetAmmo ~= nil then
 			ammotype, clip1, num = vehicle:GetAmmo()

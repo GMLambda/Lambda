@@ -173,7 +173,7 @@ function GM:UpdateCheckoints()
 			checkpointMaxs = CHECKPOINT_PLAYER_MAXS
 		else
 			pos = vehicle:GetPos()
-			filter = { ply, vehicle, vehicle.PassengerSeat }
+			filter = { ply, vehicle, vehicle:GetNWEntity("PassengerSeat") }
 			checkpointMins = CHECKPOINT_VEHICLE_MINS
 			checkpointMaxs = CHECKPOINT_VEHICLE_MAXS
 		end
@@ -301,7 +301,7 @@ function GM:UpdateCheckoints()
 			local plyRight = vehicle:GetRight()
 			local plyFwd = vehicle:GetForward()
 
-			local filter = { selectedPlayer, vehicle, vehicle.PassengerSeat }
+			local filter = { selectedPlayer, vehicle, vehicle:GetNWEntity("PassengerSeat") }
 			local vehicleAng = vehicle:GetAngles()
 			local len = 80
 			local targetPos = bestPos

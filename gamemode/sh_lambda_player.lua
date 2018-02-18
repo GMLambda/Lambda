@@ -1326,9 +1326,7 @@ end
 
 function GM:ChargeSuitPower(ply, amount)
 
-	local current = ply:GetSuitPower()
-
-	current = current + amount
+	local current = ply:GetSuitPower() + amount
 	if current > 100.0 then
 		current = 100.0
 	end
@@ -1540,19 +1538,18 @@ function GM:PlayerThink(ply)
 
 	if SERVER then
 
-		self:UpdatePlayerSpeech(ply)
-
 		ply:SetNWVector("LambdaAbsVector", ply:GetAbsVelocity())
+
+		self:UpdatePlayerSpeech(ply)
 
 		local curMdl = ply:GetInfo("lambda_playermdl")
 		local suitEquipped = ply:IsSuitEquipped()
 
 		if (suitEquipped ~= ply.LambdaSuitEquipped) or (curMdl ~= ply.LambdaLastModel) then
 			self:PlayerSetModel(ply)
+			ply.LambdaLastModel = curMdl
+			ply.LambdaSuitEquipped = suitEquipped
 		end
-
-		ply.LambdaLastModel = curMdl
-		ply.LambdaSuitEquipped = suitEquipped
 
 		-- Make sure we reset the view lock if we are in release mode.
 		local viewlock = ply:GetViewLock()
@@ -1618,7 +1615,7 @@ function GM:GravGunPunt(ply, ent)
 	end
 
 	local playerVehicle = ply:GetVehicle()
-	if playerVehicle ~= NULL and IsValid(playerVehicle) == true and ent:IsVehicle() == true and ent.PassengerSeat == playerVehicle then
+	if playerVehicle ~= NULL and IsValid(playerVehicle) == true and ent:IsVehicle() == true and ent:GetNWEntity("PassengerSeat") == playerVehicle then
 		return false
 	end
 

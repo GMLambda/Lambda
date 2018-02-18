@@ -71,7 +71,7 @@ function PANEL:Think()
 	local totalW = 0
 
 	local vehicle = ply:GetVehicle()
-	if vehicle ~= nil and IsValid(vehicle) then
+	if vehicle ~= nil and IsValid(vehicle) and vehicle:GetNWBool("IsPassengerSeat", false) == false then
 
 		if self.LastWeapon ~= vehicle then
 			animateSize = true
