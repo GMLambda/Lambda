@@ -26,8 +26,8 @@ function GM:WeaponTrackingThink()
 			continue
 		end
 
-		if wep:GetOwner() == nil or wep:GetOwner() == NULL and wep:CreatedByMap() == false then
-			if ownerlessCount >= 50 then
+		if wep:GetOwner() == nil or wep:GetOwner() == NULL and self:IsLevelDesignerPlacedObject(wep) == false then
+			if ownerlessCount >= 200 then
 				PrintMessage(HUD_PRINTTALK, "Removing weapon: " .. tostring(wep))
 				table.remove(self.TrackedWeapons, k)
 				wep:Remove()
