@@ -334,6 +334,11 @@ function GAMETYPE:LoadLocalisation(lang, gmodLang)
 	]]
 end
 
+function GAMETYPE:AllowPlayerTracking()
+	self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
+	return self.TrackerOption:GetBool()
+end
+
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
 	gametypes:Add("hl2", GAMETYPE)
 end)

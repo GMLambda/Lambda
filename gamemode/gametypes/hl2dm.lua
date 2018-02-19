@@ -129,6 +129,10 @@ function GAMETYPE:PlayerSelectSpawn(spawns)
 	return table.Random(spawns)
 end
 
+function GAMETYPE:AllowPlayerTracking()
+	return false
+end
+
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
 	gametypes:Add("hl2dm", GAMETYPE)
 end)

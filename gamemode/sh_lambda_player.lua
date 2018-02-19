@@ -1684,3 +1684,7 @@ function GM:PlayerNoClip(ply, desiredState)
 	end
 
 end
+
+function GM:AllowPlayerTracking()
+	return self:CallGameTypeFunc("AllowPlayerTracking")
+end

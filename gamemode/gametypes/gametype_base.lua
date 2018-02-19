@@ -95,6 +95,10 @@ function GAMETYPE:LoadLocalisation(lang)
 	-- Stub
 end
 
+function GAMETYPE:AllowPlayerTracking()
+	return true
+end
+
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
 	gametypes:Add("lambda_base", GAMETYPE)
 end)

@@ -61,12 +61,15 @@ if CLIENT then
 
 	function ENT:RenderPlayer()
 
-		if lambda_playertracker:GetBool() == false then
+		local ply = self:GetParent()
+		if not IsValid(ply) or not ply:IsPlayer() then
 			return
 		end
 
-		local ply = self:GetParent()
-		if not IsValid(ply) or not ply:IsPlayer() then
+		local playerVisible = IsPlayerVisible(ply)
+		local allowTracking = GAMEMODE:AllowPlayerTracking()
+
+		if allowTracking == false then
 			return
 		end
 
@@ -82,7 +85,7 @@ if CLIENT then
 			return
 		end
 
-		if lambda_playertracker:GetBool() == true and IsPlayerVisible(ply) == false then
+		if playerVisible == false then
 			cam.IgnoreZ(true)
 
 			ply:DrawModel()
@@ -103,9 +106,21 @@ if CLIENT then
 
 	function ENT:RenderPlayerStats()
 
+		local ply = self:GetParent()
+		if not IsValid(ply) or not ply:IsPlayer() then
+			return
+		end
+
+		local playerVisible = IsPlayerVisible(ply)
+		local allowTracking = GAMEMODE:AllowPlayerTracking()
+
+		if allowTracking == false and playerVisible == false then
+			-- Not visible, hide the name tag.
+			return
+		end
+
 		surface.SetFont(font)
 
-		local ply = self:GetParent()
 		local text = ply:Nick()
 
 		local w, h = surface.GetTextSize( text )
@@ -124,7 +139,7 @@ if CLIENT then
 		teamColor.a = teamColor.a * alphaScale
 
 		local restoreIgnoreZ = false
-		if lambda_playertracker:GetBool() == true and IsPlayerVisible(ply) == false then
+		if allowTracking == true and playerVisible == false then
 			cam.IgnoreZ(true)
 			restoreIgnoreZ = true
 		end
