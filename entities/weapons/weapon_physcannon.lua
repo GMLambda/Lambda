@@ -76,11 +76,14 @@ local physcannon_tracelength = GetConVar("physcannon_tracelength")
 local physcannon_maxforce = GetConVar("physcannon_maxforce")
 local physcannon_cone = GetConVar("physcannon_cone")
 local physcannon_pullforce = GetConVar("physcannon_pullforce")
+local physcannon_maxmass = GetConVar("physcannon_maxmass")
+
 -- Missing convars.
 local physcannon_dmg_class = CreateConVar("physcannon_dmg_class", "15", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED), "Damage done to glass by punting")
 local physcannon_mega_tracelength = CreateConVar("physcannon_mega_tracelength", "850", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 local physcannon_mega_pullforce = CreateConVar("physcannon_mega_pullforce", "8000", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 local physcannon_ball_cone = CreateConVar("physcannon_ball_cone", "0.997", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
+-- ConVar physcannon_maxmass( "physcannon_maxmass", "250" );
 
 local SPRITE_SCALE = 12
 
@@ -158,6 +161,8 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 1, "MegaEnabled")
 	self:NetworkVar("Float", 0, "ElementDestination")
 	self:NetworkVar("Entity", 0, "MotionController")
+	self:NetworkVar("Vector", 0, "TargetOffset")
+	self:NetworkVar("Angle", 0, "TargetAngle")
 
 end
 
@@ -176,9 +181,6 @@ function SWEP:Initialize()
 	self.GlowSprites = {}
 	self.BeamSprites = {}
 
-	--self:SetElementOpen(true)
-	--self:SetElementDestination(1)
-
 	self.ElementOpen = nil
 	self.OldOpen = false
 	self.UpdateName = true
@@ -196,7 +198,6 @@ function SWEP:Initialize()
 
 	self.ElementDebounce = CurTime()
 	self.CheckSuppressTime = CurTime()
-	self.ObjectShadowParams = {}
 	self.DebounceSecondary = false
 	self:SetWeaponHoldType(self.HoldType)
 	self.ElementPosition = InterpValue(0.0, 0.0, 0)
@@ -213,7 +214,6 @@ function SWEP:Initialize()
 	if SERVER then
 		local motionController = ents.Create("lambda_motioncontroller")
 		motionController:Spawn()
-		--self:SetNW2Entity("MotionController", motionController)
 		self:SetMotionController(motionController)
 	end
 
@@ -329,12 +329,6 @@ function SWEP:AcceptInput(inputName, activator, callee, data)
 	end
 	return false
 end
-
---[[
-function SWEP:GetMotionController()
-	return self:GetNW2Entity("MotionController")
-end
-]]
 
 function SWEP:LaunchObject(ent, fwd, force)
 
@@ -679,14 +673,19 @@ local ALLOWED_PICKUP_CLASS =
 	["combine_mine"] = true,
 }
 
-function SWEP:CanPickupObject(ent, massLimit, sizeLimit)
+function SWEP:CanPickupObject(ent)
 
 	if not IsValid(ent) then
 		return false
 	end
 
-	massLimit = massLimit or 0
-	sizeLimit = sizeLimit or 0
+	local massLimit = 0
+	local sizeLimit = 0
+
+	if self:IsMegaPhysCannon() == false then
+		massLimit = physcannon_maxmass:GetInt()
+	end
+
 	-- TODO: Disolving check
 	if ent:IsPlayer() then
 		return false
@@ -770,8 +769,6 @@ function SWEP:CanPickupObject(ent, massLimit, sizeLimit)
 				if ALLOWED_PICKUP_CLASS[class] == true then
 					return true
 				end
-				-- NOTE: We should be careful here, other objects may occupy those flags for other things, we should add a class check.
-				-- The sdk checks against CPhysicsProp and CPhysBox
 				if ent:HasSpawnFlags(SF_PHYSPROP_ENABLE_ON_PHYSCANNON) == false and ent:HasSpawnFlags(SF_PHYSBOX_ENABLE_ON_PHYSCANNON) == false then
 					return false
 				end
@@ -894,10 +891,6 @@ function SWEP:FindObject()
 		return OBJECT_NOT_FOUND
 	end
 
-	if ent:GetNW2Int("m_nPhysgunState", 0) == 1 then
-		return OBJECT_FOUND
-	end
-
 	if attach == true then
 		if self:AttachObject(ent, tr) == true then
 			return OBJECT_FOUND
@@ -949,7 +942,7 @@ function SWEP:UpdateObject()
 	local attachedObject = controller:GetAttachedObject()
 	if attachedObject:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
 		return false
-	end 
+	end
 	if owner:GetGroundEntity() == attachedObject then
 		return false
 	end
@@ -963,8 +956,8 @@ function SWEP:UpdateObject()
 	local objLen = attachedObject:OBBMaxs():Length2D()
 	local distance = minDist + playerLen + objLen
 
-	local targetAng = self:GetNW2Angle("TargetAng")
-	local targetAttachment = self:GetNW2Vector("AttachmentPoint")
+	local targetAng = self:GetTargetAngle() --self:GetNW2Angle("TargetAng")
+	local targetAttachment = self:GetTargetOffset() --self:GetNW2Vector("AttachmentPoint")
 
 	local ang = owner:LocalToWorldAngles(targetAng)
 	local endPos = start + (fwd * distance)
@@ -1360,8 +1353,8 @@ function SWEP:AttachObject(ent, tr)
 
 		targetAng = owner:WorldToLocalAngles(targetAng)
 
-		self:SetNW2Angle("TargetAng", targetAng)
-		self:SetNW2Vector("AttachmentPoint", attachmentPoint)
+		self:SetTargetAngle(targetAng) --self:SetNW2Angle("TargetAng", targetAng)
+		self:SetTargetOffset(attachmentPoint) --self:SetNW2Vector("AttachmentPoint", attachmentPoint)
 
 		ent:PhysicsImpactSound()
 	end
@@ -2139,19 +2132,37 @@ end
 
 function SWEP:DrawBeam(startPos, endPos, width, color)
 
+	if width <= 0.0 then
+		return
+	end
+
 	color = color or Color(255, 255, 255, 255)
-
-	local delta = endPos - startPos
-	local len = delta:Length()
-	local texcoord = util.RandomFloat(0, 1)
-
 	render.SetMaterial(MAT_PHYSBEAM)
-	render.DrawBeam( startPos,
-					 endPos,
-					width,
-					texcoord,
-					texcoord + (len / 32),
-					color )
+
+	local numGroups = 5
+	local numSegments = 5
+	local len = endPos - startPos
+	local split = len / numSegments
+	for n = 0, numGroups - 1 do
+		render.StartBeam(numSegments)
+		for i = 0, numSegments - 1 do
+			local offset = Vector(0, 0, 0)
+			local pos
+			if i == 0 then
+				pos = startPos
+			elseif i == numSegments - 1 then
+				pos = endPos
+			else
+				local t = CurTime() * 5
+				local p = (t + (n * n)) + (i / numSegments - 1) * math.pi
+				offset = Vector(1, 1, 1) * math.sin(p) + (VectorRand() * ((n / numGroups) - 0.5))
+				pos = startPos + (i * split) + offset
+			end
+			local texcoord = util.RandomFloat(0, 1)
+			render.AddBeam(pos, width, texcoord, color)
+		end
+		render.EndBeam()
+	end
 
 end
 
