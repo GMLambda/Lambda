@@ -471,6 +471,12 @@ function ENT:ChildPostSpawn(ent)
 		end
 	end)
 
+	-- HACKHACK: Some of the weapons appear to have EF_NODRAW set, that shouldn't be the case.
+	local wep = ent:GetActiveWeapon()
+	if IsValid(wep) then
+		wep:RemoveEffects(EF_NODRAW)
+	end
+	
 	DbgPrint(self, "Created new NPC: " .. tostring(ent))
 
 end
