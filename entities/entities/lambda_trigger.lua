@@ -114,8 +114,10 @@ if SERVER then
 
 		if showtriggers:GetBool() == false then
 			self:AddEffects(EF_NODRAW)
+			self:AddDebugOverlays(OVERLAY_BBOX_BIT)
 		else
 			self:RemoveEffects(EF_NODRAW)
+			self:RemoveDebugOverlays(OVERLAY_BBOX_BIT)
 		end
 
 		if self:GetNWVar("Blocked") == true then
@@ -228,9 +230,16 @@ if SERVER then
 			end
 
 			for k,v in pairs(self.DisabledTouchingObjects) do
-				if IsValid(Entity(k)) then
-					self:StartTouch(Entity(k))
-					self:Touch(Entity(k))
+				local ent = Entity(k)
+				if IsValid(ent) then
+					self:StartTouch(ent)
+				end
+			end
+
+			for k,v in pairs(self.DisabledTouchingObjects) do
+				local ent = Entity(k)
+				if IsValid(ent) then
+					self:Touch(ent)
 				end
 			end
 
