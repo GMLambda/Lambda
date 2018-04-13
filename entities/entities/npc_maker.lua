@@ -107,7 +107,9 @@ if SERVER then
 		ent:SetName(self.NPCTargetname)
 
 		self:FireOutputs("OnSpawnNPC", ent, ent, self)
-
+		if self.OnSpawnNPC ~= nil and isfunction(self.OnSpawnNPC) then
+			self:OnSpawnNPC(ent)
+		end
 		self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") + 1)
 
 		if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false then

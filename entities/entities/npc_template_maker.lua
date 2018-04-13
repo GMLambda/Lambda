@@ -323,7 +323,9 @@ function ENT:MakeNPC()
 	self:ChildPostSpawn(ent)
 
 	self:FireOutputs("OnSpawnNPC", ent, ent, self)
-
+	if self.OnSpawnNPC ~= nil and isfunction(self.OnSpawnNPC) then
+		self:OnSpawnNPC(ent)
+	end
 	--self.LiveChildren = self.LiveChildren + 1
 	self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") + 1)
 
@@ -446,7 +448,9 @@ function ENT:MakeNPCInRadius()
 	self:ChildPostSpawn(ent)
 
 	self:FireOutputs("OnSpawnNPC", ent, ent, self)
-
+	if self.OnSpawnNPC ~= nil and isfunction(self.OnSpawnNPC) then
+		self:OnSpawnNPC(ent)
+	end
 	self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") + 1)
 
 	if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false then
@@ -540,7 +544,9 @@ function ENT:MakeNPCInLine()
 	self:ChildPostSpawn(ent)
 
 	self:FireOutputs("OnSpawnNPC", ent, ent, self)
-
+	if self.OnSpawnNPC ~= nil and isfunction(self.OnSpawnNPC) then
+		self:OnSpawnNPC(ent)
+	end
 	self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") + 1)
 
 	if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false then
