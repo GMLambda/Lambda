@@ -82,7 +82,13 @@ function ENT:ComputeError()
 	end
 
 	local shadowParams = self.ShadowParams
-	local pos = phys:GetPos() -- FIXME: Needs to be GetShadowPosition which is missing
+	local pos
+	if phys.GetShadowPosition ~= nil then
+		pos = phys:GetShadowPosition()
+	else
+	 	pos = phys:GetPos() -- TODO: Remove this once function available in main branch.
+	end
+
 	local err = (shadowParams.pos - pos):Length()
 	if self.ErrorTime > 1 then
 		self.ErrorTime = 1
