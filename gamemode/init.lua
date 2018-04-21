@@ -132,13 +132,12 @@ function GM:EntityTakeDamage(target, dmginfo)
 		-- Check if player is attacking friendlies.
 		if ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())) and isRestricted == true then
 			DbgPrint("Filtering damage on restricted NPC")
-			dmginfo:ScaleDamage(0)
-			return true
+			--dmginfo:ScaleDamage(0)
+			--return true
 		end
 
 		if IsValid(attacker) and attacker:IsPlayer() and dmginfo:IsDamageType(DMG_BLAST) == false then
 			dmginfo:ScaleDamage(self:GetDifficultyNPCDamageScale(target))
-
 			self:RegisterNPCDamage(target, attacker, dmginfo)
 		end
 

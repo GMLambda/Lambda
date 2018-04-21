@@ -35,8 +35,6 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
-		DbgPrint("MAPSCRIPT AY")
-
 		self.DefaultLoadout.HEV = false
 
 		ents.WaitForEntityByName("player_in_teleport", function(ent)

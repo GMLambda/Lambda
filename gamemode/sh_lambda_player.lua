@@ -1,7 +1,7 @@
 if SERVER then
 	AddCSLuaFile()
 	util.AddNetworkString("LambdaPlayerSettings")
-	util.AddNetworkString("LambdaPlayerColorChanged")
+	util.AddNetworkString("LambdaPlayerSettingsChanged")
 end
 
 local DbgPrint = GetLogging("Player")
@@ -49,9 +49,10 @@ if SERVER then
 		GAMEMODE:TogglePlayerSettings(ply, false)
 	end)
 
-	net.Receive("LambdaPlayerColorChanged", function(len, ply)
+	net.Receive("LambdaPlayerSettingsChanged", function(len, ply)
 
 		GAMEMODE:PlayerSetColors(ply)
+		GAMEMODE:PlayerSetModel(ply)
 
 	end)
 
@@ -204,26 +205,17 @@ if SERVER then
 		DbgPrint("GM:PlayerSetModel")
 
 		local playermdl = ply:GetInfo("lambda_playermdl")
-		local group
-		local groupIdx
-
-		if ply:IsSuitEquipped() then
-			group = "group03"
-			groupIdx = 2
-		else
-		    group = "group01"
-			groupIdx = 1
+		if playermdl == nil or playermdl == "" then
+			playermdl = "male05"
 		end
-
 		local mdls = self:GetAvailablePlayerModels()
 		local selection = mdls[playermdl]
-		local mdl
 		if selection == nil then
-			mdl = "models/player/" .. group .. "/" .. playermdl .. ".mdl"
-		else
-			mdl = selection[groupIdx]
+			print("Player " .. tostring(ply) .. " tried to select unknown model: " .. playermdl)
+			return
 		end
 
+		local mdl = selection
 		if mdl == nil or util.IsValidModel(mdl) == false then
 			-- Fallback
 			mdl = "models/player/" .. group .. "/male_01.mdl"
@@ -233,6 +225,7 @@ if SERVER then
 		if mdl:find("female", 1, true) ~= nil then
 			gender = "female"
 		end
+
 		ply:SetGender(gender)
 
 		util.PrecacheModel(mdl)
@@ -1534,6 +1527,12 @@ function GM:CalculatePlayerMovementAccuracy(ply, cmd)
 
 end
 
+
+
+function GM:PlayerUpdateSettings(ply)
+
+end
+
 function GM:PlayerThink(ply)
 
 	if SERVER then
@@ -1541,15 +1540,6 @@ function GM:PlayerThink(ply)
 		ply:SetNWVector("LambdaAbsVector", ply:GetAbsVelocity())
 
 		self:UpdatePlayerSpeech(ply)
-
-		local curMdl = ply:GetInfo("lambda_playermdl")
-		local suitEquipped = ply:IsSuitEquipped()
-
-		if (suitEquipped ~= ply.LambdaSuitEquipped) or (curMdl ~= ply.LambdaLastModel) then
-			self:PlayerSetModel(ply)
-			ply.LambdaLastModel = curMdl
-			ply.LambdaSuitEquipped = suitEquipped
-		end
 
 		-- Make sure we reset the view lock if we are in release mode.
 		local viewlock = ply:GetViewLock()

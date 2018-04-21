@@ -6,6 +6,11 @@ local H = 440
 local COLOR_PANEL_W = 267
 local COLOR_PANEL_H = 206
 
+cvars.AddChangeCallback("lambda_playermdl", function()
+	net.Start("LambdaPlayerSettingsChanged")
+	net.SendToServer()
+end, "LambdaPlayerModelChanged")
+
 function PANEL:Init()
 
 	self:SetSkin("Lambda")
@@ -44,11 +49,11 @@ function PANEL:Init()
 		icon:SetSize(64, 64)
 		icon:SetTooltip(name)
 
-		PanelSelect:AddPanel(icon, { lambda_playermdl = name })
+		PanelSelect:AddPanel(icon, { lambda_playermdl = name, _lambda_playermdl_select = name })
 	end
 
-	local colsetb = vgui.Create("DImageButton", PanelSelect)
-	colsetb:SetPos(W - 43 , 5)
+	local colsetb = vgui.Create("DImageButton", self.Sheet)
+	colsetb:SetPos(W - 30 , 3)
 	colsetb:SetImage("lambda/icons/palette.png")
 	colsetb:SizeToContents()
 	colsetb:SetTooltip("Edit colors")
@@ -463,7 +468,7 @@ function PANEL:UpdateColorSettings(val,color)
 		lambda_hud_text_color:SetString(string.FromColor(color))
 	end
 
-	net.Start("LambdaPlayerColorChanged")
+	net.Start("LambdaPlayerSettingsChanged")
 	net.SendToServer()
 
 end
