@@ -51,9 +51,7 @@ end
 
 function GM:HandlePlayerDucking(ply, velocity)
 
-	if ply:Crouching() == false then 
-		return false
-	end
+	if ( !ply:IsFlagSet( FL_ANIMDUCKING ) ) then return false end
 
 	if (velocity:Length2DSqr() > 1000) then
 		ply.CalcIdeal = ACT_MP_CROUCHWALK
@@ -90,18 +88,23 @@ function GM:HandlePlayerNoClipping(ply, velocity)
 	return true
 end
 
-function GM:HandlePlayerVaulting(ply, velocity)
-	if (velocity:Length() < 1000) then return end
-	if (ply:IsOnGround()) then return end
-	ply.CalcIdeal = ACT_MP_SWIM
+function GM:HandlePlayerVaulting( ply, velocity )
 
+	if ( velocity:LengthSqr() < 1000000 ) then
+		return
+	end
+	if ( ply:IsOnGround() ) then
+		return
+	end
+
+	ply.CalcIdeal = ACT_MP_SWIM
 	return true
+
 end
 
 function GM:HandlePlayerSwimming(ply, velocity)
 	if (ply:WaterLevel() < 2 or ply:IsOnGround()) then
 		ply.m_bInSwim = false
-
 		return false
 	end
 
@@ -145,31 +148,26 @@ function GM:HandlePlayerDriving(ply)
 		end
 	end
 
-	if (ply.CalcSeqOverride == -1) then
-		if (class == "prop_vehicle_jeep") then
-			ply.CalcSeqOverride = ply:LookupSequence("drive_jeep")
+	if ( ply.CalcSeqOverride == -1 ) then -- pVehicle.HandleAnimation did not give us an animation
+		if ( class == "prop_vehicle_jeep" ) then
+			ply.CalcSeqOverride = ply:LookupSequence( "drive_jeep" )
+		elseif ( class == "prop_vehicle_airboat" ) then
+			ply.CalcSeqOverride = ply:LookupSequence( "drive_airboat" )
+		elseif ( class == "prop_vehicle_prisoner_pod" && pVehicle:GetModel() == "models/vehicles/prisoner_pod_inner.mdl" ) then
 			-- HACK!!
-		elseif (class == "prop_vehicle_airboat") then
-			ply.CalcSeqOverride = ply:LookupSequence("drive_airboat")
-		elseif (class == "prop_vehicle_prisoner_pod" and pVehicle:GetModel() == "models/vehicles/prisoner_pod_inner.mdl") then
-			ply.CalcSeqOverride = ply:LookupSequence("drive_pd")
+			ply.CalcSeqOverride = ply:LookupSequence( "drive_pd" )
 		else
-			ply.CalcSeqOverride = ply:LookupSequence("sit_rollercoaster")
+			ply.CalcSeqOverride = ply:LookupSequence( "sit_rollercoaster" )
 		end
-	end -- pVehicle.HandleAnimation did not give us an animation
+	end
 
-	local use_anims = ply.CalcSeqOverride == ply:LookupSequence("sit_rollercoaster") or ply.CalcSeqOverride == ply:LookupSequence("sit")
-
-	if (use_anims and ply:GetAllowWeaponsInVehicle() and IsValid(ply:GetActiveWeapon())) then
+	local use_anims = ( ply.CalcSeqOverride == ply:LookupSequence( "sit_rollercoaster" ) || ply.CalcSeqOverride == ply:LookupSequence( "sit" ) )
+	if ( use_anims && ply:GetAllowWeaponsInVehicle() && IsValid( ply:GetActiveWeapon() ) ) then
 		local holdtype = ply:GetActiveWeapon():GetHoldType()
+		if ( holdtype == "smg" ) then holdtype = "smg1" end
 
-		if (holdtype == "smg") then
-			holdtype = "smg1"
-		end
-
-		local seqid = ply:LookupSequence("sit_" .. holdtype)
-
-		if (seqid ~= -1) then
+		local seqid = ply:LookupSequence( "sit_" .. holdtype )
+		if ( seqid != -1 ) then
 			ply.CalcSeqOverride = seqid
 		end
 	end
@@ -191,12 +189,6 @@ function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 	local len = velocity:Length()
 	local movement = 1.0
 	local curWep = ply:GetActiveWeapon()
-
-	-- Workaround: Stop reload animation on weapon switches.
-	if curWep ~= ply.m_lastActiveWeapon then
-		ply:AnimResetGestureSlot(GESTURE_SLOT_ATTACK_AND_RELOAD)
-		ply.m_lastActiveWeapon = curWep
-	end
 
 	if (len > 0.2) then
 		movement = len / maxseqgroundspeed
@@ -327,18 +319,18 @@ end
 
 local IdleActivity = ACT_HL2MP_IDLE
 local IdleActivityTranslate = {}
-IdleActivityTranslate[ACT_MP_STAND_IDLE] = IdleActivity
-IdleActivityTranslate[ACT_MP_WALK] = IdleActivity + 1
-IdleActivityTranslate[ACT_MP_RUN] = IdleActivity + 2
-IdleActivityTranslate[ACT_MP_CROUCH_IDLE] = IdleActivity + 3
-IdleActivityTranslate[ACT_MP_CROUCHWALK] = IdleActivity + 4
-IdleActivityTranslate[ACT_MP_ATTACK_STAND_PRIMARYFIRE] = IdleActivity + 5
-IdleActivityTranslate[ACT_MP_ATTACK_CROUCH_PRIMARYFIRE] = IdleActivity + 5
-IdleActivityTranslate[ACT_MP_RELOAD_STAND] = IdleActivity + 6
-IdleActivityTranslate[ACT_MP_RELOAD_CROUCH] = IdleActivity + 6
-IdleActivityTranslate[ACT_MP_JUMP] = ACT_HL2MP_JUMP_SLAM
-IdleActivityTranslate[ACT_MP_SWIM] = IdleActivity + 9
-IdleActivityTranslate[ACT_LAND] = ACT_LAND
+IdleActivityTranslate[ ACT_MP_STAND_IDLE ]					= IdleActivity
+IdleActivityTranslate[ ACT_MP_WALK ]						= IdleActivity + 1
+IdleActivityTranslate[ ACT_MP_RUN ]							= IdleActivity + 2
+IdleActivityTranslate[ ACT_MP_CROUCH_IDLE ]					= IdleActivity + 3
+IdleActivityTranslate[ ACT_MP_CROUCHWALK ]					= IdleActivity + 4
+IdleActivityTranslate[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= IdleActivity + 5
+IdleActivityTranslate[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= IdleActivity + 5
+IdleActivityTranslate[ ACT_MP_RELOAD_STAND ]				= IdleActivity + 6
+IdleActivityTranslate[ ACT_MP_RELOAD_CROUCH ]				= IdleActivity + 6
+IdleActivityTranslate[ ACT_MP_JUMP ]						= ACT_HL2MP_JUMP_SLAM
+IdleActivityTranslate[ ACT_MP_SWIM ]						= IdleActivity + 9
+IdleActivityTranslate[ ACT_LAND ]							= ACT_LAND
 
 -- it is preferred you return ACT_MP_* in CalcMainActivity, and if you have a specific need to not tranlsate through the weapon do it here
 function GM:TranslateActivity(ply, act)
@@ -391,7 +383,6 @@ end
 
 local function HandleAnimCancelReload(ply, event, data)
 	ply:AnimResetGestureSlot(GESTURE_SLOT_ATTACK_AND_RELOAD)
-
 	return ACT_INVALID
 end
 
@@ -400,8 +391,7 @@ local HANDLE_ANIM =
 	[PLAYERANIMEVENT_ATTACK_PRIMARY] = HandleAnimAttackPrimary,
 	[PLAYERANIMEVENT_ATTACK_SECONDARY] = HandleAnimSecondaryAttack,
 	[PLAYERANIMEVENT_RELOAD] = HandleAnimReload,
-	-- Missing?
-	--[PLAYERANIMEVENT_CANCEL_RELOAD] = HandleAnimCancelReload,
+	[PLAYERANIMEVENT_CANCEL_RELOAD] = HandleAnimCancelReload,
 	[PLAYERANIMEVENT_JUMP] = HandleAnimJump,
 }
 
