@@ -19,7 +19,7 @@ function GM:HandlePlayerJumping(ply, velocity)
 	if (not ply.m_bJumping and not onGround and waterLevel <= 0) then
 		if (not ply.m_fGroundTime) then
 			ply.m_fGroundTime = curTime
-		elseif (curTime - ply.m_fGroundTime) > 0 and velocity:Length2DSqr() < 1 then
+		elseif (curTime - ply.m_fGroundTime) > 0 and velocity:Length2DSqr() < 0.25 then
 			ply.m_bJumping = true
 			ply.m_bFirstJumpFrame = false
 			ply.m_flJumpStartTime = 0
@@ -53,7 +53,7 @@ function GM:HandlePlayerDucking(ply, velocity)
 
 	if ( !ply:IsFlagSet( FL_ANIMDUCKING ) ) then return false end
 
-	if (velocity:Length2DSqr() > 1000) then
+	if (velocity:Length2DSqr() > 0.25) then
 		ply.CalcIdeal = ACT_MP_CROUCHWALK
 	else
 		ply.CalcIdeal = ACT_MP_CROUCH_IDLE
@@ -305,7 +305,7 @@ function GM:CalcMainActivity(ply, velocity)
 		local len2d = velocity:Length2DSqr()
 		if len2d > 22500 then
 			ply.CalcIdeal = ACT_MP_RUN
-		elseif len2d > 1500 then
+		elseif len2d > 0.25 then
 			ply.CalcIdeal = ACT_MP_WALK
 		end
 	end
