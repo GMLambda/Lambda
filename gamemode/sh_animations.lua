@@ -181,14 +181,8 @@ Desc: Animation updates (pose params etc) should be done here
 -----------------------------------------------------------]]
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 
-	if CLIENT and ply ~= LocalPlayer() then
-		-- We use the accurate server velocity instead of estimations.
-		velocity = ply:GetNWVector("LambdaAbsVector")
-	end
-
 	local len = velocity:Length()
 	local movement = 1.0
-	local curWep = ply:GetActiveWeapon()
 
 	if (len > 0.2) then
 		movement = len / maxseqgroundspeed
@@ -282,11 +276,6 @@ function GM:MouthMoveAnimation( ply )
 end
 
 function GM:CalcMainActivity(ply, velocity)
-
-	if CLIENT and ply ~= LocalPlayer() then
-		-- We use the accurate server velocity instead of estimations.
-		velocity = ply:GetNWVector("LambdaAbsVector")
-	end
 
 	ply.CalcIdeal = ACT_MP_STAND_IDLE
 	ply.CalcSeqOverride = -1

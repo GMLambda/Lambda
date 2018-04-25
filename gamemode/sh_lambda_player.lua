@@ -1536,9 +1536,6 @@ end
 function GM:PlayerThink(ply)
 
 	if SERVER then
-
-		ply:SetNWVector("LambdaAbsVector", ply:GetAbsVelocity())
-
 		self:UpdatePlayerSpeech(ply)
 
 		-- Make sure we reset the view lock if we are in release mode.
