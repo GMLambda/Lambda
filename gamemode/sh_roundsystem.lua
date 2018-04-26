@@ -269,6 +269,11 @@ function GM:PostCleanupMap()
 	end
 
 	util.RunNextFrame(function()
+		-- Create/Replace things for the map.
+		if self.MapScript.LevelPostInit ~= nil then
+			self.MapScript:LevelPostInit()
+		end
+
 		self:StartRound(true)
 	end)
 
@@ -344,8 +349,6 @@ function GM:OnNewGame()
 	    Error("Critical flaw: Called OnNewGame before NewRound == false")
 	end
 
-	-- This should be the right spot.
-
 	if SERVER then
 
 		-- FIXME: Don't ignore the delay time.
@@ -419,6 +422,11 @@ function GM:PostRoundSetup()
 
 	-- We fire things two frames later as deletion of objects seem to be delayed.
 	util.RunNextFrame(function()
+
+		-- GoldSrc support.
+		for _,v in pairs(ents.FindByClass("trigger_auto")) do
+			v:Fire("Enable")
+		end
 
 		-- We always fire OnMapSpawn
 		util.TriggerOutputs(self.OnMapSpawnEvents)
