@@ -8,6 +8,7 @@ include("gametypes/gametype_base.lua")
 include("gametypes/hl2.lua")
 include("gametypes/hl2ep1.lua")
 include("gametypes/hl2dm.lua")
+include("gametypes/hl1s.lua")
 
 local DEFAULT_MAPSCRIPT = {}
 DEFAULT_MAPSCRIPT.InputFilters = {}

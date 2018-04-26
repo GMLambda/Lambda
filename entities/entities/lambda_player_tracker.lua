@@ -165,7 +165,7 @@ if CLIENT then
 			y = y + health_h + pad
 		end
 
-		do
+		if ply:IsSuitEquipped() == true then
 			local aux = ply:GetSuitPower()
 			local p = aux / 100
 
@@ -174,7 +174,6 @@ if CLIENT then
 
 			surface.SetDrawColor(255 - p * 255, p * 200, p * 150, 100 * alphaScale)
 			surface.DrawRect(screenPos.x + -(aux_w / 2), y + 1, p * aux_w, aux_h)
-
 		end
 
 		if restoreIgnoreZ == true then

@@ -249,6 +249,13 @@ function GM:InitPostEntity()
 		end
 		self:SetRoundBootingComplete()
 		self.InitPostEntityDone = true
+
+		util.RunNextFrame(function()
+			if self.MapScript.LevelPostInit ~= nil then
+				self.MapScript:LevelPostInit()
+			end
+		end)
+
 	else
 		self:HUDInit()
 	end

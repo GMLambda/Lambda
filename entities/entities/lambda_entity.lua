@@ -294,6 +294,7 @@ if SERVER then
 		if self.OutputTable[name] ~= nil then
 			self.OutputTable[name] = self.OutputTable[name] or {}
 			table.insert(self.OutputTable[name], { val, 0 })
+			PrintTable(self, self.OutputTable[name])
 		else
 			self.KeyValueTable = self.KeyValueTable or {}
 			self.KeyValueTable[name] = val
