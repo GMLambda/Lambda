@@ -32,8 +32,6 @@ MAPSCRIPT.EntityFilterByName =
 	--["spawnitems_template"] = true,
 }
 
-MAPSCRIPT.VehicleGuns = true
-
 function MAPSCRIPT:Init()
 end
 
@@ -46,7 +44,12 @@ function MAPSCRIPT:PostInit()
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-	--DbgPrint("PostPlayerSpawn")
+	-- Failsafe: Make sure players are in the train
+	ents.WaitForEntityByName("train", function(ent)
+		local pos = ent:LocalToWorld(Vector(50, 40, 8))
+		local ang = ent:LocalToWorldAngles(Angle(0, 0, 0))
+		ply:TeleportPlayer(pos, ang)
+	end)
 end
 
 return MAPSCRIPT

@@ -218,7 +218,7 @@ if SERVER then
 
 	function GM:ChangeLevel(map, landmark, playersInTrigger)
 
-		if self.ChangingLevel == true then
+		if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
 			DbgError("Called ChangeLevel twice!")
 			return
 		end

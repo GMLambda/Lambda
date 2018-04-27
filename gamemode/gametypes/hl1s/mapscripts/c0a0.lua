@@ -38,16 +38,20 @@ function MAPSCRIPT:Init()
 end
 
 function MAPSCRIPT:LevelPostInit()
+	DbgPrint("LevelPostInit")
 	for k,v in pairs(ents.FindByClass("info_player_start")) do
 		v:Remove()
 	end
 
 	ents.WaitForEntityByName("train", function(ent)
+		DbgPrint("Fixing spawn position")
 		ent:Fire("Stop")
 
+		local pos = ent:LocalToWorld(Vector(50, 40, 8))
+		local ang = ent:LocalToWorldAngles(Angle(0, 0, 0))
 		local playerStart = ents.Create("info_player_start")
-		playerStart:SetPos(ent:GetPos() + Vector(50, 40, 20))
-		playerStart:SetAngles(Angle(0, -180, 0))
+		playerStart:SetPos(pos)
+		playerStart:SetAngles(ang)
 		playerStart:Spawn()
 		playerStart.MasterSpawn = true
 

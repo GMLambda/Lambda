@@ -322,6 +322,18 @@ function GM:ProcessLogicChoreographedScene(ent)
 
 end
 
+-- HACKHACK: We assign the next path_track on the activator for transition data.
+function GM:ProcessPathTrackHack(ent)
+	local tracker = self.PathTracker
+	if not IsValid(tracker) then
+		tracker = ents.Create("lambda_path_tracker")
+		tracker:SetName("lambda_path_tracker")
+		tracker:Spawn()
+		self.PathTracker = tracker
+	end
+	ent:SetKeyValue("OnPass", "lambda_path_tracker,OnPass,,0,-1")
+end
+
 local ENTITY_PROCESSORS =
 {
 	["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
@@ -329,6 +341,7 @@ local ENTITY_PROCESSORS =
 	["func_areaportal"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortal },
 	["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
 	["logic_choreographed_scene"] = { PostFrame = true, Fn = GM.ProcessLogicChoreographedScene },
+	["path_track"] = { PostFrame = true, Fn = GM.ProcessPathTrackHack },
 }
 
 function GM:OnEntityCreated(ent)

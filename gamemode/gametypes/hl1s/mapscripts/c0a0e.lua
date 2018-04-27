@@ -32,8 +32,6 @@ MAPSCRIPT.EntityFilterByName =
 	--["spawnitems_template"] = true,
 }
 
-MAPSCRIPT.VehicleGuns = true
-
 function MAPSCRIPT:Init()
 end
 
