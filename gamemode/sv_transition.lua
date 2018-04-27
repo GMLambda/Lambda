@@ -205,7 +205,7 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
 		obj.ForceTransition = true
 	end
 
-	local globalName = obj:GetNW2String("GlobalName", obj:GetInternalVariable("globalname") or "")
+	local globalName = obj:GetNWString("GlobalName", obj:GetInternalVariable("globalname") or "")
 	if globalName ~= "" and obj:IsDormant() == false then
 		transition = true
 		obj.ForceTransition = true
@@ -301,6 +301,14 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 		table.insert(weapons, weaponData)
 	end
 
+	local groundEnt = ply:GetGroundEntity()
+	local groundId = nil
+	local groundPos = nil
+	if IsValid(groundEnt) and groundEnt:GetClass() == "func_tracktrain" then
+		groundId = groundEnt:EntIndex()
+		groundPos = groundEnt:WorldToLocal(ply:GetPos())
+	end
+
 	local data =
 	{
 		RefId = ply:EntIndex(),
@@ -319,6 +327,8 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 		Armor = ply:Armor(),
 		Suit = ply:IsSuitEquipped(),
 		Weapons = weapons,
+		Ground = groundId,
+		GroundPos = groundPos,
 	}
 
 	if table.HasValue(playersInTrigger, ply) == true and ply:Alive() == true then
@@ -409,7 +419,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		SaveTable = ent:GetSaveTable(),
 		Table = ent:GetTable(),
 		SourceMap = ent.SourceMap or currentMap,
-		GlobalName = ent:GetNW2String("GlobalName", ent:GetInternalVariable("globalname")),
+		GlobalName = ent:GetNWString("GlobalName", ent:GetInternalVariable("globalname")),
 	}
 
 	if ent.CoopKeyValues ~= nil then
@@ -888,22 +898,33 @@ function GM:CreateTransitionObjects()
 	end
 
 	local function findByGlobalName(name)
-		for k,v in pairs(landmarkEntities) do
-			local globalName = v:GetNW2String("GlobalName", v:GetInternalVariable("globalname"))
+		for k,v in pairs(ents.GetAll()) do
+			local globalName = v:GetNWString("GlobalName", v:GetInternalVariable("globalname"))
+			DbgPrint("Found global!")
 			if globalName == name then
-				return k
+				return k,v
 			end
 		end
-		return nil
+		return nil, nil
 	end
 
 	local function findByName(name)
 		for k,v in pairs(landmarkEntities) do
 			if v:GetName() == name then
-				return k
+				return k, v
 			end
 		end
-		return nil
+		return nil, nil
+	end
+
+	-- Global entities carry the state.
+	for _,data in pairs(objects) do
+		if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
+			k, obj = findByGlobalName(data.GlobalName)
+			if k ~= nil then
+				obj:Remove()
+			end
+		end
 	end
 
 	-- Remove objects carried forth and back.
@@ -912,16 +933,25 @@ function GM:CreateTransitionObjects()
 			continue
 		end
 		local k
+		local obj
+		local isGlobal = false
 		if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
-			k = findByGlobalName(data.GlobalName)
+			k, obj = findByGlobalName(data.GlobalName)
+			if k ~= nil then
+				isGlobal = true
+			end
 		end
 		if k == nil and data.Name ~= nil and data.Name ~= "" then
 			k = findByName(data.Name)
 		end
 		if k ~= nil then
 			local obj = landmarkEntities[k]
-			DbgPrint("Removing duplicate entity", obj, data.Name or data.GlobalName or "")
-			obj:Remove()
+			if isGlobal ~= true then
+				DbgPrint("Removing duplicate entity", obj, data.Name or data.GlobalName or "")
+				obj:Remove()
+			else
+				data.GlobalEnt = obj
+			end
 			landmarkEntities[k] = nil
 		else
 			-- We don't spawn things that already exist in this world and can't be referenced.
@@ -951,12 +981,15 @@ function GM:CreateTransitionObjects()
 
 		DbgPrint("Creating: " .. data.Class, data.Name, data.GlobalName)
 
-		if data.Name == "gunship_trigger_9" then
-			PrintTable(data)
-		end
-
-		local ent = ents.Create(data.Class)
+		local ent
 		local dispatchSpawn = true
+		if IsValid(data.GlobalEnt) then
+			ent = data.GlobalEnt
+			dispatchSpawn = false
+			print("Using global entity!!!!!!")
+		else
+			ent = ents.Create(data.Class)
+		end
 
 		if not IsValid(ent) then
 			DbgPrint("Attempted to create bogus entity: " .. data.Class)
@@ -1141,6 +1174,7 @@ function GM:CreateTransitionObjects()
 			continue
 		end
 		if data.GlobalName ~= nil and data.GlobalName ~= "" then
+			ent:SetNWString("GlobalName", data.GlobalName)
 			--ent:SetKeyValue("globalname", data.GlobalName)
 		end
 	end
