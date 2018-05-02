@@ -49,7 +49,7 @@ function PANEL:Init()
 		icon:SetSize(64, 64)
 		icon:SetTooltip(name)
 
-		PanelSelect:AddPanel(icon, { lambda_playermdl = name, _lambda_playermdl_select = name })
+		PanelSelect:AddPanel(icon, { lambda_playermdl = name })
 	end
 
 	local colsetb = vgui.Create("DImageButton", self.Sheet)
