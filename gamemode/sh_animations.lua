@@ -3,6 +3,12 @@ if SERVER then
 end
 
 --local DbgPrint = GetLogging("Animation")
+local function GetPlayerVelocity(ply, velocity)
+	if CLIENT and ply ~= LocalPlayer() then
+		velocity = ply.LambdaPlayerVelocity or velocity
+	end
+	return velocity
+end
 
 function GM:HandlePlayerJumping(ply, velocity)
 	if (ply:GetMoveType() == MOVETYPE_NOCLIP) then
@@ -181,6 +187,8 @@ Desc: Animation updates (pose params etc) should be done here
 -----------------------------------------------------------]]
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 
+	velocity = GetPlayerVelocity(ply, velocity)
+
 	local len = velocity:Length()
 	local movement = 1.0
 
@@ -279,6 +287,8 @@ function GM:CalcMainActivity(ply, velocity)
 
 	ply.CalcIdeal = ACT_MP_STAND_IDLE
 	ply.CalcSeqOverride = -1
+
+	velocity = GetPlayerVelocity(ply, velocity)
 
 	self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
 
