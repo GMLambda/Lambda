@@ -11,6 +11,8 @@ local SERIALIZE_ANGLES = function(ent, val) return ent:WorldToLocalAngles(val) e
 local FIELD_SERIALIZE =
 {
 	["Pos"] = SERIALIZE_VECTOR,
+	["Pos1"] = SERIALIZE_VECTOR,
+	["Pos2"] = SERIALIZE_VECTOR,
 	["Vec"] = SERIALIZE_VECTOR,
 	["Ang"] = SERIALIZE_ANGLES,
 	["EyeAng"] = SERIALIZE_ANGLES,
@@ -22,6 +24,8 @@ local DESERIALIZE_ANGLES = function(ent, val) return ent:LocalToWorldAngles(val)
 local FIELD_DESERIALIZE =
 {
 	["Pos"] = DESERIALIZE_VECTOR,
+	["Pos1"] = DESERIALIZE_VECTOR,
+	["Pos2"] = DESERIALIZE_VECTOR,
 	["Vec"] = DESERIALIZE_VECTOR,
 	["Ang"] = DESERIALIZE_ANGLES,
 	["EyeAng"] = DESERIALIZE_ANGLES,
@@ -422,8 +426,8 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		GlobalName = ent:GetNWString("GlobalName", ent:GetInternalVariable("globalname")),
 	}
 
-	if ent.CoopKeyValues ~= nil then
-		table.Merge(data.KeyValues, ent.CoopKeyValues)
+	if ent.LambdaKeyValues ~= nil then
+		table.Merge(data.KeyValues, ent.LambdaKeyValues)
 	end
 
 	if ent.GetNWVars ~= nil then
@@ -469,6 +473,8 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		if ent:IsDoorLocked() then
 			data.SpawnFlags = bit.bor(data.SpawnFlags, 2048) -- Starts Locked
 		end
+		data.Pos1 = ent:GetSaveTable()["m_vecPosition1"]
+		data.Pos2 = ent:GetSaveTable()["m_vecPosition2"]
 	else
 		data.Type = ENT_TYPE_GENERIC
 	end
@@ -482,10 +488,8 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 
 		if IsEntity(v) and IsValid(v) then
 			data.SaveTable[k] = "CoopRef_" .. tostring(v:EntIndex())
-		elseif isvector(v) then
-			--data.SaveTable[k] = ent:WorldToLocal(v)
-		elseif isangle(v) then
-			--data.SaveTable[k] = ent:WorldToLocalAngles(v)
+		else
+			data.SaveTable[k] = v
 		end
 
 	end
@@ -508,10 +512,6 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 			data[k] = serializeFn(landmarkEnt, v)
 		end
 
-	end
-
-	if ent:GetClass() == "func_brush" then
-		--PrintTable(data)
 	end
 
 	return data
@@ -823,6 +823,7 @@ local DOOR_KEYVALUES =
 	"speed",
 	"health",
 	"returndelay",
+	"movedir",
 }
 
 local VEHICLE_KEYVALUES =
@@ -850,12 +851,6 @@ function GM:CreateTransitionObjects()
 	local objects = self.TransitionData.Objects or {}
 	local objCount = table.Count(objects)
 	local curMap = self:GetCurrentMap()
-
-	-- We shall first remove everything that already exists.
-	DbgPrint("Removing duplicate global entities")
-
-	local objectsToRemove = {}
-	local fromMap = {}
 
 	for _,data in pairs(objects) do
 		if data.GlobalName ~= nil and isstring(data.GlobalName) then
@@ -900,8 +895,8 @@ function GM:CreateTransitionObjects()
 	local function findByGlobalName(name)
 		for k,v in pairs(ents.GetAll()) do
 			local globalName = v:GetNWString("GlobalName", v:GetInternalVariable("globalname"))
-			DbgPrint("Found global!")
 			if globalName == name then
+				DbgPrint("Found global!")
 				return k,v
 			end
 		end
@@ -922,6 +917,7 @@ function GM:CreateTransitionObjects()
 		if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
 			k, obj = findByGlobalName(data.GlobalName)
 			if k ~= nil then
+				DbgPrint("Removing duplicate global entity: " .. tostring(obj))
 				obj:Remove()
 			end
 		end
@@ -1092,6 +1088,11 @@ function GM:CreateTransitionObjects()
 
 		if ent.SetNWVars ~= nil and data.NWVars ~= nil then
 			ent:SetNWVars(data.NWVars)
+		end
+
+		if data.Type == ENT_TYPE_DOOR then
+			ent:SetSaveValue("m_vecPosition1", data.Pos1)
+			ent:SetSaveValue("m_vecPosition2", data.Pos2)
 		end
 
 		--ent.TransitionData = data
