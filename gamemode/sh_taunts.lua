@@ -33,6 +33,62 @@ local function InsertTaunt(categoryId, gender, name, files)
 end
 
 local CAT_TAUNTS = InsertCategory("Taunts")
+local ZOMBIE_MOANS = {
+	"npc/zombie/zombie_voice_idle1.wav",
+	"npc/zombie/zombie_voice_idle2.wav",
+	"npc/zombie/zombie_voice_idle3.wav",
+	"npc/zombie/zombie_voice_idle4.wav",
+	"npc/zombie/zombie_voice_idle5.wav",
+	"npc/zombie/zombie_voice_idle6.wav",
+	"npc/zombie/zombie_voice_idle7.wav",
+	"npc/zombie/zombie_voice_idle8.wav",
+	"npc/zombie/zombie_voice_idle9.wav",
+	"npc/zombie/zombie_voice_idle10.wav",
+	"npc/zombie/zombie_voice_idle11.wav",
+	"npc/zombie/zombie_voice_idle12.wav",
+	"npc/zombie/zombie_voice_idle13.wav",
+	"npc/zombie/zombie_voice_idle14.wav",
+}
+
+InsertTaunt(CAT_TAUNTS, "zombie", "Over there", {"npc/zombie/zombie_alert1.wav"})
+InsertTaunt(CAT_TAUNTS, "zombie", "Over here", {"npc/zombie/zombie_alert2.wav"})
+InsertTaunt(CAT_TAUNTS, "zombie", "Take cover", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "I'm Ready", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Hi", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Yeah", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Okay", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "No", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Nice", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Help", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Sorry", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Leave it alone", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "I'm with you", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Ready when you are", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Whatever you say", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Let's go", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Excuse me", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Get down", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Heads up", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Fantastic", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Finally", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Good God", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Run for your life", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Scanners", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Strider", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Combine", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Gunship", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Headcrabs", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Zombies", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Run", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Behind you", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "You got it", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Whoops", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Watch out", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Waiting for somebody?", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Like that", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "We trusted you", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "How about that", ZOMBIE_MOANS)
+InsertTaunt(CAT_TAUNTS, "zombie", "Wanna bet", ZOMBIE_MOANS)
 
 InsertTaunt(CAT_TAUNTS, "male", "Over there", {"vo/npc/male01/overthere01.wav", "vo/npc/male01/overthere02.wav"})
 InsertTaunt(CAT_TAUNTS, "male", "Over here", {"vo/npc/male01/overhere01.wav"})
