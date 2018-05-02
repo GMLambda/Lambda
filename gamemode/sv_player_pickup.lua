@@ -123,9 +123,14 @@ function GM:PlayerCanPickupItem(ply, item)
 
 	DbgPrintPickup("PlayerCanPickupItem", ply, item)
 
-	if item.CreatedForPlayer == ply then
-		DbgPrintPickup("Simple pickup, created for player: " .. tostring(ply))
-		return true
+	if item.CreatedForPlayer ~= nil then
+		if item.CreatedForPlayer == ply then
+			DbgPrintPickup("Simple pickup, created for player: " .. tostring(ply))
+			return true
+		else
+			-- Deny this weapon for whoever wants to touch it.
+			return false
+		end
 	end
 
 	item.UniqueEntityId = item.UniqueEntityId or self:GetNextUniqueEntityId()
@@ -173,9 +178,19 @@ end
 
 function GM:PlayerCanPickupWeapon(ply, wep)
 
-	if wep.CreatedForPlayer == ply or wep.DroppedByPlayer ~= nil then
-		DbgPrintPickup("Simple pickup, created for player: " .. tostring(ply))
+	if wep.DroppedByPlayer ~= nil then
+		DbgPrintPickup(ply, "Simple pickup, dropped by other player")
 		return true
+	end
+
+	if wep.CreatedForPlayer ~= nil then
+		if wep.CreatedForPlayer == ply then
+			DbgPrintPickup(ply, "Simple pickup, created for player")
+			return true
+		else
+			-- Deny this weapon for whoever wants to touch it.
+			return false
+		end
 	end
 
 	if wep:GetClass() == "weapon_frag" then
@@ -213,7 +228,7 @@ end
 
 function GM:WeaponEquip(wep, owner)
 
-	DbgPrintPickup("WeaponEquip", wep, owner)
+	DbgPrintPickup("WeaponEquip", wep, owner, wep.CreatedForPlayer)
 
 	local ply = owner
 	if not IsValid(ply) then
