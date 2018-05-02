@@ -163,7 +163,9 @@ if SERVER then
 
 	function GM:CanPlayerSpawn(ply)
 		local gameType = self:GetGameType()
-
+		if self.WaitingForRoundStart == true then
+			return false
+		end
 		if gameType.UsingCheckpoints == true then
 			-- Check if players reached a checkpoint.
 			if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
@@ -200,6 +202,46 @@ if SERVER then
 
 	end
 
+	local male_bbox = Vector(22.291288, 20.596443, 72.959808)
+	local female_bbox = Vector(21.857199, 20.744711, 71.528900)
+
+	-- Credits to CapsAdmin
+	local function EstimateModelGender(ent)
+
+		local mdl = ent:GetModel()
+		if not mdl then
+			return
+		end
+
+		local headcrabAttachment = ent:LookupAttachment("headcrab")
+		if headcrabAttachment ~= 0 then
+			return "zombie"
+		end
+
+		local seq = ent:LookupSequence("walk_all")
+		if seq ~= nil and seq > 0 then
+			local info = ent:GetSequenceInfo(seq)
+			if info.bbmax == male_bbox then
+				return "male"
+			elseif info.bbmax == female_bbox then
+				return "female"
+			end
+		end
+
+		if
+			mdl:lower():find("female") or
+			ent:LookupBone("ValveBiped.Bip01_R_Pectoral") or
+			ent:LookupBone("ValveBiped.Bip01_R_Latt") or
+			ent:LookupBone("ValveBiped.Bip01_L_Pectoral") or
+			ent:LookupBone("ValveBiped.Bip01_L_Latt")
+		then
+			return "female"
+		end
+
+		return "male"
+
+	end
+
 	function GM:PlayerSetModel(ply)
 
 		DbgPrint("GM:PlayerSetModel")
@@ -208,28 +250,21 @@ if SERVER then
 		if playermdl == nil or playermdl == "" then
 			playermdl = "male05"
 		end
+
 		local mdls = self:GetAvailablePlayerModels()
 		local selection = mdls[playermdl]
 		if selection == nil then
 			print("Player " .. tostring(ply) .. " tried to select unknown model: " .. playermdl)
-			return
+			selection = mdls["male05"]
 		end
 
 		local mdl = selection
-		if mdl == nil or util.IsValidModel(mdl) == false then
-			-- Fallback
-			mdl = "models/player/" .. group .. "/male_01.mdl"
-		end
-
-		local gender = "male"
-		if mdl:find("female", 1, true) ~= nil then
-			gender = "female"
-		end
-
-		ply:SetGender(gender)
 
 		util.PrecacheModel(mdl)
 		ply:SetModel(mdl)
+
+		local gender = EstimateModelGender(ply)
+		ply:SetGender(gender)
 
 		if IsValid(ply.TrackerEntity) then
 			ply.TrackerEntity:AttachToPlayer(ply)
@@ -384,10 +419,10 @@ if SERVER then
 
 		DbgPrint("GM:PlayerSpawn")
 
-	    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
-	        ply:KillSilent()
-	        return
-	    end
+    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
+        ply:KillSilent()
+        return
+    end
 
 		ply:EndSpectator()
 		ply.SpawnBlocked = false
@@ -452,21 +487,15 @@ if SERVER then
 		local transitionData = ply.TransitionData
 		local useSpawnpoint = true
 
-		if transitionData ~= nil then
+		if transitionData ~= nil and transitionData.Include == true then
+
+			DbgPrint("Player " .. tostring(ply) .. " has transition data.")
 
 			-- We keep those.
 			ply:SetFrags(transitionData.Frags)
 			ply:SetDeaths(transitionData.Deaths)
 
-			if transitionData.Include == true then
-				DbgPrint("Player " .. tostring(ply) .. " uses transition data!")
-				ply:TeleportPlayer(transitionData.Pos)
-				ply:SetAngles(transitionData.Ang)
-				ply:SetEyeAngles(transitionData.EyeAng)
-				useSpawnpoint = false
-			end
-
-			if transitionData.Vehicle ~= nil and transitionData.Include == true then
+			if transitionData.Vehicle ~= nil then
 
 				local vehicle = self:FindEntityByTransitionReference(transitionData.Vehicle)
 				if IsValid(vehicle) then
@@ -478,7 +507,6 @@ if SERVER then
 					-- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
 					-- FIXME: I noticed that delaying it until the next frame won't always work, we use a fixed delay now.
 					util.RunDelayed(function()
-						spawnInVehicle = true
 						if IsValid(ply) and IsValid(vehicle) then
 							vehicle:SetVehicleEntryAnim(false)
 							vehicle.ResetVehicleEntryAnim = true
@@ -490,6 +518,27 @@ if SERVER then
 				else
 					DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))
 				end
+
+			elseif transitionData.Ground ~= nil then
+
+				local groundEnt = self:FindEntityByTransitionReference(transitionData.Ground)
+				if IsValid(groundEnt) then
+					local newPos = groundEnt:LocalToWorld(transitionData.GroundPos)
+					DbgPrint("Using func_tracktrain as spawn position reference.", newPos, groundEnt)
+					ply:TeleportPlayer(newPos, transitionData.Ang)
+					useSpawnpoint = false
+				else
+					DbgPrint("Ground set but not found")
+				end
+
+			else
+
+				DbgPrint("Player " .. tostring(ply) .. " uses normal position")
+				ply:TeleportPlayer(transitionData.Pos)
+				ply:SetAngles(transitionData.Ang)
+				ply:SetEyeAngles(transitionData.EyeAng)
+				useSpawnpoint = false
+
 			end
 
 		end
@@ -708,17 +757,15 @@ if SERVER then
 
 	function GM:PlayerDeathThink(ply)
 
-	    --DbgPrint("GM:PlayerDeathThink")
-
 		if self:IsRoundRestarting() == true then
-	        --DbgPrint("Round is restarting")
+	    DbgPrint("Round is restarting")
 			return false
 		end
 
-	    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
-	        --DbgPrint("Can not spawn before players available")
-	        return false
-	    end
+    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
+      DbgPrint("Can not spawn before players available")
+      return false
+    end
 
 		local elapsed = GetSyncedTimestamp() - ply.DeathTime
 
@@ -780,27 +827,6 @@ if SERVER then
 		end
 
 		return true
-
-	end
-
-	function GM:Move(ply, mv)
-
-		-- Whoever stumbles upon this code might ask what this is all about.
-		--
-		-- Its best shown by going to d1_town_01 to the part where you have to lift up the
-		-- vehicles, you have to walk on them and them and jump off which is close to impossible
-		-- without the code below, feel free to comment it in order to see the difference.
-		local groundEnt = ply:GetGroundEntity()
-
-		if mv:KeyDown(IN_JUMP) and groundEnt ~= NULL and IsValid(groundEnt) then
-			local class = groundEnt:GetClass()
-			if class == "prop_physics" or class == "func_physbox" then
-				local phys = groundEnt:GetPhysicsObject()
-				if IsValid(phys) and phys:IsMotionEnabled() == true then
-					ply:SetPos(ply:GetPos() + Vector(0, 0, 1))
-				end
-			end
-		end
 
 	end
 
@@ -1169,7 +1195,6 @@ end
 function GM:StartCommand(ply, cmd)
 
 	--DbgPrint("StartCommand", ply)
-
 	self:CalculatePlayerMovementAccuracy(ply, cmd)
 
 	if ply:IsPositionLocked() == true then
@@ -1247,6 +1272,27 @@ function GM:SetupMove(ply, mv, cmd)
 
 end
 
+function GM:Move(ply, mv)
+
+	-- Whoever stumbles upon this code might ask what this is all about.
+	--
+	-- Its best shown by going to d1_town_01 to the part where you have to lift up the
+	-- vehicles, you have to walk on them and them and jump off which is close to impossible
+	-- without the code below, feel free to comment it in order to see the difference.
+	local groundEnt = ply:GetGroundEntity()
+
+	if mv:KeyDown(IN_JUMP) and groundEnt ~= NULL and IsValid(groundEnt) then
+		local class = groundEnt:GetClass()
+		if class == "prop_physics" or class == "func_physbox" then
+			local phys = groundEnt:GetPhysicsObject()
+			if IsValid(phys) and phys:IsMotionEnabled() == true then
+				ply:SetPos(ply:GetPos() + Vector(0, 0, 1))
+			end
+		end
+	end
+
+end
+
 function GM:FinishMove(ply, mv)
 
 	if SERVER then
@@ -1262,6 +1308,7 @@ function GM:FinishMove(ply, mv)
 			ply:SetPos(data.pos)
 			ply:SetAngles(data.ang)
 			ply:SetVelocity(data.vel)
+			ply:SetEyeAngles(data.ang)
 			table.remove(ply.TeleportQueue, 1)
 			modifiedPlayer = true
 		end

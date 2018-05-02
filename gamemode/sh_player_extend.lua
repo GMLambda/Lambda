@@ -151,8 +151,11 @@ function PLAYER_META:GetGender()
 end
 
 function PLAYER_META:SetGender(gender)
-	if gender:iequals("male") == false and gender:iequals("female") == false then
-		gender = male
+	if gender:iequals("male") == false and
+	   gender:iequals("female") == false and
+		 gender:iequals("zombie") == false
+  then
+		gender = "male"
 	end
 	self:SetNWString("Gender", gender)
 end
