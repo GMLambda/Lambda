@@ -34,6 +34,10 @@ if SERVER then
 	SF_TRIGGER_ONLY_NPCS_IN_VEHICLES		= 0x800		-- *if* NPCs can fire this trigger, only NPCs in vehicles do so (respects player ally flag too)
 	SF_TRIGGER_DISALLOW_BOTS                = 0x1000   	-- Bots are not allowed to fire this trigger
 
+	function ENT:IsLambdaTrigger()
+		return true
+	end
+
 	function ENT:PreInitialize()
 
 		DbgPrint(self, "PreInitialize")
@@ -162,7 +166,7 @@ if SERVER then
 				self:SetModel(self.PrevModel)
 			end
 			self:SetTrigger(true)
-			--self:UseTriggerBounds(true)
+			self:CollisionRulesChanged()
 		elseif wasBlocked == false and wantsBlocking == true then
 			self:PhysicsInit(SOLID_BSP)
 			self:SetSolid(SOLID_BSP)
@@ -172,6 +176,7 @@ if SERVER then
 				phys:EnableMotion(false)
 			end
 			self:SetCustomCollisionCheck(true)
+			self:CollisionRulesChanged()
 			self.PrevModel = self:GetModel()
 		end
 
