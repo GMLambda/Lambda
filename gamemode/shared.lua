@@ -386,22 +386,6 @@ function GM:OnEntityCreated(ent)
 				end
 			end
 
-			if self.MapScript then
-				-- Monitor scripts that we have filtered by class name.
-				if self.MapScript.EntityFilterByClass and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
-					DbgPrint("Removing filtered entity by class: " .. tostring(ent))
-					ent:Remove()
-					return
-				end
-
-				-- Monitor scripts that have filtered by name.
-				if self.MapScript.EntityFilterByName and self.MapScript.EntityFilterByName[ent:GetName()] == true then
-					DbgPrint("Removing filtered entity by name: " .. tostring(ent) .. " (" .. ent:GetName() .. ")")
-					ent:Remove()
-					return
-				end
-			end
-
 			if entityProcessor ~= nil and entityProcessor.PostFrame == true then
 				entityProcessor.Fn(self, ent)
 			end
@@ -423,6 +407,24 @@ function GM:OnEntityCreated(ent)
 end
 
 function GM:EntityKeyValue(ent, key, val)
+
+	if self.MapScript then
+		-- Monitor scripts that we have filtered by class name.
+		if key:iequals("classname") == true then
+			if self.MapScript.EntityFilterByClass and self.MapScript.EntityFilterByClass[val] == true then
+				DbgPrint("Removing filtered entity by class: " .. tostring(ent))
+				ent:Remove()
+				return
+			end
+		elseif key:iequals("targetname") == true then
+			-- Monitor scripts that have filtered by name.
+			if self.MapScript.EntityFilterByName and self.MapScript.EntityFilterByName[val] == true then
+				DbgPrint("Removing filtered entity by name: " .. tostring(ent) .. " (" .. val .. ")")
+				ent:Remove()
+				return
+			end
+		end
+	end
 
 	ent.LambdaKeyValues = ent.LambdaKeyValues or {}
 
