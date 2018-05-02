@@ -15,7 +15,6 @@ function ENT:PreInitialize()
 	DbgPrint(self, "PreInitialize")
 
 	self:SetupOutput("OnTrigger")
-
 end
 
 function ENT:Initialize()
@@ -27,10 +26,15 @@ end
 
 function ENT:AcceptInput(inputName, activator, called, data)
 		if inputName:iequals("enable") then
+			DbgPrint(self, "Enabled")
 			self.Disabled = false
+			return true
 		elseif inputName:iequals("disable") then
+			DbgPrint(self, "Disabled")
 			self.Disabled = true
+			return true
 		end
+		return BaseClass.AcceptInput(self, inputName, activator, called, data)
 end
 
 function ENT:Think()
