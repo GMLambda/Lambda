@@ -7,6 +7,65 @@ LAMBDA_TEAM_SPECTATOR = 3
 
 GM.HurtSounds = {}
 
+-- Zombie
+GM.HurtSounds["zombie"] = {}
+GM.HurtSounds["zombie"][HITGROUP_LEFTARM] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_RIGHTARM] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_LEFTLEG] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_RIGHTLEG] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_STOMACH] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_GENERIC] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_CHEST] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+GM.HurtSounds["zombie"][HITGROUP_GEAR] = {
+	"npc/zombie/zombie_pain1.wav",
+	"npc/zombie/zombie_pain2.wav",
+	"npc/zombie/zombie_pain3.wav",
+	"npc/zombie/zombie_pain4.wav",
+	"npc/zombie/zombie_pain5.wav",
+}
+
 -- Male
 GM.HurtSounds["male"] = {}
 GM.HurtSounds["male"][HITGROUP_LEFTARM] = {
