@@ -1016,11 +1016,34 @@ else -- CLIENT
 
 			local bounds = data.Maxs - data.Mins
 			local meshData = table.Copy(data.MeshData)
-			for k,v in pairs(meshData) do
-				local rel = v.pos
-				meshData[k].v = math.Remap(rel.y, data.Mins.y, data.Maxs.y, 0, 1)
-				meshData[k].u = math.Remap(rel.x, data.Mins.x, data.Maxs.x, 0, 1)
-				meshData[k].tangent = Vector(1, 1, 1)
+
+			local texture_w = 48
+			for i = 1, #meshData do
+				local v1 = meshData[i]
+				v1.normal = Vector(0,0,0)
+			end
+
+			for i = 1, #meshData do
+				local v1 = meshData[i]
+				local v2 = meshData[i + 1]
+				local v3 = meshData[i + 2]
+				if v1 == nil or v2 == nil or v3 == nil then
+					continue
+				end
+				local e1 = v1.pos - v2.pos
+				local e2 = v3.pos - v2.pos
+				local no = e1:Cross(e2)
+				v1.normal = v1.normal + no
+				v2.normal = v2.normal + no
+				v3.normal = v3.normal + no
+			end
+
+			for i = 1, #meshData do
+				local v1 = meshData[i]
+				v1.normal:Normalize()
+				local rel = v1.pos
+				meshData[i].v = (rel.y % texture_w) / texture_w
+				meshData[i].u = (rel.x % texture_w) / texture_w
 			end
 
 			mesh:BuildFromTriangles(meshData)
@@ -1028,12 +1051,11 @@ else -- CLIENT
 		end
 
 		render.SetMaterial(MAT_BLOCKED)
-
 		mesh:Draw()
 
 	end
 
-	hook.Add("PostDrawTranslucentRenderables", "LambdaTrigger", function()
+	hook.Add("PostDrawOpaqueRenderables", "LambdaTrigger", function()
 
 		for k, data in pairs(LAMBDA_TRIGGERS) do
 
