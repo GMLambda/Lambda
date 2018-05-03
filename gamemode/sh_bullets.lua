@@ -301,8 +301,7 @@ function GM:EntityFireBullets(ent, data)
 			local spread = data.Spread
 			if data.Num == 1 then
 				if ent:IsPlayer() == true then
-					local p = spread * 0.5
-					spread = (spread * 0.3) + ( (spread * 0.5) * ent.MovementRecoil)
+					spread = (spread * 0.5) * (0.5 + ent.MovementRecoil)
 				end
 			end
 			data.Spread = spread
