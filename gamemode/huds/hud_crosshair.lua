@@ -87,7 +87,7 @@ function GM:DrawDynamicCrosshair(inRT)
 		else
 			movementRecoil = ply.MovementRecoil or 0
 		end
-		local gap = 4 * movementRecoil
+		local gap = 15 * movementRecoil
 		space = space + gap
 	end
 
