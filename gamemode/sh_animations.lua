@@ -385,6 +385,11 @@ local function HandleAnimCancelReload(ply, event, data)
 	return ACT_INVALID
 end
 
+-- FIXME: COMPATIBILITY, remove once update is out.
+if PLAYERANIMEVENT_CANCEL_RELOAD == nil then
+	PLAYERANIMEVENT_CANCEL_RELOAD = 23
+end
+
 local HANDLE_ANIM =
 {
 	[PLAYERANIMEVENT_ATTACK_PRIMARY] = HandleAnimAttackPrimary,
