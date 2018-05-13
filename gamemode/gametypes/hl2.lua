@@ -132,6 +132,7 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_eli"] = true,
 	["npc_mossman"] = true,
 	["npc_monk"] = true,
+	["npc_breen"] = true,
 }
 
 function GAMETYPE:GetPlayerRespawnTime()
