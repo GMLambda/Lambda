@@ -53,6 +53,11 @@ MAPSCRIPT.EntityFilterByName =
 	["mc_both_in"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+	["vortigaunt_bugbait"] = true,
+}
+
 function MAPSCRIPT:Init()
 end
 
