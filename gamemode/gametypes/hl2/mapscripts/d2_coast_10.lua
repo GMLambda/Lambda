@@ -49,6 +49,10 @@ MAPSCRIPT.EntityFilterByName =
 	["player_spawn_items_maker"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+}
+
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:Init()
@@ -59,6 +63,19 @@ function MAPSCRIPT:PostInit()
 	-- -6397.890625 4632.765625 512.031250
 	if SERVER then
 
+		local citizen_greeter
+		ents.WaitForEntityByName("citizen_greeter", function(ent)
+			ent.ImportantNPC = true
+			ent:SetHealth(100)
+			citizen_greeter = ent
+		end)
+
+		GAMEMODE:WaitForInput("greeter_dropships", "Start", function(ent)
+			if IsValid(citizen_greeter) then
+				citizen_greeter.ImportantNPC = false
+			end
+		end)
+		
 		-- In case of map reset.
 		GAMEMODE:SetSpawnPlayerVehicles(true)
 
@@ -92,6 +109,7 @@ function MAPSCRIPT:PostInit()
 				end
 			end
 		end
+
 		checkpointTrigger1.OnTrigger = function(self)
 			GAMEMODE:SetSpawnPlayerVehicles(false)
 			GAMEMODE:SetPlayerCheckpoint(checkpoint1)

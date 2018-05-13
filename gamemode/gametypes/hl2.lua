@@ -95,11 +95,9 @@ GAMETYPE.ClassesEnemyNPC =
 
 GAMETYPE.ImportantPlayerNPCNames =
 {
-	["citizen_greeter"] = true,
-	["gatekeeper"] = true,
 	["lamarr_jumper"] = true,
 	["winston"] = true,
-	["citizen_3"] = true,
+	--["citizen_3"] = true,
 }
 
 GAMETYPE.ImportantPlayerNPCClasses =
