@@ -45,6 +45,15 @@ MAPSCRIPT.EntityFilterByName =
 {
 	["player_spawn_items"] = true,
 	["trigger_changelevel"] = true, -- We use a better one.
+	["invulnerable"] = true, -- Why not.
+}
+
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+	["warehouse_citizen_jacobs"] = true,
+	["warehouse_citizen"] = true,
+	["warehouse_citizen_leon"] = true,
+	["warehouse_nurse"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -53,6 +62,18 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
+
+		ents.WaitForEntityByName("warehouse_citizen_jacobs", function(ent)
+			ent:SetHealth(100)
+		end)
+
+		ents.WaitForEntityByName("warehouse_citizen_leon", function(ent)
+			ent:SetHealth(100)
+		end)
+
+		ents.WaitForEntityByName("warehouse_citizen", function(ent)
+			ent:SetHealth(100)
+		end)
 
 		ents.WaitForEntityByName("warehouse_soldier", function(ent)
 			DbgPrint("Solider: " .. tostring(ent))
