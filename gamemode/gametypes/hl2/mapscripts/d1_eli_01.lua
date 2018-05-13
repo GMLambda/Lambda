@@ -45,12 +45,29 @@ MAPSCRIPT.EntityFilterByName =
 	["brush_exit_door_raven_PClip"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+	["vort_Lab"] = true,
+}
+
 function MAPSCRIPT:Init()
 end
 
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
+
+		ents.WaitForEntityByName("filter_eli", function(ent)
+			ent:Remove()
+		end)
+
+		ents.WaitForEntityByName("eli", function(ent)
+			ent:SetHealth(100)
+		end)
+
+		ents.WaitForEntityByName("mossman", function(ent)
+			ent:SetHealth(100)
+		end)
 
 		-- Perhaps skip this entire scene, its somewhat useless.
 		local entryTrigger = ents.Create("trigger_once")
