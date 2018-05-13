@@ -38,6 +38,28 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		local boxcar_human
+		local boxcar_vort
+		ents.WaitForEntityByName("boxcar_human", function(ent)
+			ent.ImportantNPC = true
+			boxcar_human = ent
+		end)
+
+		ents.WaitForEntityByName("boxcar_vort", function(ent)
+			ent.ImportantNPC = true
+			boxcar_vort = ent
+		end)
+
+		GAMEMODE:WaitForInput("boxcar_human", "StopScripting", function(ent)
+			print("NPCs no longer important")
+			if IsValid(boxcar_vort) then
+				boxcar_vort.ImportantNPC = false
+			end
+			if IsValid(boxcar_human) then
+				boxcar_human.ImportantNPC = false
+			end
+		end)
+
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(650.433105, -6424.663086, 540.031250) })
 		local checkpointTrigger1 = ents.Create("trigger_once")
 		checkpointTrigger1:SetupTrigger(

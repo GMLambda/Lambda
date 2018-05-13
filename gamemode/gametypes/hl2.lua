@@ -95,9 +95,6 @@ GAMETYPE.ClassesEnemyNPC =
 
 GAMETYPE.ImportantPlayerNPCNames =
 {
-	["arrest_cit_female"] = true, -- Come on, give her some slack.
-	["boxcar_human"] = true,
-	["boxcar_vort"] = true,
 	["citizen_greeter"] = true,
 	["mary"] = true,
 	["Al"] = true,
