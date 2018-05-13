@@ -43,6 +43,14 @@ MAPSCRIPT.EntityFilterByClass =
 MAPSCRIPT.EntityFilterByName =
 {
 	--["test_name"] = true,
+	["invulnerable"] = true,
+}
+
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+	["citizen_b_regular_original"] = true,
+	["rocketman"] = true,
+	["gatekeeper"] = true,
 }
 
 MAPSCRIPT.VehicleGuns = true
@@ -53,6 +61,18 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
+
+		ents.WaitForEntityByName("citizen_b_regular_original", function(ent)
+			ent:SetHealth(100)
+		end)
+
+		ents.WaitForEntityByName("rocketman", function(ent)
+			ent:SetHealth(100)
+		end)
+
+		ents.WaitForEntityByName("gatekeeper", function(ent)
+			ent:SetHealth(100)
+		end)
 
 		-- Adds an overlay to the player view and never gets removed.
 		ents.WaitForEntityByName("telescope_button", function(ent)
