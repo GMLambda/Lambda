@@ -39,6 +39,7 @@ MAPSCRIPT.EntityFilterByClass =
 MAPSCRIPT.EntityFilterByName =
 {
 	["startobjects_template"] = true,
+	["damagefilter_monk"] = true,
 	--["test_name"] = true,
 }
 
