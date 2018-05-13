@@ -26,7 +26,7 @@ end
 
 function ENT:InputReload(data, activator, caller)
 
-	GAMEMODE:RestartRound(nil, true)
+	--GAMEMODE:RestartRound(nil, true)
 
 	return true
 
