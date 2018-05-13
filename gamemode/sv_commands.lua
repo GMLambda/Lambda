@@ -29,17 +29,15 @@ concommand.Add("lambda_restart", RestartLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD
 
 local function PreviousLevel(ply, cmd, args)
 	if whoisrunning(ply) == false then return end
-	local mapList = self:GetGameTypeData("MapList")
-	local prevmap = table.FindPrev(mapList, game.GetMap())
-	game.ConsoleCommand("changelevel " .. prevmap .. "\n")
+	local prevmap = table.KeyFromValue(GAMEMODE:GetGameTypeData("MapList"), game.GetMap())
+	game.ConsoleCommand("changelevel " .. GAMEMODE:GetGameTypeData("MapList")[prevmap - 1] .. "\n")
 end
 concommand.Add("lambda_prevmap", PreviousLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
 
 local function NextLevel(ply, cmd, args)
 	if whoisrunning(ply) == false then return end
-	local mapList = self:GetGameTypeData("MapList")
-	local nextmap = table.FindNext(mapList, game.GetMap())
-	game.ConsoleCommand("changelevel " .. nextmap .. "\n")
+	local nextmap = table.KeyFromValue(GAMEMODE:GetGameTypeData("MapList"), game.GetMap())
+	game.ConsoleCommand("changelevel " .. GAMEMODE:GetGameTypeData("MapList")[nextmap + 1] .. "\n")
 end
 concommand.Add("lambda_nextmap", NextLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
 
@@ -49,3 +47,24 @@ local function ResetLevel(ply, cmd, args)
 	DbgPrint("Lambda_RESET: Map cleanup and reset")
 end
 concommand.Add("lambda_reset", ResetLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
+
+local function VoteSkip(ply, cmd, args)
+	GAMEMODE:StartSkipMapVote(20, ply)
+end
+concommand.Add("lambda_voteskip", VoteSkip, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
+
+
+local function VoteRestart(ply, cmd, args)
+	GAMEMODE:StartRestartMapVote(args[1], ply)
+end
+concommand.Add("lambda_voterestart", VoteRestart, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
+
+local function VoteMap(ply, cmd, args)
+	GAMEMODE:StartMapVote(args[1], args[2], ply)
+end
+concommand.Add("lambda_votemap", VoteMap, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
+
+local function VoteKick(ply, cmd, args)
+	GAMEMODE:StartKickVote(args[1], args[2], ply)
+end
+concommand.Add("lambda_votekick", VoteKick, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))

@@ -3,7 +3,7 @@ AddCSLuaFile("cl_hud.lua")
 AddCSLuaFile("cl_postprocess.lua")
 AddCSLuaFile("cl_ragdoll_ext.lua")
 AddCSLuaFile("cl_scoreboard.lua")
-
+AddCSLuaFile("cl_vote.lua")
 AddCSLuaFile("cl_skin_lambda.lua")
 AddCSLuaFile("huds/hud_numeric.lua")
 AddCSLuaFile("huds/hud_suit.lua")
@@ -34,6 +34,8 @@ include("sv_commands.lua")
 include("sv_checkpoints.lua")
 include("sv_weapontracking.lua")
 include("sv_player_pickup.lua")
+include("sv_vote.lua")
+include("sv_votefuncs.lua")
 
 local DbgPrint = GetLogging("Server")
 

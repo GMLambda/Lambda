@@ -346,27 +346,28 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintButton( panel, w, h )
 
+	
 	if ( !panel.m_bBackground ) then return end
 
-    local tbl = self:GetTable(panel)
-    tbl.HoverTime = tbl.HoverTime or 0
+    --local tbl = self:GetTable(panel)
+   -- tbl.HoverTime = tbl.HoverTime or 0
 
-	surface.SetDrawColor(DARK_100)
+	surface.SetDrawColor(Color(255,255,255,155))
     surface.DrawOutlinedRect(0,0,w,h)
-    surface.SetDrawColor(WHITISH)
+    surface.SetDrawColor(DARK_100)
     surface.DrawRect(1, 1, w - 2, h - 2)
 
-	if ( panel.Hovered ) then
-        tbl.HoverTime = SysTime()
-    end
+	--if ( panel.Hovered ) then
+    --    tbl.HoverTime = SysTime()
+   --end
 	if ( panel.Depressed || panel:IsSelected() || panel:GetToggle() ) then
         surface.SetDrawColor(DARK_50)
         surface.DrawOutlinedRect(0,0,w,h)
-        surface.SetDrawColor(96,143,210,128)
+        surface.SetDrawColor(255,255,255,10)
         surface.DrawRect(1,1,w-2,h-2)
 	else
         local fraction = 1 - math.Clamp(
-            Lerp((SysTime() - tbl.HoverTime) * 5, 0, 1),
+            Lerp(SysTime() * 5, 0, 1),
             0,
             1
         )
