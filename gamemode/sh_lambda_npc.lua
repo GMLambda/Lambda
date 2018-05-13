@@ -132,12 +132,18 @@ if SERVER then
 	function GM:HandleCriticalNPCDeath(npc)
 
 		local gameType = self:GetGameType()
+		local mapScript = self.MapScript
 		local name = npc:GetName()
+		local class = npc:GetClass()
 		local missionFailure = false
 
 		if gameType.ImportantPlayerNPCNames[name] == true then
 			missionFailure = true
-		elseif gameType.ImportantPlayerNPCClasses[npc:GetClass()] == true then
+		elseif gameType.ImportantPlayerNPCClasses[class] == true then
+			missionFailure = true
+		elseif mapScript ~= nil and mapScript.ImportantPlayerNPCNames ~= nil and mapScript.ImportantPlayerNPCNames[name] == true then
+			missionFailure = true
+		elseif mapScript ~= nil and mapScript.ImportantPlayerNPCClasses ~= nil and mapScript.ImportantPlayerNPCClasses[class] == true then
 			missionFailure = true
 		elseif npc.ImportantNPC == true then
 			missionFailure = true
