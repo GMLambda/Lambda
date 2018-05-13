@@ -55,6 +55,10 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		ents.WaitForEntityByName("filter_invulnerable", function(ent)
+			ent:Remove()
+		end)
+
 		local gravgun_prop
 		ents.WaitForEntityByName("gravgun_prop", function(ent) gravgun_prop = ent end)
 
