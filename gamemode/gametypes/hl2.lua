@@ -96,14 +96,9 @@ GAMETYPE.ClassesEnemyNPC =
 GAMETYPE.ImportantPlayerNPCNames =
 {
 	["citizen_greeter"] = true,
-	["citizen_b_regular_original"] = true,
 	["gatekeeper"] = true,
 	["lamarr_jumper"] = true,
 	["winston"] = true,
-	["rocketman"] = true, -- Mission critical
-	["citizen_a_medic_original"] = true,
-	["citizen_a_ammo_original"] = true,
-	["vort"] = true,
 	["citizen_3"] = true,
 }
 
