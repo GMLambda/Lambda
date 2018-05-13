@@ -62,6 +62,7 @@ lambda_map_change_timeout = GM:RegisterConVar("map_change_timeout", 60, bit.bor(
 lambda_player_god = GM:RegisterConVar("player_god", 0, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "No player damage")
 lambda_pickup_delay = GM:RegisterConVar("pickup_delay", 0.5, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "The time to wait before player can pickup again")
 lambda_dynamic_checkpoints = GM:RegisterConVar("dynamic_checkpoints", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Dynamically creates checkpoints if the position is appropriate")
+lambda_allow_npcdmg = GM:RegisterConVar("allow_npcdmg", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "If set to 1 allows players to kill any NPC")
 
 lambda_gametype = GM:RegisterConVar("gametype", "hl2", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Current gametype")
 lambda_walkspeed = GM:RegisterConVar("walkspeed", 150, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Walk speed")

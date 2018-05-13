@@ -364,6 +364,7 @@ function GM:OnNewGame()
 
 		local failureMessage = ents.Create("env_message")
 		failureMessage:SetKeyValue("spawnflags", "2")
+		failureMessage:SetKeyValue("targetname", "LambdaGameOver")
 		failureMessage:SetKeyValue("message", "GAMEOVER_ALLY")
 		failureMessage:Spawn()
 		self.LambdaFailureMessage = failureMessage

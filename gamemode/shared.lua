@@ -441,6 +441,10 @@ function GM:EntityKeyValue(ent, key, val)
 
 	ent.LambdaKeyValues = ent.LambdaKeyValues or {}
 
+	if key == "message" and ent:GetClass() == "env_message" and ent:GetName() ~= "LambdaGameOver" then
+		return ""
+  end
+
 	if util.IsOutputValue(key) then
 		ent.EntityOutputs = ent.EntityOutputs or {}
 		ent.EntityOutputs[key] = ent.EntityOutputs[key] or {}
@@ -462,11 +466,6 @@ function GM:EntityKeyValue(ent, key, val)
 		if res ~= nil then
 			return res
 		end
-	end
-
-	-- HACKHACK: Having it set to 1 causes some NPCs to fail playing their scene.
-	if ent:GetClass() == "logic_choreographed_scene" and key:iequals("busyactor") then
-		--return "0"
 	end
 
 end

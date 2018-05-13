@@ -129,6 +129,27 @@ if SERVER then
 
 	end
 
+	function GM:HandleCriticalNPCDeath(npc)
+
+		local gameType = self:GetGameType()
+		local name = npc:GetName()
+		local missionFailure = false
+
+		if gameType.ImportantPlayerNPCNames[name] == true then
+			missionFailure = true
+		elseif gameType.ImportantPlayerNPCClasses[npc:GetClass()] == true then
+			missionFailure = true
+		elseif npc.ImportantNPC == true then
+			missionFailure = true
+		end
+
+		if missionFailure == true then
+			self:RestartRound()
+			self:RegisterRoundLost()
+		end
+
+	end
+
 	function GM:OnNPCKilled(npc, attacker, inflictor)
 		local ply = nil
 		if IsValid(attacker) and attacker:IsPlayer() then
@@ -136,6 +157,7 @@ if SERVER then
 		elseif IsValid(inflictor) and inflictor:IsPlayer() then
 			ply = inflictor
 		end
+
 		if IsValid(ply) then
 			if IsFriendEntityName(npc:GetClass()) then
 				ply:AddFrags(-1)
@@ -162,12 +184,14 @@ if SERVER then
 			else
 				wep.HeldByFriendly = true
 			end
-			print("Marked weapon: " .. tostring(wep))
+			--print("Marked weapon: " .. tostring(wep))
 		end
 
-		self:RegisterNPCDeath(npc, attacker, inflictor)
+		self:HandleCriticalNPCDeath(npc)
 
+		self:RegisterNPCDeath(npc, attacker, inflictor)
 		BaseClass.OnNPCKilled(self, npc, attacker, inflictor)
+
 	end
 
 	function GM:NPCThink()
