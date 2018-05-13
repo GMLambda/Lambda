@@ -96,7 +96,6 @@ GAMETYPE.ClassesEnemyNPC =
 GAMETYPE.ImportantPlayerNPCNames =
 {
 	["citizen_greeter"] = true,
-	["mary"] = true,
 	["Al"] = true,
 	["Arlene"] = true,
 	["citizen_b_regular_original"] = true,
