@@ -48,6 +48,37 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		local npc_vort_gun
+		local npc_cit_gate
+		local npc_cit_briefer
+
+		ents.WaitForEntityByName("filter_invulnerable", function(ent)
+			ent:Remove()
+		end)
+		ents.WaitForEntityByName("npc_vort_gun", function(ent)
+			ent.ImportantNPC = true
+			npc_vort_gun = ent
+		end)
+		ents.WaitForEntityByName("npc_cit_gate", function(ent)
+			ent.ImportantNPC = true
+			npc_cit_gate = ent
+		end)
+		ents.WaitForEntityByName("npc_cit_briefer", function(ent)
+			ent.ImportantNPC = true
+			npc_cit_briefer = ent
+		end)
+		GAMEMODE:WaitForInput("door_guncave_exit", "Open", function(ent)
+			if IsValid(npc_vort_gun) then
+				npc_vort_gun.ImportantNPC = false
+			end
+			if IsValid(npc_cit_gate) then
+				npc_cit_gate.ImportantNPC = false
+			end
+			if IsValid(npc_cit_briefer) then
+				npc_cit_briefer.ImportantNPC = false
+			end
+		end)
+
 		self.VehicleGuns = false
 
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(6457.725586, 4986.333984, -953.968750), Ang = Angle(0, 180, 0) })
