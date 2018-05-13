@@ -106,7 +106,6 @@ GAMETYPE.ImportantPlayerNPCNames =
 	["gatekeeper"] = true,
 	["Chester"] = true,
 	["lamarr_jumper"] = true,
-	["stanley"] = true,
 	["warehouse_citizen_jacobs"] = true,
 	["warehouse_citizen"] = true,
 	["warehouse_citizen_leon"] = true,
@@ -118,8 +117,6 @@ GAMETYPE.ImportantPlayerNPCNames =
 	["citizen_a_ammo_original"] = true,
 	["vort"] = true,
 	["citizen_3"] = true,
-	["vortigaunt_bugbait"] = true, -- Well guess why
-	["stanley"] = true, -- He will loose his friend!
 }
 
 GAMETYPE.ImportantPlayerNPCClasses =
