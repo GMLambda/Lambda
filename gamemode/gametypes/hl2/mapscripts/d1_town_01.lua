@@ -47,6 +47,9 @@ function MAPSCRIPT:PostInit()
 	if SERVER then
 
 		-- 2849.690674 -1397.864624 -3839.968750
+		ents.WaitForEntityByName("null_filter", function(ent)
+			ent:Remove()
+		end)
 
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(2643.776611, -1465.673584, -3839.968750), Ang = Angle(0, 90, 0) })
 		local checkpointTrigger1 = ents.Create("trigger_once")
