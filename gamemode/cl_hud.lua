@@ -5,6 +5,7 @@ include("huds/hud_roundinfo.lua")
 include("huds/hud_settings.lua")
 include("huds/hud_hint.lua")
 include("huds/hud_crosshair.lua")
+include("huds/hud_vote.lua")
 
 --local DbgPrint = GetLogging("HUD")
 

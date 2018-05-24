@@ -58,53 +58,47 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
 	local transitionTriggers = {}
 	local landmarkEnt = nil
 
-	for _,v in pairs(ents.FindByName(landmark)) do
+	if landmark ~= nil and landmark ~= "" then
+		for _,v in pairs(ents.FindByName(landmark)) do
 
-		if v:GetClass() == "info_landmark" then
-			if landmarkEnt ~= nil then
-				DbgPrint("Something is wrong, we already have found the landmark")
+			if v:GetClass() == "info_landmark" then
+				if landmarkEnt ~= nil then
+					DbgPrint("Something is wrong, we already have found the landmark")
+				end
+				landmarkEnt = v
+				DbgPrint("Found landmark entity: " .. tostring(landmarkEnt))
+			elseif v:GetClass() == "trigger_transition" then
+				table.insert(transitionTriggers, v)
+				DbgPrint("Found transition trigger: " .. tostring(v))
 			end
-			landmarkEnt = v
-			DbgPrint("Found landmark entity: " .. tostring(landmarkEnt))
-		elseif v:GetClass() == "trigger_transition" then
-			table.insert(transitionTriggers, v)
-			DbgPrint("Found transition trigger: " .. tostring(v))
+
 		end
-
-	end
-
-	if not IsValid(landmarkEnt) then
-		DbgPrint("Unable to find landmark! - " .. tostring(landmark))
-	end
+	end 
 
 	-- 2. We now create a list of objects to transfer.
 	local objectTable = {}
 	local playerTable = {}
 
-	--[[
-	if table.Count(transitionTriggers) > 0 then
-		self:TransitionObjectsByVolumes(landmarkEnt, transitionTriggers, objectTable, playerTable)
-	else
-		self:TransitionObjectsByLandmark(landmarkEnt, objectTable, playerTable)
-	end
-	]]
+	if not IsValid(landmarkEnt) then
+		DbgPrint("Unable to find landmark! - " .. tostring(landmark))
+	else 
+		self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
 
-	self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+		-- In case players didnt make it, we erase their position from the data.
+		for k,v in pairs(playerTable) do
 
-	-- In case players didnt make it, we erase their position from the data.
-	for k,v in pairs(playerTable) do
+			local ply = Entity(v.RefId)
+			if not IsValid(ply) then
+				DbgError("Invalid player detected, this should not happen")
+			end
 
-		local ply = Entity(v.RefId)
-		if not IsValid(ply) then
-			DbgError("Invalid player detected, this should not happen")
+			if table.HasValue(playersInTrigger, ply) == false then
+				DbgPrint("Removing player: " .. tostring(ply) .. " from transitioning, not in changelevel trigger")
+				--playerTable[k] = nil
+				playerTable[k].Include = false -- NOTE: Changed this to carry stats and other information.
+			end
+
 		end
-
-		if table.HasValue(playersInTrigger, ply) == false then
-			DbgPrint("Removing player: " .. tostring(ply) .. " from transitioning, not in changelevel trigger")
-			--playerTable[k] = nil
-			playerTable[k].Include = false -- NOTE: Changed this to carry stats and other information.
-		end
-
 	end
 
 	DbgPrint("Transitioning #" .. tostring(table.Count(objectTable)) .. " objects")
@@ -743,7 +737,9 @@ function GM:PostLoadTransitionData()
 	end
 
 	if IsValid(landmarkEnt) == false then
-		DbgError("No landmark found to resolve transition data")
+		if table.Count(self.TransitionData.Players) > 0 or table.Count(self.TransitionData.Objects) > 0 then
+			DbgError("No landmark found to resolve transition data")
+		end
 		return
 	end
 

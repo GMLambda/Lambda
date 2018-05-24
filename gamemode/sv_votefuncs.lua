@@ -5,84 +5,44 @@ voteinfo.map = false
 voteinfo.ply = false
 voteinfo.time = 20
 
-function GM:StartSkipMapVote(t, ply)
-	local time =  t or voteinfo.time
-	local nextmap = table.KeyFromValue(self:GetGameTypeData("MapList"), game.GetMap())
-
-	voteinfo.map = self:GetGameTypeData("MapList")[nextmap + 1]
-	voteinfo.voting = true
-	voteinfo.options = {"Yes","No"}
-
-	self:StartVote(false,"Vote to skip the map.", time, VoteEnd, VoteFailed, unpack(voteinfo.options))
-end
-
-function GM:StartRestartMapVote(t, ply)
-	local time =  t or voteinfo.time
-	voteinfo.map = game.GetMap()
-
-	voteinfo.voting = true
-	voteinfo.options = {"Yes","No"}
-
-	self:StartVote(ply,"Vote to restart the map.", time, VoteEnd, VoteFailed, unpack(voteinfo.options))
-end
-
-function GM:StartMapVote(map, t, ply)
-	local time =  t or voteinfo.time
-	if !map or !file.Exists("maps/" .. map .. ".bsp", "GAME") then print("map doesnt exist") return end
-	voteinfo.map = map
-
-	voteinfo.voting = true
-	voteinfo.options = {"Yes","No"}
-
-	self:StartVote(ply,"Vote to change the map to " .. voteinfo.map, time, VoteEnd, VoteFailed, unpack(voteinfo.options))
-end
-
-function GM:StartKickVote(id, t, ply)
-	local time = t or voteinfo.time
-	if !Player(id) then return end
-	voteinfo.ply = Player(id)
-
-	voteinfo.voting = true
-	voteinfo.options = {"Yes","No"}
-
-	self:StartVote(ply, "Vote to kick player " .. voteinfo.ply:Nick(), time, VoteEnd, VoteFailed, unpack(voteinfo.options))
-end
-
-function VoteEnd(choice)
-	if !voteinfo.voting then return end
-	if choice == voteinfo.options[1] then
-		if voteinfo.map and !voteinfo.ply then
-			print("Vote passed. Changing map in 5 seconds.")
-			PrintMessage(HUD_PRINTTALK,"Vote passed. Changing map in 5 seconds.")
-			timer.Simple(5, function() VoteExec(voteinfo.map) end)
-		else
-			print("Vote passed. Kicking player " .. voteinfo.ply:Nick())
-			voteinfo.ply:Kick("You have been votekicked.")
-			voteinfo.ply = false
+function GM:StartSkipMapVote(issuer)
+	local function OnSkipToNextMapResult(vote, success, timeout, option)
+		if success == true and option == 1 then -- Yes
+			GAMEMODE:ChangeToNextLevel()
 		end
-	else
-		print("Vote failed.")
-	end
+	end 
+
+	local nextMap = self:GetNextMap()
+	self:StartVote(issuer, VOTE_TYPE_SKIP_MAP, 15, { NextMap = nextMap }, { "Yes", "No" }, {}, OnSkipToNextMapResult)
 end
 
-function VoteExec(map)
-
-	if map == game.GetMap() then
-		GAMEMODE:CleanUpMap()
-	else
-		game.ConsoleCommand("changelevel " .. map .. "\n")
-	end
-
-	voteinfo.voting = false
-	voteinfo.map = false
-	voteinfo.ply = false
+function GM:StartRestartMapVote(issuer)
+	local function OnRestartMapVoteResult(vote, success, timeout, option)
+		if success == true and option == 1 then -- Yes
+			GAMEMODE:CleanUpMap()
+		end
+	end 
+	self:StartVote(issuer, VOTE_TYPE_RESTART_MAP, 15, {}, { "Yes", "No" }, {}, OnRestartMapVoteResult)
 end
 
-function VoteFailed()
-	if !voteinfo.voting then return end
+function GM:StartMapVote(issuer, map)
+	local function OnChangeLevelVoteResult(vote, success, timeout, option)
+		if success == true and option == 1 then -- Yes
+			GAMEMODE:ChangeLevel(map, nil, {})
+		end
+	end 
+	self:StartVote(issuer, VOTE_TYPE_CHANGE_MAP, 15, { Map = map }, { "Yes", "No" }, {}, OnChangeLevelVoteResult)
+end
 
-	PrintMessage(HUD_PRINTTALK,"Vote failed. No one voted.")
-	voteinfo.voting = false
-	voteinfo.map = false
-	voteinfo.ply = false
+function GM:StartKickVote(issuer, id)
+	local ply = Player(id)
+	if not IsValid(ply) then 
+		return 
+	end 
+	local function OnKickPlayerVoteResult(vote, success, timeout, option)
+		if success == true and option == 1 then -- Yes
+			game.KickID(id, "You have been vote kicked.")
+		end
+	end 
+	self:StartVote(issuer, VOTE_TYPE_KICK_PLAYER, 15, { Player = ply }, { "Yes", "No" }, { ply }, OnKickPlayerVoteResult)
 end

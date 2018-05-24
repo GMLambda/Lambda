@@ -136,7 +136,7 @@ function GM:PreChangelevel(map, landmark, playersInTrigger)
 
 	hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark)
 
-	self:TransitionToLevel(map, landmark, playersInTrigger)
+	self:TransitionToLevel(map, landmark, playersInTrigger or {})
 
 end
 
@@ -214,28 +214,41 @@ function GM:GetCurrentMapIndex()
 	return index
 end
 
-if SERVER then
+function GM:ChangeLevel(map, landmark, playersInTrigger)
 
-	function GM:ChangeLevel(map, landmark, playersInTrigger)
-
-		if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
-			DbgError("Called ChangeLevel twice!")
-			return
-		end
-
-		self.ChangingLevel = true
-
-		DbgPrint("Changing to level: " .. map)
-
-		self:PreChangelevel(map, landmark, playersInTrigger)
-
-		local nextMap = map
-		if g_debug_transitions:GetBool() ~= true then
-			--timer.Simple(0.1, function()
-				game.ConsoleCommand("changelevel " .. nextMap .. "\n")
-			--end)
-		end
-
+	if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
+		DbgError("Called ChangeLevel twice!")
+		return
 	end
+
+	self.ChangingLevel = true
+
+	DbgPrint("Changing to level: " .. map)
+
+	self:PreChangelevel(map, landmark, playersInTrigger)
+
+	local nextMap = map
+	if g_debug_transitions:GetBool() ~= true then
+		--timer.Simple(0.1, function()
+			game.ConsoleCommand("changelevel " .. nextMap .. "\n")
+		--end)
+	end
+
+end
+
+function GM:ChangeToNextLevel()
+
+	local nextMap = self:GetNextMap()
+
+	for k,v in pairs(ents.FindByClass("trigger_changelevel")) do
+		if v.TargetMap == nextMap then 
+
+			local landmark = v.Landmark 
+			return self:ChangeLevel(nextMap, landmark, {})
+
+		end 
+	end
+
+	return self:ChangeLevel(nextMap, nil, {})
 
 end
