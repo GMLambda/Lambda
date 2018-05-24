@@ -93,13 +93,6 @@ GAMETYPE.ClassesEnemyNPC =
 	["npc_headcrab"] = true,
 }
 
-GAMETYPE.ImportantPlayerNPCNames =
-{
-	["lamarr_jumper"] = true,
-	["winston"] = true,
-	--["citizen_3"] = true,
-}
-
 GAMETYPE.ImportantPlayerNPCClasses =
 {
 	["npc_alyx"] = true,

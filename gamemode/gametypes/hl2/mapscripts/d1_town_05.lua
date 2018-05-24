@@ -54,6 +54,7 @@ MAPSCRIPT.ImportantPlayerNPCNames =
 	["warehouse_citizen"] = true,
 	["warehouse_citizen_leon"] = true,
 	["warehouse_nurse"] = true,
+	["winston"] = true,
 }
 
 function MAPSCRIPT:Init()

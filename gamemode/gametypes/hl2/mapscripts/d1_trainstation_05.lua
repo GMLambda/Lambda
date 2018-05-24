@@ -28,6 +28,11 @@ MAPSCRIPT.EntityFilterByName =
 	["lab_entry_script_trigger"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+	["lamarr_jumper"] = true,	-- In any case this should restart.
+}
+
 function MAPSCRIPT:Init()
 end
 
