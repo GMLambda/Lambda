@@ -534,7 +534,7 @@ if SERVER then
 			else
 
 				DbgPrint("Player " .. tostring(ply) .. " uses normal position")
-				ply:TeleportPlayer(transitionData.Pos)
+				ply:TeleportPlayer(transitionData.Pos, transitionData.Ang)
 				ply:SetAngles(transitionData.Ang)
 				ply:SetEyeAngles(transitionData.EyeAng)
 				useSpawnpoint = false

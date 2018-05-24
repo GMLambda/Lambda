@@ -207,6 +207,10 @@ local function EmitPlayerSpeech(ply, group, minWait)
 	end
 
 	local vos = groupData.VO[ply:GetGender()]
+	if vos == nil then 
+		return false 
+	end 
+	
 	local vo = table.Random(vos)
 	local dur = SoundDuration(vo)
 

@@ -49,22 +49,21 @@ end
 concommand.Add("lambda_reset", ResetLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
 
 local function VoteSkip(ply, cmd, args)
-	GAMEMODE:StartSkipMapVote(20, ply)
+	GAMEMODE:StartSkipMapVote(ply)
 end
 concommand.Add("lambda_voteskip", VoteSkip, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
 
-
 local function VoteRestart(ply, cmd, args)
-	GAMEMODE:StartRestartMapVote(args[1], ply)
+	GAMEMODE:StartRestartMapVote(ply, args[1])
 end
 concommand.Add("lambda_voterestart", VoteRestart, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
 
 local function VoteMap(ply, cmd, args)
-	GAMEMODE:StartMapVote(args[1], args[2], ply)
+	GAMEMODE:StartMapVote(ply, args[1])
 end
 concommand.Add("lambda_votemap", VoteMap, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))
 
 local function VoteKick(ply, cmd, args)
-	GAMEMODE:StartKickVote(args[1], args[2], ply)
+	GAMEMODE:StartKickVote(ply, args[1])
 end
 concommand.Add("lambda_votekick", VoteKick, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE))

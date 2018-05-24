@@ -28,7 +28,7 @@ SKIN.bg_alt1					= Color( 50, 50, 50, 128 )
 SKIN.bg_alt2					= Color( 55, 55, 55, 128 )
 
 SKIN.listview_hover				= Color( 70, 70, 70, 255 )
-SKIN.listview_selected			= Color( 100, 170, 220, 255 )
+SKIN.listview_selected			= Color( 0, 0, 0, 255 )
 
 SKIN.text_bright				= Color( 255, 255, 255, 255 )
 SKIN.text_normal				= Color( 180, 180, 180, 255 )
@@ -64,7 +64,7 @@ SKIN.colTextEntryText			= Color( 20, 20, 20, 255 )
 SKIN.colTextEntryTextHighlight	= Color( 20, 200, 250, 255 )
 SKIN.colTextEntryTextCursor		= Color( 0, 0, 100, 255 )
 
-SKIN.colMenuBG					= Color( 255, 255, 255, 200 )
+SKIN.colMenuBG					= Color( 0, 0, 0, 200 )
 SKIN.colMenuBorder				= Color( 0, 0, 0, 200 )
 
 SKIN.colButtonText				= Color( 255, 255, 255, 255 )
@@ -759,19 +759,16 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintComboBox( panel, w, h )
 
-	if ( panel:GetDisabled() ) then
-		return self.tex.Input.ComboBox.Disabled( 0, 0, w, h )
-	end
+	surface.SetDrawColor(Color(255,255,255,155))
+   	surface.DrawOutlinedRect(0, 0, w, h)
 
-	if ( panel.Depressed || panel:IsMenuOpen() ) then
-		return self.tex.Input.ComboBox.Down( 0, 0, w, h )
-	end
+    surface.SetDrawColor(DARK_25)
+    surface.DrawRect(0,0,w,h)
 
-	if ( panel.Hovered ) then
-		return self.tex.Input.ComboBox.Hover( 0, 0, w, h )
-	end
-
-	self.tex.Input.ComboBox.Normal( 0, 0, w, h )
+    surface.SetDrawColor(DARK_50)
+    surface.DrawLine(0, 0, w - 1, 0)
+    surface.DrawLine(0, 0, 0, h)
+    surface.DrawLine(w - 1, 0, w - 1, h)
 
 end
 
@@ -789,21 +786,6 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintNumberUp( panel, w, h )
 
-	/*if ( panel:GetDisabled() ) then
-		return self.tex.Input.UpDown.Up.Disabled( 0, 0, w, h )
-	end
-
-	if ( panel.Depressed ) then
-		return self.tex.Input.UpDown.Up.Down( 0, 0, w, h )
-	end
-
-	if ( panel.Hovered ) then
-		return self.tex.Input.UpDown.Up.Hover( 0, 0, w, h )
-	end
-
-	self.tex.Input.UpDown.Up.Normal( 0, 0, w, h ) */
-
-
 	surface.SetDrawColor(255,255,255,255)
 	surface.SetMaterial( SKIN.tex.SortUpNew )
 	surface.DrawTexturedRect(0,0,w,h)
@@ -814,20 +796,6 @@ end
 	NumberDown
 -----------------------------------------------------------]]
 function SKIN:PaintNumberDown( panel, w, h )
-
-	/* if ( panel:GetDisabled() ) then
-		return self.tex.Input.UpDown.Down.Disabled( 0, 0, w, h )
-	end
-
-	if ( panel.Depressed ) then
-		return self.tex.Input.UpDown.Down.Down( 0, 0, w, h )
-	end
-
-	if ( panel.Hovered ) then
-		return self.tex.Input.UpDown.Down.Hover( 0, 0, w, h )
-	end
-
-	self.tex.Input.UpDown.Down.Normal( 0, 0, w, h ) */
 
 	surface.SetDrawColor(255,255,255,255)
 	surface.SetMaterial( SKIN.tex.SortDownNew )

@@ -42,6 +42,7 @@ include("sh_playermodels.lua")
 include("sh_globalstate.lua")
 include("sh_userauth.lua")
 include("sh_admin_config.lua")
+include("sh_voting.lua")
 
 --Disabled for now
 --include("sh_gibs.lua")
@@ -65,6 +66,7 @@ function GM:Tick()
 		self:NPCThink()
 		self:WeaponTrackingThink()
 		self:CheckStuckScenes()
+		self:UpdateVotes()
 	else
 		self:ClientThink()
 	end

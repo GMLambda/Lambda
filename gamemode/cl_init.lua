@@ -5,8 +5,6 @@ include("cl_ragdoll_ext.lua")
 include("cl_taunts.lua")
 include("cl_hud.lua")
 include("cl_scoreboard.lua")
-include("cl_vote.lua")
---include("cl_pathobserve.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 

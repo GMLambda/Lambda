@@ -63,61 +63,98 @@ function PANEL:Init()
 
 	local PanelVote = self.Sheet:Add("DPanel")
 
+		local buttonSizeW = 110
+
 		local restartvoteb = vgui.Create("DButton", PanelVote)
 		restartvoteb:SetPos(5, 5)
 		restartvoteb:SetText("Restart map")
-		restartvoteb:SetSize(90, 22)
+		restartvoteb:SetSize(buttonSizeW, 22)
 		restartvoteb:SetTextColor(Color(255, 255, 255, 155))
 		restartvoteb.DoClick = function() RunConsoleCommand("lambda_voterestart") self:Close() end
 
 		local skipvoteb = vgui.Create("DButton", PanelVote)
 		skipvoteb:SetPos(5, 32)
-		skipvoteb:SetText("Skip map")
-		skipvoteb:SetSize(90, 22)
+		skipvoteb:SetText("Skip to next map")
+		skipvoteb:SetSize(buttonSizeW, 22)
 		skipvoteb:SetTextColor(Color(255, 255, 255, 155))
 		skipvoteb.DoClick = function() RunConsoleCommand("lambda_voteskip") self:Close() end
-
-		local cmap = vgui.Create("DTextEntry", PanelVote)
-		cmap:SetPos(100, 59)
+		
+		local cmap = vgui.Create("DComboBox", PanelVote)
+		local mapList = GAMEMODE:GetGameTypeData("MapList") or {}
+		local curMap = string.lower(game.GetMap())
+		cmap:SetPos(5 + buttonSizeW + 5, 59)
 		cmap:SetSize(100, 22)
 		cmap:SetVisible(false)
+		for _,v in pairs(mapList) do 
+			cmap:AddChoice(v, nil, v:iequals(curMap))
+		end
 
 		local cbmap = vgui.Create("DButton", PanelVote)
-		cbmap:SetPos(200, 59)
+		cbmap:SetPos(5 + buttonSizeW + 5 + 100 + 5, 59)
 		cbmap:SetSize(22, 22)
 		cbmap:SetVisible(false)
 		cbmap:SetIcon("lambda/icons/tick.png")
 		cbmap:SetText("")
-		cbmap.DoClick = function() RunConsoleCommand("lambda_votemap", cmap:GetValue()) self:Close() end
+		cbmap.DoClick = function() 
+			local selected = cmap:GetSelected()
+			RunConsoleCommand("lambda_votemap", selected) self:Close() 
+		end
 
 		local cmvoteb = vgui.Create("DButton", PanelVote)
 		cmvoteb:SetPos(5, 59)
 		cmvoteb:SetText("Change map")
-		cmvoteb:SetSize(90, 22)
+		cmvoteb:SetSize(buttonSizeW, 22)
 		cmvoteb:SetTextColor(Color(255, 255, 255, 155))
-		cmvoteb.DoClick = function() if !cmap:IsVisible() and !cbmap:IsVisible() then cmap:SetVisible(true) cbmap:SetVisible(true) else cmap:SetVisible(false) cbmap:SetVisible(false) end end
-
-		local kickvoteb = vgui.Create("DButton", PanelVote)
-		kickvoteb:SetPos(5, 86)
-		kickvoteb:SetText("Kick player")
-		kickvoteb:SetSize(90, 22)
-		kickvoteb:SetTextColor(Color(255, 255, 255, 155))
-		kickvoteb.DoClick = function()
-			local y = 120
-			local ply
-			for k, v in pairs(player.GetAll()) do
-				if v != LocalPlayer() then
-					ply = vgui.Create("DButton", PanelVote)
-					ply:SetPos(5, y)
-					ply:SetText(v:Nick())
-					ply:SetSize(90, 22)
-					ply:SetTextColor(Color(255,255,255,155))
-					ply.DoClick = function() RunConsoleCommand("lambda_votekick", v:UserID()) self:Close() end
-					y = y + 24
-				end
+		cmvoteb.DoClick = function() 
+			if !cmap:IsVisible() and !cbmap:IsVisible() then 
+				cmap:SetVisible(true)
+				cbmap:SetVisible(true) 
+			else 
+				cmap:SetVisible(false)
+				cbmap:SetVisible(false) 
+			end 
+			if self.pnlPlayersFrame ~= nil then 
+				self.pnlPlayersFrame:Remove()
+				self.pnlPlayersFrame = nil 
 			end
 		end
 
+		local cplayer = vgui.Create("DComboBox", PanelVote)
+		cplayer:SetPos(5 + buttonSizeW + 5, 86)
+		cplayer:SetSize(100, 22)
+		cplayer:SetVisible(false)
+		for _,v in pairs(player.GetAll()) do 
+			if v == LocalPlayer() then 
+				continue 
+			end 
+			cplayer:AddChoice(v:Name(), v:UserID())
+		end
+
+		local cbkick = vgui.Create("DButton", PanelVote)
+		cbkick:SetPos(5 + buttonSizeW + 5 + 100 + 5, 86)
+		cbkick:SetSize(22, 22)
+		cbkick:SetVisible(false)
+		cbkick:SetIcon("lambda/icons/tick.png")
+		cbkick:SetText("")
+		cbkick.DoClick = function() 
+			local ply, steamid = cplayer:GetSelected()
+			RunConsoleCommand("lambda_votekick", steamid) self:Close() 
+		end
+		
+		local kickvoteb = vgui.Create("DButton", PanelVote)
+		kickvoteb:SetPos(5, 86)
+		kickvoteb:SetText("Kick player")
+		kickvoteb:SetSize(buttonSizeW, 22)
+		kickvoteb:SetTextColor(Color(255, 255, 255, 155))
+		kickvoteb.DoClick = function()
+			if cplayer:IsVisible() == true then 
+				cplayer:SetVisible(false)
+				cbkick:SetVisible(false)
+			else 
+				cplayer:SetVisible(true)
+				cbkick:SetVisible(true)
+			end
+		end
 
 	self.Sheet:AddSheet("Vote", PanelVote, "lambda/icons/poll.png")
 
