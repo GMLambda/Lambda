@@ -24,6 +24,9 @@ function PANEL:Init()
 end
 
 function PANEL:UpdateVote(vote)
+	if self.currentVote ~= nil then 
+		surface.PlaySound("buttons/button16.wav")
+	end
 	self.currentVote = vote
 	self.choiceScore = {}
 	self.smoothChoiceScore = self.smoothChoiceScore or {}
