@@ -11,7 +11,6 @@ function GM:StartSkipMapVote(issuer)
 			GAMEMODE:ChangeToNextLevel()
 		end
 	end 
-
 	local nextMap = self:GetNextMap()
 	self:StartVote(issuer, VOTE_TYPE_SKIP_MAP, 15, { NextMap = nextMap }, { "Yes", "No" }, {}, OnSkipToNextMapResult)
 end
@@ -31,6 +30,9 @@ function GM:StartMapVote(issuer, map)
 			GAMEMODE:ChangeLevel(map, nil, {})
 		end
 	end 
+	if string.lower(map) == string.lower(game.GetMap()) then 
+		return 
+	end
 	self:StartVote(issuer, VOTE_TYPE_CHANGE_MAP, 15, { Map = map }, { "Yes", "No" }, {}, OnChangeLevelVoteResult)
 end
 

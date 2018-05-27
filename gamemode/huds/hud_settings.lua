@@ -86,7 +86,10 @@ function PANEL:Init()
 		cmap:SetSize(100, 22)
 		cmap:SetVisible(false)
 		for _,v in pairs(mapList) do 
-			cmap:AddChoice(v, nil, v:iequals(curMap))
+			if v:iequals(curMap) == true then
+				continue 
+			end
+			cmap:AddChoice(v)
 		end
 
 		local cbmap = vgui.Create("DButton", PanelVote)

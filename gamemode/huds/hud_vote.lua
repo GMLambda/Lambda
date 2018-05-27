@@ -19,14 +19,17 @@ function PANEL:Init()
 	self.choiceScore = {}
 	self.smoothChoiceScore = {}
 	self.lastTimeLeft = 99999
-	self.totalPlayers = player.GetCount()
+	self.totalPlayers = 0
 
 end
 
 function PANEL:UpdateVote(vote)
+
 	if self.currentVote ~= nil then 
+		-- Only play when being updated.
 		surface.PlaySound("buttons/button16.wav")
 	end
+
 	self.currentVote = vote
 	self.choiceScore = {}
 	self.smoothChoiceScore = self.smoothChoiceScore or {}
@@ -40,8 +43,6 @@ function PANEL:UpdateVote(vote)
 end 
 
 function PANEL:SetVoteResults(vote)
-
-	local pnl = self
 
 	if vote.failed == false then 
 		surface.PlaySound("buttons/button14.wav")
@@ -82,11 +83,6 @@ end
 
 function PANEL:Paint(w, h)
 
-	surface.SetDrawColor(0, 0, 0, 230)
-	surface.DrawRect(0, 0, w, h)
-
-	surface.SetDrawColor(255, 147, 30, 230)
-	surface.DrawRect(0, 0, 5, h)
 
 	local text
 	local textW, textH = 0, 0
@@ -101,6 +97,12 @@ function PANEL:Paint(w, h)
 
 	local text = ""
 
+	surface.SetDrawColor(0, 0, 0, 230)
+	surface.DrawRect(0, 0, w, h)
+
+	surface.SetDrawColor(255, 147, 30, 230)
+	surface.DrawRect(0, 0, 5, h)
+	
 	surface.SetFont("lambda_sb_def_sm")
 	
 	-- Issuer
@@ -237,14 +239,6 @@ function PANEL:Paint(w, h)
 
 	maxChoiceW = math.max(maxChoiceW, 100) + 20
 
-	local choiceScore = {}
-	for k,v in pairs(vote.options) do
-		choiceScore[k] = 0
-	end
-	for k,v in pairs(vote.results) do
-		choiceScore[v] = choiceScore[v] + 1
-	end
-
 	local barWidth = 100
 	for k,v in pairs(vote.options) do
 
@@ -285,7 +279,6 @@ function PANEL:Paint(w, h)
 		surface.DrawRect(x + choiceMargin + maxChoiceW + padding + textSpace, choiceY + 6, barSize, 5)
 
 		choiceY = choiceY + textH + paddingChoice
-
 	end
 
 	-- Seperator
