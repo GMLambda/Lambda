@@ -206,7 +206,7 @@ if SERVER then
 	local female_bbox = Vector(21.857199, 20.744711, 71.528900)
 
 	-- Credits to CapsAdmin
-	local function EstimateModelGender(ent)
+	function EstimateModelGender(ent)
 
 		local mdl = ent:GetModel()
 		if not mdl then
@@ -218,7 +218,18 @@ if SERVER then
 			return "zombie"
 		end
 
-		local seq = ent:LookupSequence("walk_all")
+		local ziplineAttachment = ent:LookupAttachment("zipline")
+		if ziplineAttachment ~= 0 then 
+			return "combine"
+		end
+
+		local seq 
+		seq = ent:LookupSequence("d3_c17_07_Kidnap")
+		if seq ~= nil and seq > 0 then 
+			return "combine"
+		end 
+
+		seq = ent:LookupSequence("walk_all")
 		if seq ~= nil and seq > 0 then
 			local info = ent:GetSequenceInfo(seq)
 			if info.bbmax == male_bbox then
@@ -264,6 +275,7 @@ if SERVER then
 		ply:SetModel(mdl)
 
 		local gender = EstimateModelGender(ply)
+		print("New Gender: " .. gender)
 		ply:SetGender(gender)
 
 		if IsValid(ply.TrackerEntity) then
