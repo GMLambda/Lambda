@@ -431,15 +431,16 @@ if SERVER then
 
 		DbgPrint("GM:PlayerSpawn")
 
-    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
-        ply:KillSilent()
-        return
-    end
+	    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
+	        ply:KillSilent()
+	        return
+	    end
 
 		ply:EndSpectator()
 		ply.SpawnBlocked = false
 		ply.LambdaSpawnTime = CurTime()
 		ply.IsCurrentlySpawning = true
+		ply.DeathAcknowledged = false
 
 		self:InitializePlayerPickup(ply)
 		self:InitializePlayerSpeech(ply)
@@ -1609,7 +1610,6 @@ function GM:PlayerThink(ply)
 	end
 
 	if SERVER then
-		self:UpdatePlayerSpeech(ply)
 		-- Make sure we reset the view lock if we are in release mode.
 		local viewlock = ply:GetViewLock()
 		if viewlock == VIEWLOCK_SETTINGS_RELEASE then
