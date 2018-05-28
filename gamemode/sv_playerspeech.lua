@@ -220,7 +220,9 @@ local SPEECH_GROUPS =
 local InSpeechUpdate = false
 local NextSpeech = nil
 
-local function EmitPlayerSpeech(ply, group, minWait)
+local function EmitPlayerSpeech(ply, group, minWait, delay)
+
+	local delay = delay or 0.5 
 
 	if InSpeechUpdate == false then
 		NextSpeech = { ply, group, minWait }
@@ -251,17 +253,16 @@ local function EmitPlayerSpeech(ply, group, minWait)
 	
 	local vo = table.Random(vos)
 	local dur = SoundDuration(vo)
+	if dur == nil or dur == 0.0 then 
+		dur = (groupData.FallbackTime or 5)
+	end 
 
 	util.RunDelayed(function()
 		if not IsValid(ply) then return end
 		ply:EmitSound(vo)
-	end, CurTime() + 0.2)
+	end, CurTime() + delay)
 
-	if dur ~= nil and dur > 0 then
-		ply.NextSpeechTime = curTime + dur
-	else
-		ply.NextSpeechTime = curTime + (groupData.FallbackTime or 5) -- Fallback
-	end
+	ply.NextSpeechTime = curTime + dur + delay
 	ply.LastSpeechTime = CurTime()
 
 	return true
@@ -355,12 +356,9 @@ function GM:HandlePlayerContact(viewer, ply)
 	local alive = ply:Alive()
 	local emitSpeech = false
 
-	if alive == false and ply.ResetAliveState ~= true then
-		ply.ResetAliveState = true
+	if alive == false and ply.DeathAcknowledged ~= true then
+		ply.DeathAcknowledged = true
 		emitSpeech = true
-	else if alive == true and ply.ResetAliveState == true then
-			ply.ResetAliveState = false
-		end
 	end
 
 	if viewer.FriendlyInSight == false then
@@ -368,7 +366,7 @@ function GM:HandlePlayerContact(viewer, ply)
 	end
 
 	if emitSpeech == true then
-		EmitPlayerSpeech(viewer, "teammate_death")
+		EmitPlayerSpeech(viewer, "teammate_death", 5, 1)
 	end
 
 end

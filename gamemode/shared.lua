@@ -82,12 +82,22 @@ function GM:Tick()
 		self.LastAllowCollisions = lambda_playercollision:GetBool()
 	end
 
-	for _,v in pairs(player.GetAll()) do
+	local plys = player.GetAll()
+	for _,v in pairs(plys) do
 		self:PlayerThink(v)
 		if collisionChanged == true then
 			v:CollisionRulesChanged()
 		end
 	end
+	
+	if SERVER then 
+		while #plys > 0 do 
+			local i = math.random(1, #plys)
+			local v = plys[i]
+			table.remove(plys, i)
+			self:UpdatePlayerSpeech(v)
+		end 
+	end 
 
 	local gameType = self:GetGameType()
 	if gameType.Think then
