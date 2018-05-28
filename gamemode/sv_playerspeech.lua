@@ -66,6 +66,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/watchout.wav", "vo/npc/male01/takecover02.wav" },
 			["female"] = { "vo/npc/female01/watchout.wav", "vo/npc/female01/takecover02.wav" },
+			["combine"] = { "npc/metropolice/vo/watchit.wav", "npc/metropolice/vo/grenade.wav", "npc/metropolice/vo/getdown.wav", "npc/metropolice/vo/lookout.wav", "npc/metropolice/vo/shit.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -75,6 +76,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/coverwhilereload02.wav", "vo/npc/male01/coverwhilereload01.wav" },
 			["female"] = { "vo/npc/female01/coverwhilereload02.wav", "vo/npc/female01/coverwhilereload01.wav" },
+			["combine"] = { "npc/combine_soldier/vo/coverme.wav"},
 		},
 		FallbackTime = 3,
 	},
@@ -84,6 +86,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/combine01.wav", "vo/npc/male01/combine02.wav" },
 			["female"] = { "vo/npc/female01/combine01.wav", "vo/npc/female01/combine02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -93,6 +96,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/combine01.wav", "vo/npc/male01/combine02.wav" },
 			["female"] = { "vo/npc/female01/combine01.wav", "vo/npc/female01/combine02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -102,6 +106,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/zombies01.wav", "vo/npc/male01/zombies02.wav" },
 			["female"] = { "vo/npc/female01/zombies01.wav", "vo/npc/female01/zombies02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/infected.wav", "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -111,6 +116,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/zombies01.wav", "vo/npc/male01/zombies02.wav" },
 			["female"] = { "vo/npc/female01/zombies01.wav", "vo/npc/female01/zombies02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/infected.wav", "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -120,6 +126,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/herecomehacks01.wav", "vo/npc/male01/herecomehacks02.wav", "vo/npc/male01/hacks01.wav", "vo/npc/male01/hacks02.wav" },
 			["female"] = { "vo/npc/female01/herecomehacks01.wav", "vo/npc/female01/herecomehacks02.wav", "vo/npc/female01/hacks01.wav", "vo/npc/female01/hacks02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -129,6 +136,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/headcrabs01.wav", "vo/npc/male01/headcrabs02.wav" },
 			["female"] = { "vo/npc/female01/headcrabs01.wav", "vo/npc/female01/headcrabs02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/bugs.wav", "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -138,6 +146,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/headcrabs01.wav", "vo/npc/male01/headcrabs02.wav" },
 			["female"] = { "vo/npc/female01/headcrabs01.wav", "vo/npc/female01/headcrabs02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/bugs.wav", "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -147,6 +156,34 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/npc/male01/headcrabs01.wav", "vo/npc/male01/headcrabs02.wav" },
 			["female"] = { "vo/npc/female01/headcrabs01.wav", "vo/npc/female01/headcrabs02.wav" },
+			["combine"] = { "npc/combine_soldier/vo/bugs.wav", "npc/combine_soldier/vo/contact.wav", "npc/combine_soldier/vo/contactconfim.wav" },
+		},
+		FallbackTime = 3,
+	},
+	["encounter_npc_strider"] =
+	{
+		VO =
+		{
+			["male"] = { "vo/npc/male01/strider.wav" },
+			["female"] = { "vo/npc/female01/strider.wav" },
+		},
+		FallbackTime = 3,
+	},
+	["encounter_npc_cscanner"] =
+	{
+		VO =
+		{
+			["male"] = { "vo/npc/male01/scanners01.wav", "vo/npc/male01/scanners02.wav" },
+			["female"] = { "vo/npc/female01/scanners01.wav", "vo/npc/female01/scanners02.wav" },
+		},
+		FallbackTime = 3,
+	},
+	["encounter_npc_combinegunship"] =
+	{
+		VO =
+		{
+			["male"] = { "vo/npc/male01/gunship02.wav" },
+			["female"] = { "vo/npc/female01/gunship02.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -165,6 +202,7 @@ local SPEECH_GROUPS =
 		{
 			["male"] = { "vo/coast/odessa/male01/nlo_cheer01.wav", "vo/coast/odessa/male01/nlo_cheer02.wav", "vo/coast/odessa/male01/nlo_cheer03.wav"  },
 			["female"] = { "vo/coast/odessa/female01/nlo_cheer02.wav", "vo/coast/odessa/female01/nlo_cheer03.wav"  },
+			["combine"] = { "npc/metropolice/vo/chuckle.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -419,13 +457,18 @@ function GM:UpdatePlayerSpeech(ply)
 	local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 164))
 	local actions = {}
 
+	local visiblePlys = {}
 	for k,v in pairs(nearbyEnts) do
 		if v == ply then
 			continue
 		end
 
-		local isVisible = ply:Visible(v)
-		if isVisible or v:IsPlayer() then
+		if v:IsPlayer() then 
+			table.insert(visiblePlys, v)
+		end 
+
+		local isVisible = ply:InsideViewCone(v)
+		if isVisible == true then
 
 			local class = v:GetClass()
 			if v:IsNPC() then
@@ -453,6 +496,8 @@ function GM:UpdatePlayerSpeech(ply)
 
 		end
 	end
+
+	--PrintTable(visiblePlys)
 
 	for _,v in pairs(actions) do
 		v()

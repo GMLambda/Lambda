@@ -153,8 +153,9 @@ end
 function PLAYER_META:SetGender(gender)
 	if gender:iequals("male") == false and
 	   gender:iequals("female") == false and
-		 gender:iequals("zombie") == false
-  then
+		 gender:iequals("zombie") == false and 
+		 gender:iequals("combine") == false
+  	then
 		gender = "male"
 	end
 	self:SetNWString("Gender", gender)
@@ -294,3 +295,11 @@ end
 function PLAYER_META:StopSprinting()
 	self:SetSprinting(false)
 end
+
+function PLAYER_META:InsideViewCone(other, tolerance)
+
+	local dir = (other:GetPos() - self:EyePos()):GetNormal()
+	local dot = dir:Dot(self:GetAimVector())
+	return dot >= (tolerance or 0.6)
+
+end 

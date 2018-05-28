@@ -9,41 +9,6 @@ GM.HurtSounds = {}
 
 -- Zombie
 GM.HurtSounds["zombie"] = {}
-GM.HurtSounds["zombie"][HITGROUP_LEFTARM] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
-GM.HurtSounds["zombie"][HITGROUP_RIGHTARM] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
-GM.HurtSounds["zombie"][HITGROUP_LEFTLEG] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
-GM.HurtSounds["zombie"][HITGROUP_RIGHTLEG] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
-GM.HurtSounds["zombie"][HITGROUP_STOMACH] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
 GM.HurtSounds["zombie"][HITGROUP_GENERIC] = {
 	"npc/zombie/zombie_pain1.wav",
 	"npc/zombie/zombie_pain2.wav",
@@ -51,20 +16,28 @@ GM.HurtSounds["zombie"][HITGROUP_GENERIC] = {
 	"npc/zombie/zombie_pain4.wav",
 	"npc/zombie/zombie_pain5.wav",
 }
-GM.HurtSounds["zombie"][HITGROUP_CHEST] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
+GM.HurtSounds["zombie"][HITGROUP_LEFTARM] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_RIGHTARM] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_LEFTLEG] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_RIGHTLEG] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_STOMACH] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_CHEST] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+GM.HurtSounds["zombie"][HITGROUP_GEAR] = GM.HurtSounds["zombie"][HITGROUP_GENERIC]
+
+-- Combine
+GM.HurtSounds["combine"] = {}
+GM.HurtSounds["combine"][HITGROUP_GENERIC] = {
+	"npc/combine_soldier/pain1.wav",
+	"npc/combine_soldier/pain2.wav",
+	"npc/combine_soldier/pain3.wav",
 }
-GM.HurtSounds["zombie"][HITGROUP_GEAR] = {
-	"npc/zombie/zombie_pain1.wav",
-	"npc/zombie/zombie_pain2.wav",
-	"npc/zombie/zombie_pain3.wav",
-	"npc/zombie/zombie_pain4.wav",
-	"npc/zombie/zombie_pain5.wav",
-}
+GM.HurtSounds["combine"][HITGROUP_LEFTARM] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_RIGHTARM] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_LEFTLEG] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_RIGHTLEG] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_STOMACH] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_CHEST] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
+GM.HurtSounds["combine"][HITGROUP_GEAR] = GM.HurtSounds["combine"][HITGROUP_GENERIC]
 
 -- Male
 GM.HurtSounds["male"] = {}
