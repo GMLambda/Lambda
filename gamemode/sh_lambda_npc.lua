@@ -174,9 +174,12 @@ if SERVER then
 			end
 		end
 
-		local wep = npc:GetActiveWeapon()
-		if not IsValid(wep) then
-			wep = nil
+		local wep = nil
+		if npc.GetActiveWeapon then 
+			wep = npc:GetActiveWeapon()
+			if not IsValid(wep) then
+				wep = nil
+			end
 		end
 		if npc:HasSpawnFlags(8192) == true and wep ~= nil then
 			--wep:Remove()
