@@ -298,7 +298,20 @@ end
 
 function PLAYER_META:InsideViewCone(other, tolerance)
 
-	local dir = (other:GetPos() - self:EyePos()):GetNormal()
+	local otherPos 
+	if IsEntity(other) then 
+		if other:IsPlayer() then 
+			otherPos = other:EyePos()
+		else 
+			otherPos = other:GetPos()
+		end 
+	elseif isvector(other) then 
+		otherPos = other 
+	else 
+		error("Invalid argument passed")
+	end 
+
+	local dir = (otherPos - self:EyePos()):GetNormal()
 	local dot = dir:Dot(self:GetAimVector())
 	return dot >= (tolerance or 0.6)
 

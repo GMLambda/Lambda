@@ -4,7 +4,6 @@ include("sh_taunts.lua")
 
 util.AddNetworkString("PlayerStartTaunt")
 
-
 local function GetNearbyAllies(ply)
 
 	local playerPos = ply:GetPos()

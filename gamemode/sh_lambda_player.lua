@@ -206,7 +206,7 @@ if SERVER then
 	local female_bbox = Vector(21.857199, 20.744711, 71.528900)
 
 	-- Credits to CapsAdmin
-	function EstimateModelGender(ent)
+	local function EstimateModelGender(ent)
 
 		local mdl = ent:GetModel()
 		if not mdl then
