@@ -248,6 +248,12 @@ function GM:GetPlayerBulletSpread(ply)
 
 end
 
+-- The revolver had always laser accuracy which is annoying for Deathmatch.
+local SPREAD_OVERRIDE_TABLE =
+{
+	["weapon_357"] = Vector(0.03, 0.03, 0.0),
+}
+
 function GM:EntityFireBullets(ent, data)
 
 	local class
@@ -299,12 +305,18 @@ function GM:EntityFireBullets(ent, data)
 			end
 
 			local spread = data.Spread
+			local spreadData = SPREAD_OVERRIDE_TABLE[class]
+			if spreadData ~= nil then 
+				spread = spreadData 
+			end 
+
 			if data.Num == 1 then
 				if ent:IsPlayer() == true then
 					spread = (spread * 0.5) * (0.5 + ent.MovementRecoil)
 				end
 			end
-			data.Spread = spread
+			
+			data.Spread = spread + (VectorRand() * 0.005)
 
 		end
 
