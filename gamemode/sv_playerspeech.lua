@@ -196,22 +196,22 @@ local SPEECH_GROUPS =
 		},
 		FallbackTime = 3,
 	},
-	["enemy_kill_10"] =
-	{
-		VO =
-		{
-			["male"] = { "vo/coast/odessa/male01/nlo_cheer01.wav", "vo/coast/odessa/male01/nlo_cheer02.wav", "vo/coast/odessa/male01/nlo_cheer03.wav"  },
-			["female"] = { "vo/coast/odessa/female01/nlo_cheer02.wav", "vo/coast/odessa/female01/nlo_cheer03.wav"  },
-			["combine"] = { "npc/metropolice/vo/chuckle.wav" },
-		},
-		FallbackTime = 3,
-	},
 	["enemy_kill_5"] =
 	{
 		VO =
 		{
-			["male"] = { "vo/coast/odessa/male01/nlo_cheer01.wav", "vo/coast/odessa/male01/nlo_cheer02.wav", "vo/coast/odessa/male01/nlo_cheer03.wav"  },
-			["female"] = { "vo/coast/odessa/female01/nlo_cheer02.wav", "vo/coast/odessa/female01/nlo_cheer03.wav"  },
+			["male"] = { "vo/coast/odessa/male01/nlo_cheer02.wav" },
+			["female"] = { "vo/coast/odessa/female01/nlo_cheer02.wav", "vo/coast/odessa/female01/nlo_cheer01.wav"  },
+		},
+		FallbackTime = 3,
+	},
+	["enemy_kill_10"] =
+	{
+		VO =
+		{
+			["male"] = { "vo/coast/odessa/male01/nlo_cheer03.wav", "vo/coast/odessa/male01/nlo_cheer04.wav"  },
+			["female"] = { "vo/coast/odessa/female01/nlo_cheer03.wav"  },
+			["combine"] = { "npc/metropolice/vo/chuckle.wav" },
 		},
 		FallbackTime = 3,
 	},
@@ -222,10 +222,12 @@ local NextSpeech = nil
 
 local function EmitPlayerSpeech(ply, group, minWait, delay)
 
-	local delay = delay or 0.5 
+	if delay == nil then 
+		delay = 0.2
+	end
 
 	if InSpeechUpdate == false then
-		NextSpeech = { ply, group, minWait }
+		NextSpeech = { ply, group, minWait, delay }
 		return true
 	end
 
@@ -237,7 +239,7 @@ local function EmitPlayerSpeech(ply, group, minWait, delay)
 	if ply.NextSpeechTime > curTime then
 		return false -- Busy
 	end
-	if minWait ~= nil and ply.LastSpeechTime ~= nil and CurTime() - ply.LastSpeechTime < minWait then
+	if minWait ~= nil and ply.LastSpeechTime ~= nil and (curTime - ply.LastSpeechTime) < minWait then
 		return false -- Busy
 	end
 
@@ -258,12 +260,14 @@ local function EmitPlayerSpeech(ply, group, minWait, delay)
 	end 
 
 	util.RunDelayed(function()
-		if not IsValid(ply) then return end
+		if not IsValid(ply) then 
+			return 
+		end
 		ply:EmitSound(vo)
 	end, CurTime() + delay)
 
 	ply.NextSpeechTime = curTime + dur + delay
-	ply.LastSpeechTime = CurTime()
+	ply.LastSpeechTime = curTime
 
 	return true
 
@@ -304,21 +308,17 @@ function GM:OnPlayerKilledEnemy(ply, npc)
 	if ply.KillStreak >= 20 then
 		ply.KillStreak = 0	-- Reset
 	elseif ply.KillStreak == 10 then
-		EmitPlayerSpeech(ply, "enemy_kill_10")
+		if math.random(0, 2) == 0 then 
+			EmitPlayerSpeech(ply, "enemy_kill_10", 5, 0.5)
+		end
 	elseif ply.KillStreak == 5 then
-		EmitPlayerSpeech(ply, "enemy_kill_5")
+		if math.random(0, 2) == 0 then 
+			EmitPlayerSpeech(ply, "enemy_kill_5", 5, 0.5)
+		end
 	else
 		if math.random(0, 10) == 0 then
-			EmitPlayerSpeech(ply, "enemy_kill", 3)
+			EmitPlayerSpeech(ply, "enemy_kill", 3, 0.5)
 		end
-	end
-
-end
-
-function GM:OnPlayerWatchPlayerDie(viewer, ply)
-
-	if viewer.FriendlyInSight == false then
-		return
 	end
 
 end
@@ -343,7 +343,7 @@ function GM:HandleNPCContact(viewer, npc)
 		newEncounter = true
 	end
 
-	if newEncounter == true and EmitPlayerSpeech(viewer, "encounter_" .. class) == true then
+	if newEncounter == true and EmitPlayerSpeech(viewer, "encounter_" .. class, 4, 0.2) == true then
 		self.EnemyClassEncounters[class] = { LastSeen = curTime }
 	elseif newEncounter == false then
 		encounterData.LastSeen = curTime
@@ -354,18 +354,18 @@ end
 function GM:HandlePlayerContact(viewer, ply)
 
 	local alive = ply:Alive()
-	local emitSpeech = false
+	local acknowledgeDeath = false
 
 	if alive == false and ply.DeathAcknowledged ~= true then
 		ply.DeathAcknowledged = true
-		emitSpeech = true
+		acknowledgeDeath = true
 	end
 
 	if viewer.FriendlyInSight == false then
 		return
 	end
 
-	if emitSpeech == true then
+	if acknowledgeDeath == true then
 		EmitPlayerSpeech(viewer, "teammate_death", 5, 1)
 	end
 
@@ -376,7 +376,11 @@ end
 
 function GM:HandleGrenadeContact(viewer, nate)
 
-	if viewer.FriendlyInSight == false then
+	if nate.Acknowledged == true then
+		return
+	end
+
+	if viewer.FriendlyNearby == false then
 		return
 	end
 
@@ -393,17 +397,13 @@ function GM:HandleGrenadeContact(viewer, nate)
 	   viewer:Health() <= 60 and
 	   nate:GetInternalVariable("m_flDetonateTime") <= 0.6)
 	then
-		if EmitPlayerSpeech(viewer, "death_imminent") == true then
+		if EmitPlayerSpeech(viewer, "death_imminent", 5, 0.2) == true then
 			nate.ExplosionAcknolwedged = true
 			return
 		end
 	end
 
-	if nate.Acknowledged == true then
-		return
-	end
-
-	if EmitPlayerSpeech(viewer, "grenade") == true then
+	if EmitPlayerSpeech(viewer, "grenade", 5, 0.2) == true then
 		nate.Acknowledged = true
 	end
 
@@ -411,20 +411,14 @@ end
 
 function GM:OnPlayerReload(ply, event, data)
 
-	if ply.FriendlyInSight == false or ply.EnemyNearby == false then
-		return
-	end
-
-	-- Don't annoy the player too much.
-	if math.random(0, 5) ~= 0 then
+	if ply.FriendlyNearby == false then
 		return
 	end
 
 	local wep = ply:GetActiveWeapon()
-	local wepclass = wep:GetClass()
-	if wepclass == "weapon_smg1" or wepclass == "weapon_pistol" or wepclass == "weapon_shotgun" or wepclass == "weapon_357" then
+	if IsValid(wep) then
 		EmitPlayerSpeech(ply, "reload")
-	end
+	end 
 
 end
 
@@ -452,23 +446,24 @@ function GM:UpdatePlayerSpeech(ply)
 	ply.EnemyInSight = false
 	ply.EnemyNearby = false
 
-	local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 164))
+	local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 250))
 	local actions = {}
 
-	local visiblePlys = {}
 	for k,v in pairs(nearbyEnts) do
 		if v == ply then
 			continue
 		end
 
-		if v:IsPlayer() then 
-			table.insert(visiblePlys, v)
-		end 
-
+		local executeHandler = false
 		local isVisible = ply:InsideViewCone(v)
+		local class = v:GetClass()
+
+		if isVisible == true then 
+			isVisible = ply:Visible(v)
+		end
+
 		if isVisible == true then
 
-			local class = v:GetClass()
 			if v:IsNPC() then
 				if IsFriendEntityName(class) == false then
 					ply.EnemyInSight = isVisible
@@ -479,9 +474,23 @@ function GM:UpdatePlayerSpeech(ply)
 				ply.FriendlyNearby = true
 			end
 
+			executeHandler = true
+		else 
+			if v:IsPlayer() and v:Alive() == true then 
+				local otherPos = v:GetPos()
+				local dist = otherPos:Distance(pos)
+				if dist <= 50 then 
+					ply.FriendlyInSight = false -- Back to back
+					ply.FriendlyNearby = true
+					executeHandler = true
+				end 
+			end
+		end
+
+		if executeHandler == true then
 			local handler = ENTITY_CLASS_HANDLER[class]
 			if handler ~= nil then
-				handler(self, ply, v)
+				table.insert(actions, function() handler(self, ply, v) end)
 			else
 				if v:IsNPC() then
 					table.insert(actions, function() self:HandleNPCContact(ply, v) end)
@@ -491,11 +500,8 @@ function GM:UpdatePlayerSpeech(ply)
 					table.insert(actions, function() self:HandleWeaponContact(ply, v) end)
 				end
 			end
-
 		end
 	end
-
-	--PrintTable(visiblePlys)
 
 	for _,v in pairs(actions) do
 		v()
@@ -504,7 +510,7 @@ function GM:UpdatePlayerSpeech(ply)
 	InSpeechUpdate = true
 
 	if NextSpeech ~= nil and IsValid(NextSpeech[1]) then
-		EmitPlayerSpeech(NextSpeech[1], NextSpeech[2], NextSpeech[3])
+		EmitPlayerSpeech(NextSpeech[1], NextSpeech[2], NextSpeech[3], NextSpeech[4])
 		NextSpeech = nil
 	end
 
