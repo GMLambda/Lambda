@@ -921,6 +921,11 @@ if SERVER then
 			dmginfo:ScaleDamage( scale )
 		end
 
+		if hitgroup == HITGROUP_HEAD then 
+			-- Make it more deadly when getting hit in the head.
+			dmginfo:ScaleDamage(1.4)
+		end 
+
 		if dmginfo:IsDamageType(DMG_BLAST) then
 			dmginfo:ScaleDamage( 2 )
 		end
