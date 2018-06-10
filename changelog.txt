@@ -3,10 +3,15 @@
 - Feature: Native game hints.
 - Feature: Experimental hl2dm gametype, set lambda_gametype convar to 'hl2dm' to try it out.
 - Feature: Ability to command friendly NPCs via the Context menu.
+- Feature: Vote system, allows players to vote: Skip Map, Change to Map, Kick Player, Restart Round.
+- Feature: Allow players to kill every NPC, the game will restart the map if a critical NPC died.
+- Improved: Allow to select all known player models the server has.
+- Improved: Player sounds and taunts are now specific to the player model type.
 - Add: Game content mounting for episodic content, automatically creates and mounts GMA based on gametype.
 - Add: ConVar to block moving weapons/items by shooting them, 'lambda_prevent_item_move <bool>'.
 - Add: ConVar to disable ammo limits, 'lambda_limit_default_ammo <bool>'.
 - Fix: Physcannon not stopping looping sounds and not detaching on player death.
+- Fix: Physcannon ignoring the mass.
 - Fix: Physcannon spamming animation events.
 - Fix: Physcannon unable to push back enemies such as headcrabs.
 - Fix: Weapons can only be picked up once now per player.
@@ -28,6 +33,8 @@
 - Fix: d3_c17_07 creating infinite soldiers when player does not meet alyx.
 - Fix: Barney to appear twice on d3_c17_10a.
 - Fix: Barney to appear twice on d3_c17_10b.
+- Fix: Players not getting the crowbar on d1_trainstation_06.
+- Fix: Suit would recharge too fast, fixes players infinite sprinting.
 
 0.9:
 - Removed: Freezing physics when trying to jump off them.
