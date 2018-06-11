@@ -1,86 +1,85 @@
 DEFINE_BASECLASS( "gamemode_base" )
 
-local DbgPrint = GetLogging("NPC")
-
 if SERVER then
-
 	AddCSLuaFile()
-
 end
 
-	local sk_npc_head = GetConVar("sk_npc_head")
-	local sk_npc_chest = GetConVar("sk_npc_chest")
-	local sk_npc_stomach = GetConVar("sk_npc_stomach")
-	local sk_npc_arm = GetConVar("sk_npc_arm")
-	local sk_npc_leg = GetConVar("sk_npc_leg")
+local DbgPrint = GetLogging("NPC")
+local DbgPrintDmg = GetLogging("Damage")
 
-	local HITGROUP_SCALE =
-	{
-		[HITGROUP_GENERIC] = function() return 1.0 end,
-		[HITGROUP_HEAD] = function() return sk_npc_head:GetFloat() end,
-		[HITGROUP_CHEST] = function() return sk_npc_chest:GetFloat() end,
-		[HITGROUP_STOMACH] = function() return sk_npc_stomach:GetFloat() end,
-		[HITGROUP_LEFTARM] = function() return sk_npc_arm:GetFloat() end,
-		[HITGROUP_RIGHTARM] = function() return sk_npc_arm:GetFloat() end,
-		[HITGROUP_LEFTLEG] = function() return sk_npc_leg:GetFloat() end,
-		[HITGROUP_RIGHTLEG] = function() return sk_npc_leg:GetFloat() end,
-	}
+local sk_npc_head = GetConVar("sk_npc_head")
+local sk_npc_chest = GetConVar("sk_npc_chest")
+local sk_npc_stomach = GetConVar("sk_npc_stomach")
+local sk_npc_arm = GetConVar("sk_npc_arm")
+local sk_npc_leg = GetConVar("sk_npc_leg")
 
-	local SOLIDER_GEAR_SOUNDS =
-	{
-		"npc/combine_soldier/gear1.wav",
-		"npc/combine_soldier/gear2.wav",
-		"npc/combine_soldier/gear3.wav",
-		"npc/combine_soldier/gear4.wav",
-		"npc/combine_soldier/gear5.wav",
-		"npc/combine_soldier/gear6.wav"
-	}
+local HITGROUP_SCALE =
+{
+	[HITGROUP_GENERIC] = function() return 1.0 end,
+	[HITGROUP_HEAD] = function() return sk_npc_head:GetFloat() end,
+	[HITGROUP_CHEST] = function() return sk_npc_chest:GetFloat() end,
+	[HITGROUP_STOMACH] = function() return sk_npc_stomach:GetFloat() end,
+	[HITGROUP_LEFTARM] = function() return sk_npc_arm:GetFloat() end,
+	[HITGROUP_RIGHTARM] = function() return sk_npc_arm:GetFloat() end,
+	[HITGROUP_LEFTLEG] = function() return sk_npc_leg:GetFloat() end,
+	[HITGROUP_RIGHTLEG] = function() return sk_npc_leg:GetFloat() end,
+}
 
-	function GM:NPCFootstep(npc, data)
+local SOLIDER_GEAR_SOUNDS =
+{
+	"npc/combine_soldier/gear1.wav",
+	"npc/combine_soldier/gear2.wav",
+	"npc/combine_soldier/gear3.wav",
+	"npc/combine_soldier/gear4.wav",
+	"npc/combine_soldier/gear5.wav",
+	"npc/combine_soldier/gear6.wav"
+}
 
-		local class = npc:GetClass()
-		if class == "npc_combine" or class == "npc_combine_s" then
-			--npc:EmitSound(table.Random(SOLIDER_GEAR_SOUNDS))
-			local vel = npc:GetVelocity()
-			if vel:Length() >= 40 then
-				EmitSound(table.Random(SOLIDER_GEAR_SOUNDS), npc:GetPos(), npc:EntIndex(), CHAN_BODY)
-			end
+function GM:NPCFootstep(npc, data)
+
+	local class = npc:GetClass()
+	if class == "npc_combine" or class == "npc_combine_s" then
+		--npc:EmitSound(table.Random(SOLIDER_GEAR_SOUNDS))
+		local vel = npc:GetVelocity()
+		if vel:Length() >= 40 then
+			EmitSound(table.Random(SOLIDER_GEAR_SOUNDS), npc:GetPos(), npc:EntIndex(), CHAN_BODY)
 		end
-
 	end
+
+end
 
 if SERVER then
 
 	function GM:ScaleNPCDamage(npc, hitgroup, dmginfo)
 
+		local DbgPrint = DbgPrintDmg 
+
+		DbgPrint("ScaleNPCDamage", npc, hitgroup)
+
 		-- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
 		self:ApplyCorrectedDamage(dmginfo)
 
 		local attacker = dmginfo:GetAttacker()
-		--DbgPrint("ScaleNPCDamage -> Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor))
 
-		-- For the lazy matt to test things more quickly.
-		if attacker:IsPlayer() and IsValid(npc:GetEnemy()) == false then
-			DbgPrint("Making the attacker the NPC enemy")
-			npc:SetEnemy(attacker)
+		-- First scale hitgroups.
+		local scale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
+		DbgPrint("Hitgroup Scale", npc, scale)
+		dmginfo:ScaleDamage(scale)
+
+		-- Scale by difficulty.
+		local scaleType = 0
+		if attacker:IsPlayer() == true then 
+			scaleType = DMG_SCALE_PVN
+		elseif attacker:IsNPC() == true then 
+			scaleType = DMG_SCALE_NVN
 		end
-
-		local hitgroupScale = HITGROUP_SCALE[hitgroup]  or function() return 1.0 end
-
-		if dmginfo:IsDamageType(DMG_BLAST) then
-
-		else
-
-			if hitgroup == HITGROUP_GEAR then
-				dmginfo:SetDamage(0.1)
-				return
-			else
-				local scale = hitgroupScale()
-				DbgPrint("Scaling damage with: " .. scale)
-				dmginfo:ScaleDamage( scale )
+		if scaleType ~= 0 then 
+			local scale = self:GetDifficultyDamageScale(scaleType)
+			if scale ~= nil then 
+				DbgPrint("Scaling difficulty damage: " .. tostring(scale))
+				dmginfo:ScaleDamage(scale)
 			end
-
-		end
+		end 
 
 		DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
 
@@ -95,17 +94,16 @@ if SERVER then
 
 		local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC") or {}
 		if enemyClasses[npc:GetClass()] == true then
-			table.insert(self.EnemyNPCs, npc)
+			self.EnemyNPCs[npc] = npc
 		end
 
 		self:AdjustNPCDifficulty(npc)
 
-		if npc:GetClass() == "npc_combine_s" and npc:GetInternalVariable("additionalequipment") == "ai_weapon_shotgun" then
+		local equip = npc:GetInternalVariable("additionalequipment")
+		if npc:GetClass() == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
 			-- HACKHACK: I'm guessing garry removed loading skins based on their weapons at some point.
 			npc:SetSkin(1)
 		end
-
-		npc:SetCustomCollisionCheck(true)
 
 		if self.MapScript.OnRegisterNPC ~= nil then
 			self.MapScript:OnRegisterNPC(npc)
@@ -226,7 +224,7 @@ if SERVER then
 		for k,v in pairs(self.EnemyNPCs or {}) do
 
 			if not IsValid(v) or not v:IsNPC() then
-				--self.EnemyNPCs[k] = nil
+				self.EnemyNPCs[k] = nil
 				continue
 			end
 

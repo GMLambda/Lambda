@@ -5,6 +5,7 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Player")
+local DbgPrintDmg = GetLogging("Damage")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -893,42 +894,47 @@ if SERVER then
 
 	local HITGROUP_SCALE =
 	{
-		[HITGROUP_GENERIC] = function() return 1.0 end,
-		[HITGROUP_HEAD] = function() return sk_player_head:GetFloat() end,
-		[HITGROUP_CHEST] = function() return sk_player_chest:GetFloat() end,
-		[HITGROUP_STOMACH] = function() return sk_player_stomach:GetFloat() end,
-		[HITGROUP_LEFTARM] = function() return sk_player_arm:GetFloat() end,
-		[HITGROUP_RIGHTARM] = function() return sk_player_arm:GetFloat() end,
-		[HITGROUP_LEFTLEG] = function() return sk_player_leg:GetFloat() end,
-		[HITGROUP_RIGHTLEG] = function() return sk_player_leg:GetFloat() end,
+		[HITGROUP_GENERIC] = function() return 1.0 end, -- 1
+		[HITGROUP_HEAD] = function() return sk_player_head:GetFloat() end, -- 3
+		[HITGROUP_CHEST] = function() return sk_player_chest:GetFloat() end, -- 1
+		[HITGROUP_STOMACH] = function() return sk_player_stomach:GetFloat() end, -- 1
+		[HITGROUP_LEFTARM] = function() return sk_player_arm:GetFloat() end, -- 1
+		[HITGROUP_RIGHTARM] = function() return sk_player_arm:GetFloat() end, -- 1
+		[HITGROUP_LEFTLEG] = function() return sk_player_leg:GetFloat() end, -- 1
+		[HITGROUP_RIGHTLEG] = function() return sk_player_leg:GetFloat() end, -- 1
 	}
 
 	function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
+
+		local DbgPrint = DbgPrintDmg 
 
 		DbgPrint("ScalePlayerDamage", ply, hitgroup)
 
 		-- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
 		self:ApplyCorrectedDamage(dmginfo)
 
-		local hitgroupScale = HITGROUP_SCALE[hitgroup] or function() return 1.0 end
+		local attacker = dmginfo:GetAttacker()
 
-		if hitgroup == HITGROUP_GEAR then
-			dmginfo:SetDamage(0.1)
-			return
-		else
-			local scale = hitgroupScale()
-			--DbgPrint("Scaling damage with: " .. scale)
-			dmginfo:ScaleDamage( scale )
+		-- First scale hitgroups.
+		local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
+		DbgPrint("Hitgroup Scale", npc, scale)
+		dmginfo:ScaleDamage(scale)
+
+		-- Scale by difficulty.
+		local scaleType = 0
+		if attacker:IsPlayer() == true then 
+			scaleType = DMG_SCALE_PVP
+		elseif attacker:IsNPC() == true then 
+			scaleType = DMG_SCALE_NVP
 		end
 
-		if hitgroup == HITGROUP_HEAD then 
-			-- Make it more deadly when getting hit in the head.
-			dmginfo:ScaleDamage(1.4)
+		if scaleType ~= 0 then 
+			scale = self:GetDifficultyDamageScale(scaleType)
+			if scale ~= nil then 
+				DbgPrint("Scaling difficulty damage: " .. tostring(scale))
+				dmginfo:ScaleDamage(scale)
+			end
 		end 
-
-		if dmginfo:IsDamageType(DMG_BLAST) then
-			dmginfo:ScaleDamage( 2 )
-		end
 
 		if dmginfo:GetDamage() > 0 then
 			--DbgPrint("ScalePlayerDamage: " .. tostring(ply))
