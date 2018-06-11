@@ -1,4 +1,4 @@
-local DbgPrint = GetLogging("NPC")
+local DbgPrint = GetLogging("NPCMaker")
 
 DEFINE_BASECLASS("lambda_entity")
 
@@ -76,14 +76,6 @@ function ENT:PreInitialize()
 	self:SetupNWVar("LiveChildren", "int", { Default = 0 })
 	self:SetupNWVar("CreatedCount", "int", { Default = 0 })
 	self:SetupNWVar("ScaleLiveChildren", "bool", { Default = true, KeyValue = "ScaleLiveChildren" })
-
-	--self.MaxNPCCount = 0
-	--self.MaxLiveChildren = 0
-	--self.SpawnFrequency = 0
-	--self.Disabled = false
-	--self.LiveChildren = 0
-	--self.CreatedCount = 0
-	--self.DisableScaling = false
 
 end
 

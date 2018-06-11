@@ -1,4 +1,4 @@
-local DbgPrint = GetLogging("NPC")
+local DbgPrint = GetLogging("NPCMaker")
 
 if SERVER then
 
@@ -285,6 +285,8 @@ function ENT:MakeNPC()
 		return
 	end
 
+	DbgPrint(self, "Created NPC: " .. tostring(ent))
+
 	local destObj = nil
 
 	if dest == nil then
@@ -348,6 +350,78 @@ function ENT:MakeNPC()
 
 end
 
+local HULL_SIZE_HUMAN = { Vector(-13, -13, 0), Vector(13, 13, 72) }
+
+local KNOWN_HULLS =
+{
+	["npc_combine"] = HULL_SIZE_HUMAN,
+	["npc_combine_s"] = HULL_SIZE_HUMAN,
+}
+
+function ENT:GetSpawnPosInRadius(hull, checkVisible)
+
+	DbgPrint(self, "ENT:GetSpawnPosInRadius")
+
+	local pos = self:GetPos()
+	local radius = self.Radius
+	local ang = Angle(0, 0, 0)
+
+	local step = 360 / self:GetScaledMaxNPCs()
+
+	local hullMins = hull[1]
+	local hullMaxs = hull[2]
+
+	--DbgPrint("NPC Hull: " .. tostring(hullMins) .. ", " .. tostring(hullMaxs))
+	--DbgPrint("NPC Hulltype: " .. tostring(npc:GetHullType()))
+
+	for y = 0, 360, step do
+
+		ang.y = y
+
+		local dir = ang:Forward()
+		local testPos = pos + (dir * radius)
+
+		if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
+			continue
+		end
+
+		-- Check if they would fall.
+		local tr = util.TraceLine(
+		{
+			start = testPos,
+			endpos = testPos - Vector(0, 0, 8192),
+			mask = MASK_NPCSOLID,
+		})
+
+		if tr.Fraction == 1 then
+			continue
+		end
+
+		-- See if they fit.
+		local hullTr = util.TraceHull(
+		{
+			start = tr.HitPos,
+			endpos = tr.HitPos + Vector(0, 0, 10),
+			mins = hullMins,
+			maxs = hullMaxs,
+			mask = MASK_NPCSOLID,
+		})
+
+		--debugoverlay.Box(tr.HitPos, hullMins, hullMaxs, 999, Color(255, 255, 255))
+
+		if hullTr.Fraction == 1.0 then
+
+			-- The SDK also checks the MoveProbe for stand position, we have no access.
+			return hullTr.HitPos
+
+		end
+
+	end
+
+	return nil
+
+end 
+
 function ENT:PlaceNPCInRadius(npc, checkVisible)
 
 	DbgPrint(self, "ENT:PlaceNPCInRadius")
@@ -382,7 +456,7 @@ function ENT:PlaceNPCInRadius(npc, checkVisible)
 			start = testPos,
 			endpos = testPos - Vector(0, 0, 8192),
 			filter = npc,
-			mask = MASK_SHOT,
+			mask = MASK_NPCSOLID,
 		})
 
 		if tr.Fraction == 1 then
@@ -424,19 +498,38 @@ function ENT:MakeNPCInRadius()
 		return
 	end
 
-	local ent = ents.CreateFromData(self.PrecacheData)
-	if not IsValid(ent) then
-		ErrorNoHalt("Unable to create npc!")
-		return
-	end
+	local ent
+	local classname = self.PrecacheData["classname"]
+	local hullData = KNOWN_HULLS[classname]
 
-	if self:PlaceNPCInRadius(ent) == false then
-		DbgPrint("Failed to create NPC in radius: " .. tostring(ent))
-		ent:Remove()
-		return
-	else
-		DbgPrint("Created NPC in radius: " .. tostring(ent))
-	end
+	-- We can avoid creating the NPC if we already know the hull.
+	if hullData ~= nil then 
+		local spawnSpot = self:GetSpawnPosInRadius(hullData)
+		if spawnSpot == nil then 
+			return 
+		end 
+		ent = ents.CreateFromData(self.PrecacheData)
+		if not IsValid(ent) then
+			ErrorNoHalt("Unable to create npc!")
+			return
+		end
+		ent:SetPos(spawnSpot)
+	else 
+		-- Fallback if we have no hull information.
+		ent = ents.CreateFromData(self.PrecacheData)
+		if not IsValid(ent) then
+			ErrorNoHalt("Unable to create npc!")
+			return
+		end
+
+		if self:PlaceNPCInRadius(ent) == false then
+			DbgPrint("Failed to create NPC in radius: " .. tostring(ent))
+			ent:Remove()
+			return
+		else
+			DbgPrint("Created NPC in radius: " .. tostring(ent))
+		end
+	end 
 
 	ent:AddSpawnFlags(SF_NPC_FALL_TO_GROUND)
 	ent:RemoveSpawnFlags(SF_NPC_TEMPLATE)
