@@ -203,6 +203,15 @@ GM.ITEM_DEF =
 	["weapon_frag"] = { ["Type"] = "Grenade", ["Max"] = sk_max_grenade, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
 }
 
+-- For compatibility reasons we need those ConVars.
+do 
+	CreateConVar("sk_plr_dmg_crowbar", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+	CreateConVar("sk_npc_dmg_crowbar", 5, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+
+	CreateConVar("sk_plr_dmg_stunstick", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+	CreateConVar("sk_npc_dmg_stunstick", 40, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+end 
+
 GM.PLAYER_WEAPON_DAMAGE =
 {
 	["weapon_crowbar"] = GetConVar("sk_plr_dmg_crowbar"),
@@ -210,7 +219,6 @@ GM.PLAYER_WEAPON_DAMAGE =
 	["weapon_ar2"] = GetConVar("sk_plr_dmg_ar2"),
 	["weapon_357"] = GetConVar("sk_plr_dmg_357"),
 	["weapon_smg1"] = GetConVar("sk_plr_dmg_smg1"),
-	["weapon_crossbow"] = GetConVar("sk_plr_dmg_crowssbow"),
 	["weapon_shotgun"] = GetConVar("sk_plr_dmg_buckshot"),
 	["weapon_pistol"] = GetConVar("sk_plr_dmg_pistol"),
 	["weapon_physcannon"] = GetConVar("string name")
@@ -222,6 +230,7 @@ GM.NPC_WEAPON_DAMAGE =
 	["weapon_stunstick"] = GetConVar("sk_npc_dmg_stunstick"),
 	["weapon_ar2"] = GetConVar("sk_npc_dmg_ar2"),
 	["weapon_357"] = GetConVar("sk_npc_dmg_357"),
+	["weapon_shotgun"] = GetConVar("sk_npc_dmg_buckshot"),
 }
 
 GM.GameWeapons =
@@ -244,6 +253,7 @@ GM.GameWeapons =
 	["weapon_stunstick"] = true,
 }
 
+-- FIXME: No longer required but keep for now.
 GM.AITranslatedGameWeapons =
 {
 	["ai_weapon_357"] = "weapon_357",
