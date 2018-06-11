@@ -91,6 +91,8 @@ GAMETYPE.ClassesEnemyNPC =
 	["npc_combine_s"] = true,
 	["npc_zombie"] = true,
 	["npc_headcrab"] = true,
+	["npc_sniper"] = true,
+	["npc_headcrab_fast"] = true,
 }
 
 GAMETYPE.ImportantPlayerNPCClasses =
