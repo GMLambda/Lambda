@@ -37,6 +37,7 @@ include("sv_player_pickup.lua")
 include("sv_votefuncs.lua")
 
 local DbgPrint = GetLogging("Server")
+local DbgPrintDmg = GetLogging("Damage")
 
 function GM:GetNextUniqueEntityId()
 	self.UniqueEntityId = self.UniqueEntityId or 0
@@ -77,6 +78,8 @@ end
 
 function GM:ApplyCorrectedDamage(dmginfo)
 
+	local DbgPrint = DbgPrintDmg
+	
 	DbgPrint("ApplyCorrectedDamage")
 
 	local attacker = dmginfo:GetAttacker()
@@ -112,6 +115,8 @@ end
 
 function GM:EntityTakeDamage(target, dmginfo)
 
+	local DbgPrint = DbgPrintDmg
+
 	local attacker = dmginfo:GetAttacker()
 	local inflictor = dmginfo:GetInflictor()
 	local targetClass = target:GetClass()
@@ -138,7 +143,6 @@ function GM:EntityTakeDamage(target, dmginfo)
 		end
 
 		if IsValid(attacker) and attacker:IsPlayer() and dmginfo:IsDamageType(DMG_BLAST) == false then
-			dmginfo:ScaleDamage(self:GetDifficultyNPCDamageScale(target))
 			self:RegisterNPCDamage(target, attacker, dmginfo)
 		end
 
