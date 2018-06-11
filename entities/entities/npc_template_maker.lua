@@ -373,48 +373,63 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
 
 	--DbgPrint("NPC Hull: " .. tostring(hullMins) .. ", " .. tostring(hullMaxs))
 	--DbgPrint("NPC Hulltype: " .. tostring(npc:GetHullType()))
+	math.randomseed(self:EntIndex())
 
 	for y = 0, 360, step do
 
 		ang.y = y
 
-		local dir = ang:Forward()
-		local testPos = pos + (dir * radius)
+		local testRadius = radius
+		for radiusDivider = 5, 10 do 
 
-		if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
-			continue
-		end
+			local n = radiusDivider / 10
+			local subRadius = radius * n
+			local traceRadius = math.random(testRadius - subRadius, testRadius)
+			testRadius = testRadius - subRadius
+			local dir = ang:Forward()
+			local testPos = pos + (dir * traceRadius)
 
-		-- Check if they would fall.
-		local tr = util.TraceLine(
-		{
-			start = testPos,
-			endpos = testPos - Vector(0, 0, 8192),
-			mask = MASK_NPCSOLID,
-		})
+			if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
+				continue
+			end
 
-		if tr.Fraction == 1 then
-			continue
-		end
+			-- Check if they would fall.
+			local tr = util.TraceLine(
+			{
+				start = testPos,
+				endpos = testPos - Vector(0, 0, 8192),
+				mask = MASK_NPCSOLID,
+			})
 
-		-- See if they fit.
-		local hullTr = util.TraceHull(
-		{
-			start = tr.HitPos,
-			endpos = tr.HitPos + Vector(0, 0, 10),
-			mins = hullMins,
-			maxs = hullMaxs,
-			mask = MASK_NPCSOLID,
-		})
+			if tr.Fraction == 1 then
+				continue
+			end
 
-		--debugoverlay.Box(tr.HitPos, hullMins, hullMaxs, 999, Color(255, 255, 255))
+			-- See if they fit.
+			local hullTr = util.TraceHull(
+			{
+				start = tr.HitPos,
+				endpos = tr.HitPos + Vector(0, 0, 10),
+				mins = hullMins,
+				maxs = hullMaxs,
+				mask = MASK_NPCSOLID,
+			})
 
-		if hullTr.Fraction == 1.0 then
+			if hullTr.Hit == true then 
+				continue 
+			end 
 
-			-- The SDK also checks the MoveProbe for stand position, we have no access.
-			return hullTr.HitPos
+			--PrintTable(hullTr)
+			debugoverlay.Box(hullTr.HitPos, hullMins, hullMaxs, 0.1, Color(255, 255, 255))
 
-		end
+			if hullTr.Fraction == 1.0 then
+
+				-- The SDK also checks the MoveProbe for stand position, we have no access.
+				return hullTr.HitPos
+
+			end
+
+		end 
 
 	end
 
@@ -426,67 +441,14 @@ function ENT:PlaceNPCInRadius(npc, checkVisible)
 
 	DbgPrint(self, "ENT:PlaceNPCInRadius")
 
-	local pos = self:GetPos()
-	local radius = self.Radius
+	local hull = { npc:GetHullMins(), npc:GetHullMaxs() }
+	local spawnPos = self:GetSpawnPosInRadius(hull, checkVisible)
+	if spawnPos == nil then 
+		return false 
+	end 
 
-	local ang = Angle(0, 0, 0)
-
-	local step = 360 / self:GetScaledMaxNPCs()
-
-	local hullMins = npc:GetHullMins()
-	local hullMaxs = npc:GetHullMaxs()
-
-	--DbgPrint("NPC Hull: " .. tostring(hullMins) .. ", " .. tostring(hullMaxs))
-	--DbgPrint("NPC Hulltype: " .. tostring(npc:GetHullType()))
-
-	for y = 0, 360, step do
-
-		ang.y = y
-
-		local dir = ang:Forward()
-		local testPos = pos + (dir * radius)
-
-		if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
-			continue
-		end
-
-		-- Check if they would fall.
-		local tr = util.TraceLine(
-		{
-			start = testPos,
-			endpos = testPos - Vector(0, 0, 8192),
-			filter = npc,
-			mask = MASK_NPCSOLID,
-		})
-
-		if tr.Fraction == 1 then
-			continue
-		end
-
-		-- See if they fit.
-		local hull = util.TraceHull(
-		{
-			start = tr.HitPos,
-			endpos = tr.HitPos + Vector(0, 0, 10),
-			mins = hullMins,
-			maxs = hullMaxs,
-			mask = MASK_NPCSOLID,
-			filter = npc,
-		})
-
-		--debugoverlay.Box(tr.HitPos, hullMins, hullMaxs, 999, Color(255, 255, 255))
-
-		if hull.Fraction == 1.0 then
-
-			-- The SDK also checks the MoveProbe for stand position, we have no access.
-			npc:SetPos(hull.HitPos)
-			return true
-
-		end
-
-	end
-
-	return false
+	npc:SetPos(spawnPos)
+	return true
 
 end
 
@@ -676,6 +638,26 @@ end
 function ENT:SetMinimumSpawnDistance(data)
 
 	Error("SetMinimumSpawnDistance not implemented")
+
+end
+
+function TestPlayerTrace(ply)
+
+	local hullMins = HULL_SIZE_HUMAN[1]
+	local hullMaxs = HULL_SIZE_HUMAN[2]
+
+	-- See if they fit.
+	local hullTr = util.TraceHull(
+	{
+		start = ply:GetPos(),
+		endpos = ply:GetPos() + Vector(0, 0, 10),
+		mins = hullMins,
+		maxs = hullMaxs,
+		mask = MASK_NPCSOLID,
+		filter = ply,
+	})
+
+	PrintTable(hullTr)
 
 end
 
