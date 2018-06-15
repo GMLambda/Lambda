@@ -95,7 +95,7 @@ if CLIENT then
 		BULLET_DATA = net.ReadTable()
 
 	end)
-	
+
 	surface.CreateFont( "LAMBDA_METRICS",
 	{
 	    font = "Consolas",
@@ -138,6 +138,10 @@ end
 
 function GM:DrawMetrics()
 
+	if lambda_difficulty_metrics:GetBool() == false then 
+		return 
+	end 
+	
 	local y = 10
 
 	-- Draw Difficulty
