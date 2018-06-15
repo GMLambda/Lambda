@@ -141,10 +141,6 @@ function GM:EntityTakeDamage(target, dmginfo)
 			return true
 		end
 
-		if IsValid(attacker) and attacker:IsPlayer() and dmginfo:IsDamageType(DMG_BLAST) == false then
-			self:RegisterNPCDamage(target, attacker, dmginfo)
-		end
-
 	elseif target:IsPlayer() then
 
 		if target:IsPositionLocked() or target:IsInactive() == true then
@@ -165,10 +161,6 @@ function GM:EntityTakeDamage(target, dmginfo)
 				hitGroup = HITGROUP_LEFTLEG
 			end
 			self:EmitPlayerHurt(dmginfo:GetDamage(), target, hitGroup)
-		end
-
-		if IsValid(attacker) and attacker:IsNPC() and dmginfo:IsDamageType(DMG_BLAST) == false then
-			self:RegisterPlayerDamage(target, attacker, dmginfo)
 		end
 
 		if target:InVehicle() then

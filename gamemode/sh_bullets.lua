@@ -265,10 +265,6 @@ function GM:EntityFireBullets(ent, data)
 	
 	if ent:IsPlayer() or ent:IsNPC() then
 
-		if SERVER then
-			self:RegisterBulletFired(ent, data.Num)
-		end
-
 		-- We have to assume its fired by the weapon.
 		wep = ent:GetActiveWeapon()
 		if IsValid(wep) then
