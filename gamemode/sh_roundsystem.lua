@@ -503,6 +503,8 @@ function GM:StartRound(cleaned)
 
 	self.RoundState = STATE_RESTARTING
 
+	self:ResetMapScript()
+
 	if self.MapScript.Init ~= nil then
 		self.MapScript:Init()
 	end
