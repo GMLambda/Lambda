@@ -1,3 +1,7 @@
+if SERVER then 
+	AddCSLuaFile()
+end 
+
 local DbgPrint = GetLogging("Difficulty")
 
 local DIFFICULTY_VERYEASY = 1
@@ -177,6 +181,7 @@ local DIFFICULTY_DATA =
 
 cvars.AddChangeCallback("lambda_difficulty", function(cvar, oldVal, newVal)
 
+	GAMEMODE:ResetMetrics()
 	GAMEMODE:AdjustDifficulty()
 
 end, "LambdaDifficulty")
@@ -263,6 +268,20 @@ function GM:GetDifficulty()
 
 end
 
+local DIFFICULTY_NAME =
+{
+	[1] = "Very Easy",
+	[2] = "Easy",
+	[3] = "Normal",
+	[4] = "Hard",
+	[5] = "Very Hard"
+}
+
+function GM:GetDifficultyText()
+	local d = self:GetDifficulty()
+	return DIFFICULTY_NAME[d]
+end 
+
 function GM:GetDifficultyDamageScale(type)
 
 	local difficulty = self:GetDifficulty()	
@@ -308,7 +327,6 @@ function GM:AdjustDifficulty()
 		-- calling game.SetSkilLLevel can crash if gamesrules is nullptr, so we just use it once players are around.
 		return
 	end
-
 
 	local difficulty = self:GetDifficulty()
 	DbgPrint("Difficulty: " .. difficulty)

@@ -915,6 +915,10 @@ if SERVER then
 
 		local attacker = dmginfo:GetAttacker()
 
+		if dmginfo:IsDamageType(DMG_BULLET) == true then 
+			self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
+		end 
+		
 		-- First scale hitgroups.
 		local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
 		DbgPrint("Hitgroup Scale", npc, scale)

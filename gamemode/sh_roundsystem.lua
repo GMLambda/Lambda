@@ -475,7 +475,8 @@ function GM:StartRound(cleaned)
 
 		self:InitializeGlobalSpeechContext()
 		self:InitializeWeaponTracking()
-
+		self:ResetMetrics()
+		
 	    game.SetTimeScale(1)
 
 		if self.InitPostEntityDone ~= true then

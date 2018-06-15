@@ -259,6 +259,10 @@ function GM:EntityFireBullets(ent, data)
 	local class
 	local wep
 
+	if SERVER then 
+		self:MetricsRegisterBullet(ent, data.Num)
+	end 
+	
 	if ent:IsPlayer() or ent:IsNPC() then
 
 		if SERVER then
