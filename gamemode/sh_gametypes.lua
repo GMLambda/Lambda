@@ -177,7 +177,8 @@ function GM:SetGameType(gametype, isFallback)
 	end
 
 	self.GameType = gametypeData
-	self.MapScript = gametypeData.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+	self:ResetMapScript()
+
 end
 
 function GM:ReloadGameType()
@@ -190,6 +191,14 @@ function GM:ReloadGameType()
 		self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 	end
 
+end
+
+function GM:ResetMapScript()
+	local gametype = self.GameType
+	if gametype.LoadCurrentMapScript ~= nil then
+		gametype:LoadCurrentMapScript()
+	end
+	self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 end
 
 function GM:GetGameType()
