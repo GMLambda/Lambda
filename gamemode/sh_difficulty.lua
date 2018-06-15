@@ -8,8 +8,8 @@ local DIFFICULTY_VERYEASY = 1
 local DIFFICULTY_EASY = 2
 local DIFFICULTY_NORMAL = 3
 local DIFFICULTY_HARD = 4
-local DIFFICULTY_EXTREME = 5
-local DIFFICULTY_MAX = DIFFICULTY_EXTREME
+local DIFFICULTY_VERYHARD = 5
+local DIFFICULTY_MAX = DIFFICULTY_VERYHARD
 
 local WEAPON_PROFICIENCY =
 {
@@ -147,7 +147,7 @@ local DIFFICULTY_DATA =
 			[HITGROUP_RIGHTLEG] = 1,
 		},
 	},
-	[DIFFICULTY_EXTREME] = { 
+	[DIFFICULTY_VERYHARD] = { 
 		Proficiency = WEAPON_PROFICIENCY_PERFECT, 
 		Skill = 3,
 		DamageScale = {
@@ -270,15 +270,31 @@ end
 
 local DIFFICULTY_NAME =
 {
-	[1] = "Very Easy",
-	[2] = "Easy",
-	[3] = "Normal",
-	[4] = "Hard",
-	[5] = "Very Hard"
+	[DIFFICULTY_VERYEASY] = "Very Easy",
+	[DIFFICULTY_EASY] = "Easy",
+	[DIFFICULTY_NORMAL] = "Normal",
+	[DIFFICULTY_HARD] = "Hard",
+	[DIFFICULTY_VERYHARD] = "Very Hard"
 }
 
-function GM:GetDifficultyText()
-	local d = self:GetDifficulty()
+local DIFFICULTIES =
+{
+	[1] = DIFFICULTY_VERYEASY,
+	[2] = DIFFICULTY_EASY,
+	[3] = DIFFICULTY_NORMAL,
+	[4] = DIFFICULTY_HARD,
+	[5] = DIFFICULTY_VERYHARD,
+}
+
+function GM:GetDifficulties()
+	return table.Copy(DIFFICULTIES)
+end
+
+function GM:GetDifficultyText(d)
+	local d = d
+	if d == nil then
+		d = self:GetDifficulty()
+	end
 	return DIFFICULTY_NAME[d]
 end 
 
