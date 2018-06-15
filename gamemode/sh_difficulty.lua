@@ -30,6 +30,7 @@ local DIFFICULTY_DATA =
 	[DIFFICULTY_VERYEASY] = { 
 		Proficiency = WEAPON_PROFICIENCY_POOR, 
 		Skill = 1,
+		NPCSpawningScale = 0.0,
 		DamageScale = {
 			[DMG_SCALE_PVN] = 2,
 			[DMG_SCALE_NVP] = 0.5,
@@ -60,6 +61,7 @@ local DIFFICULTY_DATA =
 	[DIFFICULTY_EASY] = { 
 		Proficiency = WEAPON_PROFICIENCY_AVERAGE, 
 		Skill = 1,
+		NPCSpawningScale = 0.2,
 		DamageScale = {
 			[DMG_SCALE_PVN] = 1.5,
 			[DMG_SCALE_NVP] = 0.7,
@@ -90,6 +92,7 @@ local DIFFICULTY_DATA =
 	[DIFFICULTY_NORMAL] = { 
 		Proficiency = WEAPON_PROFICIENCY_GOOD, 
 		Skill = 2,
+		NPCSpawningScale = 0.3,
 		DamageScale = {
 			[DMG_SCALE_PVN] = 1,
 			[DMG_SCALE_NVP] = 1,
@@ -120,6 +123,7 @@ local DIFFICULTY_DATA =
 	[DIFFICULTY_HARD] = { 
 		Proficiency = WEAPON_PROFICIENCY_VERY_GOOD, 
 		Skill = 2,
+		NPCSpawningScale = 0.5,
 		DamageScale = {
 			[DMG_SCALE_PVN] = 1,
 			[DMG_SCALE_NVP] = 1,
@@ -150,6 +154,7 @@ local DIFFICULTY_DATA =
 	[DIFFICULTY_VERYHARD] = { 
 		Proficiency = WEAPON_PROFICIENCY_PERFECT, 
 		Skill = 3,
+		NPCSpawningScale = 0.7,
 		DamageScale = {
 			[DMG_SCALE_PVN] = 1,
 			[DMG_SCALE_NVP] = 1,
@@ -214,16 +219,6 @@ function GM:SaveTransitionDifficulty(data)
 end
 
 function GM:LoadTransitionDifficulty(data)
-
-end
-
-function GM:RegisterBulletFired(attacker, bullets)
-end
-
-function GM:RegisterNPCDamage(npc, attacker, dmginfo)
-end
-
-function GM:RegisterPlayerDamage(ply, attacker, dmginfo)
 end
 
 function GM:RegisterRoundLost()
@@ -232,21 +227,6 @@ end
 
 function GM:RegisterRoundWon()
 	self.RoundsWon = self.RoundsWon + 1
-end
-
-function GM:GetPlayerVsNPCDamageScale()
-	-- FIXME: Add some scaling that doesnt suck.
-	return 1
-end
-
-function GM:GetNPCVsPlayerDamageScale()
-	-- FIXME: Add some scaling that doesnt suck.
-	return 1
-end
-
-function GM:GetPlayerVsPlayerDamageScale()
-	-- FIXME: Add some scaling that doesnt suck.
-	return 1
 end
 
 function GM:RegisterPlayerDeath(ply, attacker, inflictor)
@@ -335,6 +315,17 @@ function GM:GetDifficultyPlayerHitgroupDamageScale(group)
 
 	return data.HitgroupPlayerDamageScale[group]
 
+end
+
+-- Returns the scale the game should base on player count.
+function GM:GetNPCSpawningScale()
+	local difficulty = self:GetDifficulty()	
+	local data = DIFFICULTY_DATA[difficulty]
+	if data == nil then 
+		error("Invalid difficulty selected")
+		return
+	end 
+	return data.NPCSpawningScale
 end
 
 function GM:AdjustDifficulty()

@@ -189,7 +189,8 @@ function ENT:GetScaledMaxLiveChildren()
 	end
 
 	local playerCount = player.GetCount()
-	local extraCount = math.ceil(playerCount * 0.75)
+	local scale = GAMEMODE:GetNPCSpawningScale()
+	local extraCount = math.ceil(playerCount * scale)
 
 	res = maxLiveChildren + extraCount
 	self.CachedMaxLiveChildren = res
@@ -213,7 +214,9 @@ function ENT:GetScaledMaxNPCs()
 	end
 
 	local playerCount = player.GetCount()
-	local extraCount = math.ceil(playerCount / 2)
+	local scale = GAMEMODE:GetNPCSpawningScale()
+	local extraCount = math.ceil(playerCount * scale)
+	
 	local res = maxNPCCount + extraCount
 
 	if self.PrecacheData ~= nil then
