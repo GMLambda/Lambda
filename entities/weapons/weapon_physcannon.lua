@@ -4,6 +4,7 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("physcannon")
+local print = epoe.Print 
 
 SWEP.PrintName = "#HL2_GravityGun"
 SWEP.Author = "Zeh Matt"
@@ -101,12 +102,14 @@ local EFFECT_READY = 2
 local EFFECT_HOLDING = 3
 local EFFECT_LAUNCH = 4
 local EFFECT_IDLE = 5
+local EFFECT_PULLING = 6
 
 --
 -- Object Find Result
 local OBJECT_FOUND = 0
 local OBJECT_NOT_FOUND = 1
 local OBJECT_BEING_DETACHED = 2
+local OBJECT_BEING_PULLED = 3
 
 --
 -- EffectType
@@ -187,6 +190,7 @@ function SWEP:Initialize()
 	self.NextIdleTime = CurTime()
 	self.EffectsSetup = false
 	self.ObjectAttached = false
+	self.PullingObject = false
 
 	if CLIENT then
 		self.CurrentElementLen = 0
@@ -555,13 +559,20 @@ function SWEP:SecondaryAttack()
 			self:SetNextSecondaryFire(CurTime() + 0.5)
 			self:SetNextPrimaryFire(CurTime() + 0.5)
 			self:DoEffect(EFFECT_HOLDING)
+			self:OpenElements()
 		elseif res == OBJECT_NOT_FOUND then
-			self:SetNextSecondaryFire(CurTime() + 0.1)
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			self:SetNextSecondaryFire(CurTime() + 0.4)
 			self.Secondary.Automatic = true
 			self:CloseElements()
 			self:DoEffect(EFFECT_READY)
 			self.NextIdleTime = CurTime() + 0.2
+		elseif res == OBJECT_BEING_PULLED then
+			self:SetNextSecondaryFire(CurTime() + 0.1)
+			self.Secondary.Automatic = true
+			self:OpenElementsHalf()
+			self:DoEffect(EFFECT_PULLING)
+			self.NextIdleTime = CurTime() + 0.2
+			self.ElementDebounce = CurTime() + 0.2
 		elseif res == OBJECT_BEING_DETACHED then
 			self:SetNextSecondaryFire(CurTime() + 0.01)
 			self.Secondary.Automatic = true
@@ -884,9 +895,10 @@ function SWEP:FindObject()
 	end
 
 	if self:CanPickupObject(ent) == false then
-		if self.LastDenySoundPlayed ~= true then
+		if self.NextDenySoundTime == nil or CurTime() > self.NextDenySoundTime then
 			self:WeaponSound("Weapon_PhysCannon.TooHeavy")
-			self.LastDenySoundPlayed = true
+			self.NextDenySoundTime = CurTime() + 0.9
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 		end
 		return OBJECT_NOT_FOUND
 	end
@@ -916,7 +928,7 @@ function SWEP:FindObject()
 	end
 
 	phys:ApplyForceCenter(pullDir)
-	return OBJECT_NOT_FOUND
+	return OBJECT_BEING_PULLED
 
 end
 
@@ -977,7 +989,13 @@ function SWEP:OpenElements()
 	--DbgPrint(self, "OpenElements")
 
 	local owner = self:GetOwner()
-	if self.ElementOpen == true or owner == nil then
+	if owner == nil then 
+		return 
+	end 
+
+	self:SetElementDestination(1)
+
+	if self.ElementOpen == true then
 		return
 	end
 
@@ -986,10 +1004,34 @@ function SWEP:OpenElements()
 	end
 	self:WeaponSound("Weapon_PhysCannon.OpenClaws")
 
-	--self.ElementDestination = 1
-	--self:SetNW2Float("ElementDestination", 1)
-	self:SetElementDestination(1)
 	self.ElementOpen = true
+
+	if self:IsMegaPhysCannon() == true then
+		self:SendWeaponAnim(ACT_VM_IDLE)
+	end
+
+	self:DoEffect(EFFECT_READY)
+
+end
+
+function SWEP:OpenElementsHalf()
+
+	--DbgPrint(self, "OpenElements")
+
+	self:SetElementDestination(0.5)
+
+	local owner = self:GetOwner()
+	if self.ElementOpen == true or owner == nil then
+		return
+	end
+
+	if SERVER then
+		SuppressHostEvents(NULL)
+	end
+	--self:WeaponSound("Weapon_PhysCannon.OpenClaws")
+
+	self.ElementOpen = true
+	self.ElementHalfOpen = true 
 
 	if self:IsMegaPhysCannon() == true then
 		self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1017,6 +1059,8 @@ function SWEP:CloseElements()
 		return
 	end
 
+	self:SetElementDestination(0)
+
 	local snd = self:GetMotorSound()
 	if snd ~= nil and snd ~= NULL then
 		snd:ChangeVolume(0, 1.0)
@@ -1026,11 +1070,12 @@ function SWEP:CloseElements()
 	if SERVER then
 		SuppressHostEvents(NULL)
 	end
-	self:WeaponSound("Weapon_PhysCannon.CloseClaws")
+	if self.ElementHalfOpen ~= true then
+		self:WeaponSound("Weapon_PhysCannon.CloseClaws")
+	end 
 
-	--self:SetNW2Float("ElementDestination", 0)
-	self:SetElementDestination(0)
 	self.ElementOpen = false
+	--self.ElementHalfOpen = false
 
 	if self:IsMegaPhysCannon() == true then
 		self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1942,6 +1987,9 @@ function SWEP:DoEffectIdle()
 
 end
 
+function SWEP:DoEffectPulling()
+end
+
 local EFFECT_NAME =
 {
 	[EFFECT_NONE] = "EFFECT_NONE",
@@ -1950,6 +1998,7 @@ local EFFECT_NAME =
 	[EFFECT_HOLDING] = "EFFECT_HOLDING",
 	[EFFECT_LAUNCH] = "EFFECT_LAUNCH",
 	[EFFECT_IDLE] = "EFFECT_IDLE",
+	[EFFECT_PULLING] = "EFFECT_PULLING",
 }
 
 local EFFECT_TABLE =
@@ -1960,6 +2009,7 @@ local EFFECT_TABLE =
 	[EFFECT_HOLDING] = SWEP.DoEffectHolding,
 	[EFFECT_LAUNCH] = SWEP.DoEffectLaunch,
 	[EFFECT_IDLE] = SWEP.DoEffectIdle,
+	[EFFECT_PULLING] = SWEP.DoEffectPulling,
 }
 
 function SWEP:DoEffect(effect, pos)
@@ -2521,7 +2571,7 @@ function SWEP:UpdateEffects()
 		data.Col = Color(r, g, b)
 	end
 
-	if CLIENT and self:IsMegaPhysCannon() == true then
+	if CLIENT and (self:IsMegaPhysCannon() == true or self.CurrentEffect == EFFECT_PULLING) then
 
 		local endCapMax = PHYSCANNON_ENDCAP3
 		if self:ShouldDrawUsingViewModel() == true then
