@@ -54,6 +54,7 @@ if CLIENT then
 	lambda_player_color = GM:RegisterConVar("player_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player color")
 	lambda_weapon_color = GM:RegisterConVar("weapon_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Weapon color")
 	lambda_playermdl = GM:RegisterConVar("playermdl", "male_01", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player model")
+	lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0,FCVAR_REPLICATED),"Deathnotice time")
 end
 
 -- Server --
