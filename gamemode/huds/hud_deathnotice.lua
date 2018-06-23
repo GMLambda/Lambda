@@ -26,65 +26,36 @@ killicon.AddFont( "weapon_physcannon",	"Killico",	",",	Color_Icon )
 
 local Deaths = {}
 
-local function RecvPlayerKilledByPlayer()
+local function RecieveDeathEvent()
 
-	local victim	= net.ReadEntity()
-	local inflictor	= net.ReadString()
-	local attacker	= net.ReadEntity()
+	local data = net.ReadTable()
 
-	if !IsValid( attacker ) then return end
-	if !IsValid( victim ) then return end
-	
-	GAMEMODE:AddDeathNotice(attacker:Name(), attacker:Team(), inflictor, victim:Name(), victim:Team())
+	if data.type == DEATH_BYSELF then
+		if not IsValid(data.ent) then return end
+		GAMEMODE:AddDeathNotice(nil, 0, "suicide", data.ent:Name(), data.ent:Team())
+	end
 
+	if data.type == DEATH_BYPLAYER then
+		if not IsValid(data.ent) then return end
+		if not IsValid(data.attacker) then return end
+		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, data.ent:Name(), data.ent:Team())
+	end
+
+	if data.type == DEATH_NORMAL then
+		if not IsValid(data.ent) then return end
+		GAMEMODE:AddDeathNotice(data.attclass, -1, data.infclass, data.ent:Name(), data.ent:Team())
+	end
+
+	if data.type == DEATH_NPC then
+		if not IsValid(data.attacker) then return end
+		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, "#" .. data.npcclass, -1)
+	end
+
+	if data.type == DEATH_BYNPC then
+		GAMEMODE:AddDeathNotice("#" .. data.attacker, -1, data.infclass, "#" .. data.npcclass, -1)
+	end
 end
-net.Receive("PlayerKilledByPlayer", RecvPlayerKilledByPlayer)
-
-local function RecvPlayerKilledSelf()
-
-	local victim = net.ReadEntity()
-	if !IsValid( victim ) then return end
-	GAMEMODE:AddDeathNotice(nil, 0, "suicide", victim:Name(), victim:Team())
-
-end
-net.Receive("PlayerKilledSelf", RecvPlayerKilledSelf)
-
-local function RecvPlayerKilled()
-
-	local victim	= net.ReadEntity()
-	if !IsValid( victim ) then return end
-	local inflictor	= net.ReadString()
-	local attacker	= "#" .. net.ReadString()
-	
-	GAMEMODE:AddDeathNotice(attacker, -1, inflictor, victim:Name(), victim:Team())
-
-end
-net.Receive( "PlayerKilled", RecvPlayerKilled )
-
-local function RecvPlayerKilledNPC()
-
-	local victimtype = net.ReadString()
-	local victim	= "#" .. victimtype
-	local inflictor	= net.ReadString()
-	local attacker	= net.ReadEntity()
-
-	if !IsValid(attacker) then return end
-	
-	GAMEMODE:AddDeathNotice(attacker:Name(), attacker:Team(), inflictor, victim, -1)
-	
-end
-net.Receive("PlayerKilledNPC", RecvPlayerKilledNPC)
-
-local function RecvNPCKilledNPC()
-
-	local victim	= "#" .. net.ReadString()
-	local inflictor	= net.ReadString()
-	local attacker	= "#" .. net.ReadString()
-
-	GAMEMODE:AddDeathNotice(attacker, -1, inflictor, victim, -1)
-
-end
-net.Receive("NPCKilledNPC", RecvNPCKilledNPC)
+net.Receive("LambdaDeathEvent",RecieveDeathEvent)
 
 --[[---------------------------------------------------------
    Name: gamemode:AddDeathNotice( Attacker, team1, Inflictor, Victim, team2 )
