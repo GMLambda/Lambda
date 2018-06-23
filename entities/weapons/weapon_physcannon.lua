@@ -1078,32 +1078,37 @@ function SWEP:CloseElements()
 
 end
 
+function SWEP:Startup()
+	self:StartEffects()
+	self.ShouldDrawGlow = true
+	self:WeaponIdle()
+
+	if self:IsMegaPhysCannon() == true then
+		self:OpenElements()
+	else 
+		self:CloseElements()
+	end
+
+	if CLIENT then
+		self:UpdateEffects()
+	end 
+
+	self:DoEffect(EFFECT_READY)
+end 
+
 function SWEP:Equip()
 
 	DbgPrint("Equip")
 
-	self:CloseElements()
-	self:StartEffects()
-	self.ShouldDrawGlow = true
-	self:CloseElements()
+	self:Startup()
 
-	if self:IsMegaPhysCannon() == true then
-		self:OpenElements()
-	end
 end
 
 function SWEP:Deploy()
 
 	DbgPrint("Deploy")
 
-	self:CloseElements()
-	self:StartEffects()
-	self.ShouldDrawGlow = true
-	self:CloseElements()
-
-	if self:IsMegaPhysCannon() == true then
-		self:OpenElements()
-	end
+	self:Startup()
 
 	return true
 
@@ -1183,6 +1188,11 @@ function SWEP:UpdateElementPosition()
 end
 
 function SWEP:CheckForTarget()
+
+	-- Elements are always open so we can leave all of this.
+	if self:IsMegaPhysCannon() == true then 
+		return 
+	end 
 
 	if self.CheckSuppressTime > CurTime() then
 		return
@@ -2064,6 +2074,40 @@ function SWEP:Holster(ent)
 	self:StopEffects()
 	self:DetachObject()
 	self.ShouldDrawGlow = false
+
+	return true
+end
+
+function SWEP:Startup()
+	self:StartEffects()
+	self.ShouldDrawGlow = true
+	self:WeaponIdle()
+
+	if self:IsMegaPhysCannon() == true then
+		self:OpenElements()
+		self:SendWeaponAnim(ACT_VM_RELOAD)
+	else 
+		self:CloseElements()
+		self:SendWeaponAnim(ACT_VM_IDLE)
+	end
+
+	if CLIENT then
+		self:UpdateEffects()
+	end 
+
+	self:DoEffect(EFFECT_READY)
+end 
+
+function SWEP:Equip()
+	DbgPrint("Equip")
+
+	self:Startup()
+end
+
+function SWEP:Deploy()
+	DbgPrint("Deploy")
+
+	self:Startup()
 
 	return true
 end
