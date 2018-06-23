@@ -4,7 +4,6 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("physcannon")
-local print = epoe.Print 
 
 SWEP.PrintName = "#HL2_GravityGun"
 SWEP.Author = "Zeh Matt"
@@ -1028,10 +1027,10 @@ function SWEP:OpenElementsHalf()
 	if SERVER then
 		SuppressHostEvents(NULL)
 	end
-	--self:WeaponSound("Weapon_PhysCannon.OpenClaws")
+
+	self:WeaponSound("Weapon_PhysCannon.OpenClaws")
 
 	self.ElementOpen = true
-	self.ElementHalfOpen = true 
 
 	if self:IsMegaPhysCannon() == true then
 		self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1070,12 +1069,9 @@ function SWEP:CloseElements()
 	if SERVER then
 		SuppressHostEvents(NULL)
 	end
-	if self.ElementHalfOpen ~= true then
-		self:WeaponSound("Weapon_PhysCannon.CloseClaws")
-	end 
 
+	self:WeaponSound("Weapon_PhysCannon.CloseClaws")
 	self.ElementOpen = false
-	--self.ElementHalfOpen = false
 
 	if self:IsMegaPhysCannon() == true then
 		self:SendWeaponAnim(ACT_VM_IDLE)
