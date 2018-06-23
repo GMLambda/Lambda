@@ -248,11 +248,112 @@ function GM:GetPlayerBulletSpread(ply)
 
 end
 
--- The revolver had always laser accuracy which is annoying for Deathmatch.
 local SPREAD_OVERRIDE_TABLE =
 {
 	["weapon_357"] = Vector(0.03, 0.03, 0.0),
+	["weapon_pistol"] = Vector( 0.03490, 0.03490, 0.03490 ),
 }
+
+local SF_BULLSEYE_PERFECTACC = bit.lshift(1, 20)
+
+local PROFICIENCY_SPREAD_AMOUNT =
+{
+	[WEAPON_PROFICIENCY_POOR] = 0.5,
+	[WEAPON_PROFICIENCY_AVERAGE] = 0.4,
+	[WEAPON_PROFICIENCY_GOOD] = 0.3,
+	[WEAPON_PROFICIENCY_VERY_GOOD] = 0.2,
+	[WEAPON_PROFICIENCY_PERFECT] = 0.1,
+}
+
+function GM:CalculateActualShootTrajectory(ent, wep, class, data)
+
+	if not IsValid(ent) then 
+		return data.Dir 
+	end 
+
+	if not ent:IsNPC() then 
+		return data.Dir
+	end 
+
+	local dir = data.Dir 
+	local pos = ent:GetShootPos()
+	local enemy = ent:GetEnemy()
+	local enemyValid = IsValid(enemy)
+
+	-- Show fancy water bullets infront of the player.
+	if enemyValid and enemy:IsPlayer() and ent:WaterLevel() ~= 3 and enemy:WaterLevel() == 3 then 
+
+		if util.RandomInt(0, 4) < 3 then 
+			local fwd = enemy:GetForward()
+			local vel = enemy:GetVelocity()
+			vel:Normalize()
+
+			local velScale = fwd:Dot(vel)
+			if velScale < 0 then 
+				velScale = 0
+			end 
+
+			local aimPos = enemy:EyePos() + (48 * fwd) + (velScale * vel)
+			newDir = aimPos - pos 
+			newDir:Normalize()
+		end
+
+	end
+
+	local newDir = data.Dir 
+
+	if self.GameWeapons[class] == true and enemyValid then 
+		local choice = util.RandomInt(0, 5)
+		-- Randomly try to hit the head.
+		if util.RandomInt(0, 5) < 4 then 
+			newDir = enemy:WorldSpaceCenter() - pos
+		else
+			newDir = enemy:EyePos() - pos
+		end
+	end 
+
+	-- At this point the direction is 100% accurate, modify via proficiency.
+
+	local perfectAccuracy = false
+	if enemyValid and enemy:IsPlayer() == false and enemy:Classify() == CLASS_BULLSEYE then 
+		if enemy:HasSpawnFlags(SF_BULLSEYE_PERFECTACC) == true then 
+			perfectAccuracy = true 
+		end
+	end 
+
+	if perfectAccuracy == false then 
+		local proficiency = self:GetDifficultyWeaponProficiency()
+		local amount = PROFICIENCY_SPREAD_AMOUNT[proficiency]
+		local offset = (VectorRand() * 100) * amount
+		newDir = newDir + offset
+	end
+
+	if enemyValid and enemy:IsPlayer() and enemy:ShouldShootMissTarget(ent) and false then 
+
+		-- Supposed to miss.
+		local tr = util.TraceLine({
+			start = pos,
+			endpos = pos + (newDir * 8192),
+			mask = MASK_SHOT,
+			filter = ent,
+		})
+
+		if tr.Fraction ~= 1.0 and IsValid(tr.Entity) and tr.Entity:CanTakeDamage() and tr.Entity ~= enemy then 
+			return newDir
+		end
+
+		local missTarget = enemy:FindMissTarget()
+		if missTarget ~= nil then 
+			local targetPos = missTarget:NearestPoint(enemy:GetPos())
+			newDir = targetPos - pos
+			newDir:Normalize()
+		end
+
+	end
+
+	return newDir
+
+end
 
 function GM:EntityFireBullets(ent, data)
 
@@ -271,6 +372,9 @@ function GM:EntityFireBullets(ent, data)
 
 			class = wep:GetClass()
 			class = self.AITranslatedGameWeapons[class] or class
+
+			-- Calculate trajectory based on proficiency.
+			data.Dir = self:CalculateActualShootTrajectory(ent, wep, class, data)
 
 			local ammo = game.GetAmmoName(wep:GetPrimaryAmmoType())
 
@@ -305,6 +409,7 @@ function GM:EntityFireBullets(ent, data)
 			end
 
 			local spread = data.Spread
+
 			local spreadData = SPREAD_OVERRIDE_TABLE[class]
 			if spreadData ~= nil then 
 				spread = spreadData 
@@ -316,7 +421,7 @@ function GM:EntityFireBullets(ent, data)
 				end
 			end
 			
-			data.Spread = spread + (VectorRand() * 0.005)
+			data.Spread = spread
 
 		end
 

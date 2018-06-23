@@ -39,6 +39,60 @@ function ENTITY_META:GetModelInfo()
 
 end
 
+function ENTITY_META:ShouldShootMissTarget(attacker)
+
+	if self:IsPlayer() == false then 
+		return false 
+	end 
+
+	local curTime = CurTime()
+
+	if self.TargetFindTime == nil then 
+		self.TargetFindTime = curTime + util.RandomFloat(3, 5)
+		return false 
+	end 
+
+	if curTime > self.TargetFindTime then 
+		self.TargetFindTime = curTime + util.RandomFloat(3, 5)
+		return true 
+	end 
+
+	return false
+
+end
+
+local MISS_TARGET_RADIUS = Vector(150, 150, 100)
+
+function ENTITY_META:FindMissTarget()
+
+	local pos = self:GetPos()
+	local nearby = ents.FindInBox(pos - MISS_TARGET_RADIUS, pos + MISS_TARGET_RADIUS)
+	local candidates = {}
+	local isPlayer = self:IsPlayer()
+
+	for _,v in pairs(nearby) do
+		local class = v:GetClass()
+		if isPlayer then 
+			if self:InsideViewCone(v) == false then 
+				continue 
+			end 
+		end
+		if class == "prop_dynamic" or class == "prop_physics" or class == "physics_prop" then 
+			table.insert(candidates, v)
+		end
+		if #candidates >= 16 then 
+			break 
+		end
+	end
+
+	if #candidates == 0 then 
+		return nil 
+	end 
+
+	return table.Random(candidates)
+
+end
+
 local ITEM_CLASSES =
 {
 	["item_ammo_357"] = true,
@@ -331,5 +385,17 @@ function ENTITY_META:CopyAnimationDataFrom(other)
 	self:SetSaveValue("m_flAnimTime", saveTable["m_flAnimTime"])
 	self:SetSkin(other:GetSkin())
 
+
+end
+
+-- FIXME: We should either cache this or beg the devs to GetInternalVariable result the same.
+function ENTITY_META:CanTakeDamage()
+
+	local data = self:GetSaveTable()
+	if data.m_takedamage ~= nil then 
+		return data.m_takedamage ~= 0 -- DAMAGE_NO
+	end 
+
+	return false
 
 end

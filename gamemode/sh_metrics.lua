@@ -151,6 +151,13 @@ function GM:DrawMetrics()
 		y = y + 15
 	end
 
+	-- Proficiency
+	do
+		local proficiency = self:GetDifficultyWeaponProficiencyText()
+		draw.DrawText("Proficiency: " .. proficiency, "LAMBDA_METRICS", 10, y, Color(255, 255, 255, 255))
+		y = y + 15
+	end
+
 	do
 		local data = BULLET_DATA["NPC"]
 		local total = 0
