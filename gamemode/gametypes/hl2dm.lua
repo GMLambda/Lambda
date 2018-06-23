@@ -4,7 +4,6 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-local winner
 
 GAMETYPE.Name = "Deathmatch"
 GAMETYPE.MapScript = {}
@@ -70,10 +69,10 @@ function GAMETYPE:GetNextMap(map)
 	local k = table.KeyFromValue(self.MapList, map)
 	local nextmap
 
-	if !self.MapList[k+1] then
+	if !self.MapList[k + 1] then
 		nextmap = self.MapList[1]
 	else
-		nextmap = self.MapList[k+1]
+		nextmap = self.MapList[k + 1]
 	end
 	return nextmap
 end
@@ -82,7 +81,6 @@ function GAMETYPE:EndRound(winner)
 
 	local nextmap = self:GetNextMap(game.GetMap())
 	for k, v in pairs(player.GetAll()) do v:Freeze(true) end
-	hook.Run("ScoreboardShow")
 	PrintMessage(HUD_PRINTTALK, "Round Over. Frag limit reached by " .. winner:Name() .. ".")
 
 	PrintMessage(HUD_PRINTTALK, "Switching map to " .. nextmap .. ".")
