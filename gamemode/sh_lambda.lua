@@ -8,6 +8,9 @@ LAMBDA_TEAM_CONNECTING = 1200
 LAMBDA_TEAM_DEAD = 1
 LAMBDA_TEAM_ALIVE = 5
 LAMBDA_TEAM_SPECTATOR = 3
+-- TDM Teams
+LAMBDA_TEAM_REBEL = 10
+LAMBDA_TEAM_COMBINE = 11
 
 DEATH_BYSELF = 1
 DEATH_BYPLAYER = 2
@@ -279,5 +282,8 @@ function GM:CreateTeams()
 	team.SetUp(LAMBDA_TEAM_DEAD, "Dead", Color(255, 30, 0), true)
 	team.SetUp(LAMBDA_TEAM_SPECTATOR, "Spectating", Color(100, 100, 100), true)
 	team.SetUp(LAMBDA_TEAM_CONNECTING, "Connecting", Color(100, 100, 100), true)
+
+	team.SetUp(LAMBDA_TEAM_REBEL, "Rebels", Color(255, 0, 0, 100), true)
+	team.SetUp(LAMBDA_TEAM_COMBINE, "Combine", Color(0, 0, 255, 100), true)
 
 end
