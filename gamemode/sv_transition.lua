@@ -381,6 +381,11 @@ local SAVETABLE_BLACKLIST =
 	["additionalequipment"] = true,
 	["m_bConditionsGathered"] = true,
 	["m_flReadinessLockedUntil"] = true,
+	["waterlevel"] = true,
+	["m_CollisionGroup"] = true,
+	["m_nExactWaterLevel"] = true,
+	["m_nWaterType"] = true,
+	["m_rgflCoordinateFrame"] = true, -- Fucks up the airboat.
 }
 
 function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
@@ -1146,6 +1151,8 @@ function GM:CreateTransitionObjects()
 			elseif isangle(v) then
 				--local newAng = ent:LocalToWorldAngles(v)
 				--ent:SetSaveValue(k, newAng)
+			elseif istable(v) then 
+				ent:SetSaveValue(k, v)
 			else
 				ent:SetSaveValue(k,v)
 			end
