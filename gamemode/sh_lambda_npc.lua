@@ -198,10 +198,51 @@ if SERVER then
 			--print("Marked weapon: " .. tostring(wep))
 		end
 
+		if npc:GetClass() == "npc_bullseye" or npc:GetClass() == "npc_launcher" then return end
+		if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = npc end
+		if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then attacker = attacker:GetDriver() end
+		if not IsValid(inflictor) and IsValid(attacker) then inflictor = attacker end
+	
+		if IsValid(inflictor) and attacker == inflictor and inflictor:IsPlayer() or inflictor:IsNPC() then
+			inflictor = inflictor:GetActiveWeapon()
+			if not IsValid(attacker) then inflictor =  attacker end
+		end
+
+		local inflictor_class = "worldspawn"
+		local attacker_class = "worldspawn"
+
+		local data = {}
+
+		if IsValid(inflictor) then inflictor_class = inflictor:GetClass() end
+		if IsValid(attacker) then
+			attacker_class = attacker:GetClass()
+			if attacker:IsPlayer() then
+				data.type = DEATH_NPC
+				data.npcclass = npc:GetClass()
+				data.infclass = inflictor_class
+				data.attacker = attacker
+				net.Start("LambdaDeathEvent")
+					net.WriteTable(data)
+				net.Broadcast()
+			return end
+		end
+
+		if npc:GetClass() == "npc_turret_floor" then attacker_class = npc:GetClass() end
+
+		local data = {}
+		data.type = DEATH_BYNPC
+		data.npcclass = npc:GetClass()
+		data.infclass = inflictor_class
+		data.attclass = attacker_class
+		net.Start("LambdaDeathEvent")
+			net.WriteTable(data)
+		net.Broadcast()
+
 		self:HandleCriticalNPCDeath(npc)
 
 		self:RegisterNPCDeath(npc, attacker, inflictor)
-		BaseClass.OnNPCKilled(self, npc, attacker, inflictor)
+
+		--BaseClass.OnNPCKilled(self, npc, attacker, inflictor)
 
 	end
 

@@ -1,9 +1,20 @@
 AddCSLuaFile()
 
+if SERVER then
+	util.AddNetworkString("LambdaDeathEvent")
+end
+
 LAMBDA_TEAM_CONNECTING = 1200
 LAMBDA_TEAM_DEAD = 1
 LAMBDA_TEAM_ALIVE = 5
 LAMBDA_TEAM_SPECTATOR = 3
+
+DEATH_BYSELF = 1
+DEATH_BYPLAYER = 2
+DEATH_NORMAL = 3
+DEATH_BYNPC = 4
+DEATH_NPC = 5
+
 
 GM.HurtSounds = {}
 
