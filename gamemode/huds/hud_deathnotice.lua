@@ -1,5 +1,6 @@
 local Color_Icon = Color( 230, 230, 230, 130 )
-local NPC_Color = Color( 250, 50, 50, 255 )
+local NPC_Color = Color(250, 50, 50, 255)
+local times_color = Color(255, 255, 255, 255)
 
 surface.CreateFont("KillFont", {font = "Tahoma", size = 16, weight = 800, antialias = true, additive = false})
 surface.CreateFont("Killico", {font = "HL2MP", size = 46, weight = 100, antialias = true, additive = false})
@@ -22,8 +23,6 @@ killicon.AddFont( "npc_satchel",		"Killico",	"*",	Color_Icon )
 killicon.AddFont( "npc_tripmine",		"Killico",	"*",	Color_Icon )
 killicon.AddFont( "weapon_crowbar",		"Killico",	"6",	Color_Icon )
 killicon.AddFont( "weapon_physcannon",	"Killico",	",",	Color_Icon )
-killicon.Add( "default", "HUD/killicons/default", Color_Icon )
-killicon.AddAlias("suicide", "default")
 
 local Deaths = {}
 
@@ -132,9 +131,14 @@ local function DrawDeath(x, y, death, deathnotice_time)
 	local alpha = math.Clamp(fadeout * 255, 0, 255)
 	death.color1.a = alpha
 	death.color2.a = alpha
+	times_color.a = alpha
 	
-	-- Draw Icon
-	killicon.Draw(x, y, death.icon, alpha)
+
+	if death.icon == "default" or death.icon == "suicide" then
+		draw.SimpleText("KILLED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
+	else
+		killicon.Draw(x, y, death.icon, alpha)
+	end
 	
 	-- Draw KILLER
 	if ( death.left ) then
@@ -146,7 +150,7 @@ local function DrawDeath(x, y, death, deathnotice_time)
 	
 	if death.times > 1 then
 		local txt = "x" .. death.times
-		draw.SimpleText(txt, font, x + (w / 2) + _x + 25, y, Color(255,255,255,255), TEXT_ALIGN_LEFT)
+		draw.SimpleText(txt, font, x + (w / 2) + _x + 25, y, times_color, TEXT_ALIGN_LEFT)
 	end
 
 	return y + h * 0.70
@@ -156,7 +160,7 @@ end
 
 function GM:DrawDeathNotice( x, y )
 
-	if GetConVarNumber( "cl_drawhud" ) == 0 then return end
+	if GetConVarNumber("cl_drawhud") == 0 then return end
 
 	local deathnotice_time = lambda_deathnotice_time:GetFloat()
 
