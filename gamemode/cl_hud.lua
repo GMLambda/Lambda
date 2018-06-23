@@ -107,6 +107,9 @@ function GM:HUDShouldDraw( hudName )
 		end
 	elseif hudName == "CHudHistoryResource" then
 		return false
+	elseif hudName == "CHudSquadStatus" then 
+		-- TODO: Reimplement me.
+		return false
 	end
 
 	return true
