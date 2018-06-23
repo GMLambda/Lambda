@@ -13,11 +13,11 @@ local DIFFICULTY_MAX = DIFFICULTY_VERYHARD
 
 local WEAPON_PROFICIENCY =
 {
-	WEAPON_PROFICIENCY_POOR,
-	WEAPON_PROFICIENCY_AVERAGE,
-	WEAPON_PROFICIENCY_GOOD,
-	WEAPON_PROFICIENCY_VERY_GOOD,
-	WEAPON_PROFICIENCY_PERFECT,
+	[1] = WEAPON_PROFICIENCY_POOR,
+	[2] = WEAPON_PROFICIENCY_AVERAGE,
+	[3] = WEAPON_PROFICIENCY_GOOD,
+	[4] = WEAPON_PROFICIENCY_VERY_GOOD,
+	[5] = WEAPON_PROFICIENCY_PERFECT,
 }
 
 DMG_SCALE_PVN = 1
@@ -257,6 +257,15 @@ local DIFFICULTY_NAME =
 	[DIFFICULTY_VERYHARD] = "Very Hard"
 }
 
+local PROFICIENCY_NAME =
+{
+	[WEAPON_PROFICIENCY_POOR] = "Poor",
+	[WEAPON_PROFICIENCY_AVERAGE] = "Average",
+	[WEAPON_PROFICIENCY_GOOD] = "Good",
+	[WEAPON_PROFICIENCY_VERY_GOOD] = "Very Good",
+	[WEAPON_PROFICIENCY_PERFECT] = "Perfect"
+}
+
 local DIFFICULTIES =
 {
 	[1] = DIFFICULTY_VERYEASY,
@@ -302,6 +311,22 @@ function GM:GetDifficultyNPCHitgroupDamageScale(group)
 
 	return data.HitgroupNPCDamageScale[group]
 
+end
+
+function GM:GetDifficultyWeaponProficiency()
+	local difficulty = self:GetDifficulty()	
+	local data = DIFFICULTY_DATA[difficulty]
+	if data == nil then 
+		error("Invalid difficulty selected")
+		return
+	end 
+
+	return data.Proficiency
+end
+
+function GM:GetDifficultyWeaponProficiencyText()
+	local proficiency = self:GetDifficultyWeaponProficiency()
+	return PROFICIENCY_NAME[proficiency]
 end
 
 function GM:GetDifficultyPlayerHitgroupDamageScale(group)
