@@ -4,6 +4,7 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
+local winner
 
 GAMETYPE.Name = "Deathmatch"
 GAMETYPE.MapScript = {}
@@ -12,6 +13,14 @@ GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
 
 GAMETYPE.MapList =
 {
+	"dm_lockdown",
+	"dm_overwatch",
+	"dm_steamlab",
+	"dm_underpass",
+	"dm_resistance",
+	"dm_powerhouse",
+	"dm_runoff",
+	"halls3"
 }
 
 GAMETYPE.ClassesEnemyNPC =
@@ -33,9 +42,62 @@ function GAMETYPE:GetPlayerRespawnTime()
 
 end
 
+function GAMETYPE:IsTeamOnly()
+
+	return lambda_dm_teamonly:GetBool()
+
+end
+
+function GAMETYPE:GetFragLimit()
+
+	return lambda_dm_fraglimit:GetInt()
+
+end
+
+function GAMETYPE:GetTimeLimit()
+
+	return lambda_dm_timelimit:GetInt() * 60
+
+end
+
 function GAMETYPE:ShouldRestartRound()
 
 	return false
+
+end
+
+function GAMETYPE:GetNextMap(map)
+	local k = table.KeyFromValue(self.MapList, map)
+	local nextmap
+
+	if !self.MapList[k+1] then
+		nextmap = self.MapList[1]
+	else
+		nextmap = self.MapList[k+1]
+	end
+	return nextmap
+end
+
+function GAMETYPE:EndRound(winner)
+
+	local nextmap = self:GetNextMap(game.GetMap())
+	for k, v in pairs(player.GetAll()) do v:Freeze(true) end
+	hook.Run("ScoreboardShow")
+	PrintMessage(HUD_PRINTTALK, "Round Over. Frag limit reached by " .. winner:Name() .. ".")
+
+	PrintMessage(HUD_PRINTTALK, "Switching map to " .. nextmap .. ".")
+	timer.Simple(10, function() GAMEMODE:ChangeLevel(nextmap, nil, {}) end)
+
+end
+
+function GAMETYPE:ShouldEndRound()
+
+	for _, ply in pairs(player.GetAll()) do
+		if ply:Frags() >= self:GetFragLimit() then
+			self:EndRound(ply)
+			print(ply:Name())
+		end
+	end
 
 end
 
@@ -53,6 +115,8 @@ function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
 	elseif IsValid(inflictor) and inflictor:IsPlayer() then
 		inflictor:AddFrags( 1 )
 	end
+
+	self:ShouldEndRound()
 end
 
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
