@@ -72,7 +72,7 @@ function GM:AddDeathNotice(Attacker, team1, Inflictor, Victim, team2)
 	Death.times 	= 1
 
 	for k, v in pairs(Deaths) do
-		if Deaths[k].left == Death.left and Deaths[k].icon == Death.icon then
+		if Deaths[k].left == Death.left and Deaths[k].icon == Death.icon and Deaths[k].right == Death.right then
 			Death.times = Deaths[k].times + 1
 			table.remove(Deaths, k)
 		end
