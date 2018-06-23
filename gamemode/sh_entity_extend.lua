@@ -385,7 +385,6 @@ function ENTITY_META:CopyAnimationDataFrom(other)
 	self:SetSaveValue("m_flAnimTime", saveTable["m_flAnimTime"])
 	self:SetSkin(other:GetSkin())
 
-
 end
 
 -- FIXME: We should either cache this or beg the devs to GetInternalVariable result the same.
@@ -396,6 +395,10 @@ function ENTITY_META:CanTakeDamage()
 		return data.m_takedamage ~= 0 -- DAMAGE_NO
 	end 
 
-	return false
+	if self:IsNPC() == false and self:IsPlayer() == false and self:IsVehicle() == false then 
+		return false 
+	end 
+
+	return true
 
 end

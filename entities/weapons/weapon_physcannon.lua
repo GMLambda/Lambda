@@ -415,10 +415,8 @@ function SWEP:PrimaryAttack()
 	if tr.Fraction == 1 or not IsValid(ent) or ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
 		valid = false
 	elseif ent:GetMoveType() ~= MOVETYPE_VPHYSICS then
-		-- FIXME: GetInternalVariable does return nothing for m_takedamage
-		local savetable = ent:GetSaveTable()
-		if savetable.m_takedamage ~= nil and savetable.m_takedamage == 0 --[[DAMAGE_NO]] then
-			valid = false
+		if ent:CanTakeDamage() == false then 
+			valid = false 
 		end
 	end
 
@@ -437,9 +435,9 @@ function SWEP:PrimaryAttack()
 	end
 
 	if ent:GetMoveType() ~= MOVETYPE_VPHYSICS then
+
 		-- FIXME: GetInternalVariable does return nothing for m_takedamage
-		local savetable = ent:GetSaveTable()
-		if savetable.m_takedamage ~= nil and savetable.m_takedamage == 0 --[[DAMAGE_NO]] then
+		if ent:CanTakeDamage() == false then
 			return self:DryFire()
 		end
 
@@ -486,7 +484,6 @@ function SWEP:PrimaryAttack()
 		end
 	else
 		if ent:IsRagdoll() then
-			-- TODO: Replace with punt ragdoll.
 			return self:PuntRagdoll(ent, fwd, tr)
 		end
 	end
@@ -1082,7 +1079,9 @@ function SWEP:CloseElements()
 end
 
 function SWEP:Equip()
-    -- body
+
+	DbgPrint("Equip")
+
 	self:CloseElements()
 	self:StartEffects()
 	self.ShouldDrawGlow = true
@@ -1296,9 +1295,7 @@ function SWEP:Think()
 		end
 	end
 
-	--if owner:KeyDown(IN_ATTACK2) == false and controller:IsObjectAttached() == false then
-		self:WeaponIdle()
-	--end
+	self:WeaponIdle()
 
 	return true
 
@@ -1394,8 +1391,8 @@ function SWEP:AttachObject(ent, tr)
 
 		targetAng = owner:WorldToLocalAngles(targetAng)
 
-		self:SetTargetAngle(targetAng) --self:SetNW2Angle("TargetAng", targetAng)
-		self:SetTargetOffset(attachmentPoint) --self:SetNW2Vector("AttachmentPoint", attachmentPoint)
+		self:SetTargetAngle(targetAng)
+		self:SetTargetOffset(attachmentPoint)
 
 		ent:PhysicsImpactSound()
 	end
@@ -2022,7 +2019,6 @@ function SWEP:DoEffect(effect, pos)
 
 	self.CurrentEffect = effect
 	if SERVER then
-		--self:SetNW2Int("EffectState2", effect)
 		self:SetEffectState(effect)
 	end
 	DbgPrint("Assigned Current Effect: " .. (EFFECT_NAME[effect] or "Unknown!") .. " (" .. effect .. ")")
@@ -2114,16 +2110,7 @@ function SWEP:ShouldDrawUsingViewModel()
 	return self:IsCarriedByLocalPlayer() and LocalPlayer():ShouldDrawLocalPlayer() == false
 end
 
-function SWEP:DrawEffectType(id)
-
-	local data = self.EffectParameters[id]
-	if data == nil then
-		return
-	end
-
-	if data.Visible == false then
-		return
-	end
+function SWEP:DrawEffectType(id, data)
 
 	local curTime = CurTime()
 	local scale = data.Scale:Interp(curTime)
@@ -2134,7 +2121,6 @@ function SWEP:DrawEffectType(id)
 	end
 
 	local mat = data.Mat
-	local attachmentId = data.Attachment
 	local owner = self:GetOwner()
 	local pos = self:GetPos()
 	local color = data.Col
@@ -2142,14 +2128,14 @@ function SWEP:DrawEffectType(id)
 	if self:ShouldDrawUsingViewModel() == true then
 		if owner ~= nil then
 			local vm = owner:GetViewModel()
-			local attachmentData = vm:GetAttachment(attachmentId)
+			local attachmentData = vm:GetAttachment(data.Attachment)
 			if attachmentData == nil then
 				return
 			end
 			pos = self:FormatViewModelAttachment(attachmentData.Pos, true)
 		end
 	else
-		local attachmentData = self:GetAttachment(attachmentId)
+		local attachmentData = self:GetAttachment(data.Attachment)
 		if attachmentData == nil then
 			--print("Missing attachment: " .. attachmentId)
 			return
@@ -2158,50 +2144,39 @@ function SWEP:DrawEffectType(id)
 	end
 
 	render.SetMaterial(mat)
-	if self:ShouldDrawUsingViewModel() == false then
-		--scale = scale * 5
-	end
 
 	local colorScale = 0.7
 	if self:IsMegaPhysCannon() then
 		colorScale = 1
 	end
 
-	--DbgPrint(pos, scale, scale, data.Col)
-	local newColor = Color(color.r * colorScale, color.g * colorScale, color.b * colorScale, alpha)
-
-	render.DrawSprite(pos, scale, scale, newColor)
-
-	---debugoverlay.Box(pos, Vector(-0.5,-0.5,-0.5),Vector(0.5, 0.5, 0.5),0.05,Color(255, 0, 0))
+	color = Color(color.r * colorScale, color.g * colorScale, color.b * colorScale, alpha)
+	render.DrawSprite(pos, scale, scale, color)
 
 end
 
+local BEAM_GROUPS = 4
+local BEAM_SEGMENTS = 4
+
 function SWEP:DrawBeam(startPos, endPos, width, color)
 
-	if width <= 0.0 then
-		return
-	end
-
 	color = color or Color(255, 255, 255, 255)
-	render.SetMaterial(MAT_PHYSBEAM)
 
-	local numGroups = 5
-	local numSegments = 5
 	local len = endPos - startPos
-	local split = len / numSegments
-	for n = 0, numGroups - 1 do
-		render.StartBeam(numSegments)
-		for i = 0, numSegments - 1 do
+	local split = len / BEAM_SEGMENTS
+	for n = 0, BEAM_GROUPS - 1 do
+		render.StartBeam(BEAM_SEGMENTS)
+		for i = 0, BEAM_SEGMENTS - 1 do
 			local offset = Vector(0, 0, 0)
 			local pos
 			if i == 0 then
 				pos = startPos
-			elseif i == numSegments - 1 then
+			elseif i == BEAM_SEGMENTS - 1 then
 				pos = endPos
 			else
 				local t = CurTime() * 5
-				local p = (t + (n * n)) + (i / numSegments - 1) * math.pi
-				offset = Vector(1, 1, 1) * math.sin(p) + (VectorRand() * ((n / numGroups) - 0.5))
+				local p = (t + (n * n)) + (i / BEAM_SEGMENTS - 1) * math.pi
+				offset = Vector(1, 1, 1) * math.sin(p) + (VectorRand() * ((n / BEAM_GROUPS) - 0.5))
 				pos = startPos + (i * split) + offset
 			end
 			local texcoord = util.RandomFloat(0, 1)
@@ -2213,9 +2188,10 @@ function SWEP:DrawBeam(startPos, endPos, width, color)
 end
 
 function SWEP:DrawCoreBeams()
-	local corePos
+
 	local owner = self:GetOwner()
 
+	local corePos
 	if self:ShouldDrawUsingViewModel() == true then
 		if owner ~= nil then
 			local vm = owner:GetViewModel()
@@ -2242,6 +2218,8 @@ function SWEP:DrawCoreBeams()
 
 	local wepColor = self:GetWeaponColor() * colorScale
 	local color = Color(wepColor.x * 255, wepColor.y * 255, wepColor.z * 255, 255)
+
+	render.SetMaterial(MAT_PHYSBEAM)
 
 	for i = PHYSCANNON_ENDCAP1, PHYSCANNON_ENDCAP3 do
 
@@ -2271,19 +2249,24 @@ function SWEP:DrawCoreBeams()
 				local vm = owner:GetViewModel()
 				attachmentData = vm:GetAttachment(params.Attachment)
 				if attachmentData == nil then
-					return
+					continue
 				end
 				endPos = self:FormatViewModelAttachment(attachmentData.Pos, true)
 			end
 		else
 			attachmentData = self:GetAttachment(params.Attachment)
 			if attachmentData == nil then
-				return
+				continue
 			end
 			endPos = attachmentData.Pos
 		end
 
 		local width = (5 + util.RandomFloat(0, 5)) * beamdata.Scale:Interp(CurTime())
+
+		if width <= 0.0 then
+			continue
+		end
+
 		self:DrawBeam(endPos, corePos, width, color)
 
 	end
@@ -2294,8 +2277,11 @@ function SWEP:DrawEffects()
 
 	self:DrawCoreBeams()
 
-	for k,v in pairs(self.EffectParameters) do
-		self:DrawEffectType(k)
+	for k,data in pairs(self.EffectParameters) do
+		if data.Visible == false then
+			continue
+		end
+		self:DrawEffectType(k, data)
 	end
 
 end
@@ -2475,7 +2461,7 @@ function SWEP:StartEffects()
 
 	local usingViewModel = self:ShouldDrawUsingViewModel()
 	if self.LastUsingViewModel ~= usingViewModel then
-		local effects, beams = self:SetupEffects(self:ShouldDrawUsingViewModel())
+		local effects, beams = self:SetupEffects(usingViewModel)
 		self.EffectParameters = effects
 		self.BeamParameters = beams
 		self.LastUsingViewModel = usingViewModel
