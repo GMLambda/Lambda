@@ -74,6 +74,12 @@ function MAPSCRIPT:PostInit()
 			ent:SetPos(Vector(-14576, -13924, -1290))
 		end)
 
+		ents.WaitForEntityByName("breakfall_crates", function(ent)
+			-- Don't break so easily.
+			ent:SetKeyValue("physdamagescale", "1")
+			ent:SetHealth(1000)
+		end)
+
 		-- Spawn infront of G-Man
 		local spawn1 = ents.Create("info_player_start")
 		spawn1:SetPos(Vector(-14576, -13924, -1274))
