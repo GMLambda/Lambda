@@ -38,6 +38,17 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		local jumpBox = ents.Create("prop_physics")
+		jumpBox:SetPos(Vector(363.177521, -4154.399902, 277.458130))
+		jumpBox:SetAngles(Angle(0, 180, 0))
+		jumpBox:SetModel("models/props_junk/wood_crate001a.mdl")
+		jumpBox:Spawn()
+		jumpBox:SetHealth(1000)
+		local phys = jumpBox:GetPhysicsObject()
+		if IsValid(phys) then 
+			phys:SetMass(200)
+		end 
+
 		local boxcar_human
 		local boxcar_vort
 		ents.WaitForEntityByName("boxcar_human", function(ent)
