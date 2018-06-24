@@ -138,7 +138,7 @@ function MAPSCRIPT:PostInit()
 		ents.RemoveByClass("trigger_once", Vector(-3442, -316, 8)) -- We will take over.
 
 		local barney_room_trigger = ents.Create("trigger_once")
-		barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0,0,0), Vector(-150, -150, -50), Vector(150, 150, 50))
+		barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0,0,0), Vector(-150, -130, -50), Vector(150, 150, 50))
 		barney_room_trigger:SetKeyValue("teamwait", 1)
 		barney_room_trigger.OnTrigger = function(self)
 			spawn2.MasterSpawn = false
