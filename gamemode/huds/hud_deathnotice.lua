@@ -33,27 +33,20 @@ local function RecieveDeathEvent()
 	if data.type == DEATH_BYSELF then
 		if not IsValid(data.ent) then return end
 		GAMEMODE:AddDeathNotice(nil, 0, "suicide", data.ent:Name(), data.ent:Team())
-	end
-
-	if data.type == DEATH_BYPLAYER then
+	elseif data.type == DEATH_BYPLAYER then
 		if not IsValid(data.ent) then return end
 		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, data.ent:Name(), data.ent:Team())
-	end
-
-	if data.type == DEATH_NORMAL then
+	elseif data.type == DEATH_NORMAL then
 		if not IsValid(data.ent) then return end
 		GAMEMODE:AddDeathNotice(data.attclass, -1, data.infclass, data.ent:Name(), data.ent:Team())
-	end
-
-	if data.type == DEATH_NPC then
+	elseif data.type == DEATH_NPC then
 		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, "#" .. data.npcclass, -1)
-	end
-
-	if data.type == DEATH_BYNPC then
+	elseif data.type == DEATH_BYNPC then
 		GAMEMODE:AddDeathNotice("#" .. data.attacker, -1, data.infclass, "#" .. data.npcclass, -1)
 	end
+
 end
 net.Receive("LambdaDeathEvent",RecieveDeathEvent)
 
@@ -134,14 +127,15 @@ function GM:DrawDeathNotice( x, y )
 	if GetConVarNumber("cl_drawhud") == 0 then return end
 
 	local deathnotice_time = lambda_deathnotice_time:GetFloat()
-
+	local curTime = CurTime()
+	
 	x = x * ScrW() + 100
 	y = y * ScrH()
 	
 	-- Draw
 	for k, Death in pairs(Deaths) do
 
-		if Death.time + deathnotice_time > CurTime() then
+		if Death.time + deathnotice_time > curTime then
 	
 			if Death.lerp then
 				x = x * 0.3 + Death.lerp.x * 0.7
@@ -162,7 +156,7 @@ function GM:DrawDeathNotice( x, y )
 	-- expired entries one by one we will just clear the entire table
 	-- once everything is expired.
 	for k, Death in pairs(Deaths) do
-		if Death.time + deathnotice_time > CurTime() then
+		if Death.time + deathnotice_time > curTime then
 			return
 		end
 	end
