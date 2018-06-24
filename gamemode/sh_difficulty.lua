@@ -229,12 +229,6 @@ function GM:RegisterRoundWon()
 	self.RoundsWon = self.RoundsWon + 1
 end
 
-function GM:RegisterPlayerDeath(ply, attacker, inflictor)
-end
-
-function GM:RegisterNPCDeath(npc, attacker, inflictor)
-end
-
 function GM:GetDifficulty()
 
 	local difficulty = lambda_difficulty:GetInt()
