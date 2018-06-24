@@ -198,11 +198,18 @@ if SERVER then
 			--print("Marked weapon: " .. tostring(wep))
 		end
 
+		self:HandleCriticalNPCDeath(npc)
+		self:RegisterNPCDeath(npc, attacker, inflictor)
+
+	end
+
+	function GM:RegisterNPCDeath(npc, attacker, inflictor)
+
 		if npc:GetClass() == "npc_bullseye" or npc:GetClass() == "npc_launcher" then return end
 		if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = npc end
 		if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then attacker = attacker:GetDriver() end
 		if not IsValid(inflictor) and IsValid(attacker) then inflictor = attacker end
-	
+		
 		if IsValid(inflictor) and attacker == inflictor and inflictor:IsPlayer() or inflictor:IsNPC() then
 			inflictor = inflictor:GetActiveWeapon()
 			if not IsValid(attacker) then inflictor =  attacker end
@@ -237,12 +244,6 @@ if SERVER then
 		net.Start("LambdaDeathEvent")
 			net.WriteTable(data)
 		net.Broadcast()
-
-		self:HandleCriticalNPCDeath(npc)
-
-		self:RegisterNPCDeath(npc, attacker, inflictor)
-
-		--BaseClass.OnNPCKilled(self, npc, attacker, inflictor)
 
 	end
 

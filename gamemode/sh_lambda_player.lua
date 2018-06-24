@@ -735,10 +735,17 @@ if SERVER then
 			effectdata:SetEntity(ply)
 		util.Effect( "lambda_death", effectdata, true )
 
+		self:RegisterPlayerDeath(ply, attacker, inflictor)
+		local gameType = self:GetGameType()
+		self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
+
+	end
+	function GM:RegisterPlayerDeath(ply, attacker, inflictor)
+
 		if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = ply end
 		if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then attacker = attacker:GetDriver() end
 		if not IsValid(inflictor) and IsValid(attacker) then inflictor = attacker end
-		
+
 		if IsValid(inflictor) and inflictor == attacker and inflictor:IsPlayer() or inflictor:IsNPC() then
 			inflictor = inflictor:GetActiveWeapon()
 			if not IsValid(inflictor) then inflictor = attacker end
@@ -773,13 +780,6 @@ if SERVER then
 		net.Start("LambdaDeathEvent")
 			net.WriteTable(data)
 		net.Broadcast()
-
-		self:RegisterPlayerDeath(ply, attacker, inflictor)
-
-		local gameType = self:GetGameType()
-		self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
-
-		--BaseClass.PlayerDeath(self, ply, attacker, inflictor)
 
 	end
 
