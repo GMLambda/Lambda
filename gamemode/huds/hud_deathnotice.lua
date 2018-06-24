@@ -44,7 +44,7 @@ local function RecieveDeathEvent()
 		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, "#" .. data.npcclass, -1)
 	elseif data.type == DEATH_BYNPC then
-		GAMEMODE:AddDeathNotice("#" .. data.attacker, -1, data.infclass, "#" .. data.npcclass, -1)
+		GAMEMODE:AddDeathNotice("#" .. data.attacker:GetClass(), -1, data.infclass, "#" .. data.npcclass, -1)
 	end
 
 end

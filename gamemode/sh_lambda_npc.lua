@@ -241,6 +241,9 @@ if SERVER then
 		data.npcclass = npc:GetClass()
 		data.infclass = inflictor_class
 		data.attclass = attacker_class
+		if IsValid(attacker) then 
+			data.attacker = attacker
+		end
 		net.Start("LambdaDeathEvent")
 			net.WriteTable(data)
 		net.Broadcast()
