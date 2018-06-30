@@ -283,6 +283,8 @@ if SERVER then
 			ply.TrackerEntity:AttachToPlayer(ply)
 		end
 
+		ply:SetupHands()
+
 	end
 
 	function GM:PlayerSetColors(ply)
@@ -443,6 +445,7 @@ if SERVER then
 		ply.IsCurrentlySpawning = true
 		ply.DeathAcknowledged = false
 
+		self:PlayerSetModel(ply)
 		self:InitializePlayerPickup(ply)
 		self:InitializePlayerSpeech(ply)
 		self:PlayerSetColors(ply)
