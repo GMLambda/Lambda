@@ -82,6 +82,12 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
 	local ply = LocalPlayer()
 
+	if ply:Alive() == false then 
+		self.LastPlayerSpeed = 0
+		self.LastViewBob = 0
+		return oldPos, oldAng
+	end 
+
 	self.LastPlayerSpeed = self.LastPlayerSpeed or 0
 
 	local dt = SysTime() - (self.LastViewBob or SysTime())
@@ -154,10 +160,17 @@ local HL2_MAX_VIEWMODEL_LAG = 0.4
 
 function GM:CalcViewModelLag( wep, vm, oldPos, oldAng, pos, ang )
 
+	local ply = LocalPlayer()
 	local fwd = oldAng:Forward()
 
 	local newPos = oldPos
 	local newAng = oldAng
+
+	if ply:Alive() == false then 
+		self.LastViewDir = fwd
+		self.LastViewLag = 0
+		return oldPos, oldAng
+	end
 
 	self.LastViewDir = self.LastViewDir or fwd
 
