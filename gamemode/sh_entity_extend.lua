@@ -162,7 +162,7 @@ DOOR_STATE_OPEN = 2
 DOOR_STATE_CLOSING = 3
 
 function ENTITY_META:GetDoorState()
-	return self:GetSaveTable().m_eDoorState
+	return self:GetInternalVariable("m_eDoorState")
 end
 
 function ENTITY_META:IsDoorClosing()
@@ -182,7 +182,7 @@ function ENTITY_META:IsDoorOpen()
 end
 
 function ENTITY_META:IsDoorLocked()
-	return self:GetSaveTable().m_bLocked
+	return self:GetInternalVariable("m_bLocked") or false
 end
 
 OVERLAY_TEXT_BIT			=	0x00000001		-- show text debug overlay for this entity
@@ -228,13 +228,12 @@ function ENTITY_META:RemoveDebugOverlays(f)
 end
 
 function ENTITY_META:GetDebugOverlays()
-	local tbl = self:GetSaveTable()
-	return tonumber(tbl["m_debugOverlays"] or 0)
+	return tonumber(self:GetInternalVariable("m_debugOverlays") or 0)
 end
 
 -- Vehicles
 function ENTITY_META:IsGunEnabled()
-	return self:GetSaveTable().EnableGun == true
+	return self:GetInternalVariable("EnableGun") == true
 end
 
 -- caps
@@ -381,22 +380,21 @@ function ENTITY_META:CopyAnimationDataFrom(other)
 	self:AddEffects(other:GetEffects())
 	self:SetSequence(other:GetSequence())
 
-	local saveTable = other:GetSaveTable()
-	self:SetSaveValue("m_flAnimTime", saveTable["m_flAnimTime"])
+	local animTime = other:GetInternalVariable("m_flAnimTime")
+	self:SetSaveValue("m_flAnimTime", animTime)
 	self:SetSkin(other:GetSkin())
 
 end
 
--- FIXME: We should either cache this or beg the devs to GetInternalVariable result the same.
 function ENTITY_META:CanTakeDamage()
 
-	local data = self:GetSaveTable()
-	if data.m_takedamage ~= nil then 
-		return data.m_takedamage ~= 0 -- DAMAGE_NO
-	end 
-
-	if self:IsNPC() == false and self:IsPlayer() == false and self:IsVehicle() == false then 
-		return false 
+	local data = self:GetInternalVariable("m_takedamage")
+	if data ~= nil then 
+		return data ~= 0 -- DAMAGE_NO
+	else 
+		if self:IsNPC() == false and self:IsPlayer() == false and self:IsVehicle() == false then 
+			return false 
+		end 
 	end 
 
 	return true
