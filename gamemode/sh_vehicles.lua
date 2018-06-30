@@ -178,9 +178,9 @@ if SERVER then
 
 	function GM:CanExitVehicle(vehicle, ply)
 		DbgPrint("CanPlayerExitVehicle", vehicle, ply)
-		local saveTable = vehicle:GetSaveTable()
-		if saveTable.vehiclelocked ~= nil then
-			return saveTable.vehiclelocked == false
+		local locked = vehicle:GetInternalVariable("vehiclelocked")
+		if locked ~= nil then
+			return locked == false
 		end
 	    return true
 	end

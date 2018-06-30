@@ -459,7 +459,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		else
 			data.EnableGun = false
 		end
-		data.VehicleScript = ent:GetSaveTable()["VehicleScript"]
+		data.VehicleScript = ent:GetInternalVariable("VehicleScript")
 		if ent:GetNWBool("IsPassengerSeat", false) == true then
 			data.IsPassengerSeat = true
 		end
@@ -472,8 +472,8 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		if ent:IsDoorLocked() then
 			data.SpawnFlags = bit.bor(data.SpawnFlags, 2048) -- Starts Locked
 		end
-		data.Pos1 = ent:GetSaveTable()["m_vecPosition1"]
-		data.Pos2 = ent:GetSaveTable()["m_vecPosition2"]
+		data.Pos1 = ent:GetInternalVariable("m_vecPosition1")
+		data.Pos2 = ent:GetInternalVariable("m_vecPosition2")
 	else
 		data.Type = ENT_TYPE_GENERIC
 	end
