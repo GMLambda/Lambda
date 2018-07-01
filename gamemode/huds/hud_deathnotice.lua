@@ -101,33 +101,28 @@ local function DrawDeath(x, y, death, deathnotice_time)
 	local w, h = killicon.GetSize(death.icon)
 	if !w and !h then return end
 
-	local leftColor = death.color1
+	local deathIcon = false
 
 	if death.icon == "default" then
 		--draw.SimpleText("KILLED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
 	elseif death.icon == "suicide" then 
 		draw.SimpleText("SUICIDE", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
 	elseif death.icon == "fall" then 
-		--draw.SimpleText("FELL", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-		death.left = "FELL"
-		death.icon = "default"
-		death.color1 = times_color
+		draw.SimpleText("FELL", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
 	elseif death.icon == "blast" then 
-		death.left = "EXPLODED"
-		death.icon = "default"
-		death.color1 = times_color
+		draw.SimpleText("EXPLODED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
 	elseif death.icon == "burn" then 
-		death.left = "BURNED"
-		death.icon = "default"
-		death.color1 = times_color
+		draw.SimpleText("BURNED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
 	elseif death.icon == "shock" then 
-		death.left = "ELECTROCUTED"
-		death.icon = "default"
-		death.color1 = times_color
+		draw.SimpleText("ELECTROCUTED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
+	else 
+		deathIcon = true
 	end 
 
-	killicon.Draw(x, y, death.icon, alpha)
-	
+	if deathIcon == true then
+		killicon.Draw(x, y, death.icon, alpha)
+	end 
+
 	-- Draw KILLER
 	if ( death.left ) then
 		draw.SimpleText(death.left, font, x - (w / 2) - 16, y, death.color1, TEXT_ALIGN_RIGHT)

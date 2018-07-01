@@ -762,8 +762,18 @@ if SERVER then
 		local data = {}
 		data.ent = ply 
 
-		if inflictor == ply then
+		if attacker == ply then
 			data.type = DEATH_BYSELF
+			data.infclass = "suicide"
+			if bit.band(dmgInfo:GetDamageType(), DMG_BLAST) ~= 0 then 
+				data.infclass = "blast"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
+				data.infclass = "burn"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_SHOCK) ~= 0 then 
+				data.infclass = "shock"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
+				data.infclass = "fall"
+			end
 		elseif attacker:IsPlayer() then
 			data.type = DEATH_BYPLAYER
 			data.infclass = inflictor:GetClass()
@@ -787,6 +797,7 @@ if SERVER then
 				data.type = DEATH_NORMAL
 				data.infclass = inflictor:GetClass()
 				data.attacker = attacker
+				data.attclass = attacker:GetClass()
 			end 
 		else 
 			data.type = DEATH_NORMAL
@@ -794,6 +805,8 @@ if SERVER then
 			data.attclass = attacker:GetClass()
 			if bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
 				data.infclass = "burn"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
+				data.infclass = "fall"
 			end
 		end
 
