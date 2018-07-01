@@ -35,6 +35,7 @@
 - Fix: Barney to appear twice on d3_c17_10b.
 - Fix: Players not getting the crowbar on d1_trainstation_06.
 - Fix: Suit would recharge too fast, prevents players from infinite sprinting.
+- Fix: Ragdolls wouldn't be properly transitioned.
 
 0.9:
 - Removed: Freezing physics when trying to jump off them.

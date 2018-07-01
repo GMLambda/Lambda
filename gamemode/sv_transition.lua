@@ -437,6 +437,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		KeyValues = ent.KeyValueTable or ent:GetKeyValues(),
 		SaveTable = ent:GetSaveTable(),
 		Table = ent:GetTable(),
+		Phys = {},
 		SourceMap = ent.SourceMap or currentMap,
 		GlobalName = ent:GetNWString("GlobalName", ent:GetInternalVariable("globalname")),
 	}
@@ -492,6 +493,17 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 		data.Pos2 = ent:GetInternalVariable("m_vecPosition2")
 	else
 		data.Type = ENT_TYPE_GENERIC
+	end
+
+	for i = 0, ent:GetPhysicsObjectCount() - 1 do
+		local physObj = ent:GetPhysicsObjectNum(i)
+		if IsValid(physObj) then 
+			local physPos = physObj:GetPos()
+			local physAng = physObj:GetAngles()
+			physPos = ent:WorldToLocal(physPos)
+			physAng = ent:WorldToLocalAngles(physAng)
+			data.Phys[i] = { physPos, physAng }
+		end 
 	end
 
 	for k,v in pairs(data.SaveTable) do
@@ -1194,6 +1206,17 @@ function GM:CreateTransitionObjects()
 		if data.GlobalName ~= nil and data.GlobalName ~= "" then
 			ent:SetNWString("GlobalName", data.GlobalName)
 			--ent:SetKeyValue("globalname", data.GlobalName)
+		end
+
+		-- Correct phys positions.
+		for k,v in pairs(data.Phys) do 
+			local physObj = ent:GetPhysicsObjectNum(k)
+			if IsValid(physObj) then 
+				local physPos = ent:LocalToWorld(v[1])
+				local physAng = ent:LocalToWorldAngles(v[2])
+				physObj:SetPos(physPos)
+				physObj:SetAngles(physAng)
+			end
 		end
 	end
 
