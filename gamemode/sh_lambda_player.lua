@@ -276,7 +276,7 @@ if SERVER then
 		ply:SetModel(mdl)
 
 		local gender = EstimateModelGender(ply)
-		print("New Gender: " .. gender)
+		DbgPrint("New Gender: " .. gender)
 		ply:SetGender(gender)
 
 		if IsValid(ply.TrackerEntity) then
@@ -620,7 +620,7 @@ if SERVER then
 		["Grenade"] = "weapon_frag",
 	}
 
-	function GM:DoPlayerDeath(ply, attacker, dmg)
+	function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 
 		DbgPrint("GM:DoPlayerDeath", ply)
 
@@ -706,7 +706,7 @@ if SERVER then
 
 		end
 
-		local force = dmg:GetDamageForce()
+		local force = dmgInfo:GetDamageForce()
 		for _,v in ipairs(ply.LastWeaponsDropped) do
 			local phys = v:GetPhysicsObject()
 			if IsValid(phys) then
@@ -720,6 +720,9 @@ if SERVER then
 		ply:EmitSound(snd)
 		ply:SetShouldServerRagdoll(false)
 		ply:CreateRagdoll()
+
+		local inflictor = dmgInfo:GetInflictor()
+		self:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
 
 	end
 
@@ -738,12 +741,14 @@ if SERVER then
 			effectdata:SetEntity(ply)
 		util.Effect( "lambda_death", effectdata, true )
 
-		self:RegisterPlayerDeath(ply, attacker, inflictor)
 		local gameType = self:GetGameType()
 		self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
 
 	end
-	function GM:RegisterPlayerDeath(ply, attacker, inflictor)
+
+	function GM:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
+
+		DbgPrint("RegisterPlayerDeath", ply, attacker, inflictor)
 
 		if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = ply end
 		if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then attacker = attacker:GetDriver() end
@@ -755,31 +760,43 @@ if SERVER then
 		end
 
 		local data = {}
+		data.ent = ply 
 
-		if attacker == ply then
+		if inflictor == ply then
 			data.type = DEATH_BYSELF
-			data.ent = ply
-			net.Start("LambdaDeathEvent")
-				net.WriteTable(data)
-			net.Broadcast()
-		return end
-
-		if attacker:IsPlayer() then
+		elseif attacker:IsPlayer() then
 			data.type = DEATH_BYPLAYER
-			data.ent = ply
 			data.infclass = inflictor:GetClass()
 			data.attacker = attacker
-			net.Start("LambdaDeathEvent")
-				net.WriteTable(data)
-			net.Broadcast()
-		return end
+			if bit.band(dmgInfo:GetDamageType(), DMG_BLAST) ~= 0 then 
+				data.infclass = "blast"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
+				data.infclass = "burn"
+			elseif bit.band(dmgInfo:GetDamageType(), DMG_SHOCK) ~= 0 then 
+				data.infclass = "shock"
+			end
+		elseif attacker:IsNPC() then 
+			data.type = DEATH_NORMAL
+			data.infclass = inflictor:GetClass()
+			data.attclass = attacker:GetClass()
+		elseif attacker:IsWorld() then 
+			if bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
+				data.type = DEATH_BYSELF
+				data.infclass = "fall"
+			else 
+				data.type = DEATH_NORMAL
+				data.infclass = inflictor:GetClass()
+				data.attacker = attacker
+			end 
+		else 
+			data.type = DEATH_NORMAL
+			data.infclass = inflictor:GetClass()
+			data.attclass = attacker:GetClass()
+			if bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
+				data.infclass = "burn"
+			end
+		end
 
-		data = {}
-
-		data.type = DEATH_NORMAL
-		data.ent = ply
-		data.infclass = inflictor:GetClass()
-		data.attclass = attacker:GetClass()
 		net.Start("LambdaDeathEvent")
 			net.WriteTable(data)
 		net.Broadcast()

@@ -212,7 +212,9 @@ if SERVER then
 		
 		if IsValid(inflictor) and attacker == inflictor and inflictor:IsPlayer() or inflictor:IsNPC() then
 			inflictor = inflictor:GetActiveWeapon()
-			if not IsValid(attacker) then inflictor =  attacker end
+			if not IsValid(attacker) then 
+				inflictor =  attacker
+			end
 		end
 
 		local inflictor_class = "worldspawn"
@@ -220,7 +222,20 @@ if SERVER then
 
 		local data = {}
 
-		if IsValid(inflictor) then inflictor_class = inflictor:GetClass() end
+		if IsValid(inflictor) then 
+			inflictor_class = inflictor:GetClass()
+			if inflictor_class == "trigger_hurt" then 
+				if bit.band(npc:GetLastDamageType(), DMG_SHOCK) ~= 0 then 
+					inflictor_class = "shock"
+				end
+			elseif inflictor_class == "env_fire" then 
+				if bit.band(npc:GetLastDamageType(), DMG_BURN) ~= 0 then 
+					inflictor_class = "burn"
+					attacker_class = inflictor_class
+				end
+			end
+		end
+
 		if IsValid(attacker) then
 			attacker_class = attacker:GetClass()
 			if attacker:IsPlayer() then
@@ -231,7 +246,8 @@ if SERVER then
 				net.Start("LambdaDeathEvent")
 					net.WriteTable(data)
 				net.Broadcast()
-			return end
+				return 
+			end
 		end
 
 		if npc:GetClass() == "npc_turret_floor" then attacker_class = npc:GetClass() end

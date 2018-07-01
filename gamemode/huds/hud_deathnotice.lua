@@ -32,18 +32,19 @@ local function RecieveDeathEvent()
 
 	if data.type == DEATH_BYSELF then
 		if not IsValid(data.ent) then return end
-		GAMEMODE:AddDeathNotice(nil, 0, "suicide", data.ent:Name(), data.ent:Team())
+		GAMEMODE:AddDeathNotice(nil, 0, data.infclass, data.ent:Name(), data.ent:Team())
 	elseif data.type == DEATH_BYPLAYER then
 		if not IsValid(data.ent) then return end
 		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, data.ent:Name(), data.ent:Team())
 	elseif data.type == DEATH_NORMAL then
 		if not IsValid(data.ent) then return end
-		GAMEMODE:AddDeathNotice(data.attclass, -1, data.infclass, data.ent:Name(), data.ent:Team())
+		GAMEMODE:AddDeathNotice("#" .. data.attclass, -1, data.infclass, data.ent:Name(), data.ent:Team())
 	elseif data.type == DEATH_NPC then
 		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, "#" .. data.npcclass, -1)
 	elseif data.type == DEATH_BYNPC then
+		if not IsValid(data.attacker) then return end
 		GAMEMODE:AddDeathNotice("#" .. data.attacker:GetClass(), -1, data.infclass, "#" .. data.npcclass, -1)
 	end
 
@@ -79,16 +80,12 @@ function GM:AddDeathNotice(Attacker, team1, Inflictor, Victim, team2)
 	
 	if (Death.left == Death.right) then
 		Death.left = nil
-		Death.icon = "suicide"
 	end
 	
 	table.insert(Deaths, Death)
 end
 
 local function DrawDeath(x, y, death, deathnotice_time)
-
-	local w, h = killicon.GetSize(death.icon)
-	if !w and !h then return end
 	
 	local fadeout = (death.time + deathnotice_time) - CurTime()
 	
@@ -97,12 +94,39 @@ local function DrawDeath(x, y, death, deathnotice_time)
 	death.color2.a = alpha
 	times_color.a = alpha
 	
+	if death.icon == nil then 
+		death.icon = "default"
+	end 
 
-	if death.icon == "default" or death.icon == "suicide" then
-		draw.SimpleText("KILLED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	else
-		killicon.Draw(x, y, death.icon, alpha)
-	end
+	local w, h = killicon.GetSize(death.icon)
+	if !w and !h then return end
+
+	local leftColor = death.color1
+
+	if death.icon == "default" then
+		--draw.SimpleText("KILLED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
+	elseif death.icon == "suicide" then 
+		draw.SimpleText("SUICIDE", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
+	elseif death.icon == "fall" then 
+		--draw.SimpleText("FELL", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
+		death.left = "FELL"
+		death.icon = "default"
+		death.color1 = times_color
+	elseif death.icon == "blast" then 
+		death.left = "EXPLODED"
+		death.icon = "default"
+		death.color1 = times_color
+	elseif death.icon == "burn" then 
+		death.left = "BURNED"
+		death.icon = "default"
+		death.color1 = times_color
+	elseif death.icon == "shock" then 
+		death.left = "ELECTROCUTED"
+		death.icon = "default"
+		death.color1 = times_color
+	end 
+
+	killicon.Draw(x, y, death.icon, alpha)
 	
 	-- Draw KILLER
 	if ( death.left ) then
