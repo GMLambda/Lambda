@@ -64,12 +64,19 @@ function MAPSCRIPT:PostInit()
 				Vector(-480, -500, 0),
 				Vector(500, 780, 115)
 			)
+			triggerHurt1:SetKeyValue("damagetype", "32")
 			triggerHurt1:SetKeyValue("damage", "200")
 
 			-- Reposition path track so players can jump across.
 			ents.WaitForEntityByName("churchtram_path_bottom", function(ent)
 				ent:SetPos(Vector(-4530.682129, 940.989685, -2902.0))
 			end)
+
+			-- Prevent players from going back.
+			ents.WaitForEntityByName("returndoor", function(ent)
+				ent:Fire("Close", "", 2.5)
+			end)
+
 		end
 
 		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1808.973267, 721.884277, -3071.968750), Ang = Angle(0, -180, 0) })
