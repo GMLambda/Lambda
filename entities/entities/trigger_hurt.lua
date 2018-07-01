@@ -303,7 +303,7 @@ function ENT:GuessDamageForce(d, forceDir, forcePos, scale)
 
 end
 
-function ENT:HurtEntity(ent, dmg)
+function ENT:HurtEntity(ent, amount)
 
 	if self:GetNWVar("Disabled") == true then
 		return false
@@ -327,8 +327,8 @@ function ENT:HurtEntity(ent, dmg)
 		local damagePos = ent:NearestPoint(pos)
 
 		local d = DamageInfo()
-		d:SetDamage( self.Damage )
-		d:SetDamageType( dmg )
+		d:SetDamage( amount )
+		d:SetDamageType( self.DamageType )
 		d:SetInflictor(self)
 		d:SetAttacker(self)
 		if self.NoDamageForce then
