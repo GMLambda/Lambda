@@ -88,7 +88,11 @@ function MAPSCRIPT:PostInit()
 
 		-- -1836.434814 -1.664792 1344.031250
 
-		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1836.434814, -1.664792, 1344.031250), Ang = Angle(0, 0, 0) })
+		local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1965.112183, 24.634741, 578.822021), Ang = Angle(0, -90, 0) })
+		ents.WaitForEntityByName("Train_lift", function(ent)
+			checkpoint1:SetParent(ent)
+		end)
+
 		ents.WaitForEntityByName("trigger_player_Breenelevator", function(ent)
 			ent:SetKeyValue("teamwait", "1")
 			ent.OnTrigger = function()
@@ -96,7 +100,23 @@ function MAPSCRIPT:PostInit()
 			end
 		end)
 
-		local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1056.175659, 490.913574, 1271.527832), Ang = Angle(0, -90, 0) })
+		local inputEnt = ents.Create("lambda_entity")
+		inputEnt:SetName("lambda_physcannon")
+		inputEnt.AcceptInput = function(s, input, caller, activator, param)
+			if input == "AddPhyscannon" then
+				print("Adding physcannon")
+				table.insert(self.DefaultLoadout.Weapons, "weapon_physcannon")
+				s:Remove()
+				s.AcceptInput = function() end
+			end
+		end
+		inputEnt:Spawn()
+
+		ents.WaitForEntityByName("w_physgun", function(ent)
+			ent:Fire("AddOutput", "OnPlayerPickup lambda_physcannon,AddPhyscannon,,0.0,-1")
+		end)
+
+		local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1059.245605, 455.159790, 1302.171143), Ang = Angle(0, -90, 0) })
 		ents.WaitForEntityByName("Train_lift_TP", function(ent)
 			checkpoint2:SetParent(ent)
 		end)
