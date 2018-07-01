@@ -377,6 +377,7 @@ local SAVETABLE_BLACKLIST =
 	["m_hMoveChild"] = true, -- dead locks.
 	["m_hMoveParent"] = true, -- dead locks.
 	["m_pParent"] = true, -- dead locks.
+	["m_MoveCollide"] = true,
 	["globalname"] = true,
 	["additionalequipment"] = true,
 	["m_bConditionsGathered"] = true,
@@ -386,6 +387,21 @@ local SAVETABLE_BLACKLIST =
 	["m_nExactWaterLevel"] = true,
 	["m_nWaterType"] = true,
 	["m_rgflCoordinateFrame"] = true, -- Fucks up the airboat.
+	["m_bSequenceFinished"] = true,
+	["classname"] = true,
+	["health"] = true,
+	["sequence"] = true,
+	["m_bClientSideAnimation"] = true,
+	["renderfx"] = true,
+	["rendermode"] = true,
+	["m_iEFlags"] = true,
+	["m_flNextAttack"] = true,
+	["m_SleepFlags"] = true,
+	["m_nWakeTick"] = true,
+	["LightingOriginHack"] = true,
+	["m_NPCState"] = true,
+	["LightingOrigin"] = true,
+	["rendercolor"] = true,
 }
 
 function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
@@ -1044,10 +1060,8 @@ function GM:CreateTransitionObjects()
 		ent:SetSkin(data.Skin)
 		ent:SetMaterial(data.Mat)
 		ent:SetHealth(data.Health)
-		ent:AddFlags(data.Flags)
 		ent:AddEFlags(data.EFlags)
 		ent:AddEffects(data.Effects)
-		ent:SetSolidFlags(data.SolidFlags)
 		ent:SetSolid(data.Solid)
 		ent:AddSpawnFlags(data.SpawnFlags)
 		ent:SetCollisionGroup(data.CollisionGroup)
@@ -1154,7 +1168,7 @@ function GM:CreateTransitionObjects()
 			elseif istable(v) then 
 				ent:SetSaveValue(k, v)
 			else
-				ent:SetSaveValue(k,v)
+				--ent:SetSaveValue(k,v)
 			end
 		end
 
