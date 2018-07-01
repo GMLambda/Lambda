@@ -112,23 +112,7 @@ if _DEBUG then
 
 	function LogGeneric(color, ...)
 
-		local printResult = ""
-		for i,v in ipairs( {...} ) do
-			printResult = printResult .. tostring(v) .. "\t"
-		end
-		printResult = printResult
-
-		local timestamp = GetTimestamp()
-
-		if SERVER then
-			print("[SV" .. timestamp .. "] " .. printResult)
-		else
-			--if epoe and epoe.Print then
-				--epoe.Print("[CL" .. timestamp .. "] " .. printResult)
-			--else
-				print("[CL" .. timestamp .. "] " .. printResult)
-			--end
-		end
+		LogGroup("Generic", color, ...)
 
 	end
 
