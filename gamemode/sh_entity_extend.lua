@@ -236,6 +236,15 @@ function ENTITY_META:IsGunEnabled()
 	return self:GetInternalVariable("EnableGun") == true
 end
 
+-- Damage
+function ENTITY_META:GetLastDamageType()
+	return self.LastReceivedDamageType or 0
+end 
+
+function ENTITY_META:SetLastDamageType(dmgType)
+	self.LastReceivedDamageType = dmgType
+end 
+
 -- caps
 FCAP_MUST_SPAWN				= 0x00000001		-- Spawn after restore
 FCAP_ACROSS_TRANSITION		= 0x00000002		-- should transfer between transitions

@@ -113,6 +113,60 @@ function GM:ApplyCorrectedDamage(dmginfo)
 
 end
 
+local DMG_TYPES =
+{
+	[DMG_GENERIC] = "Generic",
+	[DMG_CRUSH] = "Crush",
+	[DMG_BULLET] = "Bullet",
+	[DMG_SLASH] = "Slash",
+	[DMG_BURN] = "Burn",
+	[DMG_VEHICLE] = "Vehicle",
+	[DMG_FALL] = "Fall",
+	[DMG_BLAST] = "Blast",
+	[DMG_CLUB] = "Club",
+	[DMG_SHOCK] = "Shock",
+	[DMG_SONIC] = "Sonic",
+	[DMG_ENERGYBEAM] = "Energybeam",
+	[DMG_PREVENT_PHYSICS_FORCE] = "PhysForce",
+	[DMG_NEVERGIB] = "NeverGib",
+	[DMG_ALWAYSGIB] = "AlwaysGib",
+	[DMG_DROWN] = "Drown",
+	[DMG_PARALYZE] = "Paralyze",
+	[DMG_NERVEGAS] = "NerveGas",
+	[DMG_POISON] = "Poison",
+	[DMG_RADIATION] = "Radiation",
+	[DMG_DROWNRECOVER] = "DrownRecover",
+	[DMG_ACID] = "Acid",
+	[DMG_SLOWBURN] = "SlowBurn",
+	[DMG_REMOVENORAGDOLL] = "RemoveNoRagdoll",
+	[DMG_PHYSGUN] = "Physgun",
+	[DMG_PLASMA] = "Plasma",
+	[DMG_AIRBOAT] = "Airboat",
+	[DMG_DISSOLVE] = "Dissolve",
+	[DMG_BLAST_SURFACE] = "BlastSurface",
+	[DMG_DIRECT] = "Direct",
+	[DMG_BUCKSHOT] = "Buckshot",
+	[DMG_SNIPER] = "Sniper",
+	[DMG_MISSILEDEFENSE] = "MissileDefense",
+}
+
+local function GetDamageTypeText(dmginfo)
+	local text = ""
+	local append = function(t) 
+		if text ~= "" then
+			text = text .. ", " .. t
+		else 
+			text = t 
+		end 
+	end
+	for k,v in pairs(DMG_TYPES) do 
+		if dmginfo:IsDamageType(k) == true then
+			append(v)
+		end 
+	end
+	return text .. " : " .. dmginfo:GetDamageType()
+end 
+
 function GM:EntityTakeDamage(target, dmginfo)
 
 	local DbgPrint = DbgPrintDmg
@@ -120,10 +174,14 @@ function GM:EntityTakeDamage(target, dmginfo)
 	local attacker = dmginfo:GetAttacker()
 	local inflictor = dmginfo:GetInflictor()
 	local targetClass = target:GetClass()
+	local dmgText = GetDamageTypeText(dmginfo)
 
-	DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor))
+	DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor) .. ", Type: " .. dmgText)
 
 	local gameType = self:GetGameType()
+
+	local dmgType = dmginfo:GetDamageType()
+	target:SetLastDamageType(dmgType)
 
 	target.IsPhysgunDamage = dmginfo:IsDamageType(DMG_PHYSGUN)
 	DbgPrint(target, "PhysgunDamage: " .. tostring(target.IsPhysgunDamage))
