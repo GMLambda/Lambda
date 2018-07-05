@@ -38,6 +38,8 @@ if SERVER then
 
 	function PLAYER_META:LockPosition(poslock, viewlock, viewdata)
 
+		if not self:Alive() then return end
+		
 		poslock = poslock or false
 		viewlock = viewlock or VIEWLOCK_NONE
 

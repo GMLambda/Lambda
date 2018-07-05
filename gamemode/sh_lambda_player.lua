@@ -19,7 +19,7 @@ if SERVER then
 	function GM:ShowHelp(ply)
 
 		local posLocked = ply:IsPositionLocked()
-		if posLocked == false and ply:Alive() then
+		if posLocked == false then
 			self:TogglePlayerSettings(ply, true)
 		end
 
