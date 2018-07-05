@@ -78,16 +78,16 @@ function PANEL:Init()
 		skipvoteb:SetSize(buttonSizeW, 22)
 		skipvoteb:SetTextColor(Color(255, 255, 255, 155))
 		skipvoteb.DoClick = function() RunConsoleCommand("lambda_voteskip") self:Close() end
-		
+
 		local cmap = vgui.Create("DComboBox", PanelVote)
 		local mapList = GAMEMODE:GetGameTypeData("MapList") or {}
 		local curMap = string.lower(game.GetMap())
 		cmap:SetPos(5 + buttonSizeW + 5, 59)
 		cmap:SetSize(100, 22)
 		cmap:SetVisible(false)
-		for _,v in pairs(mapList) do 
+		for _, v in pairs(mapList) do
 			if v:iequals(curMap) == true then
-				continue 
+				continue
 			end
 			cmap:AddChoice(v)
 		end
@@ -98,9 +98,9 @@ function PANEL:Init()
 		cbmap:SetVisible(false)
 		cbmap:SetIcon("lambda/icons/tick.png")
 		cbmap:SetText("")
-		cbmap.DoClick = function() 
+		cbmap.DoClick = function()
 			local selected = cmap:GetSelected()
-			RunConsoleCommand("lambda_votemap", selected) self:Close() 
+			RunConsoleCommand("lambda_votemap", selected) self:Close()
 		end
 
 		local cmvoteb = vgui.Create("DButton", PanelVote)
@@ -108,17 +108,17 @@ function PANEL:Init()
 		cmvoteb:SetText("Change map")
 		cmvoteb:SetSize(buttonSizeW, 22)
 		cmvoteb:SetTextColor(Color(255, 255, 255, 155))
-		cmvoteb.DoClick = function() 
-			if !cmap:IsVisible() and !cbmap:IsVisible() then 
+		cmvoteb.DoClick = function()
+			if !cmap:IsVisible() and !cbmap:IsVisible() then
 				cmap:SetVisible(true)
-				cbmap:SetVisible(true) 
-			else 
+				cbmap:SetVisible(true)
+			else
 				cmap:SetVisible(false)
-				cbmap:SetVisible(false) 
-			end 
-			if self.pnlPlayersFrame ~= nil then 
+				cbmap:SetVisible(false)
+			end
+			if self.pnlPlayersFrame ~= nil then
 				self.pnlPlayersFrame:Remove()
-				self.pnlPlayersFrame = nil 
+				self.pnlPlayersFrame = nil
 			end
 		end
 
@@ -126,10 +126,10 @@ function PANEL:Init()
 		cplayer:SetPos(5 + buttonSizeW + 5, 86)
 		cplayer:SetSize(100, 22)
 		cplayer:SetVisible(false)
-		for _,v in pairs(player.GetAll()) do 
-			if v == LocalPlayer() then 
-				continue 
-			end 
+		for _, v in pairs(player.GetAll()) do
+			if v == LocalPlayer() then
+				continue
+			end
 			cplayer:AddChoice(v:Name(), v:UserID())
 		end
 
@@ -139,21 +139,21 @@ function PANEL:Init()
 		cbkick:SetVisible(false)
 		cbkick:SetIcon("lambda/icons/tick.png")
 		cbkick:SetText("")
-		cbkick.DoClick = function() 
+		cbkick.DoClick = function()
 			local ply, steamid = cplayer:GetSelected()
-			RunConsoleCommand("lambda_votekick", steamid) self:Close() 
+			RunConsoleCommand("lambda_votekick", steamid) self:Close()
 		end
-		
+
 		local kickvoteb = vgui.Create("DButton", PanelVote)
 		kickvoteb:SetPos(5, 86)
 		kickvoteb:SetText("Kick player")
 		kickvoteb:SetSize(buttonSizeW, 22)
 		kickvoteb:SetTextColor(Color(255, 255, 255, 155))
 		kickvoteb.DoClick = function()
-			if cplayer:IsVisible() == true then 
+			if cplayer:IsVisible() == true then
 				cplayer:SetVisible(false)
 				cbkick:SetVisible(false)
-			else 
+			else
 				cplayer:SetVisible(true)
 				cbkick:SetVisible(true)
 			end
@@ -414,7 +414,7 @@ function PANEL:Init()
 		difficulty_cmb:SetText("Difficulty")
 		difficulty_cmb:SetSize(100, 22)
 		difficulty_cmb:SetSortItems(false)
-		for _,v in pairs(GAMEMODE:GetDifficulties()) do 
+		for _,v in pairs(GAMEMODE:GetDifficulties()) do
 			local choice = GAMEMODE:GetDifficultyText(v)
 			difficulty_cmb:AddChoice(choice, v, GAMEMODE:GetDifficulty() == v)
 		end
@@ -590,6 +590,12 @@ function PANEL:UpdateColorSettings(val,color)
 	net.Start("LambdaPlayerSettingsChanged")
 	net.SendToServer()
 
+end
+
+function PANEL:OnKeyCodePressed(key)
+	if key == KEY_F1 then
+		self:Close()
+	end
 end
 
 
