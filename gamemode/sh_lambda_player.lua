@@ -1479,10 +1479,10 @@ end
 
 function GM:ShouldChargeSuitPower(ply)
 
-	--local flashlight = ply:FlashlightIsOn() -- Its just annoying.
 	local sprinting = ply:GetSprinting()
 	local inWater = ply:WaterLevel() >= 3
-	local powerDrain = sprinting or inWater
+	local flashlightOn = ply:FlashlightIsOn()
+	local powerDrain = sprinting or inWater --[[ or flashlightOn ]]
 
 	if powerDrain == true then
 		return false -- Something is draning power.
@@ -1512,24 +1512,6 @@ function GM:UpdateSuit(ply, mv, ucmd)
 	end
 
 	local frameTime = FrameTime()
-	local currentEnergy = ply:GetSuitEnergy()
-
-	if ply:FlashlightIsOn() then
-		--powerLoad = powerLoad + SUIT_FLASHLIGHT_DRAIN
-		ply:AddSuitDevice(SUIT_DEVICE_FLASHLIGHT)
-		currentEnergy = currentEnergy - (SUIT_FLASHLIGHT_DRAIN * frameTime)
-		if currentEnergy <= 0 then
-			if SERVER then
-				ply:Flashlight(false)
-			end
-			ply:RemoveSuitDevice(SUIT_DEVICE_FLASHLIGHT)
-		end
-	else
-		currentEnergy = currentEnergy + (SUIT_ENERGY_CHARGE_RATE * frameTime)
-		ply:RemoveSuitDevice(SUIT_DEVICE_FLASHLIGHT)
-	end
-
-	ply:SetSuitEnergy(currentEnergy)
 
 	-- Check if we should recharge.
 	if self:ShouldChargeSuitPower(ply) == true then
@@ -1555,12 +1537,24 @@ function GM:UpdateSuit(ply, mv, ucmd)
 			ply:RemoveSuitDevice(SUIT_DEVICE_BREATHER)
 		end
 
+		--[[
+		if ply:FlashlightIsOn() then
+			ply:AddSuitDevice(SUIT_DEVICE_FLASHLIGHT)
+			powerLoad = powerLoad + SUIT_FLASHLIGHT_DRAIN
+		else
+			ply:RemoveSuitDevice(SUIT_DEVICE_FLASHLIGHT)
+		end
+		]]
+
 		if powerLoad > 0 then
 			ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
 			if self:DrainSuit(ply, powerLoad * frameTime) == false then
 				ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
 				if ply:GetSprinting() == true then
 					self:PlayerEndSprinting(ply, mv)
+					if SERVER then
+						ply:Flashlight(false)
+					end
 				end
 			end
 		end
