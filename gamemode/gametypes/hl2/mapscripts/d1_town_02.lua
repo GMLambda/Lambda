@@ -69,7 +69,7 @@ function MAPSCRIPT:PostInit()
 
 			-- Reposition path track so players can jump across.
 			ents.WaitForEntityByName("churchtram_path_bottom", function(ent)
-				ent:SetPos(Vector(-4530.682129, 940.989685, -2902.0))
+				ent:SetPos(Vector(-4506.009766, 964.507629, -2905.050537))
 			end)
 
 			-- Prevent players from going back.
@@ -140,6 +140,44 @@ function MAPSCRIPT:PostInit()
 				{"church_monk_maker", "Disable", 0.0, ""},
 			})
 		end
+
+		-- Reposition the awfully placed sounds.
+		ents.WaitForEntityByName("bucket_machine_wav1", function(ent)
+			ent:SetPos(Vector(-5022.800781, 596.170044, -3213.741211))
+		end)
+
+		ents.WaitForEntityByName("bucket_machine_wav2", function(ent)
+			ent:SetPos(Vector(-5022.800781, 596.170044, -3213.741211))
+		end)
+
+		ents.WaitForEntityByName("bucket_machine_wav3", function(ent)
+			ent:SetPos(Vector(-5022.800781, 596.170044, -3213.741211))
+		end)
+
+		local sparkEffect = ents.Create("lambda_entity")
+		sparkEffect:DrawShadow(false)
+		sparkEffect:SetNoDraw(true)
+		sparkEffect:SetPos(Vector(-5022.800781, 596.170044, -3213.741211))
+		sparkEffect:SetName("lambda_engine_break")
+		sparkEffect:Spawn()
+		sparkEffect.AcceptInput = function(e, name, activator, caller, data)
+			if name == "BreakDown" then 
+				local effectdata = EffectData()
+				effectdata:SetOrigin( e:GetPos() )
+				util.Effect( "ElectricSpark", effectdata )
+
+				local effectdata = EffectData()
+				effectdata:SetOrigin( e:GetPos() )
+				util.Effect( "Explosion", effectdata )
+			end
+		end
+
+		ents.WaitForEntityByName("churchtram_path_bottom", function(ent)
+			ent:Fire("AddOutput", "OnPass lambda_engine_break,BreakDown,,0,-1")
+			ent:Fire("AddOutput", "OnPass bucket_machine_wav1,StopSound,,0,-1")
+			ent:Fire("AddOutput", "OnPass bucket_machine_wav2,StopSound,,0,-1")
+			ent:Fire("AddOutput", "OnPass bucket_machine_wav3,StopSound,,0,-1")
+		end)
 
 		-- Checkpoints for part 2
 		-- -4323.520996 1618.552734 -3135.968750
