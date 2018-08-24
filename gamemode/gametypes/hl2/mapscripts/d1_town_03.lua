@@ -50,6 +50,21 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
+		-- FIX #73: If we are starting at 03 we have to correct the blockades since prev is 02 and next is 02.
+		if GAMEMODE.IsChangeLevel == false then 
+
+			for k,v in pairs(ents.FindByClass("trigger_changelevel")) do
+				
+				if v.Landmark == "d1_town_03_02" then 
+					v:SetBlocked(false)
+				elseif v.Landmark == "d1_town_02_03" then 
+					v:SetBlocked(true)
+				end
+
+			end
+
+		end 
+
 		-- The player gets stuck here, so we just put something there so it wont happen.
 		--
 		ents.CreateSimple("prop_physics", {
