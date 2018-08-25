@@ -246,9 +246,11 @@ if SERVER then
 			ply:SetAllowWeaponsInVehicle(false)
 		end
 
-		vehicle.ResetVehicleEntryAnim = true
-		vehicle:SetVehicleEntryAnim(false)
-
+		if vehicle.SetVehicleEntryAnim ~= nil then
+			vehicle.ResetVehicleEntryAnim = true
+			vehicle:SetVehicleEntryAnim(false)
+		end 
+		
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
 		   vehicle:GetClass() == "prop_vehicle_jalopy" then
