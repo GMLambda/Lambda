@@ -140,6 +140,11 @@ function MAPSCRIPT:PostInit()
 			GAMEMODE:FilterEntityInput("barney_door_1", "Close")
 		end)
 
+		-- Move barney to a better position when he wants players to go inside.
+		ents.WaitForEntityByName("mark_barney_03", function(ent)
+			ent:SetPos(Vector(-3466.066650, -486.869598, -31.968750))
+		end)
+
 		-- Create a trigger once all players are inside we setup a new spawnpoint and close the door.
 		ents.RemoveByClass("trigger_once", Vector(-3442, -316, 8)) -- We will take over.
 
