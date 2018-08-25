@@ -1073,6 +1073,9 @@ if SERVER then
 	end
 
 	function GM:FindUseEntity(ply, engineEnt)
+		if engineEnt ~= nil and engineEnt:IsVehicle() then 
+			engineEnt = self:FindVehicleSeat(ply, engineEnt)
+		end 
 		if self.MapScript ~= nil and self.MapScript.FindUseEntity ~= nil then
 			local res = self.MapScript:FindUseEntity(ply, engineEnt)
 			if res ~= nil then

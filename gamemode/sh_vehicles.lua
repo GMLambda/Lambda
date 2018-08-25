@@ -140,6 +140,22 @@ if SERVER then
 
 	end
 
+	function GM:FindVehicleSeat(ply, vehicle)
+
+		if vehicle:GetDriver() == NULL then 
+			return vehicle
+		end 
+
+		-- Allow players to enter the passenger seat directly by swapping it.
+		local passengerSeat = vehicle:GetNWEntity("PassengerSeat")
+		if IsValid(passengerSeat) and passengerSeat:GetDriver() == NULL then
+			return passengerSeat
+		end
+
+		return vehicle
+
+	end
+
 	function GM:PlayerEnteredVehicle(ply, vehicle, role)
 
 		if ply:IsSprinting() == true then
@@ -249,8 +265,10 @@ if SERVER then
 		if vehicle.SetVehicleEntryAnim ~= nil then
 			vehicle.ResetVehicleEntryAnim = true
 			vehicle:SetVehicleEntryAnim(false)
+		else 
+			vehicle.ResetVehicleEntryAnim = false
 		end 
-		
+
 		if vehicle:GetClass() == "prop_vehicle_jeep" or
 		   vehicle:GetClass() == "prop_vehicle_airboat" or
 		   vehicle:GetClass() == "prop_vehicle_jalopy" then
@@ -458,6 +476,7 @@ if SERVER then
 		end
 
 	end
+
 
 else -- CLIENT
 
