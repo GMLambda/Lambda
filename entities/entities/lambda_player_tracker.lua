@@ -165,7 +165,7 @@ if CLIENT then
 			y = y + health_h + pad
 		end
 
-		if ply:IsSuitEquipped() == true then
+		if ply:GetNWBool("LambdaHEVSuit", false) == true then
 			local aux = ply:GetSuitPower()
 			local p = aux / 100
 

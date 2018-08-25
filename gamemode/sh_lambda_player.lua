@@ -1648,6 +1648,9 @@ function GM:PlayerTick(ply, mv)
 	if SERVER then
 		self:LimitPlayerAmmo(ply)
 		self:PlayerCheckDrowning(ply)
+		if self:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then 
+			self:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
+		end
 	end
 
 end
