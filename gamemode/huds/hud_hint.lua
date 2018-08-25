@@ -80,6 +80,11 @@ local lastHintHistoryUpdate = SysTime()
 
 function GM:HUDDrawHintHistory()
 
+	local ply = LocalPlayer()
+	if ply == NULL or ply:Alive() == false then 
+		return 
+	end 
+	
 	local curSysTime = SysTime()
 	local dt = curSysTime - lastHintHistoryUpdate
 	lastHintHistoryUpdate = curSysTime
