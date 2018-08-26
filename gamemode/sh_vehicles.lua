@@ -506,7 +506,7 @@ else -- CLIENT
 		if ( !vehicle:GetThirdPersonMode() ) then return view end
 
 		-- Don't roll the camera
-		-- view.angles.roll = 0
+		view.angles.roll = 0
 
 		local mn, mx = vehicle:GetRenderBounds()
 		local radius = ( mn - mx ):Length()
