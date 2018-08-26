@@ -31,6 +31,7 @@ local ImpactSounds =
 
 local bloodEmitter = nil
 
+
 local function HandleRagdollImpact(ent, data)
 
 	ent.LastRagdollImpact = ent.LastRagdollImpact or 0

@@ -20,7 +20,7 @@ end
 -- HACKHACK: Since we can't call CBaseEntity::OnRestore we have to manually
 -- set the next track target.
 function ENT:OnPass(data, activator, caller)
-	local nextTarget = caller:GetInternalVariable("target")
+	local nextTarget = caller:SafeGetInternalVariable("target")
 	DbgPrint(self, "Passed : " .. tostring(activator), caller, nextTarget)
 	activator:SetSaveValue("target", nextTarget)
 end

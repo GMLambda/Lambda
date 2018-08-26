@@ -134,9 +134,8 @@ function GM:CheckStuckScenes()
 			continue
 		end
 
-		-- This probably performs like horseshit. Sadly GetInternalVariable doesn't work on this one.
-		local savetable = ent:GetSaveTable()
-		if savetable.m_bWaitingForActor == true then
+		local waitingForActor = ent:SafeGetInternalVariable("m_bWaitingForActor", false)
+		if waitingForActor == true then
 			if ent.WaitingForActor ~= true then
 				print(ent, "now waiting for actor")
 				ent.WaitingForActorTime = CurTime()

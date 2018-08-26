@@ -103,7 +103,7 @@ if SERVER then
 
 		self:AdjustNPCDifficulty(npc)
 
-		local equip = npc:GetInternalVariable("additionalequipment")
+		local equip = npc:SafeGetInternalVariable("additionalequipment")
 		if npc:GetClass() == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
 			-- HACKHACK: I'm guessing garry removed loading skins based on their weapons at some point.
 			npc:SetSkin(1)
