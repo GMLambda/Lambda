@@ -70,15 +70,24 @@ end
 derma.DefineControl("SBPingmeter", "Draws ping", SB_PING_METER, "DPanel")
 
 function SB_PLY_LINE:Init()
+
 	self.AvatarButton = self:Add("DButton")
 	self.AvatarButton:Dock(LEFT)
 	self.AvatarButton:DockMargin(6, 0, 0, 0)
 	self.AvatarButton:SetSize(32, 32)
 	self.AvatarButton.DoClick = function() end
+
 	self.Avatar = vgui.Create("AvatarImage", self.AvatarButton)
 	self.Avatar:SetSize(32, 32)
 	self.Avatar:DockMargin(6, 0, 0, 0)
 	self.Avatar:SetMouseInputEnabled(false)
+
+	self.AvatarDeath = vgui.Create("DImage", self.Avatar)
+	self.AvatarDeath:SetSize(32, 32)
+	self.AvatarDeath:SetImage("lambda/cross.png")
+	self.AvatarDeath:SetMouseInputEnabled(false)
+	self.AvatarDeath:SetVisible(false)
+
 	self.Name = self:Add("DLabel")
 	self.Name:Dock(FILL)
 	self.Name:SetFont("lambda_sb_def")
@@ -116,21 +125,27 @@ function SB_PLY_LINE:Think()
 	if not IsValid(self.Player) then
 		self:SetZPos(9999)
 		self:Remove()
-
 		return
 	end
 
+	self.AvatarDeath:SetVisible(not self.Player:Alive())
 	self.Name:SetText(self.Player:Nick())
 	self.Kills:SetText(self.Player:Frags())
 	self.Deaths:SetText(self.Player:Deaths())
 
 	if self.Player:Team() == TEAM_CONNECTING then
 		self:SetZPos(2000 + self.Player:EntIndex())
-
 		return
 	end
 
-	self:SetZPos((self.Player:Frags() * -50) + self.Player:Deaths() + self.Player:EntIndex())
+	local kd = self.Player:Frags()
+	if self.Player:Deaths() > 0 then 
+		kd = kd / self.Player:Deaths()
+	end 
+	if kd < 0 then 
+		kd = 0
+	end
+	self:SetZPos((kd * -50) + self.Player:EntIndex())
 end
 
 function SB_PLY_LINE:Paint(w, h)
@@ -138,16 +153,18 @@ function SB_PLY_LINE:Paint(w, h)
 		return
 	end 
 	if self.Player:Team() == TEAM_CONNECTING then
-		draw.RoundedBox(0, 0, 0, 4, h, Color(93, 93, 93, 230))
-		draw.RoundedBox(0, 4, 0, w, h, Color(0, 0, 0, 170))
-
+		surface.SetDrawColor(93, 93, 93, 230)
+		surface.DrawRect(0, 0, 4, h)
+		surface.SetDrawColor(0, 0, 0, 170)
+		surface.DrawRect(0, 4, 0, w, h)
 		return
 	end
 
 	if not self.Player:Alive() then
-		draw.RoundedBox(0, 0, 0, 4, h, Color(93, 93, 93, 230))
-		draw.RoundedBox(0, 4, 0, w, h, Color(0, 0, 0, 170))
-
+		surface.SetDrawColor(93, 93, 93, 230)
+		surface.DrawRect(0, 0, 4, h)
+		surface.SetDrawColor(0, 0, 0, 170)
+		surface.DrawRect(4, 0, w, h)
 		return
 	end
 
@@ -174,25 +191,39 @@ function SB_PANEL:Paint(w, h)
 	surface.SetMaterial(lambda_logo)
 	surface.SetDrawColor(255, 255, 255, 250)
 	surface.DrawTexturedRect(94, -160, 512, 512)
-	draw.RoundedBox(0, 2, y - 28, 4, 24, Color(255, 147, 30, 230))
-	draw.RoundedBox(0, 6, y - 28, w - 8, 24, Color(0, 0, 0, 170))
+
+	surface.SetDrawColor(255, 147, 30, 230)
+	surface.DrawRect(2, y - 28, 4, 24)
+
+	surface.SetDrawColor(0, 0, 0, 170)
+	surface.DrawRect(6, y - 28, w - 8, 24)
+
 	draw.SimpleTextOutlined("Currently playing on " .. game.GetMap() .. " with " .. player.GetCount() .. " players.", "lambda_sb_def_sm", 10, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 	draw.SimpleTextOutlined("FRAGS", "lambda_sb_def_sm", 545, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0.2, Color(0, 0, 0, 250))
 	draw.SimpleTextOutlined("DEATHS", "lambda_sb_def_sm", 595, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0.2, Color(0, 0, 0, 250))
 end
 
 function SB_PANEL:Think()
-	local players = player.GetAll()
 
-	for k, v in pairs(players) do
-		if IsValid(v.ScoreEntry) then continue end
-		v.ScoreEntry = vgui.CreateFromTable(SBPlayerLine, v.ScoreEntry)
-		v.ScoreEntry:Setup(v)
-		self.Scores:AddItem(v.ScoreEntry)
+	self.ScoreEntries = self.ScoreEntries or {}
+
+	for k, v in pairs(player.GetAll()) do
+		if self.ScoreEntries[v] ~= nil then 
+			continue 
+		end
+
+		local entry = vgui.CreateFromTable(SBPlayerLine, v.ScoreEntry)
+		entry:Setup(v)
+
+		self.ScoreEntries[v] = entry
+		self.Scores:AddItem(entry)
 	end
+
 end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
+
+local lbScoreboard = nil 
 
 function GM:ScoreboardShow()
 	if not IsValid(lbScoreboard) then
