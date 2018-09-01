@@ -63,4 +63,10 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
 
 end
 
+function MAPSCRIPT:FindUseEntity(ply, ent)
+	if IsValid(ent) and (ent:GetName() == "graveyard_exit_lever_rot" or ent:GetName() == "graveyard_exit_momentary_wheel") then 
+		return NULL 
+	end
+end
+
 return MAPSCRIPT
