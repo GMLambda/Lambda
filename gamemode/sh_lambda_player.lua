@@ -843,15 +843,10 @@ if SERVER then
 
 	function GM:PlayerDeathThink(ply)
 
-		if self:IsRoundRestarting() == true then
-	    DbgPrint("Round is restarting")
-			return false
-		end
-
-    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
-      DbgPrint("Can not spawn before players available")
-      return false
-    end
+	    if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
+	      DbgPrint("Can not spawn before players available")
+	      return false
+	    end
 
 		local elapsed = GetSyncedTimestamp() - ply.DeathTime
 

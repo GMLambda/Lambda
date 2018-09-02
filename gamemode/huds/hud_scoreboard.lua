@@ -223,24 +223,27 @@ end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 
-local lbScoreboard = nil 
+LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
+if IsValid(LAMBDA_SCOREBOARD) then 
+	LAMBDA_SCOREBOARD:Remove()
+	LAMBDA_SCOREBOARD = nil 
+end 
 
 function GM:ScoreboardShow()
-	if not IsValid(lbScoreboard) then
-		lbScoreboard = vgui.CreateFromTable(SBMain)
+	if not IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
 	end
 
-	if IsValid(lbScoreboard) then
-		lbScoreboard:Show()
-		lbScoreboard:MakePopup()
+	if IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD:Show()
 	end
 
 	return false
 end
 
 function GM:ScoreboardHide()
-	if IsValid(lbScoreboard) then
-		lbScoreboard:Hide()
+	if IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD:Hide()
 	end
 
 	return false

@@ -59,43 +59,25 @@ function GAMETYPE:GetTimeLimit()
 
 end
 
-function GAMETYPE:ShouldRestartRound()
+function GAMETYPE:ShouldRestartRound(roundTime)
 
 	return false
 
 end
 
-function GAMETYPE:GetNextMap(map)
-	local k = table.KeyFromValue(self.MapList, map)
-	local nextmap
+function GAMETYPE:ShouldEndRound(roundTime)
 
-	if !self.MapList[k + 1] then
-		nextmap = self.MapList[1]
-	else
-		nextmap = self.MapList[k + 1]
-	end
-	return nextmap
-end
-
-function GAMETYPE:EndRound(winner)
-
-	local nextmap = self:GetNextMap(game.GetMap())
-	for k, v in pairs(player.GetAll()) do v:Freeze(true) end
-	PrintMessage(HUD_PRINTTALK, "Round Over. Frag limit reached by " .. winner:Name() .. ".")
-
-	PrintMessage(HUD_PRINTTALK, "Switching map to " .. nextmap .. ".")
-	timer.Simple(10, function() GAMEMODE:ChangeLevel(nextmap, nil, {}) end)
-
-end
-
-function GAMETYPE:ShouldEndRound()
+	if roundTime >= self:GetTimeLimit() then 
+		return true 
+	end 
 
 	for _, ply in pairs(player.GetAll()) do
 		if ply:Frags() >= self:GetFragLimit() then
-			self:EndRound(ply)
-			print(ply:Name())
+			return true
 		end
 	end
+
+	return false
 
 end
 
@@ -113,8 +95,6 @@ function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
 	elseif IsValid(inflictor) and inflictor:IsPlayer() then
 		inflictor:AddFrags( 1 )
 	end
-
-	self:ShouldEndRound()
 end
 
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)

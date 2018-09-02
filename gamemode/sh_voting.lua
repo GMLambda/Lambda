@@ -7,7 +7,8 @@ VOTE_TYPE_KICK_PLAYER = 1
 VOTE_TYPE_RESTART_MAP = 2
 VOTE_TYPE_SKIP_MAP = 3
 VOTE_TYPE_CHANGE_MAP = 4
-VOTE_TYPE_LAST = VOTE_TYPE_CHANGE_MAP
+VOTE_TYPE_NEXT_MAP = 5
+VOTE_TYPE_LAST = VOTE_TYPE_NEXT_MAP
 
 local DbgPrint = GetLogging("Voting")
 local currentVotes = {}
@@ -67,7 +68,9 @@ if SERVER then
 
 		self:SendVote(nil, vote)
 
-		PrintMessage(HUD_PRINTTALK, "A vote has been started by: " .. ply:Name())
+		if ply ~= nil then
+			PrintMessage(HUD_PRINTTALK, "A vote has been started by: " .. ply:Name())
+		end 
 
 		return vote
 
@@ -143,6 +146,11 @@ if SERVER then
 
 		local winningOption = 0 
 		local failed = false 
+		local randomResult = false 
+
+		if vote.params.mustComplete == true then 
+			timeout = false 
+		end 
 
 		if timeout == true then 
 			failed = true 
@@ -159,7 +167,12 @@ if SERVER then
 					maxChoices = v
 				end
 			end
-			winningOption = bestChoice
+			if bestChoice == 0 then 
+				randomResult = true 
+				winningOption = math.random(1, #vote.options)
+			else 
+				winningOption = bestChoice
+			end
 		end 
 
 		local actionDelay = 5

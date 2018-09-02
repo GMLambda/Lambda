@@ -107,7 +107,11 @@ function PANEL:Paint(w, h)
 	
 	-- Issuer
 	do 
-		text = "Vote called by " .. ply:Name()
+		if IsValid(ply) then
+			text = "Vote called by " .. ply:Name()
+		else 
+			text = "Vote called by host"
+		end
 		surface.SetTextColor(255, 255, 255, 230)
 		surface.SetTextPos(x, y)
 		surface.DrawText(text)
@@ -149,6 +153,8 @@ function PANEL:Paint(w, h)
 			text = text .. "Restart current map"
 		elseif vote.type == VOTE_TYPE_CHANGE_MAP then 
 			text = text .. "Change to map: " .. params.Map
+		elseif vote.type == VOTE_TYPE_NEXT_MAP then 
+			text = text .. "Choose next map"
 		end 
 
 		surface.SetTextPos(x, y)

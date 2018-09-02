@@ -10,11 +10,13 @@ local STATE_IDLE = -1
 local STATE_RESTART_REQUESTED = 0
 local STATE_RESTARTING = 1
 local STATE_RUNNING = 2
+local STATE_FINISHED = 3
 
 ROUND_INFO_NONE = 0
 ROUND_INFO_PLAYERRESPAWN = 1
 ROUND_INFO_ROUNDRESTART = 2
 ROUND_INFO_WAITING_FOR_PLAYER = 3
+ROUND_INFO_FINISHED = 4
 
 function GM:InitializeRoundSystem()
 
@@ -187,20 +189,26 @@ if SERVER then
 	end
 
 	function GM:RoundStateRestarting()
-
 	end
 
 	function GM:RoundStateRunning()
 
 		local gameType = self:GetGameType()
 
-		--DbgUniquePrint("Round Logic")
-		if self:CallGameTypeFunc("ShouldRestartRound") == true then
+		local elapsed = self:RoundElapsedTime()
+
+		if self:CallGameTypeFunc("ShouldRestartRound", elapsed) == true then
 			DbgPrint("All players are dead, restart required")
 			self:RestartRound()
 			self:RegisterRoundLost()
+		elseif self:CallGameTypeFunc("ShouldEndRound", elapsed) == true then 
+			DbgPrint("Round end")
+			self:FinishRound()
 		end
 
+	end
+
+	function GM:RoundStateFinished()
 	end
 
 	local ROUND_STATE_LOGIC =
@@ -210,6 +218,7 @@ if SERVER then
 		[STATE_RESTART_REQUESTED] = GM.RoundStateRestartRequested,
 		[STATE_RESTARTING] = GM.RoundStateRestarting,
 		[STATE_RUNNING] = GM.RoundStateRunning,
+		[STATE_FINISHED] = GM.RoundStateFinished,
 	}
 
 	function GM:RoundThink()
@@ -221,7 +230,44 @@ if SERVER then
 
 	end
 
+	for _,v in pairs(player.GetAll()) do v:Freeze(false) print("Unfinished") end 
+
+	function GM:FinishRound()
+
+		self.RoundState = STATE_END_RESULTS
+
+		for _,v in pairs(player.GetAll()) do 
+			v:Freeze(true)
+		end 
+
+		local gameType = self:GetGameType()
+		local mapOptions = table.Copy(gameType.MapList)
+		while #mapOptions > 8 do 
+			local k = math.random(1, #mapOptions)
+			table.remove(mapOptions, k)
+		end
+
+		self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_FINISHED, {
+		})
+
+		timer.Simple(5, function()
+			self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, { mustComplete = true }, mapOptions, {}, function(vote, failed, timeout, winningOption)
+				local picked = mapOptions[winningOption]
+				self:ChangeLevel(picked)
+			end)
+		end)
+
+	end
+
 else
+
+	function GM:HandleRoundInfoChange(infoType, params)
+
+		if infoType == ROUND_INFO_FINISHED then 
+			self:ScoreboardShow()
+		end
+
+	end
 
 	net.Receive("LambdaRoundInfo", function(len)
 
@@ -231,6 +277,7 @@ else
 		DbgPrint("Received round state info: " .. tostring(infoType))
 		--PrintTable(params)
 
+		GAMEMODE:HandleRoundInfoChange(infoType, params)
 		GAMEMODE:SetRoundDisplayInfo(infoType, params)
 
 	end)
