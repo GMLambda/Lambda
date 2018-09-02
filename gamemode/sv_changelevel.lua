@@ -216,6 +216,10 @@ end
 
 function GM:ChangeLevel(map, landmark, playersInTrigger)
 
+	if playersInTrigger == nil then 
+		playersInTrigger = {}
+	end 
+	
 	if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
 		DbgError("Called ChangeLevel twice!")
 		return

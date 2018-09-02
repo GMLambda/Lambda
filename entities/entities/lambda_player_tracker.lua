@@ -129,9 +129,27 @@ if CLIENT then
 		local teamColor = GAMEMODE:GetTeamColor( ply )
 		local screenPos = Vector()
 
-		local dir = (ply:EyePos() - EyePos()):GetNormal()
-		local dot = dir:Dot(EyeAngles():Forward())
-		local alphaScale = (dot - 0.8) / 0.2
+		local alphaScale = 0.0
+		if allowTracking == true then 
+			local dir = (ply:EyePos() - EyePos()):GetNormal()
+			local dot = dir:Dot(EyeAngles():Forward())
+			if dot < 0.999 then 
+				dot = 0
+			end 
+			alphaScale = (dot - 0.8) / 0.2
+		else 
+			local localPly = LocalPlayer()
+			local tr = util.TraceLine({
+				start = EyePos(),
+				endpos = EyePos() + (EyeAngles():Forward() * 8024),
+				filter = { localPly },
+				mask = MASK_VISIBLE_AND_NPCS,
+			})
+			print(tr.Entity)
+			if tr.Entity == ply then 
+				alphaScale = 1
+			end
+		end
 		if alphaScale < 0 then
 			return
 		end
