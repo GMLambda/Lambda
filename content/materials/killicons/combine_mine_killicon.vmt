@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "killicons/combine_mine_killicon"
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}
