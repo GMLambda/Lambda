@@ -257,3 +257,60 @@ end
 function GM:LambdaPreChangelevel(data)
 
 end
+
+function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
+
+	local function GetEntityData(e)
+		local data = {}
+		data.entIndex = e:EntIndex()
+		data.class = e:GetClass()
+		data.name = e:GetName()
+		data.isNPC = e:IsNPC()
+		data.isPlayer = e:IsPlayer()
+		if e.Team ~= nil then 
+			data.team = e:Team()
+		end
+		return data
+	end 
+
+	local bulletDamage = bit.band(dmgType, DMG_BULLET) ~= 0 or bit.band(dmgType, DMG_BUCKSHOT) ~= 0
+	print("Bullet:" , bulletDamage)
+	print("Inflictor", inflictor)
+
+	if attacker == nil then 
+		attacker = inflictor 
+	end 
+	
+	local data = {}
+	if IsValid(victim) then 
+		data.victim = GetEntityData(victim)
+	end 
+	if IsValid(attacker) then 
+		data.attacker = GetEntityData(attacker)
+	end 
+
+	if bit.band(dmgType, DMG_BULLET) ~= 0 or 
+		bit.band(dmgType, DMG_CLUB) ~= 0 or 
+		bit.band(dmgType, DMG_BUCKSHOT) ~= 0 
+	then 
+		-- Player used his weapon in this case.
+		if IsValid(inflictor) and inflictor == attacker then 
+			local wep = attacker:GetActiveWeapon()
+			if IsValid(wep) then 
+				inflictor = wep
+			end
+		end 
+	end
+
+	if IsValid(inflictor) then 
+		data.inflictor = GetEntityData(inflictor)
+	end
+
+
+	data.dmgType = dmgType
+
+	net.Start("LambdaDeathEvent")
+		net.WriteTable(data)
+	net.Broadcast()
+
+end 

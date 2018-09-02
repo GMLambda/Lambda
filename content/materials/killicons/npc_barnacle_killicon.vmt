@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "killicons/npc_barnacle_killicon"
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}

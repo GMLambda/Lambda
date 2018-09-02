@@ -749,70 +749,7 @@ if SERVER then
 	function GM:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
 
 		DbgPrint("RegisterPlayerDeath", ply, attacker, inflictor)
-
-		if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = ply end
-		if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then attacker = attacker:GetDriver() end
-		if not IsValid(inflictor) and IsValid(attacker) then inflictor = attacker end
-
-		if IsValid(inflictor) and inflictor == attacker and inflictor:IsPlayer() or inflictor:IsNPC() then
-			inflictor = inflictor:GetActiveWeapon()
-			if not IsValid(inflictor) then inflictor = attacker end
-		end
-
-		local data = {}
-		data.ent = ply 
-
-		if attacker == ply then
-			data.type = DEATH_BYSELF
-			data.infclass = "suicide"
-			if bit.band(dmgInfo:GetDamageType(), DMG_BLAST) ~= 0 then 
-				data.infclass = "blast"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
-				data.infclass = "burn"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_SHOCK) ~= 0 then 
-				data.infclass = "shock"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
-				data.infclass = "fall"
-			end
-		elseif attacker:IsPlayer() then
-			data.type = DEATH_BYPLAYER
-			data.infclass = inflictor:GetClass()
-			data.attacker = attacker
-			if bit.band(dmgInfo:GetDamageType(), DMG_BLAST) ~= 0 then 
-				data.infclass = "blast"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
-				data.infclass = "burn"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_SHOCK) ~= 0 then 
-				data.infclass = "shock"
-			end
-		elseif attacker:IsNPC() then 
-			data.type = DEATH_NORMAL
-			data.infclass = inflictor:GetClass()
-			data.attclass = attacker:GetClass()
-		elseif attacker:IsWorld() then 
-			if bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
-				data.type = DEATH_BYSELF
-				data.infclass = "fall"
-			else 
-				data.type = DEATH_NORMAL
-				data.infclass = inflictor:GetClass()
-				data.attacker = attacker
-				data.attclass = attacker:GetClass()
-			end 
-		else 
-			data.type = DEATH_NORMAL
-			data.infclass = inflictor:GetClass()
-			data.attclass = attacker:GetClass()
-			if bit.band(dmgInfo:GetDamageType(), DMG_BURN) ~= 0 then 
-				data.infclass = "burn"
-			elseif bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0 then 
-				data.infclass = "fall"
-			end
-		end
-
-		net.Start("LambdaDeathEvent")
-			net.WriteTable(data)
-		net.Broadcast()
+		self:SendDeathNotice(ply, attacker, inflictor, dmgInfo:GetDamageType())
 
 	end
 

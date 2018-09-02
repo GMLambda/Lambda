@@ -133,10 +133,7 @@ if CLIENT then
 		if allowTracking == true then 
 			local dir = (ply:EyePos() - EyePos()):GetNormal()
 			local dot = dir:Dot(EyeAngles():Forward())
-			if dot < 0.999 then 
-				dot = 0
-			end 
-			alphaScale = (dot - 0.8) / 0.2
+			alphaScale = (dot - 0.85) / 0.2
 		else 
 			local localPly = LocalPlayer()
 			local tr = util.TraceLine({
@@ -145,7 +142,6 @@ if CLIENT then
 				filter = { localPly },
 				mask = MASK_VISIBLE_AND_NPCS,
 			})
-			print(tr.Entity)
 			if tr.Entity == ply then 
 				alphaScale = 1
 			end

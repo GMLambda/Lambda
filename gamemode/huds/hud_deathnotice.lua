@@ -7,7 +7,9 @@ surface.CreateFont("Killico", {font = "HL2MP", size = 46, weight = 100, antialia
 
 local font = "KillFont"
 
-killicon.AddFont( "prop_physics",		"Killico",	"9",	Color_Icon )
+--killicon.AddFont( "prop_physics",		"Killico",	"9",	Color_Icon )
+--killicon.AddFont( "func_physbox",		"Killico",	"9",	Color_Icon )
+
 killicon.AddFont( "weapon_smg1",		"Killico",	"/",	Color_Icon )
 killicon.AddFont( "weapon_357",			"Killico",	".",	Color_Icon )
 killicon.AddFont( "weapon_ar2",			"Killico",	"2",	Color_Icon )
@@ -24,29 +26,30 @@ killicon.AddFont( "npc_tripmine",		"Killico",	"*",	Color_Icon )
 killicon.AddFont( "weapon_crowbar",		"Killico",	"6",	Color_Icon )
 killicon.AddFont( "weapon_physcannon",	"Killico",	",",	Color_Icon )
 
+killicon.Add("prop_physics","killicons/func_physbox_killicon",	Color_Icon )
+killicon.Add("func_physbox","killicons/func_physbox_killicon",	Color_Icon )
+killicon.Add("func_physbox_multiplayer","killicons/func_physbox_killicon",	Color_Icon )
+killicon.Add("env_fire", "killicons/env_fire_killicon", Color_Icon)
+killicon.Add("entityflame", "killicons/env_fire_killicon", Color_Icon)
+killicon.Add("env_explosion", "killicons/env_explosion_killicon", Color_Icon)
+killicon.Add("env_physexplosion", "killicons/env_explosion_killicon", Color_Icon)
+killicon.Add("point_hurt", "killicons/point_hurt_killicon", Color_Icon)
+killicon.Add("trigger_hurt", "killicons/point_hurt_killicon", Color_Icon)
+killicon.Add("radiation","killicons/radiation_killicon", Color_Icon)
+killicon.Add("func_door", "killicons/func_door_killicon", Color_Icon)
+killicon.Add("func_door_rotating", "killicons/func_door_killicon", Color_Icon)
+killicon.Add("prop_door_rotating", "killicons/func_door_killicon", Color_Icon)
+killicon.Add("npc_barnacle", "killicons/npc_barnacle_killicon", Color_Icon)
+killicon.Add("npc_manhack", "killicons/npc_manhack_killicon", Color_Icon)
+killicon.Add("fall", "killicons/worldspawn_killicon", Color_Icon)
+killicon.Add("combine_mine", "killicons/combine_mine_killicon", Color_Icon)
+
 local Deaths = {}
 
 local function RecieveDeathEvent()
 
 	local data = net.ReadTable()
-
-	if data.type == DEATH_BYSELF then
-		if not IsValid(data.ent) then return end
-		GAMEMODE:AddDeathNotice(nil, 0, data.infclass, data.ent:Name(), data.ent:Team())
-	elseif data.type == DEATH_BYPLAYER then
-		if not IsValid(data.ent) then return end
-		if not IsValid(data.attacker) then return end
-		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, data.ent:Name(), data.ent:Team())
-	elseif data.type == DEATH_NORMAL then
-		if not IsValid(data.ent) then return end
-		GAMEMODE:AddDeathNotice("#" .. data.attclass, -1, data.infclass, data.ent:Name(), data.ent:Team())
-	elseif data.type == DEATH_NPC then
-		if not IsValid(data.attacker) then return end
-		GAMEMODE:AddDeathNotice(data.attacker:Name(), data.attacker:Team(), data.infclass, "#" .. data.npcclass, -1)
-	elseif data.type == DEATH_BYNPC then
-		if not IsValid(data.attacker) then return end
-		GAMEMODE:AddDeathNotice("#" .. data.attacker:GetClass(), -1, data.infclass, "#" .. data.npcclass, -1)
-	end
+	GAMEMODE:AddDeathNotice(data)
 
 end
 net.Receive("LambdaDeathEvent",RecieveDeathEvent)
@@ -55,34 +58,99 @@ net.Receive("LambdaDeathEvent",RecieveDeathEvent)
    Name: gamemode:AddDeathNotice( Attacker, team1, Inflictor, Victim, team2 )
    Desc: Adds an death notice entry
 -----------------------------------------------------------]]
-function GM:AddDeathNotice(Attacker, team1, Inflictor, Victim, team2)
+function GM:AddDeathNotice(data)
 
-	local Death = {}
-	Death.time		= CurTime()
+	local death = {}
+	death.time = CurTime()
+	death.times = 1
 
-	Death.left		= Attacker
-	Death.right		= Victim
-	Death.icon		= Inflictor
-	Death.times 	= 1
+	PrintTable(data)
+	local dmgType = data.dmgType
+
+	local inflictor = data.inflictor
+	if inflictor ~= nil then 
+		death.icon = inflictor.class 
+		if bit.band(dmgType, DMG_BLAST) ~= 0 and 
+			(inflictor.class ~= "grenade_ar2" and 
+			inflictor.class ~= "combine_mine") then 
+			death.icon = "env_explosion"
+		end
+	end
+
+	local attacker = data.attacker
+	if attacker ~= nil then 
+		if attacker.isPlayer then 
+			death.left = Entity(attacker.entIndex):Name()
+		else
+			death.left = "#" .. attacker.class 
+		end 
+		if attacker.class == "trigger_hurt" then
+			death.left = nil
+		elseif attacker.class == "combine_mine" then 
+			death.icon = "combine_mine"
+		end
+	end
+
+	local victim = data.victim 
+	if victim ~= nil then 
+		if victim.isPlayer then 
+			death.right = Entity(victim.entIndex):Name()
+		else
+			death.right = "#" .. victim.class 
+		end 
+	end
+
+	if death.left == death.right then
+		death.left = nil
+	end
+
+	if death.left == nil then  
+		if bit.band(dmgType, DMG_ALWAYSGIB) ~= 0 then 
+			print("GIB ME")
+		end 
+
+		if bit.band(dmgType, DMG_BLAST) ~= 0 then 
+			death.left = "EXPLOSION"
+		elseif bit.band(dmgType, DMG_CRUSH) ~= 0 then 
+			death.left = "CRUSHED"
+		elseif bit.band(dmgType, DMG_POISON) ~= 0 then 
+			death.left = "POISON"
+		elseif bit.band(dmgType, DMG_RADIATION) ~= 0 then 
+			death.left = "RADIATION"
+			death.icon = "radiation"
+		elseif bit.band(dmgType, DMG_DROWN) ~= 0 then 
+			death.left = "DROWNED"
+		elseif bit.band(dmgType, DMG_FALL) ~= 0 then 
+			death.left = "FELL"
+			death.icon = "fall"
+		elseif bit.band(dmgType, DMG_SHOCK) ~= 0 then 
+			death.left = "SHOCK"
+		elseif bit.band(dmgType, DMG_ENERGYBEAM) ~= 0 then 
+			death.left = "BEAM"
+		end
+	end
+	
 
 	for k, v in pairs(Deaths) do
-		if Deaths[k].left == Death.left and Deaths[k].icon == Death.icon and Deaths[k].right == Death.right then
-			Death.times = Deaths[k].times + 1
+		if Deaths[k].left == death.left and Deaths[k].icon == death.icon and Deaths[k].right == death.right then
+			death.times = Deaths[k].times + 1
 			table.remove(Deaths, k)
 		end
 	end
 
-	if (team1 == -1) then Death.color1 = table.Copy(NPC_Color)
-	else Death.color1 = table.Copy(team.GetColor(team1)) end
-	
-	if (team2 == -1) then Death.color2 = table.Copy(NPC_Color)
-	else Death.color2 = table.Copy(team.GetColor(team2)) end
-	
-	if (Death.left == Death.right) then
-		Death.left = nil
+	if attacker == nil or attacker.team == nil then
+		death.color1 = table.Copy(NPC_Color)
+	else 
+		death.color1 = table.Copy(team.GetColor(attacker.team)) 
+	end
+
+	if victim == nil or victim.team == nil then
+		death.color2 = table.Copy(NPC_Color)
+	else 
+		death.color2 = table.Copy(team.GetColor(victim.team)) 
 	end
 	
-	table.insert(Deaths, Death)
+	table.insert(Deaths, death)
 end
 
 local function DrawDeath(x, y, death, deathnotice_time)
@@ -101,27 +169,7 @@ local function DrawDeath(x, y, death, deathnotice_time)
 	local w, h = killicon.GetSize(death.icon)
 	if !w and !h then return end
 
-	local deathIcon = false
-
-	if death.icon == "default" then
-		--draw.SimpleText("KILLED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	elseif death.icon == "suicide" then 
-		draw.SimpleText("SUICIDE", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	elseif death.icon == "fall" then 
-		draw.SimpleText("FELL", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	elseif death.icon == "blast" then 
-		draw.SimpleText("EXPLODED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	elseif death.icon == "burn" then 
-		draw.SimpleText("BURNED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	elseif death.icon == "shock" then 
-		draw.SimpleText("ELECTROCUTED", font, x - (w / 2) + 22	, y, times_color, TEXT_ALIGN_CENTER)
-	else 
-		deathIcon = true
-	end 
-
-	if deathIcon == true then
-		killicon.Draw(x, y, death.icon, alpha)
-	end 
+	killicon.Draw(x, y, death.icon, alpha)
 
 	-- Draw KILLER
 	if ( death.left ) then
