@@ -279,6 +279,7 @@ function GM:CalculateActualShootTrajectory(ent, wep, class, data)
 	local pos = ent:GetShootPos()
 	local enemy = ent:GetEnemy()
 	local enemyValid = IsValid(enemy)
+	local newDir = data.Dir 
 
 	-- Show fancy water bullets infront of the player.
 	if enemyValid and enemy:IsPlayer() and ent:WaterLevel() ~= 3 and enemy:WaterLevel() == 3 then 
@@ -299,8 +300,6 @@ function GM:CalculateActualShootTrajectory(ent, wep, class, data)
 		end
 
 	end
-
-	local newDir = data.Dir 
 
 	if self.GameWeapons[class] == true and enemyValid then 
 		local choice = util.RandomInt(0, 5)
@@ -351,11 +350,16 @@ function GM:CalculateActualShootTrajectory(ent, wep, class, data)
 
 	end
 
+	newDir:Normalize()
 	return newDir
 
 end
 
 function GM:EntityFireBullets(ent, data)
+
+	do 
+		--return 
+	end 
 
 	local class
 	local wep
