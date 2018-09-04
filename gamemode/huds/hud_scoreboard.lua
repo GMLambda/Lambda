@@ -229,7 +229,8 @@ if IsValid(LAMBDA_SCOREBOARD) then
 	LAMBDA_SCOREBOARD = nil 
 end 
 
-function GM:ScoreboardShow()
+function GM:ScoreboardShow(keepOpen)
+
 	if not IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
 	end
@@ -238,13 +239,21 @@ function GM:ScoreboardShow()
 		LAMBDA_SCOREBOARD:Show()
 	end
 
+	if LAMBDA_SCOREBOARD.KeepOpen ~= true then
+		LAMBDA_SCOREBOARD.KeepOpen = keepOpen
+	end 
+
 	return false
 end
 
 function GM:ScoreboardHide()
+
 	if IsValid(LAMBDA_SCOREBOARD) then
-		LAMBDA_SCOREBOARD:Hide()
+		if LAMBDA_SCOREBOARD.KeepOpen ~= true then
+			LAMBDA_SCOREBOARD:Hide()
+		end
 	end
 
 	return false
+
 end
