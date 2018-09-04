@@ -264,7 +264,9 @@ else
 	function GM:HandleRoundInfoChange(infoType, params)
 
 		if infoType == ROUND_INFO_FINISHED then 
-			self:ScoreboardShow()
+			self:ScoreboardShow(true)
+		else 
+			self:SetRoundDisplayInfo(infoType, params)
 		end
 
 	end
@@ -278,7 +280,6 @@ else
 		--PrintTable(params)
 
 		GAMEMODE:HandleRoundInfoChange(infoType, params)
-		GAMEMODE:SetRoundDisplayInfo(infoType, params)
 
 	end)
 
