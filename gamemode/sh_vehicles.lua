@@ -451,7 +451,7 @@ if SERVER then
 					if centerDist > 1024 then
 						for _,p in pairs(playerPosTable) do
 							local dist = p:Distance(vehiclePos)
-							if dist < 1000 then
+							if dist < 4000 then
 								nearby = true
 								break
 							end
