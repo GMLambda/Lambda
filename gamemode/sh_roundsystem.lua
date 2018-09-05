@@ -242,6 +242,12 @@ if SERVER then
 
 		local gameType = self:GetGameType()
 		local mapOptions = table.Copy(gameType.MapList)
+		for k,v in pairs(mapOptions) do
+			local r = math.random(1, #mapOptions)
+			mapOptions[k] = mapOptions[r]
+			mapOptions[r] = v
+		end
+		
 		while #mapOptions > 8 do 
 			local k = math.random(1, #mapOptions)
 			table.remove(mapOptions, k)
