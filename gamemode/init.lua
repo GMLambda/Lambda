@@ -294,7 +294,7 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
 		bit.band(dmgType, DMG_BUCKSHOT) ~= 0 
 	then 
 		-- Player used his weapon in this case.
-		if IsValid(inflictor) and inflictor == attacker then 
+		if IsValid(inflictor) and inflictor == attacker and attacker.GetActiveWeapon ~= nil then 
 			local wep = attacker:GetActiveWeapon()
 			if IsValid(wep) then 
 				inflictor = wep
