@@ -64,7 +64,6 @@ function GM:AddDeathNotice(data)
 	death.time = CurTime()
 	death.times = 1
 
-	PrintTable(data)
 	local dmgType = data.dmgType
 
 	local inflictor = data.inflictor

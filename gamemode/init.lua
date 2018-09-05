@@ -274,8 +274,6 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
 	end 
 
 	local bulletDamage = bit.band(dmgType, DMG_BULLET) ~= 0 or bit.band(dmgType, DMG_BUCKSHOT) ~= 0
-	print("Bullet:" , bulletDamage)
-	print("Inflictor", inflictor)
 
 	if attacker == nil then 
 		attacker = inflictor 
@@ -305,7 +303,6 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
 	if IsValid(inflictor) then 
 		data.inflictor = GetEntityData(inflictor)
 	end
-
 
 	data.dmgType = dmgType
 

@@ -205,7 +205,7 @@ if SERVER then
 
 	function GM:RegisterNPCDeath(npc, attacker, inflictor)
 
-		print("RegisterNPCDeath", ply, attacker, inflictor)
+		DbgPrint("RegisterNPCDeath", ply, attacker, inflictor)
 		self:SendDeathNotice(npc, attacker, inflictor, npc:GetLastDamageType())
 
 	end
