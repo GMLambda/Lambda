@@ -1251,6 +1251,12 @@ function GM:StartCommand(ply, cmd)
 		return
 	end
 
+	if CLIENT and lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then 
+		if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() then
+	    	cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )
+		end
+	end 
+
 	if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() >= 1) and ply:InVehicle() == false then
 		cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
 	end

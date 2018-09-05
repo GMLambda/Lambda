@@ -54,7 +54,8 @@ if CLIENT then
 	lambda_player_color = GM:RegisterConVar("player_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player color")
 	lambda_weapon_color = GM:RegisterConVar("weapon_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Weapon color")
 	lambda_playermdl = GM:RegisterConVar("playermdl", "male_01", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player model")
-	lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0,FCVAR_REPLICATED),"Deathnotice time")
+	lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0,FCVAR_ARCHIVE),"Deathnotice time")
+	lambda_auto_jump = GM:RegisterConVar("auto_jump", "0", bit.bor(0,FCVAR_ARCHIVE), "Automatically jump if on ground")
 end
 
 -- Server --
@@ -79,6 +80,8 @@ lambda_friendlyfire = GM:RegisterConVar("friendlyfire", 0, bit.bor(0, FCVAR_ARCH
 lambda_playertracker = GM:RegisterConVar("player_tracker", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Allows to see players through walls")
 lambda_prevent_item_move = GM:RegisterConVar("weapon_strip_force", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Prevents players from moving weapons and items from by shooting.")
 lambda_limit_default_ammo = GM:RegisterConVar("limit_default_ammo", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "If enabled weapons default ammo will use the sk_* settings for max limit.")
+
+lambda_allow_auto_jump = GM:RegisterConVar("allow_auto_jump", "0", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Allow automatically jumping if on ground")
 
 -- Deathmatch specific convars
 lambda_dm_fraglimit = GM:RegisterConVar("dm_fraglimit", 50, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "When frags are reached the round ends")
