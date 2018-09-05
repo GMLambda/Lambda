@@ -363,15 +363,17 @@ function GM:AdjustDifficulty()
 		return
 	end 
 
-	RunConsoleCommand("skill", tostring(data.Skill))
-	game.SetSkillLevel(data.Skill)
+	if SERVER then 
+		RunConsoleCommand("skill", tostring(data.Skill))
+		game.SetSkillLevel(data.Skill)
 
-	for k,v in pairs(self.EnemyNPCs or {}) do
-		if IsValid(v) then
-			self:AdjustNPCDifficulty(v, data)
+		for k,v in pairs(self.EnemyNPCs or {}) do
+			if IsValid(v) then
+				self:AdjustNPCDifficulty(v, data)
+			end
 		end
-	end
-
+	end 
+	
 end
 
 function GM:AdjustNPCDifficulty(npc, data)
