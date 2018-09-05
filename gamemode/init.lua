@@ -115,6 +115,14 @@ function GM:ApplyCorrectedDamage(dmginfo)
 
 end
 
+if DMG_SNIPER == nil then 
+	DMG_SNIPER = 1073741824
+end 
+
+if DMG_MISSILEDEFENSE == nil then 
+	DMG_MISSILEDEFENSE = 2147483648
+end 
+
 local DMG_TYPES =
 {
 	[DMG_GENERIC] = "Generic",
