@@ -36,6 +36,8 @@ include("sv_weapontracking.lua")
 include("sv_player_pickup.lua")
 include("sv_votefuncs.lua")
 
+util.AddNetworkString("LambdaDeathEvent")
+
 local DbgPrint = GetLogging("Server")
 local DbgPrintDmg = GetLogging("Damage")
 
