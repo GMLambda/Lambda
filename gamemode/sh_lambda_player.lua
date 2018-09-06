@@ -1229,8 +1229,7 @@ end
 
 function GM:StartCommand(ply, cmd)
 
-	--DbgPrint("StartCommand", ply)
-	self:CalculatePlayerMovementAccuracy(ply, cmd)
+	self:CalculateMovementAccuracy(ply)
 
 	if ply:IsPositionLocked() == true then
 		local vel = ply:GetVelocity()
@@ -1251,13 +1250,15 @@ function GM:StartCommand(ply, cmd)
 		return
 	end
 
-	if CLIENT and lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then 
-		if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
-	    	cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )
+	if CLIENT then 
+		if lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then 
+			if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
+		    	cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )
+			end
 		end
 	end 
 
-	if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() >= 1) and ply:InVehicle() == false then
+	if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() > 1) and ply:InVehicle() == false then
 		cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
 	end
 
@@ -1593,14 +1594,14 @@ function GM:PlayerTick(ply, mv)
 
 end
 
-function GM:CalculatePlayerMovementAccuracy(ply, cmd)
+function GM:CalculateMovementAccuracy(ent)
 
-	local movementRecoil = ply.MovementRecoil or 0
-	ply.MovementRecoil = ply.MovementRecoil or 0
+	local movementRecoil = ent.MovementRecoil or 0
+	ent.MovementRecoil = ent.MovementRecoil or 0
 
-	local vel = ply:GetVelocity()
+	local vel = ent:GetVelocity()
 	local len = vel:Length()
-	local target = len / ply:GetWalkSpeed()
+	local target = len / ent:GetWalkSpeed()
 	local scale = 100
 	if len > 0 then
 		scale = 20
@@ -1608,11 +1609,9 @@ function GM:CalculatePlayerMovementAccuracy(ply, cmd)
 	movementRecoil = Lerp(FrameTime() * scale, movementRecoil, target)
 	movementRecoil = math.Clamp(movementRecoil, 0, 2)
 
-	ply.MovementRecoil = movementRecoil
+	ent.MovementRecoil = movementRecoil
 
 end
-
-
 
 function GM:PlayerUpdateSettings(ply)
 

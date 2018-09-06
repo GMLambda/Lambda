@@ -115,6 +115,7 @@ function GM:ApplyCorrectedDamage(dmginfo)
 
 end
 
+-- Dev branch compatibility
 if DMG_SNIPER == nil then 
 	DMG_SNIPER = 1073741824
 end 
