@@ -380,14 +380,6 @@ function GM:EntityFireBullets(ent, data)
 			-- Calculate trajectory based on proficiency.
 			data.Dir = self:CalculateActualShootTrajectory(ent, wep, class, data)
 
-			local ammo = game.GetAmmoName(wep:GetPrimaryAmmoType())
-
-			if self.GameWeapons[class] == true and data.AmmoType == ammo then
-				scale = true
-				--DbgPrint("Scaling recoil")
-			end
-
-			local vel = Vector(0, 0, 0)
 			if ent:IsPlayer() then
 
 				local primaryAmmo = ent:GetAmmoCount(wep:GetPrimaryAmmoType())
@@ -401,15 +393,6 @@ function GM:EntityFireBullets(ent, data)
 				if primaryAmmo == 0 and secondaryAmmo == 0 and clip1 == 0 and clip2 == 0 and IsFirstTimePredicted() then
 					self:OnPlayerAmmoDepleted(ent, wep)
 				end
-
-				vel = ent:GetAbsVelocity()
-			elseif ent:IsNPC() then
-
-				local phys = ent:GetPhysicsObject()
-				if IsValid(phys) then
-					vel = phys:GetVelocity()
-				end
-
 			end
 
 			local spread = data.Spread
@@ -420,8 +403,9 @@ function GM:EntityFireBullets(ent, data)
 			end 
 
 			if data.Num == 1 then
+				local movementRecoil = ent.MovementRecoil or 0
 				if ent:IsPlayer() == true then
-					spread = (spread * 0.5) * (0.5 + ent.MovementRecoil)
+					spread = (spread * 0.5) * (0.5 + movementRecoil)
 				end
 			end
 			
