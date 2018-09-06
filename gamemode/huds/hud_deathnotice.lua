@@ -54,10 +54,15 @@ local function RecieveDeathEvent()
 end
 net.Receive("LambdaDeathEvent",RecieveDeathEvent)
 
---[[---------------------------------------------------------
-   Name: gamemode:AddDeathNotice( Attacker, team1, Inflictor, Victim, team2 )
-   Desc: Adds an death notice entry
------------------------------------------------------------]]
+local WEAPON_TYPES =
+{
+	["grenade_ar2"] = true,
+	["combine_mine"] = true,
+	["rpg_missile"] = true,
+	["npc_grenade_frag"] = true,
+	["grenade_frag"] = true,
+}
+
 function GM:AddDeathNotice(data)
 
 	local death = {}
@@ -70,8 +75,7 @@ function GM:AddDeathNotice(data)
 	if inflictor ~= nil then 
 		death.icon = inflictor.class 
 		if bit.band(dmgType, DMG_BLAST) ~= 0 and 
-			(inflictor.class ~= "grenade_ar2" and 
-			inflictor.class ~= "combine_mine") then 
+			WEAPON_TYPES[inflictor.class] ~= true then 
 			death.icon = "env_explosion"
 		end
 	end
@@ -104,10 +108,6 @@ function GM:AddDeathNotice(data)
 	end
 
 	if death.left == nil then  
-		if bit.band(dmgType, DMG_ALWAYSGIB) ~= 0 then 
-			print("GIB ME")
-		end 
-
 		if bit.band(dmgType, DMG_BLAST) ~= 0 then 
 			death.left = "EXPLOSION"
 		elseif bit.band(dmgType, DMG_CRUSH) ~= 0 then 
@@ -129,7 +129,6 @@ function GM:AddDeathNotice(data)
 		end
 	end
 	
-
 	for k, v in pairs(Deaths) do
 		if Deaths[k].left == death.left and Deaths[k].icon == death.icon and Deaths[k].right == death.right then
 			death.times = Deaths[k].times + 1
