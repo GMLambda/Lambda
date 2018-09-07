@@ -47,9 +47,16 @@ function GM:RespawnObject(obj, delay)
 			effectdata:SetMagnitude(5)
 			util.Effect( "ElectricSpark", effectdata )
 		end
+
 	end, CurTime() + delay)
 
 end
+
+local AMMO_LIKE_WEAPONS = 
+{
+	["weapon_frag"] = true,
+	["weapon_slam"] = true,
+}
 
 function GM:PlayerCanPickupAmmo(ply, ent)
 
@@ -193,7 +200,7 @@ function GM:PlayerCanPickupWeapon(ply, wep)
 		end
 	end
 
-	if wep:GetClass() == "weapon_frag" then
+	if AMMO_LIKE_WEAPONS[wep:GetClass()] == true then
 		return self:PlayerCanPickupItem(ply, wep)
 	end
 
@@ -249,7 +256,7 @@ function GM:WeaponEquip(wep, owner)
 
 	if wep.CreatedForPlayer ~= owner and wep.DroppedByPlayer == nil then
 
-		if wep:GetClass() ~= "weapon_frag" and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
+		if AMMO_LIKE_WEAPONS[wep:GetClass()] ~= true and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
 			local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0.5
 			self:RespawnObject(wep, respawnTime)
 		end

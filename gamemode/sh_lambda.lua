@@ -179,6 +179,10 @@ sk_max_buckshot = GetConVar("sk_max_buckshot")
 sk_max_crossbow = GetConVar("sk_max_crossbow")
 sk_max_grenade = GetConVar("sk_max_grenade")
 sk_max_rpg_round = GetConVar("sk_max_rpg_round")
+-- For compatibility reasons we need those ConVars.
+do 
+	sk_max_slam = CreateConVar("sk_max_slam", "3", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+end 
 
 GM.MAX_AMMO_DEF =
 {
@@ -192,6 +196,7 @@ GM.MAX_AMMO_DEF =
 	["XBowBolt"] = sk_max_crossbow,
 	["Grenade"] = sk_max_grenade,
 	["RPG_Round"] = sk_max_rpg_round,
+	["slam"] = sk_max_slam,
 }
 
 GM.ITEM_DEF =
@@ -211,6 +216,7 @@ GM.ITEM_DEF =
 	["item_ammo_crossbow"] = { ["Type"] = "XBowBolt", ["Max"] = sk_max_crossbow, ["1"] = 7, ["2"] = 6, ["3"] = 3 },
 	["item_rpg_round"] = { ["Type"] = "RPG_Round", ["Max"] = sk_max_rpg_round, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
 	["weapon_frag"] = { ["Type"] = "Grenade", ["Max"] = sk_max_grenade, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
+	["weapon_slam"] = { ["Type"] = "slam", ["Max"] = sk_max_slam, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
 }
 
 -- For compatibility reasons we need those ConVars.
