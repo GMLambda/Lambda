@@ -482,3 +482,4 @@ function GM:EntityKeyValue(ent, key, val)
 	end
 
 end
+	

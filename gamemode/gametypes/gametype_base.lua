@@ -99,6 +99,10 @@ function GAMETYPE:AllowPlayerTracking()
 	return true
 end
 
+function GAMETYPE:IsPlayerEnemy(ply1, ply2)
+	return false
+end	
+
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
 	gametypes:Add("lambda_base", GAMETYPE)
 end)

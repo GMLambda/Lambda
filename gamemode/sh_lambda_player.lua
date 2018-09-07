@@ -16,6 +16,13 @@ local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 
 if SERVER then
 
+	function GM:IsPlayerEnemy(ply1, ply2)
+
+		local isEnemy = self:CallGameTypeFunc("IsPlayerEnemy", ply1, ply2)
+		return isEnemy 
+
+	end
+
 	function GM:ShowHelp(ply)
 
 		local posLocked = ply:IsPositionLocked()

@@ -177,6 +177,11 @@ function GAMETYPE:AllowPlayerTracking()
 	return false
 end
 
+function GAMETYPE:IsPlayerEnemy(ply1, ply2)
+	-- TODO: TDM
+	return true
+end	
+
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
 	gametypes:Add("hl2dm", GAMETYPE)
 end)

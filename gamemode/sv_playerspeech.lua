@@ -365,7 +365,7 @@ function GM:HandlePlayerContact(viewer, ply)
 		return
 	end
 
-	if acknowledgeDeath == true then
+	if acknowledgeDeath == true and self:IsPlayerEnemy(viewer, ply) ~= true then
 		EmitPlayerSpeech(viewer, "teammate_death", 5, 1)
 	end
 
@@ -450,6 +450,7 @@ function GM:UpdatePlayerSpeech(ply)
 	local actions = {}
 
 	for k,v in pairs(nearbyEnts) do
+
 		if v == ply then
 			continue
 		end
@@ -463,20 +464,19 @@ function GM:UpdatePlayerSpeech(ply)
 		end
 
 		if isVisible == true then
-
 			if v:IsNPC() then
 				if IsFriendEntityName(class) == false then
 					ply.EnemyInSight = isVisible
 					ply.EnemyNearby = true
 				end
-			elseif v:IsPlayer() == true and v:Alive() == true then
+			elseif v:IsPlayer() == true and v:Alive() == true and self:IsPlayerEnemy(ply, v) == false then
 				ply.FriendlyInSight = isVisible
 				ply.FriendlyNearby = true
 			end
 
 			executeHandler = true
 		else 
-			if v:IsPlayer() and v:Alive() == true then 
+			if v:IsPlayer() and v:Alive() == true and self:IsPlayerEnemy(ply, v) ~= true then 
 				local otherPos = v:GetPos()
 				local dist = otherPos:Distance(pos)
 				if dist <= 50 then 
