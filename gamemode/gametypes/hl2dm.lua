@@ -132,14 +132,16 @@ function GAMETYPE:GetItemRespawnTime()
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false then
+	local SF_NORESPAWN = 1073741824 -- (1 << 30)
+	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then
 		return false
 	end
 	return true
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
-	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false then
+	local SF_NORESPAWN = 1073741824 -- (1 << 30)
+	if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then
 		return false
 	end
 	return true
