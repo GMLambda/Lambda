@@ -155,6 +155,10 @@ end
 
 function GM:GetPreviousMap()
 
+	if self.PreviousMap ~= nil then 
+		return self.PreviousMap 
+	end 
+
 	local gameType = self:GetGameType()
 	local mapList = self:GetGameTypeData("MapList")
 
@@ -172,7 +176,7 @@ function GM:GetCurrentMap()
 end
 
 function GM:GetEntryLandmark()
-	return self.EntryLandmark or nil
+	return self.EntryLandmark
 end
 
 function GM:GetMapIndex(prevMap, currentMap)
