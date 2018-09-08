@@ -97,12 +97,12 @@ if SERVER then
 		local userId = ply:UserID()
 		local playerData = self.Connecting[userId]
 		if playerData == nil then
-			DbgError("ERROR: User never signaled a connect: " .. userid)
+			--DbgError("ERROR: User never signaled a connect: " .. userid)
 			playerData = {}
 			playerData.ConnectTime = GetSyncedTimestamp()
 			playerData.Nick = ply:Nick()
 			playerData.SteamID = ply:SteamID64()
-			playerData.UserID = ply:UserID()
+			playerData.UserID = userId
 			playerData.Bot = ply:IsBot()
 			playerData.Connecting = false
 		end
