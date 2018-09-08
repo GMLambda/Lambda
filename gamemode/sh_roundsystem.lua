@@ -245,9 +245,21 @@ if SERVER then
 		for k,v in pairs(mapOptions) do
 			local r = math.random(1, #mapOptions)
 			mapOptions[k] = mapOptions[r]
-			mapOptions[r] = v
+			mapOptions[r] = string.lower(v)
 		end
 		
+		local prevMap = self:GetPreviousMap()
+		if prevMap ~= nil then 
+			prevMap = string.lower(prevMap)
+			table.RemoveByValue(mapOptions, prevMap)
+		end 
+
+		local curMap = self:GetCurrentMap()
+		if curMap ~= nil then 
+			curMap = string.lower(curMap)
+			table.RemoveByValue(mapOptions, curMap)
+		end
+
 		while #mapOptions > 8 do 
 			local k = math.random(1, #mapOptions)
 			table.remove(mapOptions, k)
