@@ -5,6 +5,12 @@ end
 GM.ConVars = {}
 
 function GM:RegisterConVar(name, value, flags, helptext, fn)
+
+	if CLIENT and bit.band(flags, FCVAR_REPLICATED) ~= 0 and bit.band(flags, FCVAR_ARCHIVE) ~= 0 then 
+		print("Removing FCVAR_ARCHIVE from " .. name)
+		flags = bit.band(flags, bit.bnot(FCVAR_ARCHIVE))
+	end
+
 	local prefix = "lambda_"
 	local actualName = prefix .. name
 	local actualValue = ""
