@@ -291,9 +291,10 @@ function GM:CreateTeams()
 end
 
 if CLIENT then 
-	language.Add("LAMBDA_Timeleft", "Time left")
-	language.Add("LAMBDA_Map", "Map")
-	language.Add("LAMBDA_Uptime", "Uptime")
-	language.Add("LAMBDA_Campaign", "Campaign")
-	language.Add("LAMBDA_Frags", "Frags left")
+	language.Add("LAMBDA_Timeleft", "TIME LEFT")
+	language.Add("LAMBDA_Map", "MAP")
+	language.Add("LAMBDA_Uptime", "UPTIME")
+	language.Add("LAMBDA_Campaign", "CAMPAIGN")
+	language.Add("LAMBDA_Chapter", "CHAPTER")
+	language.Add("LAMBDA_Frags", "FRAGS LEFT")
 end 

@@ -216,8 +216,8 @@ local function DrawBar(x, y, w, name, value)
 	surface.SetDrawColor(dark2)
 	surface.DrawRect(x + 6, y - 56, w - 11, 24)
 
-	name = Localize(name)
-	value = Localize(value)
+	name = string.upper(Localize(name))
+	value = string.upper(Localize(value))
 	
 	draw.SimpleTextOutlined(name, "lambda_sb_def_sm", x + 10, y - 52, white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 	draw.SimpleTextOutlined(value, "lambda_sb_def_sm", x + w - 12, y - 52, white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))

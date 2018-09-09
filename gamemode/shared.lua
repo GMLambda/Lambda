@@ -45,6 +45,7 @@ include("sh_userauth.lua")
 include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
+include("sh_maplist.lua")
 
 --Disabled for now
 --include("sh_gibs.lua")
@@ -482,4 +483,3 @@ function GM:EntityKeyValue(ent, key, val)
 	end
 
 end
-	

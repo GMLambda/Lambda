@@ -333,7 +333,8 @@ function GAMETYPE:AllowPlayerTracking()
 end
 
 function GAMETYPE:GetCampaignName(map)
-	local n = table.KeyFromValue(self.MapList, map)
+	local curMap = GAMEMODE:GetCurrentMap()
+	local n = GAMEMODE:GetMapIndex( GAMEMODE:GetPreviousMap(), curMap )
 	for k, v in pairs(self.CampaignNames) do
 		if n >= v.s and n <= v.e then return k end
 	end
@@ -343,8 +344,11 @@ function GAMETYPE:GetScoreboardInfo()
 	local scoreboardInfo =
 	{
 		{ name = "LAMBDA_Map", value = game.GetMap() },
-		{ name = "LAMBDA_Campaign", value = self:GetCampaignName(game.GetMap())},
 	}
+	local campaign = self:GetCampaignName(GAMEMODE:GetCurrentMap())
+	if campaign ~= nil then 
+		table.insert(scoreboardInfo, { name = "LAMBDA_Chapter", value = campaign } )
+	end
 	return scoreboardInfo
 end
 
