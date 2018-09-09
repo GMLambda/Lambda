@@ -294,4 +294,5 @@ if CLIENT then
 	language.Add("LAMBDA_Timeleft", "Time left")
 	language.Add("LAMBDA_Map", "Map")
 	language.Add("LAMBDA_Uptime", "Uptime")
+	language.Add("LAMBDA_Campaign", "Campaign")
 end 
