@@ -1,18 +1,16 @@
-surface.CreateFont("lambda_sb_def", {
-	font = "Roboto",
-	size = 24,
-	weight = 400,
-	antialias = true
-})
-
-surface.CreateFont("lambda_sb_def_sm", {
-	font = "Roboto Light",
-	size = 16,
-	weight = 300,
-	antialias = true
-})
+surface.CreateFont("lambda_sb_def", {font = "Verdana", size = 22, weight = 400, antialias = true})
+surface.CreateFont("lambda_sb_num", {font = "HudHintTextLarge", size = 18, weight = 600, antialias = true})
+surface.CreateFont("lambda_sb_def_sm", {font = "Roboto Light", size = 16, weight = 300, antialias = true})
+surface.CreateFont("lambda_sb_def_nsm", {font = "DermaLarge", size = 26, weight = 600, antialias = true})
 
 local lambda_logo = Material("lambda/logo_512.png", "noclamp smooth")
+local frag_logo = Material("lambda/icons/gun.png", "noclamp smooth")
+local death_logo = Material("lambda/icons/skull.png", "noclamp smooth")
+local time_logo = Material("lambda/icons/stopwatch.png", "noclamp smooth")
+local ping_logo = Material("lambda/icons/ping.png", "noclamp smooth")
+local gradientL = Material("vgui/gradient-l")
+local gradientR = Material("vgui/gradient-r")
+
 local SB_PING_METER = {}
 local SB_PLY_LINE = {}
 local SB_PANEL = {}
@@ -21,8 +19,8 @@ function SB_PING_METER:Init()
 	self:Dock(FILL)
 	self:DockMargin(0, 3, 0, 0)
 	self.PingNum = self:Add("DLabel")
-	self.PingNum:SetPos(10, 1)
-	self.PingNum:SetFont("lambda_sb_def_sm")
+	self.PingNum:SetPos(18, 2)
+	self.PingNum:SetFont("DebugFixed")
 	self.PingNum:SetTextColor(Color(250, 250, 250, 250))
 	self.PingNum:SetContentAlignment(4)
 	self:SetWidth(50)
@@ -36,7 +34,7 @@ end
 function SB_PING_METER:Think()
 	if not IsValid(self.Player) then return end
 	self.PlyPing = self.Player:Ping()
-	self.PingNum:SetText("   " .. self.PlyPing)
+	self.PingNum:SetText(self.PlyPing)
 end
 
 function SB_PING_METER:Paint(w, h)
@@ -91,23 +89,38 @@ function SB_PLY_LINE:Init()
 	self.Name = self:Add("DLabel")
 	self.Name:Dock(FILL)
 	self.Name:SetFont("lambda_sb_def")
-	self.Name:SetTextColor(Color(255, 255, 255, 240))
+	self.Name:SetTextColor(Color(255, 255, 255, 220))
 	self.Name:DockMargin(8, 0, 0, 0)
 	self.Ping = self:Add("SBPingmeter")
 	self.Ping:Dock(RIGHT)
+	self.Ping:DockMargin(-25,3,-5,0)
 	self.Ping:SetWidth(50)
 	self.Deaths = self:Add("DLabel")
 	self.Deaths:Dock(RIGHT)
+	self.Deaths:DockMargin(0,0,40,0)
 	self.Deaths:SetWidth(50)
-	self.Deaths:SetFont("lambda_sb_def")
-	self.Deaths:SetTextColor(Color(255, 255, 255, 240))
+	self.Deaths:SetFont("lambda_sb_num")
+	self.Deaths:SetTextColor(Color(255, 255, 255, 220))
 	self.Deaths:SetContentAlignment(5)
 	self.Kills = self:Add("DLabel")
 	self.Kills:Dock(RIGHT)
+	self.Kills:DockMargin(0,0, 0,0)
 	self.Kills:SetWidth(50)
-	self.Kills:SetFont("lambda_sb_def")
-	self.Kills:SetTextColor(Color(255, 255, 255, 240))
+	self.Kills:SetFont("lambda_sb_num")
+	self.Kills:SetTextColor(Color(255, 255, 255, 220))
 	self.Kills:SetContentAlignment(5)
+
+	if GAMEMODE:GetGameType().PlayerTiming then
+		self.PB = self:Add("DLabel")
+		self.PB:Dock(RIGHT)
+		self.PB:DockMargin(0,0,25,0)
+		self.PB:SetWidth(70)
+		self.PB:SetFont("lambda_sb_num")
+		self.PB:SetTextColor(Color(255, 255, 255, 220))
+		self.PB:SetText("00:00:00")
+		self.PB:SetContentAlignment(5)
+	end
+
 	self:Dock(TOP)
 	self:DockPadding(3, 3, 3, 3)
 	self:SetHeight(32 + 3 * 2)
@@ -139,10 +152,10 @@ function SB_PLY_LINE:Think()
 	end
 
 	local kd = self.Player:Frags()
-	if self.Player:Deaths() > 0 then 
+	if self.Player:Deaths() > 0 then
 		kd = kd / self.Player:Deaths()
-	end 
-	if kd < 0 then 
+	end
+	if kd < 0 then
 		kd = 0
 	end
 	self:SetZPos((kd * -50) + self.Player:EntIndex())
@@ -151,7 +164,7 @@ end
 function SB_PLY_LINE:Paint(w, h)
 	if not IsValid(self.Player) then
 		return
-	end 
+	end
 	if self.Player:Team() == TEAM_CONNECTING then
 		surface.SetDrawColor(93, 93, 93, 230)
 		surface.DrawRect(0, 0, 4, h)
@@ -177,12 +190,32 @@ SBPlayerLine = vgui.RegisterTable(SB_PLY_LINE, "DPanel")
 function SB_PANEL:Init()
 	self.Scores = self:Add("DScrollPanel")
 	self.Scores:Dock(FILL)
-	self.Scores:DockMargin(0, 200, 0, 0)
+	self.Scores:DockMargin(0, 250, 0, 0)
 end
 
 function SB_PANEL:PerformLayout()
-	self:SetSize(700, ScrH() - 200)
+	self:SetSize(700, ScrH() - 250)
 	self:SetPos(ScrW() / 2 - 350, 0)
+end
+
+local function DrawBar(_x,y,_w,_h,k,v)
+	surface.SetDrawColor(255, 147, 30, 190)
+	surface.DrawRect(_x + 2, y - 58, 4, 24)
+	surface.SetMaterial(gradientL)
+	surface.SetDrawColor(0, 0, 0, 190)
+	surface.DrawRect(_x + 6, y - 58, _w - 8, 24)
+	draw.SimpleTextOutlined(k, "lambda_sb_def_sm", _x + 10, y - 54, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+	draw.SimpleTextOutlined(v, "lambda_sb_def_sm", _x + _w - 10, y - 54, Color(255, 255, 255, 220), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+end
+
+local function DrawHostName(x,y,w,h)
+	surface.SetMaterial(gradientR)
+	surface.SetDrawColor(0, 0, 0, 190)
+	surface.DrawTexturedRect(20, y - 88, w / 2 - 20, 24)
+	surface.SetMaterial(gradientL)
+	surface.SetDrawColor(0, 0, 0, 190)
+	surface.DrawTexturedRect(w / 2, y - 88, w / 2 - 20, 24)
+	draw.SimpleTextOutlined(GetHostName(), "lambda_sb_def_nsm", w / 2, y - 90, Color(225, 225, 225, 220), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 end
 
 function SB_PANEL:Paint(w, h)
@@ -192,15 +225,36 @@ function SB_PANEL:Paint(w, h)
 	surface.SetDrawColor(255, 255, 255, 250)
 	surface.DrawTexturedRect(94, -160, 512, 512)
 
-	surface.SetDrawColor(255, 147, 30, 230)
-	surface.DrawRect(2, y - 28, 4, 24)
+	local n = 700 / table.Count(GAMEMODE:GetGameType():GetScoreboardInfo())
+	local x = 0
+	for k, v in pairs(GAMEMODE:GetGameType():GetScoreboardInfo()) do
+		DrawBar(x, y, n, 10, k, v)
+		x = x + n
+	end
 
-	surface.SetDrawColor(0, 0, 0, 170)
-	surface.DrawRect(6, y - 28, w - 8, 24)
+	DrawHostName(x,y,w,h)
 
-	draw.SimpleTextOutlined("Currently playing on " .. game.GetMap() .. " with " .. player.GetCount() .. " players.", "lambda_sb_def_sm", 10, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
-	draw.SimpleTextOutlined("FRAGS", "lambda_sb_def_sm", 545, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0.2, Color(0, 0, 0, 250))
-	draw.SimpleTextOutlined("DEATHS", "lambda_sb_def_sm", 595, y - 24, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0.2, Color(0, 0, 0, 250))
+	surface.SetMaterial(gradientR)
+	surface.SetDrawColor(0, 0, 0, 190)
+	surface.DrawTexturedRect(300, y - 28, w - 302, 24)
+
+	if GAMEMODE:GetGameType().PlayerTiming then
+		surface.SetMaterial(time_logo)
+		surface.SetDrawColor(255,255,255,220)
+		surface.DrawTexturedRect(467, y - 24, 16, 16)
+	end
+	
+	surface.SetMaterial(frag_logo)
+	surface.SetDrawColor(255,255,255,220)
+	surface.DrawTexturedRect(550, y - 24, 16, 16)
+
+	surface.SetMaterial(death_logo)
+	surface.SetDrawColor(255,255,255,220)
+	surface.DrawTexturedRect(601, y - 24, 16, 16)
+
+	surface.SetMaterial(ping_logo)
+	surface.SetDrawColor(255,255,255,220)
+	surface.DrawTexturedRect(650, y - 24, 16, 16)
 end
 
 function SB_PANEL:Think()

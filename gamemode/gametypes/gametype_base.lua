@@ -13,6 +13,8 @@ GAMETYPE.MapList = {}
 GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
+GAMETYPE.PlayerTiming = false
+GAMETYPE.ScoreboardInfo = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
 	return 0
@@ -101,7 +103,11 @@ end
 
 function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 	return false
-end	
+end
+
+function GAMETYPE:GetScoreboardInfo()
+	return self.ScoreboardInfo
+end
 
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
 	gametypes:Add("lambda_base", GAMETYPE)

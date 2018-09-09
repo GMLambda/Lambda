@@ -9,6 +9,8 @@ GAMETYPE.Name = "Deathmatch"
 GAMETYPE.MapScript = {}
 GAMETYPE.UsingCheckpoints = false
 GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
+GAMETYPE.PlayerTiming = false
+GAMETYPE.ScoreboardInfo = {["Map"] = game.GetMap(),["Timeleft"] = "0", ["Uptime"] = string.NiceTime(CurTime())}
 
 GAMETYPE.MapList =
 {
@@ -180,7 +182,11 @@ end
 function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 	-- TODO: TDM
 	return true
-end	
+end
+
+function GAMETYPE:GetScoreboardInfo()
+	return self.ScoreboardInfo
+end
 
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
 	gametypes:Add("hl2dm", GAMETYPE)
