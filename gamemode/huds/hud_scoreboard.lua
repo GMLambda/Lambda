@@ -11,6 +11,12 @@ local ping_logo = Material("lambda/icons/ping.png", "noclamp smooth")
 local gradientL = Material("vgui/gradient-l")
 local gradientR = Material("vgui/gradient-r")
 
+local orange = Color(255, 147, 30, 190)
+local orange2 = Color(93, 93, 93, 230)
+local dark = Color(0, 0, 0, 180)
+local dark2 = Color(0, 0, 0, 150)
+local white = Color(235, 235, 235, 235)
+
 local SB_PING_METER = {}
 local SB_PLY_LINE = {}
 local SB_PANEL = {}
@@ -21,7 +27,7 @@ function SB_PING_METER:Init()
 	self.PingNum = self:Add("DLabel")
 	self.PingNum:SetPos(18, 2)
 	self.PingNum:SetFont("DebugFixed")
-	self.PingNum:SetTextColor(Color(250, 250, 250, 250))
+	self.PingNum:SetTextColor(white)
 	self.PingNum:SetContentAlignment(4)
 	self:SetWidth(50)
 end
@@ -73,7 +79,11 @@ function SB_PLY_LINE:Init()
 	self.AvatarButton:Dock(LEFT)
 	self.AvatarButton:DockMargin(6, 0, 0, 0)
 	self.AvatarButton:SetSize(32, 32)
-	self.AvatarButton.DoClick = function() end
+	self.AvatarButton.DoClick = function()
+		m = DermaMenu()
+		m:AddOption("Profile", function() end):SetIcon("icon16/user.png")
+		m:Open()
+	end
 
 	self.Avatar = vgui.Create("AvatarImage", self.AvatarButton)
 	self.Avatar:SetSize(32, 32)
@@ -89,34 +99,34 @@ function SB_PLY_LINE:Init()
 	self.Name = self:Add("DLabel")
 	self.Name:Dock(FILL)
 	self.Name:SetFont("lambda_sb_def")
-	self.Name:SetTextColor(Color(255, 255, 255, 220))
+	self.Name:SetTextColor(white)
 	self.Name:DockMargin(8, 0, 0, 0)
 	self.Ping = self:Add("SBPingmeter")
 	self.Ping:Dock(RIGHT)
-	self.Ping:DockMargin(-25,3,-5,0)
+	self.Ping:DockMargin(-25, 3, -5, 0)
 	self.Ping:SetWidth(50)
 	self.Deaths = self:Add("DLabel")
 	self.Deaths:Dock(RIGHT)
-	self.Deaths:DockMargin(0,0,40,0)
+	self.Deaths:DockMargin(0, 0, 40, 0)
 	self.Deaths:SetWidth(50)
 	self.Deaths:SetFont("lambda_sb_num")
-	self.Deaths:SetTextColor(Color(255, 255, 255, 220))
+	self.Deaths:SetTextColor(white)
 	self.Deaths:SetContentAlignment(5)
 	self.Kills = self:Add("DLabel")
 	self.Kills:Dock(RIGHT)
-	self.Kills:DockMargin(0,0, 0,0)
+	self.Kills:DockMargin(0, 0, 0, 0)
 	self.Kills:SetWidth(50)
 	self.Kills:SetFont("lambda_sb_num")
-	self.Kills:SetTextColor(Color(255, 255, 255, 220))
+	self.Kills:SetTextColor(white)
 	self.Kills:SetContentAlignment(5)
 
 	if GAMEMODE:GetGameType().PlayerTiming then
 		self.PB = self:Add("DLabel")
 		self.PB:Dock(RIGHT)
-		self.PB:DockMargin(0,0,25,0)
+		self.PB:DockMargin(0, 0, 25, 0)
 		self.PB:SetWidth(70)
 		self.PB:SetFont("lambda_sb_num")
-		self.PB:SetTextColor(Color(255, 255, 255, 220))
+		self.PB:SetTextColor(white)
 		self.PB:SetText("00:00:00")
 		self.PB:SetContentAlignment(5)
 	end
@@ -166,23 +176,23 @@ function SB_PLY_LINE:Paint(w, h)
 		return
 	end
 	if self.Player:Team() == TEAM_CONNECTING then
-		surface.SetDrawColor(93, 93, 93, 230)
+		surface.SetDrawColor(orange2)
 		surface.DrawRect(0, 0, 4, h)
-		surface.SetDrawColor(0, 0, 0, 170)
+		surface.SetDrawColor(dark)
 		surface.DrawRect(0, 4, 0, w, h)
 		return
 	end
 
 	if not self.Player:Alive() then
-		surface.SetDrawColor(93, 93, 93, 230)
+		surface.SetDrawColor(orange2)
 		surface.DrawRect(0, 0, 4, h)
-		surface.SetDrawColor(0, 0, 0, 170)
+		surface.SetDrawColor(dark)
 		surface.DrawRect(4, 0, w, h)
 		return
 	end
 
-	draw.RoundedBox(0, 0, 0, 4, h, Color(255, 147, 30, 230))
-	draw.RoundedBox(0, 4, 0, w, h, Color(0, 0, 0, 170))
+	draw.RoundedBox(0, 0, 0, 4, h, orange)
+	draw.RoundedBox(0, 4, 0, w, h, dark)
 end
 
 SBPlayerLine = vgui.RegisterTable(SB_PLY_LINE, "DPanel")
@@ -191,6 +201,7 @@ function SB_PANEL:Init()
 	self.Scores = self:Add("DScrollPanel")
 	self.Scores:Dock(FILL)
 	self.Scores:DockMargin(0, 250, 0, 0)
+	self.Focused = false
 end
 
 function SB_PANEL:PerformLayout()
@@ -198,62 +209,62 @@ function SB_PANEL:PerformLayout()
 	self:SetPos(ScrW() / 2 - 350, 0)
 end
 
-local function DrawBar(_x,y,_w,_h,k,v)
-	surface.SetDrawColor(255, 147, 30, 190)
-	surface.DrawRect(_x + 2, y - 58, 4, 24)
+local function DrawBar(x,y,w,k,v)
+	surface.SetDrawColor(orange)
+	surface.DrawRect(x + 2, y - 56, 4, 24)
 	surface.SetMaterial(gradientL)
-	surface.SetDrawColor(0, 0, 0, 190)
-	surface.DrawRect(_x + 6, y - 58, _w - 8, 24)
-	draw.SimpleTextOutlined(k, "lambda_sb_def_sm", _x + 10, y - 54, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
-	draw.SimpleTextOutlined(v, "lambda_sb_def_sm", _x + _w - 10, y - 54, Color(255, 255, 255, 220), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+	surface.SetDrawColor(dark2)
+	surface.DrawRect(x + 6, y - 56, w - 11, 24)
+	draw.SimpleTextOutlined(k, "lambda_sb_def_sm", x + 10, y - 52, white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+	draw.SimpleTextOutlined(v, "lambda_sb_def_sm", x + w - 12, y - 52, white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 end
 
 local function DrawHostName(x,y,w,h)
 	surface.SetMaterial(gradientR)
-	surface.SetDrawColor(0, 0, 0, 190)
-	surface.DrawTexturedRect(20, y - 88, w / 2 - 20, 24)
+	surface.SetDrawColor(dark)
+	surface.DrawTexturedRect(20, y - 90, w / 2 - 20, 28)
 	surface.SetMaterial(gradientL)
-	surface.SetDrawColor(0, 0, 0, 190)
-	surface.DrawTexturedRect(w / 2, y - 88, w / 2 - 20, 24)
-	draw.SimpleTextOutlined(GetHostName(), "lambda_sb_def_nsm", w / 2, y - 90, Color(225, 225, 225, 220), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+	surface.SetDrawColor(dark)
+	surface.DrawTexturedRect(w / 2, y - 90, w / 2 - 20, 28)
+	draw.SimpleTextOutlined(GetHostName(), "lambda_sb_def_nsm", w / 2, y - 91, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 end
 
 function SB_PANEL:Paint(w, h)
 	local _, y = self.Scores:GetPos()
 	-- this was the best way to get an image in here... screw u dimage and power of 2
 	surface.SetMaterial(lambda_logo)
-	surface.SetDrawColor(255, 255, 255, 250)
+	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(94, -160, 512, 512)
 
 	local n = 700 / table.Count(GAMEMODE:GetGameType():GetScoreboardInfo())
 	local x = 0
 	for k, v in pairs(GAMEMODE:GetGameType():GetScoreboardInfo()) do
-		DrawBar(x, y, n, 10, k, v)
-		x = x + n
+		DrawBar(x, y, n, k, v)
+		x = x + n + 2
 	end
 
 	DrawHostName(x,y,w,h)
 
 	surface.SetMaterial(gradientR)
-	surface.SetDrawColor(0, 0, 0, 190)
+	surface.SetDrawColor(dark)
 	surface.DrawTexturedRect(300, y - 28, w - 302, 24)
 
 	if GAMEMODE:GetGameType().PlayerTiming then
 		surface.SetMaterial(time_logo)
-		surface.SetDrawColor(255,255,255,220)
+		surface.SetDrawColor(white)
 		surface.DrawTexturedRect(467, y - 24, 16, 16)
 	end
-	
+
 	surface.SetMaterial(frag_logo)
-	surface.SetDrawColor(255,255,255,220)
+	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(550, y - 24, 16, 16)
 
 	surface.SetMaterial(death_logo)
-	surface.SetDrawColor(255,255,255,220)
+	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(601, y - 24, 16, 16)
 
 	surface.SetMaterial(ping_logo)
-	surface.SetDrawColor(255,255,255,220)
+	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(650, y - 24, 16, 16)
 end
 
@@ -262,8 +273,8 @@ function SB_PANEL:Think()
 	self.ScoreEntries = self.ScoreEntries or {}
 
 	for k, v in pairs(player.GetAll()) do
-		if self.ScoreEntries[v] ~= nil then 
-			continue 
+		if self.ScoreEntries[v] ~= nil then
+			continue
 		end
 
 		local entry = vgui.CreateFromTable(SBPlayerLine, v.ScoreEntry)
@@ -273,15 +284,20 @@ function SB_PANEL:Think()
 		self.Scores:AddItem(entry)
 	end
 
+	if input.IsMouseDown(MOUSE_RIGHT) and not self.Focus then
+		self.Focus = true
+		gui.EnableScreenClicker(true)
+	end
+
 end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 
 LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
-if IsValid(LAMBDA_SCOREBOARD) then 
+if IsValid(LAMBDA_SCOREBOARD) then
 	LAMBDA_SCOREBOARD:Remove()
-	LAMBDA_SCOREBOARD = nil 
-end 
+	LAMBDA_SCOREBOARD = nil
+end
 
 function GM:ScoreboardShow(keepOpen)
 
@@ -295,7 +311,7 @@ function GM:ScoreboardShow(keepOpen)
 
 	if LAMBDA_SCOREBOARD.KeepOpen ~= true then
 		LAMBDA_SCOREBOARD.KeepOpen = keepOpen
-	end 
+	end
 
 	return false
 end
@@ -304,6 +320,8 @@ function GM:ScoreboardHide()
 
 	if IsValid(LAMBDA_SCOREBOARD) then
 		if LAMBDA_SCOREBOARD.KeepOpen ~= true then
+			LAMBDA_SCOREBOARD.Focus = false
+			gui.EnableScreenClicker(false)
 			LAMBDA_SCOREBOARD:Hide()
 		end
 	end
