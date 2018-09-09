@@ -60,6 +60,14 @@ function GAMETYPE:GetTimeLimit()
 
 end
 
+function GAMETYPE:GetAllFrags()
+	local f = 0
+	for k, v in pairs(player.GetAll()) do
+		f = f + v:Frags()
+	end
+	return f
+end
+
 function GAMETYPE:ShouldRestartRound(roundTime)
 
 	return false
@@ -190,11 +198,12 @@ function GAMETYPE:GetScoreboardInfo()
 	if timeLeft < 0 then 
 		timeLeft = 0
 	end
+	local fragsleft = self:GetFragLimit() - self:GetAllFrags()
 	local scoreboardInfo = 
 	{
 		{ name = "LAMBDA_Map", value = game.GetMap() },
 		{ name = "LAMBDA_Timeleft", value = string.NiceTime(timeLeft) },
-		{ name = "LAMBDA_Uptime", value = string.NiceTime(CurTime()) },
+		{ name = "LAMBDA_Frags", value = fragsleft },
 	}
 	return scoreboardInfo
 end
