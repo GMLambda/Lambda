@@ -105,8 +105,7 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 end
 
 function GAMETYPE:GetScoreboardInfo()
-	local scoreboardInfo = {}
-	return scoreboardInfo
+	return {}
 end
 
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)

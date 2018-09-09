@@ -289,3 +289,9 @@ function GM:CreateTeams()
 	team.SetUp(LAMBDA_TEAM_COMBINE, "Combine", Color(0, 0, 255, 100), true)
 
 end
+
+if CLIENT then 
+	language.Add("LAMBDA_Timeleft", "Time left")
+	language.Add("LAMBDA_Map", "Map")
+	language.Add("LAMBDA_Uptime", "Uptime")
+end 

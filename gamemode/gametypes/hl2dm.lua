@@ -184,7 +184,18 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 end
 
 function GAMETYPE:GetScoreboardInfo()
-	local scoreboardInfo = {["Map"] = game.GetMap(),["Timeleft"] = "0", ["Uptime"] = string.NiceTime(CurTime())}
+	local timeElapsed = GAMEMODE:RoundElapsedTime()
+	local timeLimit = self:GetTimeLimit()
+	local timeLeft = timeLimit - timeElapsed
+	if timeLeft < 0 then 
+		timeLeft = 0
+	end
+	local scoreboardInfo = 
+	{
+		{ name = "LAMBDA_Map", value = game.GetMap() },
+		{ name = "LAMBDA_Timeleft", value = string.NiceTime(timeLeft) },
+		{ name = "LAMBDA_Uptime", value = string.NiceTime(CurTime()) },
+	}
 	return scoreboardInfo
 end
 

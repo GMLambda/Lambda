@@ -16,14 +16,22 @@ ROUND_INFO_NONE = 0
 ROUND_INFO_PLAYERRESPAWN = 1
 ROUND_INFO_ROUNDRESTART = 2
 ROUND_INFO_WAITING_FOR_PLAYER = 3
-ROUND_INFO_FINISHED = 4
+ROUND_INFO_STARTED = 4
+ROUND_INFO_FINISHED = 5
 
 function GM:InitializeRoundSystem()
 
 	DbgPrint("GM:InitializeRoundSystem")
 
-	self.RoundState = STATE_IDLE
-	self.RoundStartTime = GetSyncedTimestamp()
+	if not SERVER then 
+		return 
+	end 
+
+	--self.RoundState = STATE_IDLE
+	self:SetRoundState(STATE_IDLE)
+	--self.RoundStartTime = GetSyncedTimestamp()
+	self:SetRoundStartTime(GetSyncedTimestamp())
+
 	self.WaitingForRoundStart = true
 	self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 
@@ -35,7 +43,45 @@ function GM:InitializeRoundSystem()
 
 end
 
+function GM:GetRoundState()
+	if SERVER then 
+		return self.RoundState
+	end 
+	return GetGlobalInt("LambdaRoundState", STATE_IDLE)
+end
+
+function GM:GetRoundStartTime()
+	if SERVER then 
+		return self.RoundStartTime
+	end 
+	return GetGlobalFloat("LambdaRoundStartTime", 0)
+end 
+
+function GM:RoundElapsedTime()
+
+	if self:GetRoundState() == STATE_RUNNING then
+		return GetSyncedTimestamp() - self:GetRoundStartTime()
+	end
+
+	return 0
+
+end
+
 if SERVER then
+
+	function GM:SetRoundState(state)
+		-- Clients.
+		SetGlobalInt("LambdaRoundState", state)
+		-- Server.
+		self.RoundState = state
+	end
+
+	function GM:SetRoundStartTime(t)
+		-- Clients.
+		SetGlobalFloat("LambdaRoundStartTime", t)
+		-- Server
+		self.RoundStartTime = t
+	end
 
 	function GM:NotifyRoundStateChanged(receivers, infoType, params)
 		DbgPrint("GM:NotifyRoundStateChanged")
@@ -92,7 +138,9 @@ if SERVER then
 			return
 		end
 
-		self.RoundState = STATE_RESTART_REQUESTED
+		--self.RoundState = STATE_RESTART_REQUESTED
+		self:SetRoundState(STATE_RESTART_REQUESTED)
+
 		self.RestartStartTime = GetSyncedTimestamp()
 		self.ScheduledRestartTime = self.RestartStartTime + restartTime
 		self.RealTimeScale = game.GetTimeScale()
@@ -137,7 +185,8 @@ if SERVER then
 		DbgPrint("GM:CleanUpMap")
 
 		-- Make sure nothing is going to create new things now
-		self.RoundState = STATE_RESTARTING
+		--self.RoundState = STATE_RESTARTING
+		self:SetRoundState(STATE_RESTARTING)
 
 		-- Remove vehicles
 		self:CleanUpVehicles()
@@ -223,7 +272,8 @@ if SERVER then
 
 	function GM:RoundThink()
 
-		local fn = ROUND_STATE_LOGIC[self.RoundState]
+		local state = self:GetRoundState()
+		local fn = ROUND_STATE_LOGIC[state]
 		if fn ~= nil then
 			fn(self)
 		end
@@ -234,7 +284,8 @@ if SERVER then
 
 	function GM:FinishRound()
 
-		self.RoundState = STATE_END_RESULTS
+		--self.RoundState = STATE_END_RESULTS
+		self:SetRoundState(STATE_END_RESULTS)
 
 		for _,v in pairs(player.GetAll()) do 
 			v:Freeze(true)
@@ -277,12 +328,21 @@ if SERVER then
 
 	end
 
-else
+else -- CLIENT
+
+	function GM:HandleRoundInfoStarted(infoType, params)
+	end
+
+	function GM:HandleRoundInfoFinished(infoType, params)
+		self:ScoreboardShow(true)
+	end
 
 	function GM:HandleRoundInfoChange(infoType, params)
 
 		if infoType == ROUND_INFO_FINISHED then 
-			self:ScoreboardShow(true)
+			self:HandleRoundInfoFinished(infoType, params)
+		elseif infoType == ROUND_INFO_STARTED then 
+			self:HandleRoundInfoStarted(infoType, params)
 		else 
 			self:SetRoundDisplayInfo(infoType, params)
 		end
@@ -316,7 +376,9 @@ function GM:PreCleanupMap()
 		end
 
 		-- Cleanup the input/output system.
-		self.RoundState = STATE_RESTARTING
+		--self.RoundState = STATE_RESTARTING
+		self:SetRoundState(STATE_RESTARTING)
+
 		self:CleanUpGameEvents()
 		self:ResetInputOutput()
 		self:ResetVehicleCheckpoint()
@@ -330,7 +392,7 @@ function GM:PostCleanupMap()
 
 	DbgPrint("GM:PostCleanupMap")
 
-	if self.RoundState ~= STATE_RESTARTING then
+	if self:GetRoundState() ~= STATE_RESTARTING then
 		return
 	end
 
@@ -347,8 +409,9 @@ end
 
 function GM:IsRoundRestarting()
 
-	if self.RoundState == STATE_RESTART_REQUESTED or
-	   self.RoundState == STATE_RESTARTING
+	local state = self:GetRoundState()
+	if state == STATE_RESTART_REQUESTED or
+	   state == STATE_RESTARTING
 	then
 	    return true
 	end
@@ -476,8 +539,16 @@ function GM:PostRoundSetup()
 	DbgPrint("PostRoundSetup")
 	DbgPrint("Game Events: " .. tostring(#self.OnNewGameEvents))
 
-	self.RoundState = STATE_RUNNING
-	self.RoundStartTime = GetSyncedTimestamp()
+	--self.RoundState = STATE_RUNNING
+	self:SetRoundState(STATE_RUNNING)
+
+	--self.RoundStartTime = GetSyncedTimestamp()
+	self:SetRoundStartTime(GetSyncedTimestamp())
+
+	self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_STARTED, {
+		-- Is this required? GetRoundStartTime is networked, but as an event, why not?
+		StartTime = self:GetRoundStartTime(),
+	})
 
 	DbgPrint("Spawning players")
 	for _,v in pairs(player.GetAll()) do
@@ -557,6 +628,9 @@ function GM:StartRound(cleaned)
 			self:CleanUpVehicles()
 		end
 
+		--self.RoundState = STATE_RESTARTING
+		self:SetRoundState(STATE_RESTARTING)
+		
 	end
 
 	self.WaitingForRoundStart = false
@@ -566,8 +640,6 @@ function GM:StartRound(cleaned)
 	elseif player.GetCount() == 0 then
 	    self.WaitingForRoundStart = true
 	end
-
-	self.RoundState = STATE_RESTARTING
 
 	self:ResetMapScript()
 
@@ -600,8 +672,10 @@ function GM:StartRound(cleaned)
 		end, CurTime() + 0.5)
 	else
 	    if SERVER then
-			self.RoundState = STATE_IDLE
-			self.RoundStartTime = GetSyncedTimestamp()
+			--self.RoundState = STATE_IDLE
+			self:SetRoundState(STATE_IDLE)
+			--self.RoundStartTime = GetSyncedTimestamp()
+			self:SetRoundStartTime(GetSyncedTimestamp())
 			self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 			self:NotifyPlayerListChanged()
 	    end
@@ -610,15 +684,5 @@ function GM:StartRound(cleaned)
 end
 
 function GM:IsRoundRunning()
-	return self.RoundState == STATE_RUNNING
-end
-
-function GM:RoundElapsedTime()
-
-	if self.RoundState == STATE_RUNNING then
-		return GetSyncedTimestamp() - self.RoundStartTime
-	end
-
-	return 0
-
+	return self:GetRoundState() == STATE_RUNNING
 end
