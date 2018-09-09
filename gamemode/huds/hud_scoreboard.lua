@@ -209,14 +209,18 @@ function SB_PANEL:PerformLayout()
 	self:SetPos(ScrW() / 2 - 350, 0)
 end
 
-local function DrawBar(x,y,w,k,v)
+local function DrawBar(x, y, w, name, value)
 	surface.SetDrawColor(orange)
 	surface.DrawRect(x + 2, y - 56, 4, 24)
 	surface.SetMaterial(gradientL)
 	surface.SetDrawColor(dark2)
 	surface.DrawRect(x + 6, y - 56, w - 11, 24)
-	draw.SimpleTextOutlined(k, "lambda_sb_def_sm", x + 10, y - 52, white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
-	draw.SimpleTextOutlined(v, "lambda_sb_def_sm", x + w - 12, y - 52, white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+
+	name = Localize(name)
+	value = Localize(value)
+	
+	draw.SimpleTextOutlined(name, "lambda_sb_def_sm", x + 10, y - 52, white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
+	draw.SimpleTextOutlined(value, "lambda_sb_def_sm", x + w - 12, y - 52, white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP, 0, Color(0, 0, 0, 250))
 end
 
 local function DrawHostName(x,y,w,h)
@@ -238,8 +242,9 @@ function SB_PANEL:Paint(w, h)
 
 	local n = 700 / table.Count(GAMEMODE:GetGameType():GetScoreboardInfo())
 	local x = 0
+
 	for k, v in pairs(GAMEMODE:GetGameType():GetScoreboardInfo()) do
-		DrawBar(x, y, n, k, v)
+		DrawBar(x, y, n, v.name, v.value)
 		x = x + n + 2
 	end
 
