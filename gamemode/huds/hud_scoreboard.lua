@@ -294,6 +294,8 @@ end
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 
 LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
+LAMBDA_SCOREBOARD_OPEN = LAMBDA_SCOREBOARD_OPEN or false 
+
 if IsValid(LAMBDA_SCOREBOARD) then
 	LAMBDA_SCOREBOARD:Remove()
 	LAMBDA_SCOREBOARD = nil
@@ -307,6 +309,7 @@ function GM:ScoreboardShow(keepOpen)
 
 	if IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD:Show()
+		LAMBDA_SCOREBOARD_OPEN = true
 	end
 
 	if LAMBDA_SCOREBOARD.KeepOpen ~= true then
@@ -316,6 +319,10 @@ function GM:ScoreboardShow(keepOpen)
 	return false
 end
 
+function GM:IsScoreboardOpen()
+	return LAMBDA_SCOREBOARD_OPEN
+end 
+
 function GM:ScoreboardHide()
 
 	if IsValid(LAMBDA_SCOREBOARD) then
@@ -323,6 +330,7 @@ function GM:ScoreboardHide()
 			LAMBDA_SCOREBOARD.Focus = false
 			gui.EnableScreenClicker(false)
 			LAMBDA_SCOREBOARD:Hide()
+			LAMBDA_SCOREBOARD_OPEN = false
 		end
 	end
 
