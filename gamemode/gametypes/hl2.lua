@@ -108,6 +108,24 @@ GAMETYPE.ImportantPlayerNPCClasses =
 	["npc_breen"] = true,
 }
 
+GAMETYPE.CampaignNames =
+{
+	["POINT INSERTION"] = {s = 1, e = 4},
+	["A RED LETTER DAY"] = {s = 5, e = 6},
+	["ROUTE KANAL"] = {s = 7, e = 11},
+	["WATER HAZARD"] = {s = 12, e = 19},
+	["BLACK MESA EAST"] = {s = 20, e = 21},
+	["WE DON'T GO TO RAVENHOLM"] = {s = 22, e = 29},
+	["HIGHWAY 17"] = {s = 30, e = 36},
+	["SANDTRAPS"] = {s = 37, e = 41},
+	["NOVA PROSPEKT"] = {s = 42, e = 45},
+	["ENTANGLEMENT"] = {s = 46, e = 49},
+	["ANTICITIZEN ONE"] = {s = 50, e = 57},
+	["FOLLOW FREEMAN!"] = {s = 58, e = 64},
+	["OUR BENEFACTORS"] = {s = 65, e = 69},
+	["DARK ENERGY"] = {s = 70, e = 70},
+}
+
 function GAMETYPE:GetPlayerRespawnTime()
 
 	local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
@@ -312,6 +330,22 @@ end
 function GAMETYPE:AllowPlayerTracking()
 	self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
 	return self.TrackerOption:GetBool()
+end
+
+function GAMETYPE:GetCampaignName(map)
+	local n = table.KeyFromValue(self.MapList, map)
+	for k, v in pairs(self.CampaignNames) do
+		if n >= v.s and n <= v.e then return k end
+	end
+end
+
+function GAMETYPE:GetScoreboardInfo()
+	local scoreboardInfo =
+	{
+		{ name = "LAMBDA_Map", value = game.GetMap() },
+		{ name = "LAMBDA_Campaign", value = self:GetCampaignName(game.GetMap())},
+	}
+	return scoreboardInfo
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2GameType", function(gametypes)
