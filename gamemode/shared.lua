@@ -457,7 +457,10 @@ function GM:EntityKeyValue(ent, key, val)
 
 	if key == "message" and ent:GetClass() == "env_message" and ent:GetName() ~= "LambdaGameOver" then
 		return ""
-  end
+	elseif key == "globalstate" and val == "friendly_encounter" and ent:GetClass() == "env_global" then 
+		-- HACKHACK: This solves an issue that causes prediction errors because clients arent aware of global states.
+		return ""
+  	end
 
 	if util.IsOutputValue(key) then
 		ent.EntityOutputs = ent.EntityOutputs or {}
