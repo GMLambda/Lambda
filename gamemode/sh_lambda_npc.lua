@@ -117,6 +117,8 @@ if SERVER then
 
 	local function DissolveEntity(ent)
 
+		ent:SetOwner(NULL)
+
 		local name = "dissolve_" .. tostring(ent:EntIndex())
 		ent:SetName(name)
 
@@ -183,11 +185,31 @@ if SERVER then
 				wep = nil
 			end
 		end
-		if npc:HasSpawnFlags(8192) == true and wep ~= nil then
-			--wep:Remove()
+
+		local SF_DONT_DROP_WEAPONS = 8192
+		local removeWeapon = (npc:HasSpawnFlags(SF_DONT_DROP_WEAPONS) == true or 
+							game.GetGlobalState("super_phys_gun") == GLOBAL_ON)
+
+		if removeWeapon == true and wep ~= nil then
+
+			local spawnFlags = npc:GetSpawnFlags()
+
+			-- We dissolve this on our own, so we keep weapon dropping.
+			spawnFlags = bit.band(spawnFlags, bit.bnot(SF_DONT_DROP_WEAPONS))
+
+			-- Don't drop grenades
+			spawnFlags = bit.bor(spawnFlags, 131072)
+
+			-- Don't drop ar2 alt fire (elite only)
+			spawnFlags = bit.bor(spawnFlags, 262144)
+
+			npc:SetKeyValue("spawnflags", spawnFlags)
+
 			DissolveEntity(wep)
 			wep = nil
+
 		end
+
 		if wep ~= nil then
 			-- FIXME: https://github.com/Facepunch/garrysmod-issues/issues/3377
 			if IsEnemyEntityName(npc:GetClass()) == true then
