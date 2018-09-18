@@ -14,16 +14,10 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-	--["point_teleport"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-	--["teleport_to_start"] = true,
-	--["teleport_to_train"] = true,
-	--["teleport_to_trainstation"] = true,
-	--["teleport_to_citadel"] = true,
-	--["teleport_to_test_chamber"] = true,
 }
 
 MAPSCRIPT.InputFilters =
@@ -34,6 +28,12 @@ MAPSCRIPT.InputFilters =
 	["cage_door_counter"] = {"Add"},
 	["logic_kill_citizens"] = {"Trigger"},
 	["storage_room_door"] = {"Close", "Lock"},
+}
+
+MAPSCRIPT.GlobalStates =
+{
+	["gordon_precriminal"] = GLOBAL_ON,
+	["gordon_invulnerable"] = GLOBAL_ON,
 }
 
 function MAPSCRIPT:Init()
@@ -52,10 +52,6 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
-
-		-- Override env_global so combines dont flip shit on everyone
-		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
-		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
 
 		self.PlayersLocked = true
 

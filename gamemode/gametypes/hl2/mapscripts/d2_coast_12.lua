@@ -49,6 +49,11 @@ MAPSCRIPT.EntityFilterByName =
 	["player_spawn_items_maker"] = true,
 }
 
+MAPSCRIPT.GlobalStates =
+{
+	["antlion_allied"] = GLOBAL_ON,
+}
+
 function MAPSCRIPT:Init()
 end
 

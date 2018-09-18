@@ -78,6 +78,9 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 
+        ents.WaitForEntityByName("kleiner", function(ent)
+        	ent:SetHealth(100)
+        end)
 
     end
 

@@ -26,9 +26,12 @@ MAPSCRIPT.EntityFilterByName =
 	["logic_flr1tv_turnoffallscreens"] = true,
 	["ai_breakin_cop3goal4_blockplayer"] = true,
 	["ai_breakin_cop3goal4_blockplayer"] = true,
-	--["attic_door_push"] = true,
-	--["attic_door_push_trigger"] = true,
-	--["brush_prevent_cops_getting_to_bracer"] = true,
+}
+
+MAPSCRIPT.GlobalStates =
+{
+	["gordon_precriminal"] = GLOBAL_ON,
+	["gordon_invulnerable"] = GLOBAL_ON,
 }
 
 function MAPSCRIPT:Init()
@@ -37,10 +40,6 @@ end
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
-
-		-- Override env_global so combines dont flip shit on everyone
-		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
-		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
 		
 		-- FIX: The cop would stand there annoying players that have not yet passed through.
 		GAMEMODE:WaitForInput("brush_breakin_blockplayer1", "Kill", function()

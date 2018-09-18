@@ -42,9 +42,6 @@ function MAPSCRIPT:PostInit()
 
 	if SERVER then
 
-		game.SetGlobalState("gordon_precriminal", GLOBAL_OFF)
-		game.SetGlobalState("global_gordon_invulnerable", GLOBAL_OFF)
-
 		-- If the changelevel fires before he closed it, the position would be off.
 		ents.WaitForEntityByName("citizen_DoorBracer", function(ent)
 			ent:SetPos(Vector(-3082.781738, -3532.943115, 384.031250))

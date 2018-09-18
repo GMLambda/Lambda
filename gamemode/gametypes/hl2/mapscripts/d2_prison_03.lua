@@ -53,6 +53,11 @@ MAPSCRIPT.EntityFilterByName =
 	["global_newgame_template_ammo"] = true,
 }
 
+MAPSCRIPT.GlobalStates =
+{
+    ["antlion_allied"] = GLOBAL_ON,
+}
+
 function MAPSCRIPT:Init()
 end
 

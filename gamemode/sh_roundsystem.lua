@@ -480,6 +480,20 @@ function GM:OnNewGame()
 
 	if SERVER then
 
+		local defaultGlobals = self:GetGameTypeData("DefaultGlobalState")
+		if defaultGlobals ~= nil then 
+			for k,v in pairs(defaultGlobals) do 
+				game.SetGlobalState(k, v)
+			end 
+		end
+
+		local mapscriptGlobals = self.MapScript.GlobalStates
+		if mapscriptGlobals ~= nil then 
+			for k,v in pairs(mapscriptGlobals) do 
+				game.SetGlobalState(k, v)
+			end 
+		end
+
 		-- FIXME: Don't ignore the delay time.
 		self:CreateTransitionObjects()
 

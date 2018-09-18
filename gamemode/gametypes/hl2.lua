@@ -95,6 +95,15 @@ GAMETYPE.ClassesEnemyNPC =
 	["npc_headcrab_fast"] = true,
 }
 
+GAMETYPE.DefaultGlobalState =
+{
+	["gordon_precriminal"] = GLOBAL_OFF,
+	["gordon_invulnerable"] = GLOBAL_OFF,
+	["antlion_allied"] = GLOBAL_OFF,
+	["super_phys_gun"] = GLOBAL_OFF,
+	["friendly_encounter"] = GLOBAL_OFF,
+}
+
 GAMETYPE.ImportantPlayerNPCClasses =
 {
 	["npc_alyx"] = true,

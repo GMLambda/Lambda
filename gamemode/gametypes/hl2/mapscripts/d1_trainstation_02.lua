@@ -16,16 +16,18 @@ MAPSCRIPT.InputFilters =
 {
 }
 
+MAPSCRIPT.GlobalStates =
+{
+	["gordon_precriminal"] = GLOBAL_ON,
+	["gordon_invulnerable"] = GLOBAL_ON,
+}
+
 function MAPSCRIPT:Init()
 end
 
 function MAPSCRIPT:PostInit()
 
 	if SERVER then
-
-		-- Override env_global so combines dont flip shit on everyone
-		game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
-		game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
 
 		local cupcop_can = nil
 		local cupcop = nil

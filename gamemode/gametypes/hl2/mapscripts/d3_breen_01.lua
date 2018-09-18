@@ -44,6 +44,11 @@ MAPSCRIPT.EntityFilterByName =
 	["citadel_brush_combinewall_start2"] = true,
 }
 
+MAPSCRIPT.GlobalStates =
+{
+	["super_phys_gun"] = GLOBAL_ON,
+}
+
 function MAPSCRIPT:Init()
 end
 
