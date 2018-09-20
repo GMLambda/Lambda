@@ -19,6 +19,8 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.InputFilters =
 {
+	["pod_ready_counter"] = { "Kill" },
+	["relay_playerpod_resume"] = { "Kill" },
 }
 
 MAPSCRIPT.EntityFilterByClass =
@@ -45,6 +47,10 @@ function MAPSCRIPT:PostInit()
 
 		ents.WaitForEntityByName("citadel_trigger_elevatorride_up", function(ent)
 			ent:SetKeyValue("teamwait", "1")
+		end)
+
+		ents.WaitForEntityByName("pod_02_track0", function(ent)
+			ent:Fire("AddOutput", "OnPass pod_02_track_inspection,DisableAlternatePath,,0.0")
 		end)
 
     end

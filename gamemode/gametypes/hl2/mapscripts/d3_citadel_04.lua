@@ -33,6 +33,11 @@ MAPSCRIPT.EntityFilterByName =
 	["global_newgame_template_local_items"] = true,
 }
 
+MAPSCRIPT.GlobalStates =
+{
+	["super_phys_gun"] = GLOBAL_ON,
+}
+
 function MAPSCRIPT:Init()
 end
 
