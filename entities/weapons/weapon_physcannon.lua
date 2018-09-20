@@ -1324,12 +1324,13 @@ function SWEP:AttachObject(ent, tr)
 	local grabPos = tr.HitPos
 	local attachmentPoint = ent:OBBCenter() -- ent:WorldToLocal(ent:OBBCenter())
 
-	if self:IsMegaPhysCannon() == true  and
+	if (self:IsMegaPhysCannon() == true and
 		ent:IsNPC() and
 		ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == false and
 		ent:IsEFlagSet(EFL_NO_MEGAPHYSCANNON_RAGDOLL) == false and
 		ent:CanBecomeRagdoll() == true and
-		ent:GetMoveType() == MOVETYPE_STEP then
+		ent:GetMoveType() == MOVETYPE_STEP) 
+	then
 
 		local dmgInfo = DamageInfo()
 		dmgInfo:SetInflictor(owner)
@@ -1647,7 +1648,6 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 			fwd.z = fwd.z * -0.65
 		end
 
-		-- 	TODO: Physgun_OnPhysGunPickup( pEntity, pOwner, PUNTED_BY_CANNON );
 		owner:SimulateGravGunPickup(ent, true)
 
 		local phys = ent:GetPhysicsObjectNum(0)
@@ -1731,7 +1731,6 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
 			fwd.z = fwd.z * -0.65
 		end
 
-		-- 	TODO: Physgun_OnPhysGunPickup( pEntity, pOwner, PUNTED_BY_CANNON );
 		owner:SimulateGravGunPickup(ent, true)
 
 		local vel = fwd * 1500
