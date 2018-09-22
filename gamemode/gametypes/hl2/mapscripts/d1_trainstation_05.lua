@@ -52,7 +52,7 @@ function MAPSCRIPT:PostInit()
 
 		ents.WaitForEntityByName("kleiner_console_lift_1", function(ent)
 			ent:SetKeyValue("spawnflags", "256")
-			ent:SetKeyValue("dmg", "0") -- Don`t hurt the player
+			--ent:SetKeyValue("dmg", "0") -- Don`t hurt the player
 		end)
 
 		local mapscript = self
