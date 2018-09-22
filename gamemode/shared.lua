@@ -46,6 +46,7 @@ include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
+include("sh_gibs.lua")
 
 --Disabled for now
 --include("sh_gibs.lua")

@@ -734,9 +734,26 @@ if SERVER then
 		if enableGore == true and dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
 			-- Exploded
 			self:GibPlayer(ply, dmgForce, true)
-		elseif enableGore == true and dmgInfo:IsDamageType(DMG_CRUSH) then 
+		elseif enableGore == true and dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then 
 			-- Crushed
-			self:GibPlayer(ply, dmgForce, false)
+			local totalMass = 0
+			for i = 0, attacker:GetPhysicsObjectCount() - 1 do 
+				local physObj = attacker:GetPhysicsObjectNum(i)
+				if IsValid(physObj) then 
+					totalMass = totalMass + physObj:GetMass()
+				end 
+			end 
+			local forceLen = dmgForce:Length2D()
+			if forceLen <= 0 then 
+				forceLen = 2
+			end
+			local forceWithMass = totalMass * forceLen
+			print(forceWithMass, totalMass)
+			if forceWithMass >= 150000 or totalMass >= 10000 then
+				self:GibPlayer(ply, dmgForce, false)
+			else 
+				ply:CreateRagdoll()
+			end
 		else 
 			ply:CreateRagdoll()
 		end 
@@ -744,37 +761,6 @@ if SERVER then
 		local inflictor = dmgInfo:GetInflictor()
 		self:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
 
-	end
-
-	function GM:GibPlayer(ply, dmgForce, exploded)
-
-		local numHitBoxGroups = ply:GetHitBoxGroupCount()
-
-		util.Decal("Blood", ply:GetPos() + ply:GetUp(), ply:GetPos() - ply:GetUp())
-
-		-- Head
-		-- models/gibs/hgibs.mdl
-		local boneId = ply:LookupBone("ValveBiped.Bip01_Head1")
-		if boneId ~= -1 then 
-			local pos, ang = ply:GetBonePosition(boneId)
-			local gib = ents.Create("lambda_gib_part")
-			local offset = VectorRand() * dmgForce:Length2D()
-			gib:InitializeGibs("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
-		end 
-
-		for group=0, numHitBoxGroups - 1 do
-			local numHitBoxes = ply:GetHitBoxCount( group )
-
-			for hitbox=0, numHitBoxes - 1 do
-				local bone = ply:GetHitBoxBone( hitbox, group )
-				local boneName = ply:GetBoneName(bone)
-				local pos, ang = ply:GetBonePosition(bone)
-
-				local gib = ents.Create("lambda_gib_part")
-				local offset = VectorRand() * dmgForce:Length2D()
-				gib:InitializeGibs(boneName, pos, ang, (dmgForce * 0.8) + offset, 3, exploded)
-			end
-		end
 	end
 
 	function GM:PlayerDeathSound()
