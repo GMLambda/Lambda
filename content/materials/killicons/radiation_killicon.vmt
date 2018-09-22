@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture" "killicons/sent_nuke_killicon"
+	"$basetexture" "killicons/radiation_killicon"
 	"$vertexalpha" 1
 	"$vertexcolor" 1
 }
