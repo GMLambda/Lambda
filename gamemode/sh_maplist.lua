@@ -6,12 +6,11 @@ local DbgPrint = GetLogging("MapList")
 
 function GM:GetNextMap()
 
-	local gameType = self:GetGameType()
 	local mapList = self:GetGameTypeData("MapList")
 
 	local current = self:GetCurrentMapIndex()
 	if current + 1 > #mapList then
-		return nil
+		return mapList[1]
 	end
 	return mapList[current + 1]
 
@@ -19,11 +18,10 @@ end
 
 function GM:GetPreviousMap()
 
-	if self.PreviousMap ~= nil then 
-		return self.PreviousMap 
-	end 
+	if self.PreviousMap ~= nil then
+		return self.PreviousMap
+	end
 
-	local gameType = self:GetGameType()
 	local mapList = self:GetGameTypeData("MapList")
 
 	local current = self:GetCurrentMapIndex()
@@ -45,7 +43,6 @@ end
 
 function GM:GetMapIndex(prevMap, currentMap)
 
-	local gameType = self:GetGameType()
 	local mapList = self:GetGameTypeData("MapList")
 
 	DbgPrint("Getting Map Index, Prev: " .. tostring(prevMap) .. ", Cur: " .. currentMap)
