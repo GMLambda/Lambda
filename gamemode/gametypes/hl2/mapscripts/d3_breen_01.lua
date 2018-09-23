@@ -109,8 +109,8 @@ function MAPSCRIPT:PostInit()
 		inputEnt:SetName("lambda_physcannon")
 		inputEnt.AcceptInput = function(s, input, caller, activator, param)
 			if input == "AddPhyscannon" then
-				print("Adding physcannon")
-				table.insert(self.DefaultLoadout.Weapons, "weapon_physcannon")
+				DbgPrint("Adding physcannon")
+				table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_physcannon")
 				s:Remove()
 				s.AcceptInput = function() end
 			end
