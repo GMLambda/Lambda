@@ -121,6 +121,8 @@ function GM:EntityRemoved(ent)
 	end
 end
 
+-- NOTE: This case is probably fixed, this was due to an uninitialized variable
+--       which Willox fixed, revisit this.
 function GM:CheckStuckScenes()
 
 	local curTime = CurTime()
@@ -139,20 +141,20 @@ function GM:CheckStuckScenes()
 		local waitingForActor = ent:SafeGetInternalVariable("m_bWaitingForActor", false)
 		if waitingForActor == true then
 			if ent.WaitingForActor ~= true then
-				print(ent, "now waiting for actor")
+				DbgPrint(ent, "now waiting for actor")
 				ent.WaitingForActorTime = CurTime()
 				ent.WaitingForActor = true
 			elseif ent.WaitingForActor == true then
 				local delta = CurTime() - ent.WaitingForActorTime
 				if delta >= 5 then
-					print("Long waiting logic_choreographed_scene")
+					DbgPrint("Long waiting logic_choreographed_scene")
 					ent:SetKeyValue("busyactor", "0")
 					ent.WaitingForActor = false
 				end
 			end
 		else
 			if ent.WaitingForActor == true then
-				print(ent, "no longer waiting")
+				DbgPrint(ent, "no longer waiting")
 			end
 			ent.WaitingForActor = false
 		end
@@ -196,29 +198,29 @@ function GM:MountRequiredContent()
 	end
 
 	if file.Exists(filename, "DATA") == false then
-		print("Creating new GMA mount package...")
+		DbgPrint("Creating new GMA mount package...")
 		if GMA.CreatePackage(mountFiles, filename) == false then
-			print("Unable to create GMA archive, make sure you have the required content mounted.")
+			DbgPrint("Unable to create GMA archive, make sure you have the required content mounted.")
 			return
 		end
-		print("OK.")
+		DbgPrint("OK.")
 	else
-		print("Found pre-existing GMA archive, no need to generate.")
+		DbgPrint("Found pre-existing GMA archive, no need to generate.")
 	end
 
 	if file.Exists(filename, "DATA") == false then
 		-- What?
-		print("Unable to find the GMA archive, unable to mount.")
+		DbgPrint("Unable to find the GMA archive, unable to mount.")
 		return
 	end
 
 	local res, mountedList = game.MountGMA("data/" .. filename)
 	if res == false then
-		print("Unable to mount the required GMA, you may be unable to play.")
+		DbgPrint("Unable to mount the required GMA, you may be unable to play.")
 		return
 	end
 
-	print("Mounted content!")
+	DbgPrint("Mounted content!")
 
 end
 

@@ -248,7 +248,7 @@ if SERVER then
 
 	function GM:CanPlayerEnterVehicle(ply, vehicle, role)
 
-		print("CanPlayerEnterVehicle", ply, vehicle)
+		DbgPrint("CanPlayerEnterVehicle", ply, vehicle)
 
 		if ply.OwnedVehicle ~= nil and IsValid(ply.OwnedVehicle) == false then
 			-- Just to make sure, its possible it might error somewhere and did not unassign it.

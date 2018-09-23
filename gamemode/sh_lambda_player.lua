@@ -748,10 +748,9 @@ if SERVER then
 			end 
 			local forceLen = dmgForce:Length2D()
 			if forceLen <= 0 then 
-				forceLen = 2
+				forceLen = 1
 			end
 			local forceWithMass = totalMass * forceLen
-			print(forceWithMass, totalMass)
 			if forceWithMass >= 150000 or totalMass >= 10000 then
 				self:GibPlayer(ply, dmgForce, false)
 			end

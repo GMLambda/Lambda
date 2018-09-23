@@ -62,7 +62,7 @@ function MAPSCRIPT:PostInit()
 		end)
 
 		GAMEMODE:WaitForInput("boxcar_human", "StopScripting", function(ent)
-			print("NPCs no longer important")
+			DbgPrint("NPCs no longer important")
 			if IsValid(boxcar_vort) then
 				boxcar_vort.ImportantNPC = false
 			end

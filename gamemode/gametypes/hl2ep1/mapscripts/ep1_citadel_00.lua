@@ -152,7 +152,7 @@ function MAPSCRIPT:PostInit()
 		carTrigger:SetKeyValue("spawnflags", tostring(SF_TRIGGER_ALLOW_CLIENTS + SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES))
 		carTrigger:SetKeyValue("teamwait", "1")
 		carTrigger.OnTrigger = function(trigger)
-			print("All players on board")
+			DbgPrint("All players on board")
 			TriggerOutputs({
 				{"counter_alyx_van", "Add", 0.0, "1"},
 			})
@@ -173,7 +173,7 @@ function MAPSCRIPT:FindUseEntity(ply, engineEnt)
 		end
 		for _,v in pairs(van.VanSeats) do
 			if not IsValid(v:GetDriver()) then
-				print("Giving different seat: " .. tostring(v))
+				DbgPrint("Giving different seat: " .. tostring(v))
 				return v
 			end
 		end

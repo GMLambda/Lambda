@@ -1011,7 +1011,7 @@ function GM:CreateTransitionObjects()
 		if IsValid(data.GlobalEnt) then
 			ent = data.GlobalEnt
 			dispatchSpawn = false
-			print("Using global entity!!!!!!")
+			DbgPrint("Using global entity!")
 		else
 			ent = ents.Create(data.Class)
 		end
