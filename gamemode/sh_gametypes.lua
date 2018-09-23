@@ -184,11 +184,7 @@ end
 function GM:ReloadGameType()
 
 	if self.GameType ~= nil then
-		local gametype = self.GameType
-		if gametype.LoadCurrentMapScript ~= nil then
-			gametype:LoadCurrentMapScript()
-		end
-		self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+		self:ResetMapScript()
 	end
 
 end
@@ -204,3 +200,7 @@ end
 function GM:GetGameType()
 	return self.GameType
 end
+
+function GM:GetMapScript()
+	return self.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
+end 

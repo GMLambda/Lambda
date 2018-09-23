@@ -347,7 +347,7 @@ if SERVER then
 			ply:SetArmor(loadout.Armor or 0)
 
 			-- HEV
-			if loadout.HEV then
+			if loadout.HEV == true then
 				DbgPrint("EquipSuit(" .. tostring(ply) .. ")")
 				ply:EquipSuit()
 			else

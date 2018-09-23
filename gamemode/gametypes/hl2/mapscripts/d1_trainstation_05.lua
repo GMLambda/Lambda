@@ -67,7 +67,7 @@ function MAPSCRIPT:PostInit()
 				-- Update model.
 				GAMEMODE:PlayerSetModel(v)
 
-				mapscript.DefaultLoadout.HEV = true
+				GAMEMODE:GetMapScript().DefaultLoadout.HEV = true
 			end
 		end)
 
