@@ -384,7 +384,6 @@ function PANEL:Init()
 		change_time:SetMinMax(0, 100)
 
 		function change_time:OnValueChanged(val)
-			--pl:ConCommand("lambda_map_change_timeout " .. tonumber(val))
 			if tonumber(val) > 100 then val = 100 change_time:SetValue(val) end
 			GAMEMODE:ChangeAdminConfiguration("map_change_timeout", tostring(val))
 		end
@@ -406,7 +405,6 @@ function PANEL:Init()
 		pick_delay:SetValue(cvars.Number("lambda_pickup_delay"))
 
 		function pick_delay:OnValueChanged(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			GAMEMODE:ChangeAdminConfiguration("pickup_delay", tostring(val))
 		end
 
@@ -441,7 +439,6 @@ function PANEL:Init()
 		player_god:SizeToContents()
 		player_god:SetValue(cvars.Number("lambda_player_god"))
 		function player_god:OnChange(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			if val then val = "1" else val = "0" end
 			GAMEMODE:ChangeAdminConfiguration("player_god", val)
 		end
@@ -452,7 +449,6 @@ function PANEL:Init()
 		ply_coll:SizeToContents()
 		ply_coll:SetValue(cvars.Number("lambda_playercollision"))
 		function ply_coll:OnChange(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			if val then val = "1" else val = "0" end
 			GAMEMODE:ChangeAdminConfiguration("playercollision", val)
 		end
@@ -463,7 +459,6 @@ function PANEL:Init()
 		ply_track:SizeToContents()
 		ply_track:SetValue(cvars.Number("lambda_player_tracker"))
 		function ply_track:OnChange(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			if val then val = "1" else val = "0" end
 			GAMEMODE:ChangeAdminConfiguration("player_tracker", val)
 		end
@@ -474,7 +469,6 @@ function PANEL:Init()
 		ply_friendlyfire:SizeToContents()
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
 		function ply_friendlyfire:OnChange(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			if val then val = "1" else val = "0" end
 			GAMEMODE:ChangeAdminConfiguration("friendlyfire", val)
 		end
@@ -485,9 +479,28 @@ function PANEL:Init()
 		dynamic_checkpoints:SizeToContents()
 		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
 		function dynamic_checkpoints:OnChange(val)
-			--pl:ConCommand("lambda_pickup_delay " .. tonumber(val))
 			if val then val = "1" else val = "0" end
 			GAMEMODE:ChangeAdminConfiguration("dynamic_checkpoints", val)
+		end
+
+		local npc_damage = vgui.Create("DCheckBoxLabel", PanelAdmin)
+		npc_damage:SetPos(5, 10 * nwh + 32)
+		npc_damage:SetText("Friendly NPC damage")
+		npc_damage:SizeToContents()
+		npc_damage:SetValue(cvars.Number("lambda_allow_npcdmg"))
+		function npc_damage:OnChange(val)
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("allow_npcdmg", val)
+		end
+
+		local limit_ammo = vgui.Create("DCheckBoxLabel", PanelAdmin)
+		limit_ammo:SetPos(5, 11 * nwh + 32)
+		limit_ammo:SetText("Limit default ammo")
+		limit_ammo:SizeToContents()
+		limit_ammo:SetValue(cvars.Number("lambda_limit_default_ammo"))
+		function limit_ammo:OnChange(val)
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration("limit_default_ammo", val)
 		end
 
 		self.Sheet:AddSheet("Admin Settings", PanelAdmin, "lambda/icons/admin_settings.png")
