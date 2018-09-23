@@ -86,7 +86,7 @@ function MAPSCRIPT:PostInit()
 
 			gravgun_prop:Remove()
 
-			table.insert(self.DefaultLoadout.Weapons, "weapon_physcannon")
+			table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_physcannon")
 
 			-- No longer needed.
 			s:Remove()
