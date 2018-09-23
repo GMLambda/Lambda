@@ -731,6 +731,9 @@ if SERVER then
 		local damgeDist = dmgInfo:GetDamagePosition():Distance(ply:GetPos())
 		local enableGore = true 
 
+		-- We always create the ragdoll, client decides what to do with it.
+		ply:CreateRagdoll()
+
 		if enableGore == true and dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
 			-- Exploded
 			self:GibPlayer(ply, dmgForce, true)
@@ -751,11 +754,7 @@ if SERVER then
 			print(forceWithMass, totalMass)
 			if forceWithMass >= 150000 or totalMass >= 10000 then
 				self:GibPlayer(ply, dmgForce, false)
-			else 
-				ply:CreateRagdoll()
 			end
-		else 
-			ply:CreateRagdoll()
 		end 
 
 		local inflictor = dmgInfo:GetInflictor()
