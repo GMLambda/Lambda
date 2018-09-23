@@ -125,7 +125,7 @@ function MAPSCRIPT:PostInit()
 		inputEnt:SetName("lambda_crowbar")
 		inputEnt.AcceptInput = function(s, input, caller, activator, param)
 			if input == "AddCrowbar" then
-				table.insert(self.DefaultLoadout.Weapons, "weapon_crowbar")
+				table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_crowbar")
 				s:Remove()
 			end
 		end
