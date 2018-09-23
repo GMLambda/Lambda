@@ -312,8 +312,15 @@ function PANEL:Init()
 			postproc:SizeToContents()
 			postproc:SetConVar("lambda_postprocess")
 			postproc:SetValue(cvars.Number("lambda_postprocess"))
+
+			local gore = vgui.Create("DCheckBoxLabel", PanelPostFx)
+			gore:SetPos(5, 25)
+			gore:SetText("Gore")
+			gore:SizeToContents()
+			gore:SetConVar("lambda_gore")
+			gore:SetValue(cvars.Number("lambda_gore"))
 		end
-		sheetSettings:AddSheet("Post Processing", PanelPostFx)
+		sheetSettings:AddSheet("Effects", PanelPostFx)
 	end
 	self.Sheet:AddSheet("Settings", PanelSettings, "lambda/icons/settings.png")
 

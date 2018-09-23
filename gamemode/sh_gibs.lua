@@ -29,7 +29,6 @@ end
 PrecacheParticleSystem("env_fire_tiny")
 PrecacheParticleSystem("blood_impact_red_01_mist")
 
-
 for _,v in pairs(BLOOD_SPRAY) do
 	PrecacheParticleSystem( v )
 end 
@@ -112,12 +111,10 @@ else
 		gib:PhysicsInit(SOLID_VPHYSICS)
 		gib:SetMoveType(MOVETYPE_VPHYSICS)
 		gib:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+		gib:SetNotSolid(true)
 		local phys = gib:GetPhysicsObject()
-		if not IsValid(phys) then 
-			print("Invalid phys")
-		else 
+		if IsValid(phys) then 
 			phys:SetVelocity(dmgForce)
-			--phys:EnableMotion(false)
 		end 
 
 		-- Rendering.
@@ -208,30 +205,71 @@ else
 
 	function GM:GibPlayer(ply, dmgForce, exploded)
 
-		local numHitBoxGroups = ply:GetHitBoxGroupCount()
-		util.Decal("Blood", ply:GetPos() + ply:GetUp(), ply:GetPos() - ply:GetUp())
-
-		-- Head
-		-- models/gibs/hgibs.mdl
-		local boneId = ply:LookupBone("ValveBiped.Bip01_Head1")
-		if boneId ~= -1 then 
-			local pos, ang = ply:GetBonePosition(boneId)
-			local offset = VectorRand() * dmgForce:Length2D()
-			--gib:InitializeGibs("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
-			self:CreateGibPart("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
-		end 
-
-		for group=0, numHitBoxGroups - 1 do
-			local numHitBoxes = ply:GetHitBoxCount( group )
-
-			for hitbox=0, numHitBoxes - 1 do
-				local bone = ply:GetHitBoxBone( hitbox, group )
-				local boneName = ply:GetBoneName(bone)
-				local pos, ang = ply:GetBonePosition(bone)
-				local offset = VectorRand() * dmgForce:Length2D()
-				self:CreateGibPart(boneName, pos, ang, (dmgForce * 0.8) + offset, 3, exploded)
-			end
+		if lambda_gore:GetBool() == false then 
+			-- Leave normal ragdoll intact.
+			return 
 		end
+
+		-- We have to wait for the ragdoll to be created first.
+		local ply = ply
+		local dmgForce = dmgForce 
+		local exploded = exploded
+		local hookName = "LambdaRagdoll_" .. tostring(ply)
+		local searchStart = CurTime()
+
+		hook.Add("Think", hookName, function()
+
+			if CurTime() - searchStart > 2 then 
+				-- Timeout
+				hook.Remove("Think", hookName)
+				return 
+			end 
+
+			if not IsValid(ply) then 
+				-- Player left.
+				hook.Remove("Think", hookName)
+				return
+			end
+
+			local ragdoll = ply:GetRagdollEntity()
+			if not IsValid(ragdoll) then 
+				return
+			end
+
+			-- Remove collision and dont draw the ragdoll.
+			ragdoll:AddEffects(EF_NODRAW)
+			ragdoll:SetNotSolid(true)
+			ragdoll:DrawShadow(false)
+
+			-- Create gibs.
+			local numHitBoxGroups = ply:GetHitBoxGroupCount()
+			util.Decal("Blood", ply:GetPos() + ply:GetUp(), ply:GetPos() - ply:GetUp())
+
+			-- Head
+			-- models/gibs/hgibs.mdl
+			local boneId = ply:LookupBone("ValveBiped.Bip01_Head1")
+			if boneId ~= -1 then 
+				local pos, ang = ply:GetBonePosition(boneId)
+				local offset = VectorRand() * dmgForce:Length2D()
+				self:CreateGibPart("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
+			end 
+
+			for group=0, numHitBoxGroups - 1 do
+				local numHitBoxes = ply:GetHitBoxCount( group )
+
+				for hitbox=0, numHitBoxes - 1 do
+					local bone = ply:GetHitBoxBone( hitbox, group )
+					local boneName = ply:GetBoneName(bone)
+					local pos, ang = ply:GetBonePosition(bone)
+					local offset = VectorRand() * dmgForce:Length2D()
+					self:CreateGibPart(boneName, pos, ang, (dmgForce * 0.8) + offset, 3, exploded)
+				end
+			end
+
+			-- Finally remove this nasty workaround.
+			hook.Remove("Think", hookName)
+
+		end)
 
 	end
 
