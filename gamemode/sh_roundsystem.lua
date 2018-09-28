@@ -27,19 +27,11 @@ function GM:InitializeRoundSystem()
 		return 
 	end 
 
-	--self.RoundState = STATE_IDLE
 	self:SetRoundState(STATE_IDLE)
-	--self.RoundStartTime = GetSyncedTimestamp()
 	self:SetRoundStartTime(GetSyncedTimestamp())
 
 	self.WaitingForRoundStart = true
 	self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
-
-	if SERVER then
-		self.OnNewGameEvents = {}
-		self.OnMapTransitionEvents = {}
-		self.OnMapSpawnEvents = {}
-	end
 
 end
 
@@ -138,7 +130,6 @@ if SERVER then
 			return
 		end
 
-		--self.RoundState = STATE_RESTART_REQUESTED
 		self:SetRoundState(STATE_RESTART_REQUESTED)
 
 		self.RestartStartTime = GetSyncedTimestamp()
@@ -185,7 +176,6 @@ if SERVER then
 		DbgPrint("GM:CleanUpMap")
 
 		-- Make sure nothing is going to create new things now
-		--self.RoundState = STATE_RESTARTING
 		self:SetRoundState(STATE_RESTARTING)
 
 		-- Remove vehicles
@@ -284,7 +274,6 @@ if SERVER then
 
 	function GM:FinishRound()
 
-		--self.RoundState = STATE_END_RESULTS
 		self:SetRoundState(STATE_END_RESULTS)
 
 		for _,v in pairs(player.GetAll()) do 
@@ -376,10 +365,8 @@ function GM:PreCleanupMap()
 		end
 
 		-- Cleanup the input/output system.
-		--self.RoundState = STATE_RESTARTING
 		self:SetRoundState(STATE_RESTARTING)
 
-		self:CleanUpGameEvents()
 		self:ResetInputOutput()
 		self:ResetVehicleCheckpoint()
 		self:ResetCheckpoints()
@@ -420,54 +407,16 @@ function GM:IsRoundRestarting()
 
 end
 
-function GM:CleanUpGameEvents()
-	DbgPrint("Cleaning up Game events")
-	self.OnNewGameEvents = {}
-	self.OnMapTransitionEvents = {}
-	self.OnMapSpawnEvents = {}
-end
+function GM:GetMapLoadType()
 
-function GM:RegisterNewGameEvent(v)
-	table.insert(self.OnNewGameEvents, { v, 0 })
-end
+	-- Because changelevel is used instead of changelevel2 it would always return "newgame"
+	-- http://wiki.garrysmod.com/page/game/MapLoadType
+	if self.IsChangeLevel == true then 
+		return "transition"
+	end 
+	return game.MapLoadType()
 
-function GM:RegisterMapTransitionEvent(v)
-	table.insert(self.OnMapTransitionEvents, { v, 0 })
-end
-
-function GM:RegisterMapSpawnEvent(v)
-	table.insert(self.OnMapSpawnEvents, { v, 0 })
-end
-
-function GM:RoundSystemEntityKeyValue(ent, key, val)
-
-	local overrideEvent = true
-	if self.MapScript ~= nil and self.MapScript.EntityFilterByClass ~= nil and self.MapScript.EntityFilterByClass[ent:GetClass()] == true then
-		DbgPrint("Blocked override by mapscript: " .. key)
-		overrideEvent = false
-	end
-
-	if key:iequals("OnNewGame") then
-	    DbgPrint(tostring(ent) .. ": Overriding OnNewGame event")
-		if overrideEvent == true then
-	    	self:RegisterNewGameEvent(val)
-		end
-	    return ""
-	elseif key:iequals("OnMapSpawn") then
-		DbgPrint(tostring(ent) .. ": Overriding OnMapSpawn event")
-		if overrideEvent == true then
-			self:RegisterMapSpawnEvent(val)
-		end
-		return ""
-	elseif key:iequals("OnMapTransition") then
-		DbgPrint(tostring(ent) .. ": Overriding OnMapTransition event")
-		if overrideEvent == true then
-			self:RegisterMapTransitionEvent(val)
-		end
-		return ""
-	end
-
-end
+end 
 
 -- Called as soon players are ready to play or a new round has begun.
 function GM:OnNewGame()
@@ -551,12 +500,8 @@ end
 function GM:PostRoundSetup()
 
 	DbgPrint("PostRoundSetup")
-	DbgPrint("Game Events: " .. tostring(#self.OnNewGameEvents))
 
-	--self.RoundState = STATE_RUNNING
 	self:SetRoundState(STATE_RUNNING)
-
-	--self.RoundStartTime = GetSyncedTimestamp()
 	self:SetRoundStartTime(GetSyncedTimestamp())
 
 	self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_STARTED, {
@@ -572,35 +517,14 @@ function GM:PostRoundSetup()
 
 	self:ResetGlobalStates()
 
-	-- We fire things two frames later as deletion of objects seem to be delayed.
-	util.RunNextFrame(function()
+	-- GoldSrc support.
+	for _,v in pairs(ents.FindByClass("trigger_auto")) do
+		v:Fire("Enable")
+	end
 
-		-- GoldSrc support.
-		for _,v in pairs(ents.FindByClass("trigger_auto")) do
-			v:Fire("Enable")
-		end
-
-		-- We always fire OnMapSpawn
-		util.TriggerOutputs(self.OnMapSpawnEvents)
-
-		-- Fire this only when we used map.
-		if self.IsChangeLevel == false then
-			DbgPrint("Firing OnNewGame events")
-			util.TriggerOutputs(self.OnNewGameEvents)
-
-			if self.MapScript.OnNewGame then
-				self.MapScript:OnNewGame()
-			end
-		else
-			DbgPrint("Firing OnMapTransition events")
-			util.TriggerOutputs(self.OnMapTransitionEvents)
-
-			if self.MapScript.OnMapTransition then
-				self.MapScript:OnMapTransition()
-			end
-		end
-
-	end)
+	for _,v in pairs(ents.FindByClass("logic_auto")) do
+		v:Fire("Enable")
+	end
 
 	util.RunDelayed(function()
 		if IsValid(self.LambdaChapterMessage) then

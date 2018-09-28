@@ -4,6 +4,9 @@ function EFFECT:Init( data )
 
 	local size = 64
 	local ply = data:GetEntity()
+	if not IsValid(ply) then 
+		self:Remove()
+	end
 
 	self:SetCollisionBounds( Vector( -size,-size,-size ), Vector( size,size,size ) )
 	self:SetAngles( data:GetNormal():Angle() + Angle( 0.01, 0.01, 0.01 ) )
