@@ -473,14 +473,6 @@ function GM:EntityKeyValue(ent, key, val)
 		ent.LambdaKeyValues[key] = val
 	end
 
-	if SERVER then
-		local res
-		res = self:RoundSystemEntityKeyValue(ent, key, val)
-		if res ~= nil then
-			return res
-		end
-	end
-
 	if self.MapScript.EntityKeyValue then
 		res = self.MapScript:EntityKeyValue(ent, key, val)
 		if res ~= nil then
