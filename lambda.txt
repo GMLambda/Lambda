@@ -69,5 +69,14 @@
 			"type"		"Numeric"
 			"default"	"120"
 		}
+		
+		8
+		{
+			"name"		"lambda_gametype"
+			"text"		"Gametype"
+			"help"		"Controls the behavior of the game"
+			"type"		"Text"
+			"default"	"hl2"
+		}
 	}
 }
