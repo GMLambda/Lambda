@@ -304,7 +304,6 @@ function GM:UpdateCheckoints()
             local filter = { selectedPlayer, vehicle, vehicle:GetNWEntity("PassengerSeat") }
             local vehicleAng = vehicle:GetAngles()
             local len = 80
-            local targetPos = bestPos
             vehiclePos = vehicle:GetPos() + Vector(0, 0, 10)
 
             -- NOTE: Order was handpicked, do not change it, having players infront should be the last resort.
@@ -326,7 +325,7 @@ function GM:UpdateCheckoints()
         end
 
         local cp = ents.Create("lambda_checkpoint")
-        local ang = selectedPlayer:GetAngles()
+        ang = selectedPlayer:GetAngles()
         if vehiclePos ~= nil then
             ang = (vehiclePos - bestPos):Angle()
         end
@@ -346,13 +345,13 @@ function GM:SetVehicleCheckpoint(pos, ang)
     local delaySwitch = false
 
     if self.LastSelectedSpawnPoint ~= nil and IsValid(self.LastSelectedSpawnPoint) then
-        local pos = self.LastSelectedSpawnPoint:GetPos()
+        local checkpointPos = self.LastSelectedSpawnPoint:GetPos()
         for _,v in pairs(player.GetAll()) do
             if v:Alive() == false or v:InVehicle() == true then
                 continue
             end
             local plyPos = v:GetPos()
-            local dist = plyPos:Distance(pos)
+            local dist = plyPos:Distance(checkpointPos)
             if dist < 500 then
                 delaySwitch = true
                 break

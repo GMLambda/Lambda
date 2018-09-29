@@ -78,10 +78,10 @@ SKIN.tex = {}
 SKIN.tex.Selection                  = GWEN.CreateTextureBorder( 384, 32, 31, 31, 4, 4, 4, 4 )
 
 SKIN.tex.Panels = {}
-SKIN.tex.Panels.Normal              = GWEN.CreateTextureBorder( 256,    0, 63, 63, 16, 16, 16, 16 )
-SKIN.tex.Panels.Bright              = GWEN.CreateTextureBorder( 256+64, 0, 63, 63, 16, 16, 16, 16 )
-SKIN.tex.Panels.Dark                = GWEN.CreateTextureBorder( 256,    64, 63, 63, 16, 16, 16, 16 )
-SKIN.tex.Panels.Highlight           = GWEN.CreateTextureBorder( 256+64, 64, 63, 63, 16, 16, 16, 16 )
+SKIN.tex.Panels.Normal              = GWEN.CreateTextureBorder( 256,  0, 63, 63, 16, 16, 16, 16 )
+SKIN.tex.Panels.Bright              = GWEN.CreateTextureBorder( 256 + 64, 0, 63, 63, 16, 16, 16, 16 )
+SKIN.tex.Panels.Dark                = GWEN.CreateTextureBorder( 256,  64, 63, 63, 16, 16, 16, 16 )
+SKIN.tex.Panels.Highlight           = GWEN.CreateTextureBorder( 256 + 64, 64, 63, 63, 16, 16, 16, 16 )
 
 SKIN.tex.Button                     = GWEN.CreateTextureBorder( 480, 0, 31, 31, 8, 8, 8, 8 )
 SKIN.tex.Button_Hovered             = GWEN.CreateTextureBorder( 480, 32, 31, 31, 8, 8, 8, 8 )
@@ -118,9 +118,9 @@ SKIN.tex.TabB_Inactive              = GWEN.CreateTextureBorder( 128,    416, 63,
 SKIN.tex.TabT_Active                = GWEN.CreateTextureBorder( 0,      384, 63, 31, 8, 8, 8, 8 )
 SKIN.tex.TabT_Inactive              = GWEN.CreateTextureBorder( 128,    384, 63, 31, 8, 8, 8, 8 )
 SKIN.tex.TabL_Active                = GWEN.CreateTextureBorder( 64,     384, 31, 63, 8, 8, 8, 8 )
-SKIN.tex.TabL_Inactive              = GWEN.CreateTextureBorder( 64+128, 384, 31, 63, 8, 8, 8, 8 )
-SKIN.tex.TabR_Active                = GWEN.CreateTextureBorder( 96,     384, 31, 63, 8, 8, 8, 8 )
-SKIN.tex.TabR_Inactive              = GWEN.CreateTextureBorder( 96+128, 384, 31, 63, 8, 8, 8, 8 )
+SKIN.tex.TabL_Inactive              = GWEN.CreateTextureBorder( 64 + 128, 384, 31, 63, 8, 8, 8, 8 )
+SKIN.tex.TabR_Active                = GWEN.CreateTextureBorder( 96,  384, 31, 63, 8, 8, 8, 8 )
+SKIN.tex.TabR_Inactive              = GWEN.CreateTextureBorder( 96 + 128, 384, 31, 63, 8, 8, 8, 8 )
 SKIN.tex.Tab_Bar                    = GWEN.CreateTextureBorder( 128, 352, 127, 31, 4, 4, 4, 4 )
 
 SKIN.tex.Window = {}
@@ -184,41 +184,41 @@ SKIN.tex.Input = {}
 
 SKIN.tex.Input.ComboBox = {}
 SKIN.tex.Input.ComboBox.Normal      = GWEN.CreateTextureBorder( 384, 336,   127, 31, 8, 8, 32, 8 )
-SKIN.tex.Input.ComboBox.Hover       = GWEN.CreateTextureBorder( 384, 336+32, 127, 31, 8, 8, 32, 8 )
-SKIN.tex.Input.ComboBox.Down        = GWEN.CreateTextureBorder( 384, 336+64, 127, 31, 8, 8, 32, 8 )
-SKIN.tex.Input.ComboBox.Disabled    = GWEN.CreateTextureBorder( 384, 336+96, 127, 31, 8, 8, 32, 8 )
+SKIN.tex.Input.ComboBox.Hover       = GWEN.CreateTextureBorder( 384, 336 + 32, 127, 31, 8, 8, 32, 8 )
+SKIN.tex.Input.ComboBox.Down        = GWEN.CreateTextureBorder( 384, 336 + 64, 127, 31, 8, 8, 32, 8 )
+SKIN.tex.Input.ComboBox.Disabled    = GWEN.CreateTextureBorder( 384, 336 + 96, 127, 31, 8, 8, 32, 8 )
 
 SKIN.tex.Input.ComboBox.Button = {}
 SKIN.tex.Input.ComboBox.Button.Normal   = GWEN.CreateTextureNormal( 496, 272, 15, 15 )
-SKIN.tex.Input.ComboBox.Button.Hover    = GWEN.CreateTextureNormal( 496, 272+16, 15, 15 )
-SKIN.tex.Input.ComboBox.Button.Down     = GWEN.CreateTextureNormal( 496, 272+32, 15, 15 )
-SKIN.tex.Input.ComboBox.Button.Disabled = GWEN.CreateTextureNormal( 496, 272+48, 15, 15 )
+SKIN.tex.Input.ComboBox.Button.Hover    = GWEN.CreateTextureNormal( 496, 272 + 16, 15, 15 )
+SKIN.tex.Input.ComboBox.Button.Down     = GWEN.CreateTextureNormal( 496, 272 + 32, 15, 15 )
+SKIN.tex.Input.ComboBox.Button.Disabled = GWEN.CreateTextureNormal( 496, 272 + 48, 15, 15 )
 
 SKIN.tex.Input.UpDown = {}
 SKIN.tex.Input.UpDown.Up = {}
 SKIN.tex.Input.UpDown.Up.Normal     = GWEN.CreateTextureCentered( 384,      112, 7, 7 )
-SKIN.tex.Input.UpDown.Up.Hover      = GWEN.CreateTextureCentered( 384+8,    112, 7, 7 )
-SKIN.tex.Input.UpDown.Up.Down       = GWEN.CreateTextureCentered( 384+16,   112, 7, 7 )
-SKIN.tex.Input.UpDown.Up.Disabled   = GWEN.CreateTextureCentered( 384+24,   112, 7, 7 )
+SKIN.tex.Input.UpDown.Up.Hover      = GWEN.CreateTextureCentered( 384 + 8,    112, 7, 7 )
+SKIN.tex.Input.UpDown.Up.Down       = GWEN.CreateTextureCentered( 384 + 16,   112, 7, 7 )
+SKIN.tex.Input.UpDown.Up.Disabled   = GWEN.CreateTextureCentered( 384 + 24,   112, 7, 7 )
 
 SKIN.tex.Input.UpDown.Down = {}
 SKIN.tex.Input.UpDown.Down.Normal   = GWEN.CreateTextureCentered( 384,      120, 7, 7 )
-SKIN.tex.Input.UpDown.Down.Hover    = GWEN.CreateTextureCentered( 384+8,    120, 7, 7 )
-SKIN.tex.Input.UpDown.Down.Down     = GWEN.CreateTextureCentered( 384+16,   120, 7, 7 )
-SKIN.tex.Input.UpDown.Down.Disabled = GWEN.CreateTextureCentered( 384+24,   120, 7, 7 )
+SKIN.tex.Input.UpDown.Down.Hover    = GWEN.CreateTextureCentered( 384 + 8,    120, 7, 7 )
+SKIN.tex.Input.UpDown.Down.Down     = GWEN.CreateTextureCentered( 384 + 16,   120, 7, 7 )
+SKIN.tex.Input.UpDown.Down.Disabled = GWEN.CreateTextureCentered( 384 + 24,   120, 7, 7 )
 
 SKIN.tex.Input.Slider = {}
 SKIN.tex.Input.Slider.H = {}
 SKIN.tex.Input.Slider.H.Normal      = GWEN.CreateTextureNormal( 416, 32,    15, 15 )
-SKIN.tex.Input.Slider.H.Hover       = GWEN.CreateTextureNormal( 416, 32+16, 15, 15 )
-SKIN.tex.Input.Slider.H.Down        = GWEN.CreateTextureNormal( 416, 32+32, 15, 15 )
-SKIN.tex.Input.Slider.H.Disabled    = GWEN.CreateTextureNormal( 416, 32+48, 15, 15 )
+SKIN.tex.Input.Slider.H.Hover       = GWEN.CreateTextureNormal( 416, 32 + 16, 15, 15 )
+SKIN.tex.Input.Slider.H.Down        = GWEN.CreateTextureNormal( 416, 32 + 32, 15, 15 )
+SKIN.tex.Input.Slider.H.Disabled    = GWEN.CreateTextureNormal( 416, 32 + 48, 15, 15 )
 
 SKIN.tex.Input.Slider.V = {}
-SKIN.tex.Input.Slider.V.Normal      = GWEN.CreateTextureNormal( 416+16, 32, 15, 15 )
-SKIN.tex.Input.Slider.V.Hover       = GWEN.CreateTextureNormal( 416+16, 32+16, 15, 15 )
-SKIN.tex.Input.Slider.V.Down        = GWEN.CreateTextureNormal( 416+16, 32+32, 15, 15 )
-SKIN.tex.Input.Slider.V.Disabled    = GWEN.CreateTextureNormal( 416+16, 32+48, 15, 15 )
+SKIN.tex.Input.Slider.V.Normal      = GWEN.CreateTextureNormal( 416 + 16, 32, 15, 15 )
+SKIN.tex.Input.Slider.V.Hover       = GWEN.CreateTextureNormal( 416 + 16, 32 + 16, 15, 15 )
+SKIN.tex.Input.Slider.V.Down        = GWEN.CreateTextureNormal( 416 + 16, 32 + 32, 15, 15 )
+SKIN.tex.Input.Slider.V.Disabled    = GWEN.CreateTextureNormal( 416 + 16, 32 + 48, 15, 15 )
 
 SKIN.tex.Input.ListBox = {}
 SKIN.tex.Input.ListBox.Background       = GWEN.CreateTextureBorder( 256, 256, 63, 127, 8, 8, 8, 8 )
@@ -230,7 +230,7 @@ SKIN.tex.Input.ListBox.OddLineSelected  = GWEN.CreateTextureBorder( 320, 288, 31
 
 SKIN.tex.ProgressBar = {}
 SKIN.tex.ProgressBar.Back   = GWEN.CreateTextureBorder( 384,    0, 31, 31, 8, 8, 8, 8 )
-SKIN.tex.ProgressBar.Front  = GWEN.CreateTextureBorder( 384+32, 0, 31, 31, 8, 8, 8, 8 )
+SKIN.tex.ProgressBar.Front  = GWEN.CreateTextureBorder( 384 + 32, 0, 31, 31, 8, 8, 8, 8 )
 
 SKIN.tex.CategoryList = {}
 SKIN.tex.CategoryList.Outer     = GWEN.CreateTextureBorder( 256, 384, 63, 63, 8, 8, 8, 8 )
@@ -346,20 +346,13 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintButton( panel, w, h )
 
-    
     if ( !panel.m_bBackground ) then return end
-
-    --local tbl = self:GetTable(panel)
-   -- tbl.HoverTime = tbl.HoverTime or 0
 
     surface.SetDrawColor(Color(255,255,255,155))
     surface.DrawOutlinedRect(0,0,w,h)
     surface.SetDrawColor(DARK_100)
     surface.DrawRect(1, 1, w - 2, h - 2)
 
-    --if ( panel.Hovered ) then
-    --    tbl.HoverTime = SysTime()
-   --end
     if ( panel.Depressed || panel:IsSelected() || panel:GetToggle() ) then
         surface.SetDrawColor(DARK_50)
         surface.DrawOutlinedRect(0,0,w,h)
@@ -372,10 +365,10 @@ function SKIN:PaintButton( panel, w, h )
             1
         )
 
-        surface.SetDrawColor(96,143,210,255*fraction)
-        surface.DrawOutlinedRect(0,0,w,h)
-        surface.SetDrawColor(96,143,210,64*fraction)
-        surface.DrawRect(1,1,w-2,h-2)
+        surface.SetDrawColor(96, 143, 210, 255 * fraction)
+        surface.DrawOutlinedRect(0, 0, w, h)
+        surface.SetDrawColor(96, 143, 210, 64 * fraction)
+        surface.DrawRect(1, 1, w-2, h - 2)
 
     end
 
@@ -430,18 +423,6 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintTextEntry( panel, w, h )
 
-    /* if ( panel.m_bBackground ) then
-
-        if ( panel:GetDisabled() ) then
-            self.tex.TextBox_Disabled( 0, 0, w, h )
-        elseif ( panel:HasFocus() ) then
-            self.tex.TextBox_Focus( 0, 0, w, h )
-        else
-            self.tex.TextBox( 0, 0, w, h )
-        end
-
-    end */
-
     surface.SetDrawColor(Color(255,255,255,155))
     surface.DrawOutlinedRect(0, 0, w, h)
 
@@ -483,7 +464,7 @@ function SKIN:PaintMenuOption( panel, w, h )
     end
 
     if ( panel:GetChecked() ) then
-        self.tex.Menu_Check( 5, h/2-7, 15, 15 )
+        self.tex.Menu_Check( 5, h / 2 - 7, 15, 15 )
     end
 
 end
@@ -509,9 +490,9 @@ function SKIN:PaintPropertySheet( panel, w, h )
     if ActiveTab == nil then
         return
     end
-    
+
     local Offset = 0
-    if ( ActiveTab ) then Offset = ActiveTab:GetTall()-8 end
+    if ( ActiveTab ) then Offset = ActiveTab:GetTall() - 8 end
 
     surface.DrawRect(0,Offset,w,h-Offset)
     surface.SetDrawColor(Color(0, 0, 0, 128))
@@ -519,7 +500,7 @@ function SKIN:PaintPropertySheet( panel, w, h )
     surface.DrawLine(w - 1,Offset,w - 1, h)
     surface.DrawLine(0, h - 1, w - 1, h - 1)
 
-    local tx, ty = ActiveTab:CursorPos()
+    local tx,_ = ActiveTab:CursorPos()
     tx = panel:CursorPos() - tx
     local tw = ActiveTab:GetWide()
 
@@ -559,7 +540,6 @@ end
 -----------------------------------------------------------]]
 function SKIN:PaintWindowCloseButton( panel, w, h )
 
-
     if ( !panel.m_bBackground ) then return end
 
     if ( panel:GetDisabled() ) then
@@ -576,12 +556,9 @@ function SKIN:PaintWindowCloseButton( panel, w, h )
 
     self.tex.Window.Close( 0, 0, w, h )
 
-
-
 end
 
 function SKIN:PaintWindowMinimizeButton( panel, w, h )
-
 
     if ( !panel.m_bBackground ) then return end
 
@@ -827,9 +804,9 @@ function SKIN:PaintTreeNodeButton( panel, w, h )
 
     -- Don't worry this isn't working out the size every render
     -- it just gets the cached value from inside the Label
-    local w, _ = panel:GetTextSize()
+    local textSize, _ = panel:GetTextSize()
 
-    self.tex.Selection( 38, 0, w + 6, h )
+    self.tex.Selection( 38, 0, textSize + 6, h )
 
 end
 
@@ -861,7 +838,7 @@ local function PaintNotches( x, y, w, h, num )
 
     local space = w / num
 
-    for i=0, num do
+    for i = 0, num do
 
         surface.DrawRect( x + i * space, y + 4, 1, 5 )
 

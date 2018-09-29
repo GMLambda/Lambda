@@ -203,4 +203,4 @@ end
 
 function GM:GetMapScript()
     return self.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
-end 
+end

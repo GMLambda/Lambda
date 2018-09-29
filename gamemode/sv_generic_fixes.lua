@@ -36,9 +36,7 @@ end
 
 --- func_tank not controllable because of custom trigger entities
 hook.Add("EntityKeyValue", "Lambda_FuncTank", function(ent, key, val)
-    if ent:GetClass() == "func_tank" or ent:GetClass() == "func_tankairboatgun" then
-        if key == "control_volume" then
-            return ReplaceFuncTankVolume(ent, val)
-        end
+    if ent:GetClass() == "func_tank" or ent:GetClass() == "func_tankairboatgun" and key == "control_volume" then
+        return ReplaceFuncTankVolume(ent, val)
     end
 end)

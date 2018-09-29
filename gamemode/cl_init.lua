@@ -83,11 +83,11 @@ function GM:CalcViewModelBob( wep, vm, oldPos, oldAng, pos, ang )
 
     local ply = LocalPlayer()
 
-    if ply:Alive() == false then 
+    if ply:Alive() == false then
         self.LastPlayerSpeed = 0
         self.LastViewBob = 0
         return oldPos, oldAng
-    end 
+    end
 
     self.LastPlayerSpeed = self.LastPlayerSpeed or 0
 
@@ -232,7 +232,7 @@ function GM:CalcViewModelView( wep, vm, oldPos, oldAng, vm_origin, vm_angles )
             local eyeAng = ply:GetAimVector():Angle()
             ang:Set(eyeAng + ply:GetViewPunchAngles())
 
-            local localvec, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
+            local _, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
             ang:RotateAroundAxis( ang:Forward() * -1, localang.r)
 
             oldAng = ang
@@ -373,7 +373,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
                 local eyeAng = ply:GetAimVector():Angle()
                 ang:Set(eyeAng + ply:GetViewPunchAngles())
 
-                local localvec, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
+                local _, localang = WorldToLocal( Vector(0,0,0), ang, Vector(0,0,0), vehicle:GetAngles())
                 ang:RotateAroundAxis( ang:Forward() * -1, localang.r)
 
                 view.angles = ang

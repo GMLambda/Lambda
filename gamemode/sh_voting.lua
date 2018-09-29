@@ -1,6 +1,6 @@
-if SERVER then 
+if SERVER then
     AddCSLuaFile()
-end 
+end
 
 VOTE_TYPE_INVALID = 0
 VOTE_TYPE_KICK_PLAYER = 1
@@ -13,7 +13,7 @@ VOTE_TYPE_LAST = VOTE_TYPE_NEXT_MAP
 local DbgPrint = GetLogging("Voting")
 local currentVotes = {}
 
-if SERVER then 
+if SERVER then
 
     util.AddNetworkString("LambdaUpdateVote")
     util.AddNetworkString("LambdaVoteResults")
@@ -23,14 +23,14 @@ if SERVER then
     local voteid = 0
 
     local function IsValidVoteType(votetype)
-        if not isnumber(votetype) then 
-            return false 
+        if not isnumber(votetype) then
+            return false
         end
-        if votetype <= VOTE_TYPE_INVALID or votetype > VOTE_TYPE_LAST then 
-            return false 
-        end 
+        if votetype <= VOTE_TYPE_INVALID or votetype > VOTE_TYPE_LAST then
+            return false
+        end
         return true
-    end 
+    end
 
     function GM:HasActiveVotes()
         return table.Count(currentVotes) > 0
@@ -38,17 +38,17 @@ if SERVER then
 
     function GM:StartVote(ply, votetype, time, params, options, excluded, resultFn)
 
-        if not IsValidVoteType(votetype) then 
-            return false 
-        end 
+        if not IsValidVoteType(votetype) then
+            return false
+        end
 
         -- We only support a single vote right now.
-        if self:HasActiveVotes() == true then 
-            return 
-        end 
+        if self:HasActiveVotes() == true then
+            return
+        end
 
         voteid = voteid + 1
-        if voteid >= 10000 then 
+        if voteid >= 10000 then
             voteid = 1
         end
 
@@ -70,7 +70,7 @@ if SERVER then
 
         if ply ~= nil then
             PrintMessage(HUD_PRINTTALK, "A vote has been started by: " .. ply:Name())
-        end 
+        end
 
         return vote
 
@@ -91,38 +91,38 @@ if SERVER then
     function GM:UpdateVotes()
 
         local t = GetSyncedTimestamp()
-        
+
         for k,v in pairs(currentVotes) do
             local plys = player.GetAll()
-            for _,v in pairs(v.excluded or {}) do 
-                table.RemoveByValue(plys, v)
-            end 
+            for _,exc in pairs(v.excluded or {}) do
+                table.RemoveByValue(plys, exc)
+            end
             local plyCount = #plys
-            if t >= v.endtime then 
-                if table.Count(v.results) >= plyCount then 
+            if t >= v.endtime then
+                if table.Count(v.results) >= plyCount then
                     self:VoteCompleted(v)
                 else
                     self:VoteTimeout(v)
                 end
-                currentVotes[k] = nil 
+                currentVotes[k] = nil
                 continue
             end
 
-            if table.Count(v.results) >= plyCount then 
+            if table.Count(v.results) >= plyCount then
                 --self:VoteCompleted(v)
                 --currentVotes[k] = nil 
             end
 
             for steamid, _ in pairs(v.results) do
                 local ply = player.GetBySteamID(steamid)
-                if not IsValid(ply) then 
+                if not IsValid(ply) then
                     v.results[steamid] = nil
                     self:SendVote(nil, v)
                 end
             end
         end
 
-    end 
+    end
 
     function GM:SendVote(ply, vote)
         net.Start("LambdaUpdateVote")
@@ -144,17 +144,17 @@ if SERVER then
 
     function GM:FinishVote(vote, timeout)
 
-        local winningOption = 0 
-        local failed = false 
-        local randomResult = false 
+        local winningOption = 0
+        local failed = false
+        local randomResult = false
 
-        if vote.params.mustComplete == true then 
-            timeout = false 
-        end 
+        if vote.params.mustComplete == true then
+            timeout = false
+        end
 
-        if timeout == true then 
-            failed = true 
-        else 
+        if timeout == true then
+            failed = true
+        else
             local choices = {}
             for k,v in pairs(vote.results) do
                 choices[v] = (choices[v] or 0) + 1
@@ -162,33 +162,33 @@ if SERVER then
             local maxChoices = 0
             local bestChoice = 0
             for k,v in pairs(choices) do
-                if v > maxChoices then 
+                if v > maxChoices then
                     bestChoice = k
                     maxChoices = v
                 end
             end
-            if bestChoice == 0 then 
-                randomResult = true 
+            if bestChoice == 0 then
+                randomResult = true
                 winningOption = math.random(1, #vote.options)
-            else 
+            else
                 winningOption = bestChoice
             end
-        end 
+        end
 
         local actionDelay = 5
 
         net.Start("LambdaVoteResults")
         net.WriteUInt(vote.id, 16)
         net.WriteBool(failed)
-        if failed == false then 
+        if failed == false then
             net.WriteUInt(winningOption, 8)
             net.WriteFloat(GetSyncedTimestamp() + actionDelay)
         end
         net.Broadcast()
 
-        if failed == true then 
+        if failed == true then
             PrintMessage(HUD_PRINTTALK,"Vote failed, not enough players voted.")
-        end 
+        end
 
         timer.Simple(actionDelay, function()
             net.Start("LambdaFinishVote")
@@ -206,8 +206,8 @@ if SERVER then
         local choice = net.ReadUInt(8)
 
         local vote = currentVotes[id]
-        if vote == nil then 
-            return 
+        if vote == nil then
+            return
         end
 
         local steamid = ply:SteamID()
@@ -233,34 +233,34 @@ else -- CLIENT
 
         local current = currentVotes[vote.id]
 
-        if current ~= nil then 
+        if current ~= nil then
             -- Update only 
             current.results = vote.results
 
             DbgPrint("Updating vote: " .. tostring(vote.id))
-        else 
+        else
             -- New vote.
             currentVotes[vote.id] = vote
-            current = vote 
+            current = vote
 
             -- TODO: Create panel.
             local panel = vgui.Create("HudVote")
             vote.panel = panel
 
             DbgPrint("Started new vote: " .. tostring(vote.id))
-        end 
+        end
 
         -- Always use the newest as active vote.
         activeVoteId = nil
-        for k,_ in pairs(currentVotes) do 
-            activeVoteId = k 
-            break 
+        for k,_ in pairs(currentVotes) do
+            activeVoteId = k
+            break
         end
 
-        vote.canVote = true 
+        vote.canVote = true
         for _,v in pairs(vote.excluded) do
-            if v == LocalPlayer() then 
-                vote.canVote = false 
+            if v == LocalPlayer() then
+                vote.canVote = false
             end
         end
 
@@ -273,14 +273,14 @@ else -- CLIENT
         DbgPrint("Vote Results: " .. tostring(vote.id))
 
         vote.finished = true
-        vote.failed = failed 
+        vote.failed = failed
         vote.winningOption = winningOption
         vote.actionTime = actionTime
 
         local panel = vote.panel
-        if IsValid(panel) then 
+        if IsValid(panel) then
             panel:SetVoteResults(vote)
-        end 
+        end
 
     end
 
@@ -289,13 +289,13 @@ else -- CLIENT
         DbgPrint("Vote Finished: " .. tostring(vote.id))
 
         local panel = vote.panel
-        if IsValid(panel) then 
+        if IsValid(panel) then
             panel:Remove()
-        end 
+        end
 
-        currentVotes[vote.id] = nil 
-        if activeVoteId == vote.id then 
-            activeVoteId = nil 
+        currentVotes[vote.id] = nil
+        if activeVoteId == vote.id then
+            activeVoteId = nil
         end
 
     end
@@ -319,59 +319,59 @@ else -- CLIENT
         local failed = net.ReadBool()
         local winningOption = nil
         local actionTime = nil
-        if failed == false then 
+        if failed == false then
             winningOption = net.ReadUInt(8)
             actionTime = net.ReadFloat()
         end
         local vote = currentVotes[id]
-        if vote ~= nil then 
-            GAMEMODE:VoteResults(vote, actionTime, failed, winningOption) 
+        if vote ~= nil then
+            GAMEMODE:VoteResults(vote, actionTime, failed, winningOption)
         end
     end)
 
     net.Receive("LambdaFinishVote", function()
         local id = net.ReadUInt(16)
         local vote = currentVotes[id]
-        if vote ~= nil then 
-            GAMEMODE:VoteFinish(vote) 
+        if vote ~= nil then
+            GAMEMODE:VoteFinish(vote)
         end
     end)
 
     hook.Add("PlayerBindPress", "LambdaVoteInput", function(ply, bind, pressed)
 
-        if activeVoteId == nil then 
-            return 
-        end 
+        if activeVoteId == nil then
+            return
+        end
 
-        if string.match(bind, "slot%d+") == nil then 
-            return 
+        if string.match(bind, "slot%d+") == nil then
+            return
         end
 
         local vote = currentVotes[activeVoteId]
-        if vote == nil then 
-            return 
-        end 
-        if vote.finished == true or vote.canVote == false then 
-            return 
-        end 
+        if vote == nil then
+            return
+        end
+        if vote.finished == true or vote.canVote == false then
+            return
+        end
 
         local num = string.gsub(bind, "slot", "")
         num = tonumber(num)
 
         local choice = vote.options[num]
-        if choice == nil then 
+        if choice == nil then
             DbgPrint("Invalid input choice: " .. tostring(num))
-            return 
-        end 
+            return
+        end
 
-        if vote.choice ~= num then 
-            vote.choice = num 
+        if vote.choice ~= num then
+            vote.choice = num
             net.Start("LambdaVote")
             net.WriteUInt(activeVoteId, 16)
             net.WriteUInt(num, 8)
             net.SendToServer()
-        end 
-        
+        end
+
         return true
 
     end)

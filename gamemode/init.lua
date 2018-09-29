@@ -81,7 +81,7 @@ end
 function GM:ApplyCorrectedDamage(dmginfo)
 
     local DbgPrint = DbgPrintDmg
-    
+ 
     DbgPrint("ApplyCorrectedDamage")
 
     local attacker = dmginfo:GetAttacker()
@@ -116,13 +116,13 @@ function GM:ApplyCorrectedDamage(dmginfo)
 end
 
 -- Dev branch compatibility
-if DMG_SNIPER == nil then 
+if DMG_SNIPER == nil then
     DMG_SNIPER = 1073741824
-end 
+end
 
-if DMG_MISSILEDEFENSE == nil then 
+if DMG_MISSILEDEFENSE == nil then
     DMG_MISSILEDEFENSE = 2147483648
-end 
+end
 
 local DMG_TYPES =
 {
@@ -163,20 +163,20 @@ local DMG_TYPES =
 
 local function GetDamageTypeText(dmginfo)
     local text = ""
-    local append = function(t) 
+    local append = function(t)
         if text ~= "" then
             text = text .. ", " .. t
-        else 
-            text = t 
-        end 
+        else
+            text = t
+        end
     end
-    for k,v in pairs(DMG_TYPES) do 
+    for k,v in pairs(DMG_TYPES) do
         if dmginfo:IsDamageType(k) == true then
             append(v)
-        end 
+        end
     end
     return text .. " : " .. dmginfo:GetDamageType()
-end 
+end
 
 function GM:EntityTakeDamage(target, dmginfo)
 
@@ -188,8 +188,6 @@ function GM:EntityTakeDamage(target, dmginfo)
     local dmgText = GetDamageTypeText(dmginfo)
 
     DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor) .. ", Type: " .. dmgText)
-
-    local gameType = self:GetGameType()
 
     local dmgType = dmginfo:GetDamageType()
     target:SetLastDamageType(dmgType)
@@ -217,7 +215,6 @@ function GM:EntityTakeDamage(target, dmginfo)
             return true
         end
 
-        local gameType = self:GetGameType()
         if target ~= attacker and target ~= inflictor then
             if self:CallGameTypeFunc("PlayerShouldTakeDamage", target, attacker, inflictor) == false then
                 return true
@@ -282,36 +279,34 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
             data.team = e:Team()
         end
         return data
-    end 
-
-    local bulletDamage = bit.band(dmgType, DMG_BULLET) ~= 0 or bit.band(dmgType, DMG_BUCKSHOT) ~= 0
-
-    if attacker == nil then 
-        attacker = inflictor 
-    end 
-    
-    local data = {}
-    if IsValid(victim) then 
-        data.victim = GetEntityData(victim)
-    end 
-    if IsValid(attacker) then 
-        data.attacker = GetEntityData(attacker)
-    end 
-
-    if bit.band(dmgType, DMG_BULLET) ~= 0 or 
-        bit.band(dmgType, DMG_CLUB) ~= 0 or 
-        bit.band(dmgType, DMG_BUCKSHOT) ~= 0 
-    then 
-        -- Player used his weapon in this case.
-        if IsValid(inflictor) and inflictor == attacker and attacker.GetActiveWeapon ~= nil then 
-            local wep = attacker:GetActiveWeapon()
-            if IsValid(wep) then 
-                inflictor = wep
-            end
-        end 
     end
 
-    if IsValid(inflictor) then 
+    if attacker == nil then
+        attacker = inflictor
+    end
+
+    local data = {}
+    if IsValid(victim) then
+        data.victim = GetEntityData(victim)
+    end
+    if IsValid(attacker) then
+        data.attacker = GetEntityData(attacker)
+    end
+
+    if bit.band(dmgType, DMG_BULLET) ~= 0 or
+        bit.band(dmgType, DMG_CLUB) ~= 0 or
+        bit.band(dmgType, DMG_BUCKSHOT) ~= 0
+    then
+        -- Player used his weapon in this case.
+        if IsValid(inflictor) and inflictor == attacker and attacker.GetActiveWeapon ~= nil then
+            local wep = attacker:GetActiveWeapon()
+            if IsValid(wep) then
+                inflictor = wep
+            end
+        end
+    end
+
+    if IsValid(inflictor) then
         data.inflictor = GetEntityData(inflictor)
     end
 

@@ -438,7 +438,7 @@ function GM:UpdatePlayerSpeech(ply)
         return
     end
     ply.LastSpeechUpdate = curTime
-    
+
     local pos = ply:GetPos()
 
     ply.FriendlyInSight = false
@@ -459,7 +459,7 @@ function GM:UpdatePlayerSpeech(ply)
         local isVisible = ply:InsideViewCone(v)
         local class = v:GetClass()
 
-        if isVisible == true then 
+        if isVisible == true then
             isVisible = ply:Visible(v)
         end
 
@@ -475,15 +475,15 @@ function GM:UpdatePlayerSpeech(ply)
             end
 
             executeHandler = true
-        else 
-            if v:IsPlayer() and v:Alive() == true and self:IsPlayerEnemy(ply, v) ~= true then 
+        else
+            if v:IsPlayer() and v:Alive() == true and self:IsPlayerEnemy(ply, v) ~= true then
                 local otherPos = v:GetPos()
                 local dist = otherPos:Distance(pos)
-                if dist <= 50 then 
+                if dist <= 50 then
                     ply.FriendlyInSight = false -- Back to back
                     ply.FriendlyNearby = true
                     executeHandler = true
-                end 
+                end
             end
         end
 

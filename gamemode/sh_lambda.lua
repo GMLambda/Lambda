@@ -1,4 +1,6 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 LAMBDA_TEAM_CONNECTING = 1200
 LAMBDA_TEAM_DEAD = 1
@@ -13,7 +15,6 @@ DEATH_BYPLAYER = 2
 DEATH_NORMAL = 3
 DEATH_BYNPC = 4
 DEATH_NPC = 5
-
 
 GM.HurtSounds = {}
 
@@ -180,9 +181,11 @@ sk_max_crossbow = GetConVar("sk_max_crossbow")
 sk_max_grenade = GetConVar("sk_max_grenade")
 sk_max_rpg_round = GetConVar("sk_max_rpg_round")
 -- For compatibility reasons we need those ConVars.
-do 
-    sk_max_slam = CreateConVar("sk_max_slam", "3", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-end 
+sk_max_slam = CreateConVar("sk_max_slam", "3", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_plr_dmg_crowbar = CreateConVar("sk_plr_dmg_crowbar", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_npc_dmg_crowbar = CreateConVar("sk_npc_dmg_crowbar", 5, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_plr_dmg_stunstick = CreateConVar("sk_plr_dmg_stunstick", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_npc_dmg_stunstick = CreateConVar("sk_npc_dmg_stunstick", 40, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
 
 GM.MAX_AMMO_DEF =
 {
@@ -218,15 +221,6 @@ GM.ITEM_DEF =
     ["weapon_frag"] = { ["Type"] = "Grenade", ["Max"] = sk_max_grenade, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
     ["weapon_slam"] = { ["Type"] = "slam", ["Max"] = sk_max_slam, ["1"] = 1, ["2"] = 1, ["3"] = 1 },
 }
-
--- For compatibility reasons we need those ConVars.
-do 
-    CreateConVar("sk_plr_dmg_crowbar", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-    CreateConVar("sk_npc_dmg_crowbar", 5, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-
-    CreateConVar("sk_plr_dmg_stunstick", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-    CreateConVar("sk_npc_dmg_stunstick", 40, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-end 
 
 GM.PLAYER_WEAPON_DAMAGE =
 {
@@ -290,11 +284,11 @@ function GM:CreateTeams()
 
 end
 
-if CLIENT then 
+if CLIENT then
     language.Add("LAMBDA_Timeleft", "TIME LEFT")
     language.Add("LAMBDA_Map", "MAP")
     language.Add("LAMBDA_Uptime", "UPTIME")
     language.Add("LAMBDA_Campaign", "CAMPAIGN")
     language.Add("LAMBDA_Chapter", "CHAPTER")
     language.Add("LAMBDA_Frags", "FRAGS LEFT")
-end 
+end

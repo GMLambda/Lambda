@@ -38,8 +38,10 @@ if SERVER then
 
     function PLAYER_META:LockPosition(poslock, viewlock, viewdata)
 
-        if not self:Alive() then return end
-        
+        if not self:Alive() then
+            return
+        end
+
         poslock = poslock or false
         viewlock = viewlock or VIEWLOCK_NONE
 
@@ -300,18 +302,18 @@ end
 
 function PLAYER_META:InsideViewCone(other, tolerance)
 
-    local otherPos 
-    if IsEntity(other) then 
-        if other:IsPlayer() then 
+    local otherPos
+    if IsEntity(other) then
+        if other:IsPlayer() then
             otherPos = other:EyePos()
-        else 
+        else
             otherPos = other:GetPos()
-        end 
-    elseif isvector(other) then 
-        otherPos = other 
-    else 
+        end
+    elseif isvector(other) then
+        otherPos = other
+    else
         error("Invalid argument passed")
-    end 
+    end
 
     local dir = (otherPos - self:EyePos()):GetNormal()
     local dot = dir:Dot(self:GetAimVector())

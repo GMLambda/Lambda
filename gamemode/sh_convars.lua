@@ -37,10 +37,6 @@ function GM:GetRegisteredConVar(name)
     return self.ConVars[name]
 end
 
-local size = 5
-local width = 2
-local space = 5
-
 if CLIENT then
     lambda_crosshair = GM:RegisterConVar("crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Lambda Crosshair")
     lambda_crosshair_dynamic = GM:RegisterConVar("crosshair_dynamic", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")

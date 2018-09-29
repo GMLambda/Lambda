@@ -1,9 +1,8 @@
-if SERVER then 
+if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("LambdaMetrics")
-
-end 
+end
 
 local DEFAULT_HITS =
 {
@@ -29,19 +28,19 @@ function GM:ResetMetrics()
     BULLET_DATA["NPC"].Hits = table.Copy(DEFAULT_HITS)
     BULLET_DATA["Player"].Hits = table.Copy(DEFAULT_HITS)
 
-end 
+end
 
 GM:ResetMetrics()
 
 local function GetGroup(ent)
-    if not IsValid(ent) then 
-        return nil 
-    end 
-    if ent:IsNPC() then 
+    if not IsValid(ent) then
+        return nil
+    end
+    if ent:IsNPC() then
         return "NPC"
-    elseif ent:IsPlayer() then 
+    elseif ent:IsPlayer() then
         return "Player"
-    end 
+    end
     return nil
 end
 
@@ -49,9 +48,9 @@ local NEXT_NETWORK_UPDATE = CurTime()
 
 local function NetworkUpdate()
 
-    if CurTime() < NEXT_NETWORK_UPDATE then 
-        return 
-    end 
+    if CurTime() < NEXT_NETWORK_UPDATE then
+        return
+    end
 
     net.Start("LambdaMetrics")
     net.WriteTable(BULLET_DATA)
@@ -64,7 +63,7 @@ end
 function GM:MetricsRegisterBullet(ent, amount)
 
     local group = GetGroup(ent)
-    if group == nil then return end 
+    if group == nil then return end
 
     local data = BULLET_DATA[group]
     data.Fired = data.Fired + amount
@@ -75,12 +74,12 @@ end
 
 function GM:MetricsRegisterBulletHit(attacker, target, hitgroup)
 
-    if not IsValid(attacker) then 
-        return 
-    end 
+    if not IsValid(attacker) then
+        return
+    end
 
     local group = GetGroup(attacker)
-    if group == nil then return end 
+    if group == nil then return end
 
     local data = BULLET_DATA[group]
     data.Hits[hitgroup] = data.Hits[hitgroup] + 1
@@ -89,7 +88,7 @@ function GM:MetricsRegisterBulletHit(attacker, target, hitgroup)
 
 end
 
-if CLIENT then 
+if CLIENT then
     net.Receive("LambdaMetrics", function(len)
 
         BULLET_DATA = net.ReadTable()
@@ -130,18 +129,18 @@ local HITGROUP_NAME =
 -- Difficulty setting, 1 = Very Easy, 2 = Easy, 3 = Normal, 4 = Hard, 5 = Extreme
 
 local function GetAccuracy(v, max)
-    if max == 0 then 
+    if max == 0 then
         return 0
-    end 
+    end
     return (v / max) * 100.0
-end 
+end
 
 function GM:DrawMetrics()
 
-    if lambda_difficulty_metrics:GetBool() == false then 
-        return 
-    end 
-    
+    if lambda_difficulty_metrics:GetBool() == false then
+        return
+    end
+
     local y = 10
 
     -- Draw Difficulty
@@ -184,7 +183,7 @@ function GM:DrawMetrics()
         for k,v in pairs(data.Hits) do
             local hitGroup = HITGROUP_NAME[k]
             local accuracy = GetAccuracy(v, data.Fired)
-            if data.Fired == 0 then 
+            if data.Fired == 0 then
                 accuracy = 0
             end
             total = total + v

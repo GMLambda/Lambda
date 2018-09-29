@@ -19,7 +19,7 @@ if SERVER then
     function GM:IsPlayerEnemy(ply1, ply2)
 
         local isEnemy = self:CallGameTypeFunc("IsPlayerEnemy", ply1, ply2)
-        return isEnemy 
+        return isEnemy
 
     end
 
@@ -52,7 +52,9 @@ if SERVER then
 
     net.Receive("LambdaPlayerSettings", function(len, ply)
         local state = net.ReadBool()
-        if (state) then end
+        if state == true then
+            return
+        end
         -- Who cares about state, only sent when closed.
         GAMEMODE:TogglePlayerSettings(ply, false)
     end)
@@ -227,15 +229,15 @@ if SERVER then
         end
 
         local ziplineAttachment = ent:LookupAttachment("zipline")
-        if ziplineAttachment ~= 0 then 
+        if ziplineAttachment ~= 0 then
             return "combine"
         end
 
-        local seq 
+        local seq
         seq = ent:LookupSequence("d3_c17_07_Kidnap")
-        if seq ~= nil and seq > 0 then 
+        if seq ~= nil and seq > 0 then
             return "combine"
-        end 
+        end
 
         seq = ent:LookupSequence("walk_all")
         if seq ~= nil and seq > 0 then
@@ -676,17 +678,15 @@ if SERVER then
             end
 
             local drop
-            if dropAmmo == true then
-                if ammo1 > 0 then
-                    local ammoDropType1 = game.GetAmmoName(ammoType1)
-                    local dropClass = AMMO_TO_ITEM[ammoDropType1]
-                    if dropClass ~= nil then
-                        for i = 1, ammo1 do
-                            drop = ents.Create(dropClass)
-                            drop:SetPos(v:GetPos())
-                            drop:Spawn()
-                            drop.DroppedByPlayer = ply
-                        end
+            if dropAmmo == true and ammo1 > 0 then
+                local ammoDropType1 = game.GetAmmoName(ammoType1)
+                local dropClass = AMMO_TO_ITEM[ammoDropType1]
+                if dropClass ~= nil then
+                    for i = 1, ammo1 do
+                        drop = ents.Create(dropClass)
+                        drop:SetPos(v:GetPos())
+                        drop:Spawn()
+                        drop.DroppedByPlayer = ply
                     end
                 end
             else
@@ -729,7 +729,7 @@ if SERVER then
         ply:SetShouldServerRagdoll(false)
 
         local damgeDist = dmgInfo:GetDamagePosition():Distance(ply:GetPos())
-        local enableGore = true 
+        local enableGore = true
 
         -- We always create the ragdoll, client decides what to do with it.
         ply:CreateRagdoll()
@@ -737,24 +737,24 @@ if SERVER then
         if enableGore == true and dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
             -- Exploded
             self:GibPlayer(ply, dmgForce, true)
-        elseif enableGore == true and dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then 
+        elseif enableGore == true and dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then
             -- Crushed
             local totalMass = 0
-            for i = 0, attacker:GetPhysicsObjectCount() - 1 do 
+            for i = 0, attacker:GetPhysicsObjectCount() - 1 do
                 local physObj = attacker:GetPhysicsObjectNum(i)
-                if IsValid(physObj) then 
+                if IsValid(physObj) then
                     totalMass = totalMass + physObj:GetMass()
-                end 
-            end 
+                end
+            end
             local forceLen = dmgForce:Length2D()
-            if forceLen <= 0 then 
+            if forceLen <= 0 then
                 forceLen = 1
             end
             local forceWithMass = totalMass * forceLen
             if forceWithMass >= 150000 or totalMass >= 10000 then
                 self:GibPlayer(ply, dmgForce, false)
             end
-        end 
+        end
 
         local inflictor = dmgInfo:GetInflictor()
         self:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
@@ -776,7 +776,6 @@ if SERVER then
             effectdata:SetEntity(ply)
         util.Effect( "lambda_death", effectdata, true )
 
-        local gameType = self:GetGameType()
         self:CallGameTypeFunc("PlayerDeath", ply, attacker, inflictor)
 
     end
@@ -796,7 +795,6 @@ if SERVER then
         ply:SetTeam(LAMBDA_TEAM_DEAD)
         ply:LockPosition(false, false)
 
-        local gameType = self:GetGameType()
         local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
         ply.RespawnTime = ply.DeathTime + respawnTime
 
@@ -925,24 +923,6 @@ if SERVER then
 
     end
 
-    local sk_player_head = GetConVar("sk_player_head")
-    local sk_player_chest = GetConVar("sk_player_chest")
-    local sk_player_stomach = GetConVar("sk_player_stomach")
-    local sk_player_arm = GetConVar("sk_player_arm")
-    local sk_player_leg = GetConVar("sk_player_leg")
-
-    local HITGROUP_SCALE =
-    {
-        [HITGROUP_GENERIC] = function() return 1.0 end, -- 1
-        [HITGROUP_HEAD] = function() return sk_player_head:GetFloat() end, -- 3
-        [HITGROUP_CHEST] = function() return sk_player_chest:GetFloat() end, -- 1
-        [HITGROUP_STOMACH] = function() return sk_player_stomach:GetFloat() end, -- 1
-        [HITGROUP_LEFTARM] = function() return sk_player_arm:GetFloat() end, -- 1
-        [HITGROUP_RIGHTARM] = function() return sk_player_arm:GetFloat() end, -- 1
-        [HITGROUP_LEFTLEG] = function() return sk_player_leg:GetFloat() end, -- 1
-        [HITGROUP_RIGHTLEG] = function() return sk_player_leg:GetFloat() end, -- 1
-    }
-
     function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
 
         local DbgPrint = DbgPrintDmg 
@@ -954,9 +934,9 @@ if SERVER then
 
         local attacker = dmginfo:GetAttacker()
 
-        if dmginfo:IsDamageType(DMG_BULLET) == true then 
+        if dmginfo:IsDamageType(DMG_BULLET) == true then
             self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
-        end 
+        end
         
         -- First scale hitgroups.
         local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
@@ -965,19 +945,19 @@ if SERVER then
 
         -- Scale by difficulty.
         local scaleType = 0
-        if attacker:IsPlayer() == true then 
+        if attacker:IsPlayer() == true then
             scaleType = DMG_SCALE_PVP
-        elseif attacker:IsNPC() == true then 
+        elseif attacker:IsNPC() == true then
             scaleType = DMG_SCALE_NVP
         end
 
-        if scaleType ~= 0 then 
+        if scaleType ~= 0 then
             scale = self:GetDifficultyDamageScale(scaleType)
-            if scale ~= nil then 
+            if scale ~= nil then
                 DbgPrint("Scaling difficulty damage: " .. tostring(scale))
                 dmginfo:ScaleDamage(scale)
             end
-        end 
+        end
 
         if dmginfo:GetDamage() > 0 then
             --DbgPrint("ScalePlayerDamage: " .. tostring(ply))
@@ -1285,18 +1265,18 @@ function GM:StartCommand(ply, cmd)
         return
     end
 
-    if CLIENT then 
-        if self:IsScoreboardOpen() == true then 
+    if CLIENT then
+        if self:IsScoreboardOpen() == true then
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK)) )
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK2)) )
-        end 
+        end
 
-        if lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then 
+        if lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then
             if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
                 cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )
             end
         end
-    end 
+    end
 
     if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() > 1) and ply:InVehicle() == false then
         cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
@@ -1627,7 +1607,7 @@ function GM:PlayerTick(ply, mv)
     if SERVER then
         self:LimitPlayerAmmo(ply)
         self:PlayerCheckDrowning(ply)
-        if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then 
+        if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then
             ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
         end
     end
