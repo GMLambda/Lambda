@@ -22,15 +22,14 @@ else -- CLIENT
 
         hint:SetPos(ScrW(), ScrH() * 0.8)
 
-        PANEL.unique = table.insert(HINTS, hint)
+        hint.unique = table.insert(HINTS, hint)
 
         local y = ScrH() * 0.8
         for i = 0, #HINTS do
-            local PANEL = HINTS[#HINTS - i]
-            if IsValid(PANEL) then
-                local x = PANEL:GetPos()
-                PANEL:MoveTo(ScrW() -  hint:GetWide() - 20, y, 0.3, 0, 0.9)
-                y = y - (PANEL:GetTall() + 8)
+            local pnl = HINTS[#HINTS - i]
+            if IsValid(pnl) then
+                pnl:MoveTo(ScrW() -  hint:GetWide() - 20, y, 0.3, 0, 0.9)
+                y = y - (pnl:GetTall() + 8)
             end
         end
     end

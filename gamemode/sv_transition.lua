@@ -73,7 +73,7 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
             end
 
         end
-    end 
+    end
 
     -- 2. We now create a list of objects to transfer.
     local objectTable = {}
@@ -81,7 +81,7 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
 
     if not IsValid(landmarkEnt) then
         DbgPrint("Unable to find landmark! - " .. tostring(landmark))
-    else 
+    else
         self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
 
         -- In case players didnt make it, we erase their position from the data.
@@ -497,13 +497,13 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 
     for i = 0, ent:GetPhysicsObjectCount() - 1 do
         local physObj = ent:GetPhysicsObjectNum(i)
-        if IsValid(physObj) then 
+        if IsValid(physObj) then
             local physPos = physObj:GetPos()
             local physAng = physObj:GetAngles()
             physPos = ent:WorldToLocal(physPos)
             physAng = ent:WorldToLocalAngles(physAng)
             data.Phys[i] = { physPos, physAng }
-        end 
+        end
     end
 
     for k,v in pairs(data.SaveTable) do
@@ -944,7 +944,7 @@ function GM:CreateTransitionObjects()
     -- Global entities carry the state.
     for _,data in pairs(objects) do
         if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
-            k, obj = findByGlobalName(data.GlobalName)
+            local k, obj = findByGlobalName(data.GlobalName)
             if k ~= nil then
                 DbgPrint("Removing duplicate global entity: " .. tostring(obj))
                 obj:Remove()
@@ -970,7 +970,7 @@ function GM:CreateTransitionObjects()
             k = findByName(data.Name)
         end
         if k ~= nil then
-            local obj = landmarkEntities[k]
+            obj = landmarkEntities[k]
             if isGlobal ~= true then
                 DbgPrint("Removing duplicate entity", obj, data.Name or data.GlobalName or "")
                 obj:Remove()
@@ -1209,9 +1209,9 @@ function GM:CreateTransitionObjects()
         end
 
         -- Correct phys positions.
-        for k,v in pairs(data.Phys) do 
+        for k,v in pairs(data.Phys) do
             local physObj = ent:GetPhysicsObjectNum(k)
-            if IsValid(physObj) then 
+            if IsValid(physObj) then
                 local physPos = ent:LocalToWorld(v[1])
                 local physAng = ent:LocalToWorldAngles(v[2])
                 physObj:SetPos(physPos)

@@ -1,17 +1,17 @@
-if SERVER then 
+if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("LambdaGibPlayer")
-end 
+end
 
-local GIB_PARTS = 
+local GIB_PARTS =
 {
     [1] = "models/props_junk/watermelon01_chunk02c.mdl",
     [2] = "models/props_junk/watermelon01_chunk02b.mdl",
     [3] = "models/props_junk/watermelon01_chunk02a.mdl",
 }
 
-local BLOOD_SPRAY = 
+local BLOOD_SPRAY =
 {
     [4] = "blood_impact_red_01_droplets",
     [3] = "blood_impact_red_01",
@@ -22,7 +22,7 @@ local BLOOD_SPRAY =
 game.AddParticles( "particles/blood_impact.pcf" )
 game.AddParticles( "particles/fire_01.pcf" )
 
-for _,v in pairs(GIB_PARTS) do 
+for _,v in pairs(GIB_PARTS) do
     util.PrecacheModel(v)
 end
 
@@ -31,7 +31,7 @@ PrecacheParticleSystem("blood_impact_red_01_mist")
 
 for _,v in pairs(BLOOD_SPRAY) do
     PrecacheParticleSystem( v )
-end 
+end
 
 if SERVER then
 
@@ -58,42 +58,42 @@ else
     function GM:UpdateGibs()
 
         local fn = self.GibQueue[1]
-        if fn ~= nil then 
+        if fn ~= nil then
             fn()
             table.remove(self.GibQueue, 1)
-        end 
+        end
 
-        while #self.GibParts > MAX_GIBS do 
+        while #self.GibParts > MAX_GIBS do
             table.remove(self.GibParts, 1)
         end
 
-        for k,v in pairs(self.GibParts) do 
-            if not IsValid(v.Ent) then 
+        for k,v in pairs(self.GibParts) do
+            if not IsValid(v.Ent) then
                 table.remove(self.GibParts, k)
-                continue 
-            end 
+                continue
+            end
 
-            if CurTime() - v.StartTime >= GIBS_MAX_LIFETIME then 
+            if CurTime() - v.StartTime >= GIBS_MAX_LIFETIME then
                 v.Ent:Remove()
                 table.remove(self.GibParts, k)
-                continue 
-            end 
+                continue
+            end
 
             v.Ent:Update()
         end
 
-    end 
+    end
 
     function GM:CreateGibPart(boneName, pos, ang, dmgForce, sizeType, exploded)
 
-        local mdl 
+        local mdl = nil
         local isBone = true
 
-        if sizeType > 0 then 
+        if sizeType > 0 then
             mdl = GIB_PARTS[sizeType]
             isBone = false
-        else 
-            if boneName == "ValveBiped.Bip01_Head1" then 
+        else
+            if boneName == "ValveBiped.Bip01_Head1" then
                 mdl = "models/gibs/hgibs.mdl"
             end
         end
@@ -113,9 +113,9 @@ else
         gib:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
         gib:SetNotSolid(true)
         local phys = gib:GetPhysicsObject()
-        if IsValid(phys) then 
+        if IsValid(phys) then
             phys:SetVelocity(dmgForce)
-        end 
+        end
 
         -- Rendering.
         if isBone ~= true then
@@ -124,7 +124,7 @@ else
                 e:DrawModel()
                 render.MaterialOverride(nil)
             end
-        end 
+        end
 
         gib:CallOnRemove("EmitterCleanup", function(e)
             e.Emitter:Finish()
@@ -135,29 +135,27 @@ else
         gib.HitSomething = false
         gib:AddCallback("PhysicsCollide", function(e, data)
 
-            gib.HitSomething = true 
+            gib.HitSomething = true
 
             if data.Speed > 20 and CurTime() - e.LastDecal >= 0.05 and e.IsBone == false then
                 util.Decal("Blood", data.HitPos + data.HitNormal, data.HitPos - data.HitNormal)
                 e.LastDecal = CurTime()
-            end 
+            end
 
-            if data.Speed >= MAX_SPEED_THRESHOLD then 
-                if e.SizeType > 1 then 
-                    e:EmitSound("Flesh.Break")
-                    table.insert(self.GibQueue, function()
+            if data.Speed >= MAX_SPEED_THRESHOLD and e.SizeType > 1 then
+                e:EmitSound("Flesh.Break")
+                table.insert(self.GibQueue, function()
 
-                        if not IsValid(e) then 
-                            return 
-                        end
+                    if not IsValid(e) then
+                        return
+                    end
 
-                        self:CreateGibPart("", e:GetPos(), e:GetAngles(), e:GetVelocity(), e.SizeType - 1)
-                        self:CreateGibPart("", e:GetPos(), e:GetAngles(), e:GetVelocity(), e.SizeType - 1)
+                    self:CreateGibPart("", e:GetPos(), e:GetAngles(), e:GetVelocity(), e.SizeType - 1)
+                    self:CreateGibPart("", e:GetPos(), e:GetAngles(), e:GetVelocity(), e.SizeType - 1)
 
-                        e:Remove()
-                    end)
-                end
-            end 
+                    e:Remove()
+                end)
+            end
 
         end)
 
@@ -167,15 +165,15 @@ else
         gib.Update = function(e)
 
             local curTime = CurTime()
-            if curTime - e.LastDroplet < 0.1 or curTime > e.DropletTimeEnd or e.HitSomething == true then 
-                return 
-            end 
+            if curTime - e.LastDroplet < 0.1 or curTime > e.DropletTimeEnd or e.HitSomething == true then
+                return
+            end
 
             e.LastDroplet = curTime
             if math.random() < 0.5 then
                 ParticleEffectAttach("blood_impact_red_01_droplets", PATTACH_POINT_FOLLOW, e, 0)
             end
-            
+
             if math.random() < 0.5 then
                 ParticleEffectAttach("blood_impact_red_01_goop", PATTACH_POINT_FOLLOW, gib, 0)
             end
@@ -187,32 +185,29 @@ else
         if sizeType > 1 then
             local spray = BLOOD_SPRAY[sizeType]
             ParticleEffectAttach(spray, PATTACH_POINT_FOLLOW, gib, 0)
-        end 
+        end
 
-        if exploded == true then 
-            if math.random() < 0.2 then 
-                -- env_fire_small
-                ParticleEffectAttach("env_fire_tiny", PATTACH_POINT_FOLLOW, gib, 0)
-            end
-        end 
+        if exploded == true and math.random() < 0.2 then
+            ParticleEffectAttach("env_fire_tiny", PATTACH_POINT_FOLLOW, gib, 0)
+        end
 
         table.insert(self.GibParts, {
             StartTime = CurTime(),
             Ent = gib,
         })
 
-    end 
+    end
 
     function GM:GibPlayer(ply, dmgForce, exploded)
 
-        if lambda_gore:GetBool() == false then 
+        if lambda_gore:GetBool() == false then
             -- Leave normal ragdoll intact.
-            return 
+            return
         end
 
         -- We have to wait for the ragdoll to be created first.
         local ply = ply
-        local dmgForce = dmgForce 
+        local dmgForce = dmgForce
         local exploded = exploded
         local hookName = "LambdaRagdoll_" .. tostring(ply)
         local searchStart = CurTime()
@@ -222,17 +217,17 @@ else
             if CurTime() - searchStart > 2 then 
                 -- Timeout
                 hook.Remove("Think", hookName)
-                return 
-            end 
+                return
+            end
 
-            if not IsValid(ply) then 
+            if not IsValid(ply) then
                 -- Player left.
                 hook.Remove("Think", hookName)
                 return
             end
 
             local ragdoll = ply:GetRagdollEntity()
-            if not IsValid(ragdoll) then 
+            if not IsValid(ragdoll) then
                 return
             end
 
@@ -248,16 +243,16 @@ else
             -- Head
             -- models/gibs/hgibs.mdl
             local boneId = ply:LookupBone("ValveBiped.Bip01_Head1")
-            if boneId ~= -1 then 
+            if boneId ~= -1 then
                 local pos, ang = ply:GetBonePosition(boneId)
                 local offset = VectorRand() * dmgForce:Length2D()
                 self:CreateGibPart("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
-            end 
+            end
 
-            for group=0, numHitBoxGroups - 1 do
+            for group = 0, numHitBoxGroups - 1 do
                 local numHitBoxes = ply:GetHitBoxCount( group )
 
-                for hitbox=0, numHitBoxes - 1 do
+                for hitbox = 0, numHitBoxes - 1 do
                     local bone = ply:GetHitBoxBone( hitbox, group )
                     local boneName = ply:GetBoneName(bone)
                     local pos, ang = ply:GetBonePosition(bone)
@@ -280,6 +275,6 @@ else
         GAMEMODE:GibPlayer(ply, dmgForce, exploded)
     end)
 
-end 
+end
 
 -- SHARED

@@ -76,8 +76,6 @@ function GM:HUDShouldDraw( hudName )
         return false
     end
 
-    local viewlock = ply:GetViewLock()
-
     if hidehud:GetBool() == true then
         return false
     end
@@ -109,7 +107,7 @@ function GM:HUDShouldDraw( hudName )
         end
     elseif hudName == "CHudHistoryResource" then
         return false
-    elseif hudName == "CHudSquadStatus" then 
+    elseif hudName == "CHudSquadStatus" then
         -- TODO: Reimplement me.
         return false
     end
@@ -125,7 +123,7 @@ function GM:HUDPaint()
     hook.Run( "DrawDeathNotice", 0.85, 0.04 )
     hook.Run( "DrawTauntsMenu" )
     hook.Run( "DrawMetrics" )
-    
+
     if lambda_crosshair:GetBool() == true and self:ShouldDrawCrosshair() == true then
         hook.Run( "DrawDynamicCrosshair" )
     end

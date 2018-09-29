@@ -130,5 +130,5 @@ function GMA.CreatePackage(filelist, outpath)
     f:Close()
 
     return true
-    
+
 end

@@ -108,7 +108,7 @@ if SERVER then
 
     end
 
-    function util.SimpleTriggerOutputs(outputs, activator, caller, parameter, self)
+    function util.SimpleTriggerOutputs(outputs, activator, caller, parameter, myself)
 
         --DbgPrint("Firing " .. tostring(table.Count(outputs)) .. " outputs")
 
@@ -144,7 +144,7 @@ if SERVER then
                 elseif entname == "!caller" then
                     targetents = { caller }
                 elseif entname == "!self" then
-                    targetents = { self }
+                    targetents = { myself }
                 elseif entname == "!player" or entname == "player" then
                     targetents = player.GetAll()
                 elseif entname == "!pvsplayer" then
@@ -448,10 +448,8 @@ hook.Add("Think", "LambdaRunNextFrame", function()
             -- In case it was added before Think was called.
             continue
         end
-        if v.timestamp ~= nil then
-            if CurTime() < v.timestamp then
-                continue
-            end
+        if v.timestamp ~= nil and CurTime() < v.timestamp then
+            continue
         end
         table.remove(funcQueue, k)
         v.func()

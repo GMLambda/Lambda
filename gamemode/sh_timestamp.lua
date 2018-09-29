@@ -92,43 +92,45 @@ function GetSyncedTimestamp()
     return res
 end
 
---[[
-if SERVER then
+local TEST_SYNC = false
 
-    util.AddNetworkString("SyncTest")
+if TEST_SYNC == true then
+    if SERVER then
 
-    timer.Create("test", 1, 10, function()
-        net.Start("SyncTest")
-        net.WriteDouble(os.clock())
-        net.WriteDouble(SysTime())
-        net.WriteDouble(CurTime())
-        net.WriteDouble(GetSyncedTimestamp())
-        net.Broadcast()
-    end)
+        util.AddNetworkString("SyncTest")
 
-else
+        timer.Create("test", 1, 10, function()
+            net.Start("SyncTest")
+            net.WriteDouble(os.clock())
+            net.WriteDouble(SysTime())
+            net.WriteDouble(CurTime())
+            net.WriteDouble(GetSyncedTimestamp())
+            net.Broadcast()
+        end)
 
-    DbgPrint("  ", "os.clock", "SysTime", "CurTime", "SyncedTimestamp")
-    net.Receive("SyncTest",function(len)
+    else
 
-        local network1 = net.ReadDouble()
-        local network2 = net.ReadDouble()
-        local network3 = net.ReadDouble()
-        local network4 = net.ReadDouble()
-        local cl1 = os.clock()
-        local cl2 = SysTime()
-        local cl3 = CurTime()
-        local cl4 = GetSyncedTimestamp()
-        local diff1 = cl1 - network1
-        local diff2 = cl2 - network2
-        local diff3 = cl3 - network3
-        local diff4 = cl4 - network4
+        DbgPrint("  ", "os.clock", "SysTime", "CurTime", "SyncedTimestamp")
+        net.Receive("SyncTest",function(len)
 
-        DbgPrint("SV", network1, network2, network3, network4)
-        DbgPrint("CL", cl1, cl2, cl3, cl4)
-        DbgPrint("Diff", diff1, diff2, diff3, diff4)
+            local network1 = net.ReadDouble()
+            local network2 = net.ReadDouble()
+            local network3 = net.ReadDouble()
+            local network4 = net.ReadDouble()
+            local cl1 = os.clock()
+            local cl2 = SysTime()
+            local cl3 = CurTime()
+            local cl4 = GetSyncedTimestamp()
+            local diff1 = cl1 - network1
+            local diff2 = cl2 - network2
+            local diff3 = cl3 - network3
+            local diff4 = cl4 - network4
 
-    end)
+            DbgPrint("SV", network1, network2, network3, network4)
+            DbgPrint("CL", cl1, cl2, cl3, cl4)
+            DbgPrint("Diff", diff1, diff2, diff3, diff4)
 
+        end)
+
+    end
 end
-]]

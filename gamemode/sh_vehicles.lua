@@ -142,9 +142,9 @@ if SERVER then
 
     function GM:FindVehicleSeat(ply, vehicle)
 
-        if vehicle:GetDriver() == NULL then 
+        if vehicle:GetDriver() == NULL then
             return vehicle
-        end 
+        end
 
         -- Allow players to enter the passenger seat directly by swapping it.
         local passengerSeat = vehicle:GetNWEntity("PassengerSeat")
@@ -495,22 +495,21 @@ else -- CLIENT
             view.origin = viewPos + (view.angles:Forward() * 3)
         end
 
-        if ( vehicle.GetThirdPersonMode == nil || ply:GetViewEntity() != ply ) then
-            -- This hsouldn't ever happen.
+        if vehicle.GetThirdPersonMode == nil or ply:GetViewEntity() ~= ply then
+            -- This should never happen.
             return
         end
 
-        --
-        -- If we're not in third person mode - then get outa here stalker
-        --
-        if ( !vehicle:GetThirdPersonMode() ) then return view end
+        if vehicle:GetThirdPersonMode() == false then
+            return view
+        end
 
         -- Don't roll the camera
         view.angles.roll = 0
 
         local mn, mx = vehicle:GetRenderBounds()
         local radius = ( mn - mx ):Length()
-        local radius = radius + radius * vehicle:GetCameraDistance()
+        radius = radius + radius * vehicle:GetCameraDistance()
 
         -- Trace back from the original eye position, so we don't clip through walls/objects
         local TargetOrigin = view.origin + ( view.angles:Forward() * -radius )
@@ -521,7 +520,7 @@ else -- CLIENT
             endpos = TargetOrigin,
             filter = function( e )
                 local c = e:GetClass() -- Avoid contact with entities that can potentially be attached to the vehicle. Ideally, we should check if "e" is constrained to "Vehicle".
-                return !c:StartWith( "prop_physics" ) &&!c:StartWith( "prop_dynamic" ) && !c:StartWith( "prop_ragdoll" ) && !e:IsVehicle() && !c:StartWith( "gmod_" )
+                return not c:StartWith( "prop_physics" ) and not c:StartWith( "prop_dynamic" ) and not c:StartWith( "prop_ragdoll" )  and not e:IsVehicle() and not c:StartWith( "gmod_" )
             end,
             mins = Vector( -WallOffset, -WallOffset, -WallOffset ),
             maxs = Vector( WallOffset, WallOffset, WallOffset ),
@@ -533,7 +532,7 @@ else -- CLIENT
         --
         -- If the trace hit something, put the camera there.
         --
-        if ( tr.Hit && !tr.StartSolid) then
+        if tr.Hit and not tr.StartSolid then
             view.origin = view.origin + tr.HitNormal * WallOffset
         end
 

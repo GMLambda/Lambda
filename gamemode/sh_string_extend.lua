@@ -1,4 +1,6 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 function string.iequals(a, b)
     if string.len(a) ~= string.len(b) then

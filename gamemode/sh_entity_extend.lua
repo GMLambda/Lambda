@@ -41,21 +41,21 @@ end
 
 function ENTITY_META:ShouldShootMissTarget(attacker)
 
-    if self:IsPlayer() == false then 
-        return false 
-    end 
+    if self:IsPlayer() == false then
+        return false
+    end
 
     local curTime = CurTime()
 
-    if self.TargetFindTime == nil then 
+    if self.TargetFindTime == nil then
         self.TargetFindTime = curTime + util.RandomFloat(3, 5)
-        return false 
-    end 
+        return false
+    end
 
-    if curTime > self.TargetFindTime then 
+    if curTime > self.TargetFindTime then
         self.TargetFindTime = curTime + util.RandomFloat(3, 5)
-        return true 
-    end 
+        return true
+    end
 
     return false
 
@@ -72,22 +72,22 @@ function ENTITY_META:FindMissTarget()
 
     for _,v in pairs(nearby) do
         local class = v:GetClass()
-        if isPlayer then 
-            if self:InsideViewCone(v) == false then 
-                continue 
-            end 
+        if isPlayer then
+            if self:InsideViewCone(v) == false then
+                continue
+            end
         end
         if class == "prop_dynamic" or class == "prop_physics" or class == "physics_prop" then 
             table.insert(candidates, v)
         end
-        if #candidates >= 16 then 
-            break 
+        if #candidates >= 16 then
+            break
         end
     end
 
-    if #candidates == 0 then 
-        return nil 
-    end 
+    if #candidates == 0 then
+        return nil
+    end
 
     return table.Random(candidates)
 
@@ -228,18 +228,18 @@ function ENTITY_META:RemoveDebugOverlays(f)
 end
 
 function ENTITY_META:SafeGetInternalVariable(var, default)
-    local res = self:GetInternalVariable(var) 
-    if res ~= nil then 
-        return res 
-    end 
-    if VERSION < 180820 then 
+    local res = self:GetInternalVariable(var)
+    if res ~= nil then
+        return res
+    end
+    if VERSION < 180820 then
         local saveTable = self:GetSaveTable()
-        if saveTable[var] ~= nil then 
+        if saveTable[var] ~= nil then
             return saveTable[var]
         end
     end
     return default
-end 
+end
 
 function ENTITY_META:GetDebugOverlays()
     return tonumber(self:SafeGetInternalVariable("m_debugOverlays", 0))
@@ -253,11 +253,11 @@ end
 -- Damage
 function ENTITY_META:GetLastDamageType()
     return self.LastReceivedDamageType or 0
-end 
+end
 
 function ENTITY_META:SetLastDamageType(dmgType)
     self.LastReceivedDamageType = dmgType
-end 
+end
 
 -- caps
 FCAP_MUST_SPAWN             = 0x00000001        -- Spawn after restore
@@ -412,13 +412,13 @@ end
 function ENTITY_META:CanTakeDamage()
 
     local data = self:SafeGetInternalVariable("m_takedamage")
-    if data ~= nil then 
+    if data ~= nil then
         return data ~= 0 -- DAMAGE_NO
-    else 
+    else
         if self:IsNPC() == false and self:IsPlayer() == false and self:IsVehicle() == false then 
-            return false 
-        end 
-    end 
+            return false
+        end
+    end
 
     return true
 

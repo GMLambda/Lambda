@@ -23,9 +23,9 @@ function GM:InitializeRoundSystem()
 
     DbgPrint("GM:InitializeRoundSystem")
 
-    if not SERVER then 
-        return 
-    end 
+    if not SERVER then
+        return
+    end
 
     self:SetRoundState(STATE_IDLE)
     self:SetRoundStartTime(GetSyncedTimestamp())
@@ -36,18 +36,18 @@ function GM:InitializeRoundSystem()
 end
 
 function GM:GetRoundState()
-    if SERVER then 
+    if SERVER then
         return self.RoundState
-    end 
+    end
     return GetGlobalInt("LambdaRoundState", STATE_IDLE)
 end
 
 function GM:GetRoundStartTime()
-    if SERVER then 
+    if SERVER then
         return self.RoundStartTime
-    end 
+    end
     return GetGlobalFloat("LambdaRoundStartTime", 0)
-end 
+end
 
 function GM:RoundElapsedTime()
 
@@ -232,8 +232,6 @@ if SERVER then
 
     function GM:RoundStateRunning()
 
-        local gameType = self:GetGameType()
-
         local elapsed = self:RoundElapsedTime()
 
         if self:CallGameTypeFunc("ShouldRestartRound", elapsed) == true then
@@ -270,15 +268,13 @@ if SERVER then
 
     end
 
-    for _,v in pairs(player.GetAll()) do v:Freeze(false) print("Unfinished") end 
-
     function GM:FinishRound()
 
         self:SetRoundState(STATE_END_RESULTS)
 
-        for _,v in pairs(player.GetAll()) do 
+        for _,v in pairs(player.GetAll()) do
             v:Freeze(true)
-        end 
+        end
 
         local gameType = self:GetGameType()
         local mapOptions = table.Copy(gameType.MapList)
@@ -287,20 +283,20 @@ if SERVER then
             mapOptions[k] = mapOptions[r]
             mapOptions[r] = string.lower(v)
         end
-        
+
         local prevMap = self:GetPreviousMap()
-        if prevMap ~= nil then 
+        if prevMap ~= nil then
             prevMap = string.lower(prevMap)
             table.RemoveByValue(mapOptions, prevMap)
-        end 
+        end
 
         local curMap = self:GetCurrentMap()
-        if curMap ~= nil then 
+        if curMap ~= nil then
             curMap = string.lower(curMap)
             table.RemoveByValue(mapOptions, curMap)
         end
 
-        while #mapOptions > 8 do 
+        while #mapOptions > 8 do
             local k = math.random(1, #mapOptions)
             table.remove(mapOptions, k)
         end
@@ -328,11 +324,11 @@ else -- CLIENT
 
     function GM:HandleRoundInfoChange(infoType, params)
 
-        if infoType == ROUND_INFO_FINISHED then 
+        if infoType == ROUND_INFO_FINISHED then
             self:HandleRoundInfoFinished(infoType, params)
-        elseif infoType == ROUND_INFO_STARTED then 
+        elseif infoType == ROUND_INFO_STARTED then
             self:HandleRoundInfoStarted(infoType, params)
-        else 
+        else
             self:SetRoundDisplayInfo(infoType, params)
         end
 
@@ -411,12 +407,12 @@ function GM:GetMapLoadType()
 
     -- Because changelevel is used instead of changelevel2 it would always return "newgame"
     -- http://wiki.garrysmod.com/page/game/MapLoadType
-    if self.IsChangeLevel == true then 
+    if self.IsChangeLevel == true then
         return "transition"
-    end 
+    end
     return game.MapLoadType()
 
-end 
+end
 
 -- Called as soon players are ready to play or a new round has begun.
 function GM:OnNewGame()
@@ -430,17 +426,17 @@ function GM:OnNewGame()
     if SERVER then
 
         local defaultGlobals = self:GetGameTypeData("DefaultGlobalState")
-        if defaultGlobals ~= nil then 
-            for k,v in pairs(defaultGlobals) do 
+        if defaultGlobals ~= nil then
+            for k,v in pairs(defaultGlobals) do
                 game.SetGlobalState(k, v)
-            end 
+            end
         end
 
         local mapscriptGlobals = self.MapScript.GlobalStates
-        if mapscriptGlobals ~= nil then 
-            for k,v in pairs(mapscriptGlobals) do 
+        if mapscriptGlobals ~= nil then
+            for k,v in pairs(mapscriptGlobals) do
                 game.SetGlobalState(k, v)
-            end 
+            end
         end
 
         -- FIXME: Don't ignore the delay time.
@@ -551,7 +547,7 @@ function GM:StartRound(cleaned)
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
         self:ResetMetrics()
-        
+
         game.SetTimeScale(1)
 
         if self.InitPostEntityDone ~= true then
@@ -568,7 +564,7 @@ function GM:StartRound(cleaned)
 
         --self.RoundState = STATE_RESTARTING
         self:SetRoundState(STATE_RESTARTING)
-        
+
     end
 
     self.WaitingForRoundStart = false
@@ -610,9 +606,7 @@ function GM:StartRound(cleaned)
         end, CurTime() + 0.5)
     else
         if SERVER then
-            --self.RoundState = STATE_IDLE
             self:SetRoundState(STATE_IDLE)
-            --self.RoundStartTime = GetSyncedTimestamp()
             self:SetRoundStartTime(GetSyncedTimestamp())
             self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
             self:NotifyPlayerListChanged()

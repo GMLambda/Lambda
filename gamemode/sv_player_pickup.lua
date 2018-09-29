@@ -52,7 +52,7 @@ function GM:RespawnObject(obj, delay)
 
 end
 
-local AMMO_LIKE_WEAPONS = 
+local AMMO_LIKE_WEAPONS =
 {
     ["weapon_frag"] = true,
     ["weapon_slam"] = true,
@@ -65,9 +65,6 @@ function GM:PlayerCanPickupAmmo(ply, ent)
         return true
     end
 
-    local res = true
-    local capacity = 0
-    local skill = tostring(game.GetSkillLevel())
     local class = ent:GetClass()
     local primaryFull = true
     local secondaryFull = true
@@ -110,7 +107,6 @@ function GM:PlayerCanPickupAmmo(ply, ent)
     local ammo = self.ITEM_DEF[class]
     if ammo ~= nil then
         local cur = ply:GetAmmoCount(ammo.Type)
-        local amount = ammo[skill]
         local ammoMax = ammo.Max:GetInt()
         if cur >= ammoMax then
             DbgPrint("Limited ammo pickup: " .. tostring(class) .. ", " .. ammo.Type)
@@ -148,7 +144,6 @@ function GM:PlayerCanPickupItem(ply, item)
     end
 
     local class = item:GetClass()
-    local res = true
 
     -- Dont pickup stuff if we dont need it.
     if class == "item_health" or class == "item_healthvial" or class == "item_healthkit" then

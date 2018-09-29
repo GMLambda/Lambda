@@ -7,24 +7,6 @@ end
 local DbgPrint = GetLogging("NPC")
 local DbgPrintDmg = GetLogging("Damage")
 
-local sk_npc_head = GetConVar("sk_npc_head")
-local sk_npc_chest = GetConVar("sk_npc_chest")
-local sk_npc_stomach = GetConVar("sk_npc_stomach")
-local sk_npc_arm = GetConVar("sk_npc_arm")
-local sk_npc_leg = GetConVar("sk_npc_leg")
-
-local HITGROUP_SCALE =
-{
-    [HITGROUP_GENERIC] = function() return 1.0 end,
-    [HITGROUP_HEAD] = function() return sk_npc_head:GetFloat() end,
-    [HITGROUP_CHEST] = function() return sk_npc_chest:GetFloat() end,
-    [HITGROUP_STOMACH] = function() return sk_npc_stomach:GetFloat() end,
-    [HITGROUP_LEFTARM] = function() return sk_npc_arm:GetFloat() end,
-    [HITGROUP_RIGHTARM] = function() return sk_npc_arm:GetFloat() end,
-    [HITGROUP_LEFTLEG] = function() return sk_npc_leg:GetFloat() end,
-    [HITGROUP_RIGHTLEG] = function() return sk_npc_leg:GetFloat() end,
-}
-
 local SOLIDER_GEAR_SOUNDS =
 {
     "npc/combine_soldier/gear1.wav",
@@ -39,7 +21,6 @@ function GM:NPCFootstep(npc, data)
 
     local class = npc:GetClass()
     if class == "npc_combine" or class == "npc_combine_s" then
-        --npc:EmitSound(table.Random(SOLIDER_GEAR_SOUNDS))
         local vel = npc:GetVelocity()
         if vel:Length() >= 40 then
             EmitSound(table.Random(SOLIDER_GEAR_SOUNDS), npc:GetPos(), npc:EntIndex(), CHAN_BODY)
@@ -52,7 +33,7 @@ if SERVER then
 
     function GM:ScaleNPCDamage(npc, hitgroup, dmginfo)
 
-        local DbgPrint = DbgPrintDmg 
+        local DbgPrint = DbgPrintDmg
 
         DbgPrint("ScaleNPCDamage", npc, hitgroup)
 
@@ -61,29 +42,29 @@ if SERVER then
 
         local attacker = dmginfo:GetAttacker()
 
-        if dmginfo:IsDamageType(DMG_BULLET) == true then 
+        if dmginfo:IsDamageType(DMG_BULLET) == true then
             self:MetricsRegisterBulletHit(attacker, npc, hitgroup)
-        end 
+        end
 
         -- First scale hitgroups.
-        local scale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
-        DbgPrint("Hitgroup Scale", npc, scale)
+        local hitgroupScale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
+        DbgPrint("Hitgroup Scale", npc, hitgroupScale)
         dmginfo:ScaleDamage(scale)
 
         -- Scale by difficulty.
         local scaleType = 0
-        if attacker:IsPlayer() == true then 
+        if attacker:IsPlayer() == true then
             scaleType = DMG_SCALE_PVN
-        elseif attacker:IsNPC() == true then 
+        elseif attacker:IsNPC() == true then
             scaleType = DMG_SCALE_NVN
         end
-        if scaleType ~= 0 then 
-            local scale = self:GetDifficultyDamageScale(scaleType)
-            if scale ~= nil then 
-                DbgPrint("Scaling difficulty damage: " .. tostring(scale))
-                dmginfo:ScaleDamage(scale)
+        if scaleType ~= 0 then
+            local difficultyScale = self:GetDifficultyDamageScale(scaleType)
+            if difficultyScale ~= nil then
+                DbgPrint("Scaling difficulty damage: " .. tostring(difficultyScale))
+                dmginfo:ScaleDamage(difficultyScale)
             end
-        end 
+        end
 
         DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
 
@@ -161,7 +142,7 @@ if SERVER then
     end
 
     function GM:OnNPCKilled(npc, attacker, inflictor)
-        local ply = nil
+        local ply
         if IsValid(attacker) and attacker:IsPlayer() then
             ply = attacker
         elseif IsValid(inflictor) and inflictor:IsPlayer() then
@@ -179,7 +160,7 @@ if SERVER then
         end
 
         local wep = nil
-        if npc.GetActiveWeapon then 
+        if npc.GetActiveWeapon then
             wep = npc:GetActiveWeapon()
             if not IsValid(wep) then
                 wep = nil
@@ -187,7 +168,7 @@ if SERVER then
         end
 
         local SF_DONT_DROP_WEAPONS = 8192
-        local removeWeapon = (npc:HasSpawnFlags(SF_DONT_DROP_WEAPONS) == true or 
+        local removeWeapon = (npc:HasSpawnFlags(SF_DONT_DROP_WEAPONS) == true or
                             game.GetGlobalState("super_phys_gun") == GLOBAL_ON)
 
         if removeWeapon == true and wep ~= nil then
@@ -227,7 +208,7 @@ if SERVER then
 
     function GM:RegisterNPCDeath(npc, attacker, inflictor)
 
-        DbgPrint("RegisterNPCDeath", ply, attacker, inflictor)
+        DbgPrint("RegisterNPCDeath", npc, attacker, inflictor)
         self:SendDeathNotice(npc, attacker, inflictor, npc:GetLastDamageType())
 
     end

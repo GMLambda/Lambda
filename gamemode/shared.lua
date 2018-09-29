@@ -93,15 +93,15 @@ function GM:Tick()
             v:CollisionRulesChanged()
         end
     end
-    
-    if SERVER then 
-        while #plys > 0 do 
+
+    if SERVER then
+        while #plys > 0 do
             local i = math.random(1, #plys)
             local v = plys[i]
             table.remove(plys, i)
             self:UpdatePlayerSpeech(v)
-        end 
-    end 
+        end
+    end
 
     local gameType = self:GetGameType()
     if gameType.Think then
@@ -214,7 +214,7 @@ function GM:MountRequiredContent()
         return
     end
 
-    local res, mountedList = game.MountGMA("data/" .. filename)
+    local res, _ = game.MountGMA("data/" .. filename)
     if res == false then
         DbgPrint("Unable to mount the required GMA, you may be unable to play.")
         return
@@ -460,7 +460,7 @@ function GM:EntityKeyValue(ent, key, val)
 
     if key == "message" and ent:GetClass() == "env_message" and ent:GetName() ~= "LambdaGameOver" then
         return ""
-    elseif key == "globalstate" and val == "friendly_encounter" and ent:GetClass() == "env_global" then 
+    elseif key == "globalstate" and val == "friendly_encounter" and ent:GetClass() == "env_global" then
         -- HACKHACK: This solves an issue that causes prediction errors because clients arent aware of global states.
         return ""
     end

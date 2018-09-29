@@ -34,11 +34,11 @@ local bloodEmitter = nil
 
 local function HandleRagdollImpact(ent, data)
 
-    if ent:IsEffectActive(EF_NODRAW) then 
+    if ent:IsEffectActive(EF_NODRAW) then
         -- Do nothing if we are invisible.
-        return 
-    end 
-    
+        return
+    end
+
     ent.LastRagdollImpact = ent.LastRagdollImpact or 0
 
     if bloodEmitter == nil then

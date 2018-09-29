@@ -84,7 +84,6 @@ function GM:AcceptInput(ent, input, activator, caller, value)
                 DbgPrint(ent, "Filtered input: " .. name .. " -> " .. input)
                 return true
             end
-        else
         end
     end
 

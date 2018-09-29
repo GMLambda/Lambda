@@ -1,6 +1,6 @@
-if SERVER then 
+if SERVER then
     AddCSLuaFile()
-end 
+end
 
 local DbgPrint = GetLogging("Difficulty")
 
@@ -11,15 +11,6 @@ local DIFFICULTY_HARD = 4
 local DIFFICULTY_VERYHARD = 5
 local DIFFICULTY_MAX = DIFFICULTY_VERYHARD
 
-local WEAPON_PROFICIENCY =
-{
-    [1] = WEAPON_PROFICIENCY_POOR,
-    [2] = WEAPON_PROFICIENCY_AVERAGE,
-    [3] = WEAPON_PROFICIENCY_GOOD,
-    [4] = WEAPON_PROFICIENCY_VERY_GOOD,
-    [5] = WEAPON_PROFICIENCY_PERFECT,
-}
-
 DMG_SCALE_PVN = 1
 DMG_SCALE_NVP = 2
 DMG_SCALE_PVP = 3
@@ -27,8 +18,8 @@ DMG_SCALE_NVN = 4
 
 local DIFFICULTY_DATA =
 {
-    [DIFFICULTY_VERYEASY] = { 
-        Proficiency = WEAPON_PROFICIENCY_POOR, 
+    [DIFFICULTY_VERYEASY] = {
+        Proficiency = WEAPON_PROFICIENCY_POOR,
         Skill = 1,
         NPCSpawningScale = 0.0,
         DamageScale = {
@@ -58,8 +49,8 @@ local DIFFICULTY_DATA =
             [HITGROUP_RIGHTLEG] = 1,
         },
     },
-    [DIFFICULTY_EASY] = { 
-        Proficiency = WEAPON_PROFICIENCY_AVERAGE, 
+    [DIFFICULTY_EASY] = {
+        Proficiency = WEAPON_PROFICIENCY_AVERAGE,
         Skill = 1,
         NPCSpawningScale = 0.2,
         DamageScale = {
@@ -89,8 +80,8 @@ local DIFFICULTY_DATA =
             [HITGROUP_RIGHTLEG] = 1,
         },
     },
-    [DIFFICULTY_NORMAL] = { 
-        Proficiency = WEAPON_PROFICIENCY_GOOD, 
+    [DIFFICULTY_NORMAL] = {
+        Proficiency = WEAPON_PROFICIENCY_GOOD,
         Skill = 2,
         NPCSpawningScale = 0.3,
         DamageScale = {
@@ -120,8 +111,8 @@ local DIFFICULTY_DATA =
             [HITGROUP_RIGHTLEG] = 1,
         },
     },
-    [DIFFICULTY_HARD] = { 
-        Proficiency = WEAPON_PROFICIENCY_VERY_GOOD, 
+    [DIFFICULTY_HARD] = {
+        Proficiency = WEAPON_PROFICIENCY_VERY_GOOD,
         Skill = 2,
         NPCSpawningScale = 0.5,
         DamageScale = {
@@ -151,8 +142,8 @@ local DIFFICULTY_DATA =
             [HITGROUP_RIGHTLEG] = 1,
         },
     },
-    [DIFFICULTY_VERYHARD] = { 
-        Proficiency = WEAPON_PROFICIENCY_PERFECT, 
+    [DIFFICULTY_VERYHARD] = {
+        Proficiency = WEAPON_PROFICIENCY_PERFECT,
         Skill = 3,
         NPCSpawningScale = 0.7,
         DamageScale = {
@@ -232,10 +223,10 @@ end
 function GM:GetDifficulty()
 
     local difficulty = lambda_difficulty:GetInt()
-    if difficulty > DIFFICULTY_MAX then 
+    if difficulty > DIFFICULTY_MAX then
         difficulty = DIFFICULTY_MAX
-    end 
-    if difficulty < DIFFICULTY_VERYEASY then 
+    end
+    if difficulty < DIFFICULTY_VERYEASY then
         difficulty = DIFFICULTY_VERYEASY
     end
     return difficulty
@@ -274,21 +265,20 @@ function GM:GetDifficulties()
 end
 
 function GM:GetDifficultyText(d)
-    local d = d
     if d == nil then
         d = self:GetDifficulty()
     end
     return DIFFICULTY_NAME[d]
-end 
+end
 
 function GM:GetDifficultyDamageScale(type)
 
-    local difficulty = self:GetDifficulty() 
+    local difficulty = self:GetDifficulty()
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
 
     return data.DamageScale[type]
 
@@ -296,24 +286,24 @@ end
 
 function GM:GetDifficultyNPCHitgroupDamageScale(group)
 
-    local difficulty = self:GetDifficulty() 
+    local difficulty = self:GetDifficulty()
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
 
     return data.HitgroupNPCDamageScale[group]
 
 end
 
 function GM:GetDifficultyWeaponProficiency()
-    local difficulty = self:GetDifficulty() 
+    local difficulty = self:GetDifficulty()
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
 
     return data.Proficiency
 end
@@ -325,12 +315,12 @@ end
 
 function GM:GetDifficultyPlayerHitgroupDamageScale(group)
 
-    local difficulty = self:GetDifficulty() 
+    local difficulty = self:GetDifficulty()
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
 
     return data.HitgroupPlayerDamageScale[group]
 
@@ -338,12 +328,12 @@ end
 
 -- Returns the scale the game should base on player count.
 function GM:GetNPCSpawningScale()
-    local difficulty = self:GetDifficulty() 
+    local difficulty = self:GetDifficulty()
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
     return data.NPCSpawningScale
 end
 
@@ -356,14 +346,14 @@ function GM:AdjustDifficulty()
 
     local difficulty = self:GetDifficulty()
     DbgPrint("Difficulty: " .. difficulty)
-    
+
     local data = DIFFICULTY_DATA[difficulty]
-    if data == nil then 
+    if data == nil then
         error("Invalid difficulty selected")
         return
-    end 
+    end
 
-    if SERVER then 
+    if SERVER then
         RunConsoleCommand("skill", tostring(data.Skill))
         game.SetSkillLevel(data.Skill)
 
@@ -372,20 +362,20 @@ function GM:AdjustDifficulty()
                 self:AdjustNPCDifficulty(v, data)
             end
         end
-    end 
-    
+    end
+
 end
 
 function GM:AdjustNPCDifficulty(npc, data)
 
-    if data == nil then 
+    if data == nil then
         local difficulty = self:GetDifficulty()
         data = DIFFICULTY_DATA[difficulty]
-        if data == nil then 
+        if data == nil then
             error("Invalid difficulty selected")
             return
-        end 
-    end 
+        end
+    end
     DbgPrint("Adjusting NPC difficulty: " .. tostring(npc) .. ", Prof: " .. data.Proficiency)
     npc:SetCurrentWeaponProficiency(data.Proficiency)
 
