@@ -6,34 +6,34 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-	Weapons =
-	{
-		"weapon_crowbar",
-		"weapon_pistol",
-		"weapon_smg1",
-		"weapon_357",
-		"weapon_physcannon",
-		"weapon_frag",
-		"weapon_shotgun",
-		"weapon_ar2",
-		"weapon_rpg",
-		"weapon_crossbow",
+    Weapons =
+    {
+        "weapon_crowbar",
+        "weapon_pistol",
+        "weapon_smg1",
+        "weapon_357",
+        "weapon_physcannon",
+        "weapon_frag",
+        "weapon_shotgun",
+        "weapon_ar2",
+        "weapon_rpg",
+        "weapon_crossbow",
         "weapon_bugbait",
-	},
-	Ammo =
-	{
-		["Pistol"] = 20,
-		["SMG1"] = 45,
-		["357"] = 6,
-		["Grenade"] = 3,
-		["Buckshot"] = 12,
-		["AR2"] = 50,
-		["RPG_Round"] = 8,
-		["SMG1_Grenade"] = 3,
-		["XBowBolt"] = 4,
-	},
-	Armor = 60,
-	HEV = true,
+    },
+    Ammo =
+    {
+        ["Pistol"] = 20,
+        ["SMG1"] = 45,
+        ["357"] = 6,
+        ["Grenade"] = 3,
+        ["Buckshot"] = 12,
+        ["AR2"] = 50,
+        ["RPG_Round"] = 8,
+        ["SMG1_Grenade"] = 3,
+        ["XBowBolt"] = 4,
+    },
+    Armor = 60,
+    HEV = true,
 }
 
 MAPSCRIPT.InputFilters =
@@ -42,13 +42,13 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-	--["env_global"] = true,
+    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-	["global_newgame_template_local_items"] = true,
-	["global_newgame_template_ammo"] = true,
+    ["global_newgame_template_local_items"] = true,
+    ["global_newgame_template_ammo"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
@@ -63,13 +63,13 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-		-- 1386.760010 946.409973 385.000000
-		-- Make sure the player spawns at the correct spot.
-		local spawn = ents.Create("info_player_start")
-		spawn:SetPos(Vector(1386.760010, 946.409973, 385.000000))
-		spawn:SetAngles(Angle(0, -180, 0))
-		spawn:SetKeyValue("spawnflags", "1")
-		spawn:Spawn()
+        -- 1386.760010 946.409973 385.000000
+        -- Make sure the player spawns at the correct spot.
+        local spawn = ents.Create("info_player_start")
+        spawn:SetPos(Vector(1386.760010, 946.409973, 385.000000))
+        spawn:SetAngles(Angle(0, -180, 0))
+        spawn:SetKeyValue("spawnflags", "1")
+        spawn:Spawn()
 
         -- setpos -497.127838 29.422707 576.030090;setang 1.708000 -178.566528 0.000000
         local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-497.127838, 29.422707, 512.03009), Ang = Angle(0, 0, 0) })
@@ -130,7 +130,7 @@ end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
 
-	--DbgPrint("PostPlayerSpawn")
+    --DbgPrint("PostPlayerSpawn")
 
 end
 

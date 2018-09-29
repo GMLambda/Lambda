@@ -4,50 +4,50 @@ local Taunts = {}
 local Categories = {}
 
 local function InsertCategory(category)
-	local id = #Categories + 1
-	Categories[id] = { Id = id, Name = category }
-	return id
+    local id = #Categories + 1
+    Categories[id] = { Id = id, Name = category }
+    return id
 end
 
 local function GetCategoryIndex(category)
-	for k,v in pairs(Categories) do
-		if v.Name == category then
-			return v.Id
-		end
-	end
-	return nil
+    for k,v in pairs(Categories) do
+        if v.Name == category then
+            return v.Id
+        end
+    end
+    return nil
 end
 
 local function InsertTaunt(categoryId, gender, name, files)
-	if Categories[categoryId] == nil then
-		error("Invalid category id.")
-		return
-	end
-	Taunts[categoryId] = Taunts[categoryId] or {}
-	Taunts[categoryId][gender] = Taunts[categoryId][gender] or {}
-	local data = {
-		Name = name,
-		Sounds = files,
-	}
-	table.insert(Taunts[categoryId][gender], data)
+    if Categories[categoryId] == nil then
+        error("Invalid category id.")
+        return
+    end
+    Taunts[categoryId] = Taunts[categoryId] or {}
+    Taunts[categoryId][gender] = Taunts[categoryId][gender] or {}
+    local data = {
+        Name = name,
+        Sounds = files,
+    }
+    table.insert(Taunts[categoryId][gender], data)
 end
 
 local CAT_TAUNTS = InsertCategory("Taunts")
 local ZOMBIE_MOANS = {
-	"npc/zombie/zombie_voice_idle1.wav",
-	"npc/zombie/zombie_voice_idle2.wav",
-	"npc/zombie/zombie_voice_idle3.wav",
-	"npc/zombie/zombie_voice_idle4.wav",
-	"npc/zombie/zombie_voice_idle5.wav",
-	"npc/zombie/zombie_voice_idle6.wav",
-	"npc/zombie/zombie_voice_idle7.wav",
-	"npc/zombie/zombie_voice_idle8.wav",
-	"npc/zombie/zombie_voice_idle9.wav",
-	"npc/zombie/zombie_voice_idle10.wav",
-	"npc/zombie/zombie_voice_idle11.wav",
-	"npc/zombie/zombie_voice_idle12.wav",
-	"npc/zombie/zombie_voice_idle13.wav",
-	"npc/zombie/zombie_voice_idle14.wav",
+    "npc/zombie/zombie_voice_idle1.wav",
+    "npc/zombie/zombie_voice_idle2.wav",
+    "npc/zombie/zombie_voice_idle3.wav",
+    "npc/zombie/zombie_voice_idle4.wav",
+    "npc/zombie/zombie_voice_idle5.wav",
+    "npc/zombie/zombie_voice_idle6.wav",
+    "npc/zombie/zombie_voice_idle7.wav",
+    "npc/zombie/zombie_voice_idle8.wav",
+    "npc/zombie/zombie_voice_idle9.wav",
+    "npc/zombie/zombie_voice_idle10.wav",
+    "npc/zombie/zombie_voice_idle11.wav",
+    "npc/zombie/zombie_voice_idle12.wav",
+    "npc/zombie/zombie_voice_idle13.wav",
+    "npc/zombie/zombie_voice_idle14.wav",
 }
 
 InsertTaunt(CAT_TAUNTS, "zombie", "Over there", {"npc/zombie/zombie_alert1.wav"})
@@ -161,18 +161,18 @@ InsertTaunt(CAT_TAUNTS, "female", "How about that", {"vo/npc/female01/answer25.w
 InsertTaunt(CAT_TAUNTS, "female", "Wanna bet", {"vo/npc/female01/answer27.wav"})
 
 function GM:GetTauntCategories()
-	return Categories
+    return Categories
 end
 
 function GM:GetTauntCategoryId(category)
-	return GetCategoryIndex(category)
+    return GetCategoryIndex(category)
 end
 
 function GM:GetTaunts(categoryId, gender)
-	return Taunts[categoryId][gender]
+    return Taunts[categoryId][gender]
 end
 
 function GM:GetPlayerTaunts(ply, categoryId)
-	local gender = ply:GetGender()
-	return self:GetTaunts(categoryId, gender)
+    local gender = ply:GetGender()
+    return self:GetTaunts(categoryId, gender)
 end

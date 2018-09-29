@@ -2,7 +2,7 @@
 -- https://github.com/Facepunch/garrysmod-issues/issues/2657
 
 if SERVER then
-	AddCSLuaFile()
+    AddCSLuaFile()
 end
 
 local ENTITY = FindMetaTable("Entity")
@@ -13,33 +13,33 @@ local PVS_MAXS = Vector(PVS_DIST, PVS_DIST, PVS_DIST)
 
 if ENTITY.TestPVS == nil then
 
-	function ENTITY:TestPVS(test)
+    function ENTITY:TestPVS(test)
 
-		if IsEntity(test) then
-			test = test:GetPos()
-		end
+        if IsEntity(test) then
+            test = test:GetPos()
+        end
 
-		local pos = self:GetPos()
-		if pos:Distance(test) > PVS_DIST then
-			return false
-		end
+        local pos = self:GetPos()
+        if pos:Distance(test) > PVS_DIST then
+            return false
+        end
 
-		return true
+        return true
 
-	end
+    end
 
 end
 
 --if ents.FindInPVS == nil then
 
-	function ents.FindInPVS(what)
+    function ents.FindInPVS(what)
 
-		if IsEntity(what) then
-			what = what:GetPos()
-		end
+        if IsEntity(what) then
+            what = what:GetPos()
+        end
 
-		return ents.FindInBox(what + PVS_MINS, what + PVS_MAXS)
+        return ents.FindInBox(what + PVS_MINS, what + PVS_MAXS)
 
-	end
+    end
 
 --end

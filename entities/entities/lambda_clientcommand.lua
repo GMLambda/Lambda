@@ -7,14 +7,14 @@ DEFINE_BASECLASS( "lambda_entity" )
 
 function ENT:PreInitialize()
 
-	BaseClass.PreInitialize(self)
-	self:SetInputFunction("Command", self.InputCommand)
+    BaseClass.PreInitialize(self)
+    self:SetInputFunction("Command", self.InputCommand)
 
 end
 
 function ENT:Initialize()
 
-	BaseClass.Initialize(self)
+    BaseClass.Initialize(self)
 
 end
 
@@ -26,13 +26,13 @@ end
 
 function ENT:InputCommand(data, activator, caller)
 
-	DbgPrint("Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
-	return self:Command(data, activator, caller)
+    DbgPrint("Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
+    return self:Command(data, activator, caller)
 
 end
 
 function ENT:Command(data, activator, caller)
-	-- Stub
+    -- Stub
 end
 
 end

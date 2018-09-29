@@ -6,19 +6,19 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-	Weapons =
-	{
-		"weapon_crowbar",
-		"weapon_pistol",
-		"weapon_smg1",
-	},
-	Ammo =
-	{
-		["Pistol"] = 60,
-		["SMG1"] = 60,
-	},
-	Armor = 0,
-	HEV = true,
+    Weapons =
+    {
+        "weapon_crowbar",
+        "weapon_pistol",
+        "weapon_smg1",
+    },
+    Ammo =
+    {
+        ["Pistol"] = 60,
+        ["SMG1"] = 60,
+    },
+    Armor = 0,
+    HEV = true,
 }
 
 MAPSCRIPT.InputFilters =
@@ -27,12 +27,12 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-	--["env_global"] = true,
+    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-	["global_newgame_entmaker"] = true,
+    ["global_newgame_entmaker"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -40,15 +40,15 @@ end
 
 function MAPSCRIPT:PostInit()
 
-	if SERVER then
+    if SERVER then
 
-	end
+    end
 
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
 
-	--DbgPrint("PostPlayerSpawn")
+    --DbgPrint("PostPlayerSpawn")
 
 end
 

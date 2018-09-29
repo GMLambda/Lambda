@@ -7,10 +7,10 @@ DEFINE_BASECLASS( "lambda_trigger" )
 
 function ENT:Initialize()
 
-	--DbgPrint(self, "trigger_multiple:Initialize")
+    --DbgPrint(self, "trigger_multiple:Initialize")
 
-	BaseClass.Initialize(self)
-	BaseClass.SetWaitTime(self, 0.2) 
+    BaseClass.Initialize(self)
+    BaseClass.SetWaitTime(self, 0.2) 
 
 end
 

@@ -66,7 +66,7 @@ function EFFECT:Render( )
 						 Normal:GetNormalized() * self.Direction,
 						 self.Size, self.Size,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
-						 (self.Alpha * 500) )
+						 self.Alpha * 500)
 
 	render.SetMaterial( self.Mat3 )
 	render.DrawQuadEasy( self:GetPos() + Normal,
