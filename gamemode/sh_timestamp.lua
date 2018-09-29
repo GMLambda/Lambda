@@ -28,10 +28,12 @@ if SERVER then
 
         if CURRENT_TIMESTAMP - TIMESTAMP_UPDATE_TIME >= UpdateTime then
 
-            net.Start("LambdaTimeSync")
-            net.WriteDouble(CURRENT_TIMESTAMP)
-            net.Broadcast()
-
+            if player.GetCount() > 0 then
+                net.Start("LambdaTimeSync")
+                net.WriteDouble(CURRENT_TIMESTAMP)
+                net.Broadcast()
+            end 
+            
             TIMESTAMP_UPDATE_TIME = CURRENT_TIMESTAMP
             updateTimestamp = true
         end
@@ -100,6 +102,9 @@ if TEST_SYNC == true then
         util.AddNetworkString("SyncTest")
 
         timer.Create("test", 1, 10, function()
+            if player.GetCount() == 0 then 
+                return 
+            end
             net.Start("SyncTest")
             net.WriteDouble(os.clock())
             net.WriteDouble(SysTime())
