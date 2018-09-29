@@ -659,7 +659,12 @@ if SERVER then
             return
         end
 
-        ply = ply or player.GetHumans()
+        if ply == nil then
+            ply = player.GetHumans()
+            if #ply == 0 then
+                return
+            end
+        end
 
         local playerCount = 0
         local players = {}
@@ -691,7 +696,12 @@ if SERVER then
 
         DbgPrint(self, "Sending trigger update: ", state, timeout)
 
-        ply = ply or player.GetAll()
+        if ply == nil then
+            ply = player.GetHumans()
+            if #ply == 0 then
+                return
+            end
+        end
 
         net.Start("LambdaTriggerUpdate")
         net.WriteUInt(self:EntIndex(), 13)
@@ -714,7 +724,12 @@ if SERVER then
 
         DbgPrint(self, "Sending trigger blocked: ", blocked)
 
-        ply = ply or player.GetHumans()
+        if ply == nil then
+            ply = player.GetHumans()
+            if #ply == 0 then
+                return
+            end
+        end
 
         net.Start("LambdaTriggerUpdate")
         net.WriteUInt(self:EntIndex(), 13)
@@ -741,6 +756,10 @@ if SERVER then
     end
 
     function ENT:CmdTriggerRemoved()
+
+        if player.GetCount() == 0 then
+            return
+        end
 
         -- Wipe it from the table on the client, he doesnt need to do anything anymore.
         net.Start("LambdaTriggerUpdate")

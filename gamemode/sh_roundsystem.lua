@@ -78,6 +78,10 @@ if SERVER then
     function GM:NotifyRoundStateChanged(receivers, infoType, params)
         DbgPrint("GM:NotifyRoundStateChanged")
 
+        if istable(receivers) and #receivers == 0 then
+            return
+        end
+
         net.Start("LambdaRoundInfo")
         net.WriteUInt(infoType, 4)
         net.WriteTable(params)

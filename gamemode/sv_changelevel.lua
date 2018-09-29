@@ -146,10 +146,10 @@ end
 
 function GM:ChangeLevel(map, landmark, playersInTrigger)
 
-    if playersInTrigger == nil then 
+    if playersInTrigger == nil then
         playersInTrigger = {}
-    end 
-    
+    end
+
     if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
         DbgError("Called ChangeLevel twice!")
         return
@@ -175,12 +175,12 @@ function GM:ChangeToNextLevel()
     local nextMap = self:GetNextMap()
 
     for k,v in pairs(ents.FindByClass("trigger_changelevel")) do
-        if v.TargetMap == nextMap then 
+        if v.TargetMap == nextMap then
 
-            local landmark = v.Landmark 
+            local landmark = v.Landmark
             return self:ChangeLevel(nextMap, landmark, {})
 
-        end 
+        end
     end
 
     return self:ChangeLevel(nextMap, nil, {})

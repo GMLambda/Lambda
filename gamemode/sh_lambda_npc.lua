@@ -49,7 +49,7 @@ if SERVER then
         -- First scale hitgroups.
         local hitgroupScale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
         DbgPrint("Hitgroup Scale", npc, hitgroupScale)
-        dmginfo:ScaleDamage(scale)
+        dmginfo:ScaleDamage(hitgroupScale)
 
         -- Scale by difficulty.
         local scaleType = 0

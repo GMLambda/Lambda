@@ -52,9 +52,11 @@ local function NetworkUpdate()
         return
     end
 
-    net.Start("LambdaMetrics")
-    net.WriteTable(BULLET_DATA)
-    net.Broadcast()
+    if player.GetCount() > 0 then
+        net.Start("LambdaMetrics")
+        net.WriteTable(BULLET_DATA)
+        net.Broadcast()
+    end
 
     NEXT_NETWORK_UPDATE = CurTime() + 1
 
