@@ -4,7 +4,7 @@ function EFFECT:Init( data )
 
 	local size = 64
 	local ply = data:GetEntity()
-	if not IsValid(ply) then 
+	if not IsValid(ply) then
 		self:Remove()
 	end
 
@@ -56,7 +56,6 @@ function EFFECT:Render( )
 	local Normal = self.Normal
 	local eyePos = EyePos()
 	local dir = Normal:Angle()
-	local ply = LocalPlayer()
 	local ang = eyePos - self:GetPos()
 	local dist = eyePos:Distance(self:GetPos())
 
@@ -75,5 +74,5 @@ function EFFECT:Render( )
 	cam.IgnoreZ(false)
 
 	render.SuppressEngineLighting(false)
-	
+
 end

@@ -1,5 +1,5 @@
 if SERVER then
-	AddCSLuaFile()
+    AddCSLuaFile()
 end
 
 local DbgPrint = GetLogging("GameType")
@@ -16,98 +16,98 @@ GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
 
 function GAMETYPE:GetPlayerRespawnTime()
-	return 0
+    return 0
 end
 
 function GAMETYPE:ShouldRestartRound()
-	return false
+    return false
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
-	return true
+    return true
 end
 
 function GAMETYPE:PlayerCanPickupItem(ply, item)
-	return true
+    return true
 end
 
 function GAMETYPE:GetWeaponRespawnTime()
-	return 1
+    return 1
 end
 
 function GAMETYPE:GetItemRespawnTime()
-	return -1
+    return -1
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-	return false
+    return false
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
-	ply:AddDeaths( 1 )
+    ply:AddDeaths( 1 )
 
-	-- Suicide?
-	if inflictor == ply or attacker == ply then
-		attacker:AddFrags(-1)
-		return
-	end
+    -- Suicide?
+    if inflictor == ply or attacker == ply then
+        attacker:AddFrags(-1)
+        return
+    end
 
-	-- Friendly kill?
-	if IsValid(attacker) and attacker:IsPlayer() then
-		attacker:AddFrags( -1 )
-	elseif IsValid(inflictor) and inflictor:IsPlayer() then
-		inflictor:AddFrags( -1 )
-	end
+    -- Friendly kill?
+    if IsValid(attacker) and attacker:IsPlayer() then
+        attacker:AddFrags( -1 )
+    elseif IsValid(inflictor) and inflictor:IsPlayer() then
+        inflictor:AddFrags( -1 )
+    end
 end
 
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
-	return true
+    return true
 end
 
 function GAMETYPE:CanPlayerSpawn(ply, spawn)
-	return true
+    return true
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
-	return false
+    return false
 end
 
 function GAMETYPE:GetPlayerLoadout()
-	return self.MapScript.DefaultLoadout or {}
+    return self.MapScript.DefaultLoadout or {}
 end
 
 function GAMETYPE:LoadMapScript(path, name)
-	local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/" .. path .. "/mapscripts/" .. name .. ".lua"
-	self.MapScript = nil
-	if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
-		self.MapScript = include(MAPSCRIPT_FILE)
-		if self.MapScript ~= nil then
-			DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
-		else
-			self.MapScript = {}
-		end
-	else
-		DbgPrint("No mapscript available.")
-		self.MapScript = {}
-	end
+    local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/" .. path .. "/mapscripts/" .. name .. ".lua"
+    self.MapScript = nil
+    if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
+        self.MapScript = include(MAPSCRIPT_FILE)
+        if self.MapScript ~= nil then
+            DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
+        else
+            self.MapScript = {}
+        end
+    else
+        DbgPrint("No mapscript available.")
+        self.MapScript = {}
+    end
 end
 
 function GAMETYPE:LoadLocalisation(lang)
-	-- Stub
+    -- Stub
 end
 
 function GAMETYPE:AllowPlayerTracking()
-	return true
+    return true
 end
 
 function GAMETYPE:IsPlayerEnemy(ply1, ply2)
-	return false
+    return false
 end
 
 function GAMETYPE:GetScoreboardInfo()
-	return {}
+    return {}
 end
 
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
-	gametypes:Add("lambda_base", GAMETYPE)
+    gametypes:Add("lambda_base", GAMETYPE)
 end)

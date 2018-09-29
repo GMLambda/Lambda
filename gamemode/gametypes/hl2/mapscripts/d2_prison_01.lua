@@ -6,34 +6,34 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-	Weapons =
-	{
-		"weapon_crowbar",
-		"weapon_pistol",
-		"weapon_smg1",
-		"weapon_357",
-		"weapon_physcannon",
-		"weapon_frag",
-		"weapon_shotgun",
-		"weapon_ar2",
-		"weapon_rpg",
-		"weapon_crossbow",
+    Weapons =
+    {
+        "weapon_crowbar",
+        "weapon_pistol",
+        "weapon_smg1",
+        "weapon_357",
+        "weapon_physcannon",
+        "weapon_frag",
+        "weapon_shotgun",
+        "weapon_ar2",
+        "weapon_rpg",
+        "weapon_crossbow",
         "weapon_bugbait",
-	},
-	Ammo =
-	{
-		["Pistol"] = 20,
-		["SMG1"] = 45,
-		["357"] = 6,
-		["Grenade"] = 3,
-		["Buckshot"] = 12,
-		["AR2"] = 50,
-		["RPG_Round"] = 8,
-		["SMG1_Grenade"] = 3,
-		["XBowBolt"] = 4,
-	},
-	Armor = 60,
-	HEV = true,
+    },
+    Ammo =
+    {
+        ["Pistol"] = 20,
+        ["SMG1"] = 45,
+        ["357"] = 6,
+        ["Grenade"] = 3,
+        ["Buckshot"] = 12,
+        ["AR2"] = 50,
+        ["RPG_Round"] = 8,
+        ["SMG1_Grenade"] = 3,
+        ["XBowBolt"] = 4,
+    },
+    Armor = 60,
+    HEV = true,
 }
 
 MAPSCRIPT.InputFilters =
@@ -42,14 +42,14 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-	--["env_global"] = true,
+    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-	["global_newgame_template_base_items"] = true,
-	["global_newgame_template_local_items"] = true,
-	["global_newgame_template_ammo"] = true,
+    ["global_newgame_template_base_items"] = true,
+    ["global_newgame_template_local_items"] = true,
+    ["global_newgame_template_ammo"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
@@ -64,11 +64,11 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-		-- Enable the changelevel trigger like it would normally.
-		ents.WaitForEntityByName("changelevel_01-02", function(ent)
-			ent:SetKeyValue("spawnflags", "1") -- Remove no-touch
-			ent:Fire("Enable")
-		end)
+        -- Enable the changelevel trigger like it would normally.
+        ents.WaitForEntityByName("changelevel_01-02", function(ent)
+            ent:SetKeyValue("spawnflags", "1") -- Remove no-touch
+            ent:Fire("Enable")
+        end)
 
         --1726.193115 -3289.614502 1344.031250
         local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(1726.193115, -3289.614502, 1280.03125), Ang = Angle(0, 0, 0) })
@@ -111,10 +111,10 @@ function MAPSCRIPT:PostInit()
 
         -- Rock falling at the end
         GAMEMODE:WaitForInput("relay_start_rockfall", "Trigger", function(ent)
-			TriggerOutputs({
-				{"ambient_rockfall_creak", "PlaySound", 0, ""},
-				{"door_2", "Unlock", 0, ""},
-			})
+            TriggerOutputs({
+                {"ambient_rockfall_creak", "PlaySound", 0, ""},
+                {"door_2", "Unlock", 0, ""},
+            })
             return true
         end)
 
@@ -124,7 +124,7 @@ end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
 
-	--DbgPrint("PostPlayerSpawn")
+    --DbgPrint("PostPlayerSpawn")
 
 end
 

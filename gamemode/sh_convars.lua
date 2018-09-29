@@ -1,40 +1,40 @@
 if SERVER then
-	AddCSLuaFile()
+    AddCSLuaFile()
 end
 
 GM.ConVars = {}
 
 function GM:RegisterConVar(name, value, flags, helptext, fn)
 
-	if CLIENT and bit.band(flags, FCVAR_REPLICATED) ~= 0 and bit.band(flags, FCVAR_ARCHIVE) ~= 0 then 
-		DbgPrint("Removing FCVAR_ARCHIVE from " .. name)
-		flags = bit.band(flags, bit.bnot(FCVAR_ARCHIVE))
-	end
+    if CLIENT and bit.band(flags, FCVAR_REPLICATED) ~= 0 and bit.band(flags, FCVAR_ARCHIVE) ~= 0 then 
+        DbgPrint("Removing FCVAR_ARCHIVE from " .. name)
+        flags = bit.band(flags, bit.bnot(FCVAR_ARCHIVE))
+    end
 
-	local prefix = "lambda_"
-	local actualName = prefix .. name
-	local actualValue = ""
+    local prefix = "lambda_"
+    local actualName = prefix .. name
+    local actualValue = ""
 
-	if isbool(value) then
-		actualValue = tostring(tonumber(value))
-	elseif isstring(value) then
-		actualValue = value
-	else
-		actualValue = tostring(value)
-	end
+    if isbool(value) then
+        actualValue = tostring(tonumber(value))
+    elseif isstring(value) then
+        actualValue = value
+    else
+        actualValue = tostring(value)
+    end
 
-	local convar = CreateConVar(actualName, actualValue, flags, helptext)
-	self.ConVars[name] = convar
+    local convar = CreateConVar(actualName, actualValue, flags, helptext)
+    self.ConVars[name] = convar
 
-	if fn ~= nil and isfunction(fn) then
-		cvars.AddChangeCallback(actualName, fn)
-	end
+    if fn ~= nil and isfunction(fn) then
+        cvars.AddChangeCallback(actualName, fn)
+    end
 
-	return convar
+    return convar
 end
 
 function GM:GetRegisteredConVar(name)
-	return self.ConVars[name]
+    return self.ConVars[name]
 end
 
 local size = 5
@@ -42,27 +42,27 @@ local width = 2
 local space = 5
 
 if CLIENT then
-	lambda_crosshair = GM:RegisterConVar("crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Lambda Crosshair")
-	lambda_crosshair_dynamic = GM:RegisterConVar("crosshair_dynamic", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")
-	lambda_crosshair_size = GM:RegisterConVar("crosshair_size", 8, bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_width = GM:RegisterConVar("crosshair_width", 2, bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_space = GM:RegisterConVar("crosshair_space", 4, bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_outline = GM:RegisterConVar("crosshair_outline", 1, bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_adaptive = GM:RegisterConVar("crosshair_adaptive", 1, bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_color = GM:RegisterConVar("crosshair_color", "0 128 0", bit.bor(0, FCVAR_ARCHIVE), "")
-	lambda_crosshair_alpha = GM:RegisterConVar("crosshair_alpha", 255, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair = GM:RegisterConVar("crosshair", 1, bit.bor(0, FCVAR_ARCHIVE), "Lambda Crosshair")
+    lambda_crosshair_dynamic = GM:RegisterConVar("crosshair_dynamic", 1, bit.bor(0, FCVAR_ARCHIVE), "Dynamic crosshair")
+    lambda_crosshair_size = GM:RegisterConVar("crosshair_size", 8, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_width = GM:RegisterConVar("crosshair_width", 2, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_space = GM:RegisterConVar("crosshair_space", 4, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_outline = GM:RegisterConVar("crosshair_outline", 1, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_adaptive = GM:RegisterConVar("crosshair_adaptive", 1, bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_color = GM:RegisterConVar("crosshair_color", "0 128 0", bit.bor(0, FCVAR_ARCHIVE), "")
+    lambda_crosshair_alpha = GM:RegisterConVar("crosshair_alpha", 255, bit.bor(0, FCVAR_ARCHIVE), "")
 
-	lambda_difficulty_metrics = GM:RegisterConVar("difficulty_metrics", 0, bit.bor(0, FCVAR_ARCHIVE), "Draws npc/player metrics.")
+    lambda_difficulty_metrics = GM:RegisterConVar("difficulty_metrics", 0, bit.bor(0, FCVAR_ARCHIVE), "Draws npc/player metrics.")
 
-	lambda_postprocess = GM:RegisterConVar("postprocess", 1, bit.bor(0, FCVAR_ARCHIVE), "Postprocessing")
-	lambda_hud_text_color = GM:RegisterConVar("hud_text_color", "255 208 64", bit.bor(0, FCVAR_ARCHIVE), "HUD Text Color R(0-255), G(0-255), B(0-255)")
-	lambda_hud_bg_color = GM:RegisterConVar("hud_bg_color", "0 0 0", bit.bor(0, FCVAR_ARCHIVE), "HUD BG Color R(0-255), G(0-255), B(0-255)")
-	lambda_player_color = GM:RegisterConVar("player_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player color")
-	lambda_weapon_color = GM:RegisterConVar("weapon_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Weapon color")
-	lambda_playermdl = GM:RegisterConVar("playermdl", "male_01", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player model")
-	lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0,FCVAR_ARCHIVE),"Deathnotice time")
-	lambda_auto_jump = GM:RegisterConVar("auto_jump", "0", bit.bor(0,FCVAR_ARCHIVE), "Automatically jump if on ground")
-	lambda_gore = GM:RegisterConVar("gore", "1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Enable gore")
+    lambda_postprocess = GM:RegisterConVar("postprocess", 1, bit.bor(0, FCVAR_ARCHIVE), "Postprocessing")
+    lambda_hud_text_color = GM:RegisterConVar("hud_text_color", "255 208 64", bit.bor(0, FCVAR_ARCHIVE), "HUD Text Color R(0-255), G(0-255), B(0-255)")
+    lambda_hud_bg_color = GM:RegisterConVar("hud_bg_color", "0 0 0", bit.bor(0, FCVAR_ARCHIVE), "HUD BG Color R(0-255), G(0-255), B(0-255)")
+    lambda_player_color = GM:RegisterConVar("player_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player color")
+    lambda_weapon_color = GM:RegisterConVar("weapon_color", "0.3 1 1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Weapon color")
+    lambda_playermdl = GM:RegisterConVar("playermdl", "male_01", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Player model")
+    lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0,FCVAR_ARCHIVE),"Deathnotice time")
+    lambda_auto_jump = GM:RegisterConVar("auto_jump", "0", bit.bor(0,FCVAR_ARCHIVE), "Automatically jump if on ground")
+    lambda_gore = GM:RegisterConVar("gore", "1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Enable gore")
 end
 
 -- Server --

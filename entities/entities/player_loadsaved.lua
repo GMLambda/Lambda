@@ -7,14 +7,14 @@ DEFINE_BASECLASS( "lambda_entity" )
 
 function ENT:PreInitialize()
 
-	BaseClass.PreInitialize(self)
-	self:SetInputFunction("Reload", self.InputReload)
+    BaseClass.PreInitialize(self)
+    self:SetInputFunction("Reload", self.InputReload)
 
 end
 
 function ENT:Initialize()
 
-	BaseClass.Initialize(self)
+    BaseClass.Initialize(self)
 
 end
 
@@ -26,15 +26,15 @@ end
 
 function ENT:InputReload(data, activator, caller)
 
-	--GAMEMODE:RestartRound(nil, true)
+    --GAMEMODE:RestartRound(nil, true)
 
-	return true
+    return true
 
 end
 
 function ENT:UpdateTransmitState()
 
-	return TRANSMIT_NEVER
+    return TRANSMIT_NEVER
 
 end
 
