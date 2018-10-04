@@ -81,7 +81,7 @@ if _DEBUG then
     end
 
     local function GetTimestamp()
-        return string.format("(%.03f %.03f)", CurTime(), GetSyncedTimestamp())
+        return string.format("(%.03f)", CurTime())
     end
 
     function LogGroup(group, color, ...)
