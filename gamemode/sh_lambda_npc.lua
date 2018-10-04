@@ -78,14 +78,15 @@ if SERVER then
         self.EnemyNPCs = self.EnemyNPCs or {}
 
         local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC") or {}
-        if enemyClasses[npc:GetClass()] == true then
+        local npcClass = npc:GetClass()
+        if enemyClasses[npcClass] == true then
             self.EnemyNPCs[npc] = npc
         end
 
         self:AdjustNPCDifficulty(npc)
 
         local equip = npc:SafeGetInternalVariable("additionalequipment")
-        if npc:GetClass() == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
+        if npcClass == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
             -- HACKHACK: I'm guessing garry removed loading skins based on their weapons at some point.
             npc:SetSkin(1)
         end
