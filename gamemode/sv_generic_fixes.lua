@@ -2,14 +2,12 @@ local Dbgprint = GetLogging("Generic")
 
 local function ReplaceFuncTankVolume(ent, volname)
 
-    --DbgPrint("Replacing control volume: " .. volname)
-
     local ent = ent
     local newName = "Lambda" .. volname
 
     ents.WaitForEntityByName(volname, function(vol)
 
-        DbgPrint("Replacing control volume for: " .. tostring(ent))
+        DbgPrint("Replacing control volume for: " .. tostring(ent), volname)
 
         local newVol = ents.Create("trigger") -- Yes this actually exists and it has what func_tank needs.
         newVol:SetKeyValue("StartDisabled", "0")
@@ -36,7 +34,7 @@ end
 
 --- func_tank not controllable because of custom trigger entities
 hook.Add("EntityKeyValue", "Lambda_FuncTank", function(ent, key, val)
-    if ent:GetClass() == "func_tank" or ent:GetClass() == "func_tankairboatgun" and key == "control_volume" then
+    if (ent:GetClass() == "func_tank" or ent:GetClass() == "func_tankairboatgun") and key == "control_volume" then
         return ReplaceFuncTankVolume(ent, val)
     end
 end)
