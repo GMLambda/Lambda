@@ -1610,6 +1610,15 @@ function GM:PlayerTick(ply, mv)
         if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then
             ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
         end
+
+        -- Remove those useless "weapons"
+        if ply:HasWeapon("weapon_frag") and ply:GetAmmoCount("Grenade") == 0 then
+            ply:StripWeapon("weapon_frag")
+        end
+
+        if ply:HasWeapon("weapon_slam") and ply:GetAmmoCount("slam") == 0 then
+            ply:StripWeapon("weapon_frag")
+        end
     end
 
 end
