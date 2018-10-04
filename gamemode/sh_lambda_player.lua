@@ -1499,24 +1499,12 @@ function GM:UpdateSuit(ply, mv, ucmd)
             ply:RemoveSuitDevice(SUIT_DEVICE_BREATHER)
         end
 
-        --[[
-        if ply:FlashlightIsOn() then
-            ply:AddSuitDevice(SUIT_DEVICE_FLASHLIGHT)
-            powerLoad = powerLoad + SUIT_FLASHLIGHT_DRAIN
-        else
-            ply:RemoveSuitDevice(SUIT_DEVICE_FLASHLIGHT)
-        end
-        ]]
-
         if powerLoad > 0 then
             ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
             if self:DrainSuit(ply, powerLoad * frameTime) == false then
                 ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
                 if ply:GetSprinting() == true then
                     self:PlayerEndSprinting(ply, mv)
-                    if SERVER then
-                        ply:Flashlight(false)
-                    end
                 end
             end
         end
