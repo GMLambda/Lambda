@@ -436,6 +436,8 @@ function GM:OnNewGame()
             end
         end
 
+        self:ResetGlobalStates()
+
         local mapscriptGlobals = self.MapScript.GlobalStates
         if mapscriptGlobals ~= nil then
             for k,v in pairs(mapscriptGlobals) do
@@ -460,6 +462,10 @@ function GM:OnNewGame()
         failureMessage:SetKeyValue("message", "GAMEOVER_ALLY")
         failureMessage:Spawn()
         self.LambdaFailureMessage = failureMessage
+
+        local roachManager = ents.Create("lambda_cockroach_manager")
+        roachManager:Spawn()
+        self.LambdaRoachManager = roachManager
 
         local mapData = game.GetMapData()
         if mapData ~= nil and mapData.Entities ~= nil then
@@ -514,8 +520,6 @@ function GM:PostRoundSetup()
         v.TransitionData = self:GetPlayerTransitionData(v)
         v:Spawn()
     end
-
-    self:ResetGlobalStates()
 
     -- GoldSrc support.
     for _,v in pairs(ents.FindByClass("trigger_auto")) do
