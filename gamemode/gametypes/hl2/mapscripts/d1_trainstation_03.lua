@@ -81,7 +81,7 @@ function MAPSCRIPT:PostInit()
         end)
 
         local door_bracer_trigger = ents.Create("trigger_once")
-        door_bracer_trigger:SetupTrigger(Vector(-4995, -4848, 512), Angle(0,0,0), Vector(-110, -80, 0), Vector(110, 110, 90))
+        door_bracer_trigger:SetupTrigger(Vector(-4995, -4848, 512), Angle(0,0,0), Vector(-200, -80, 0), Vector(110, 110, 130))
         door_bracer_trigger:SetKeyValue("teamwait", "1")
         door_bracer_trigger.OnTrigger = function(self)
             DbgPrint("All players inside trigger, closing door, swapping spawnpoint.")
