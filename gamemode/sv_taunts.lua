@@ -4,6 +4,11 @@ include("sh_taunts.lua")
 
 util.AddNetworkString("PlayerStartTaunt")
 
+local COMMANDABLE_CLASSES =
+{
+    ["npc_citizen"] = true,
+}
+
 local function GetNearbyAllies(ply)
 
     local playerPos = ply:GetPos()
@@ -13,19 +18,22 @@ local function GetNearbyAllies(ply)
     local nearbyEnts = ents.FindInBox(playerPos - boxMins, playerPos + boxMaxs)
     local res = {}
     for _,v in pairs(nearbyEnts) do
+        if COMMANDABLE_CLASSES[v:GetClass()] ~= true then
+            continue
+        end
         if v:IsNPC() == false then
             continue
         end
         if v:GetNPCState() == NPC_STATE_SCRIPT then
             continue
         end
-        if IsFriendEntityName(v:GetClass()) == false then
+        if v:Visible(ply) == false then
             continue
         end
         if v:HasSpawnFlags(SF_CITIZEN_NOT_COMMANDABLE) == true then
             continue
         end
-        if v:Visible(ply) == false then
+        if v:Disposition(ply) ~= D_LI then
             continue
         end
         table.insert(res, v)
