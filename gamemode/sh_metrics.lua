@@ -48,6 +48,10 @@ local NEXT_NETWORK_UPDATE = CurTime()
 
 local function NetworkUpdate()
 
+    if lambda_difficulty_metrics:GetBool() == false then
+        return
+    end
+    
     if CurTime() < NEXT_NETWORK_UPDATE then
         return
     end
