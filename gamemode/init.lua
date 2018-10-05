@@ -209,6 +209,11 @@ function GM:EntityTakeDamage(target, dmginfo)
             return true
         end
 
+        local dmg = dmginfo:GetDamage()
+        if dmg > 0 then
+            self:EmitNPCHurt(dmg, target, HITGROUP_GENERIC)
+        end
+
     elseif target:IsPlayer() then
 
         if target:IsPositionLocked() or target:IsInactive() == true then
@@ -227,7 +232,7 @@ function GM:EntityTakeDamage(target, dmginfo)
             if dmginfo:IsDamageType(DMG_FALL) and dmg > 40 and math.random(1, 2) == 1 then
                 hitGroup = HITGROUP_LEFTLEG
             end
-            self:EmitPlayerHurt(dmginfo:GetDamage(), target, hitGroup)
+            self:EmitPlayerHurt(dmg, target, hitGroup)
         end
 
         if target:InVehicle() then

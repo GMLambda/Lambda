@@ -97,6 +97,41 @@ if SERVER then
 
     end
 
+    function GM:EmitNPCHurt(amount, npc, hitgroup)
+
+        if npc:WaterLevel() == 3 then
+            return
+        end
+
+        if npc:Health() - amount <= 0 then
+            -- Dead people dont say stuff
+            return
+        end
+
+        if hitgroup == nil or hitgroup == HITGROUP_HEAD or hitgroup == HITGROUP_GEAR then
+            hitgroup = HITGROUP_GENERIC
+        end
+
+        local gender = nil
+        local class = npc:GetClass()
+        if class ~= "npc_combine" and class ~= "npc_combine_s" then
+            -- We do this for the combine only at this moment.
+            return
+        end
+
+        local hurtsounds = self.HurtSounds["combine"][hitgroup]
+
+        npc.NextHurtSound = npc.NextHurtSound or 0
+
+        local curTime = CurTime()
+        if curTime - npc.NextHurtSound >= 2 then
+            local snd = table.Random(hurtsounds)
+            npc:EmitSound(snd)
+            npc.NextHurtSound = curTime + 2
+        end
+
+    end
+
     local function DissolveEntity(ent)
 
         ent:SetOwner(NULL)
