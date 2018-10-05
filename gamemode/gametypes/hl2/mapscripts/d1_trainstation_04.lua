@@ -99,8 +99,17 @@ function MAPSCRIPT:PostInit()
         -- We skip the knockout scene because its not shown anyway.
         ents.WaitForEntityByName("door_knockout_1", function(ent)
             --ent:Fire("Lock")
+            ent:SetKeyValue("spawnflags", "2048")
             ent:SetKeyValue("speed", "100")
             ent:SetKeyValue("opendir", "1")
+            ent:SetKeyValue("soundlockedoverride", "DoorHandles.Locked1")
+            ent:SetKeyValue("soundunlockedoverride", "DoorHandles.Unlocked1")
+        end)
+
+        -- We skip the knockout scene because its not shown anyway.
+        ents.WaitForEntityByName("door_knockout_2", function(ent)
+            ent:SetKeyValue("spawnflags", "2048")
+            ent:SetKeyValue("soundlockedoverride", "DoorHandles.Locked1")
         end)
 
         local tracktrain_elevator
