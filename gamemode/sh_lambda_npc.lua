@@ -112,9 +112,8 @@ if SERVER then
             hitgroup = HITGROUP_GENERIC
         end
 
-        local gender = nil
-        local class = npc:GetClass()
-        if class ~= "npc_combine" and class ~= "npc_combine_s" then
+        local gender = npc:GetGender()
+        if gender ~= "combine" then
             -- We do this for the combine only at this moment.
             return
         end

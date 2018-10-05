@@ -3,6 +3,73 @@ AddCSLuaFile()
 --local DbgPrint = GetLogging("EntityExt")
 local ENTITY_META = FindMetaTable("Entity")
 
+local male_bbox = Vector(22.291288, 20.596443, 72.959808)
+local female_bbox = Vector(21.857199, 20.744711, 71.528900)
+
+-- Credits to CapsAdmin
+local function EstimateModelGender(ent)
+
+    local mdl = ent:GetModel()
+    if not mdl then
+        return
+    end
+
+    local headcrabAttachment = ent:LookupAttachment("headcrab")
+    if headcrabAttachment ~= 0 then
+        return "zombie"
+    end
+
+    local ziplineAttachment = ent:LookupAttachment("zipline")
+    if ziplineAttachment ~= 0 then
+        return "combine"
+    end
+
+    local seq
+    seq = ent:LookupSequence("d3_c17_07_Kidnap")
+    if seq ~= nil and seq > 0 then
+        return "combine"
+    end
+
+    seq = ent:LookupSequence("walk_all")
+    if seq ~= nil and seq > 0 then
+        local info = ent:GetSequenceInfo(seq)
+        if info.bbmax == male_bbox then
+            return "male"
+        elseif info.bbmax == female_bbox then
+            return "female"
+        end
+    end
+
+    if
+        mdl:lower():find("female") or
+        ent:LookupBone("ValveBiped.Bip01_R_Pectoral") or
+        ent:LookupBone("ValveBiped.Bip01_R_Latt") or
+        ent:LookupBone("ValveBiped.Bip01_L_Pectoral") or
+        ent:LookupBone("ValveBiped.Bip01_L_Latt")
+    then
+        return "female"
+    end
+
+    return "male"
+
+end
+
+function ENTITY_META:GetGender()
+
+    local oldCache = false
+    local mdl = self:GetModel()
+
+    if self.CachedGenderModel == nil or self.CachedGenderModel ~= mdl then
+        self.CachedGenderModel = mdl
+        oldCache = true
+    end
+    if oldCache == true then
+        self.CachedGender = EstimateModelGender(self)
+    end
+    return self.CachedGender
+
+end
+
 function ENTITY_META:AddSpawnFlags(flags)
 
     local newFlags = bit.bor(self:GetSpawnFlags(), flags)

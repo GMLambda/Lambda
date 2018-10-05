@@ -150,21 +150,6 @@ function PLAYER_META:GetViewLockTime()
     return self:GetNWFloat("ViewLockTime", CurTime())
 end
 
-function PLAYER_META:GetGender()
-    return self:GetNWString("Gender", "male")
-end
-
-function PLAYER_META:SetGender(gender)
-    if gender:iequals("male") == false and
-       gender:iequals("female") == false and
-         gender:iequals("zombie") == false and 
-         gender:iequals("combine") == false
-    then
-        gender = "male"
-    end
-    self:SetNWString("Gender", gender)
-end
-
 function PLAYER_META:GetViewLock()
 
     if SERVER then
