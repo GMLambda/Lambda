@@ -243,9 +243,12 @@ else
             -- Head
             -- models/gibs/hgibs.mdl
             local boneId = ply:LookupBone("ValveBiped.Bip01_Head1")
-            if boneId ~= -1 then
+            local offset = VectorRand() * dmgForce:Length2D()
+            if boneId == nil and boneId == -1 then
                 local pos, ang = ply:GetBonePosition(boneId)
-                local offset = VectorRand() * dmgForce:Length2D()
+                self:CreateGibPart("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
+            else
+                local pos, ang = ply:EyePos(),ply:GetAngles()
                 self:CreateGibPart("ValveBiped.Bip01_Head1", pos, ang, (dmgForce * 0.8) + offset, 0, exploded)
             end
 
