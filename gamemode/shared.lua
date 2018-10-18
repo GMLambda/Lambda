@@ -436,6 +436,37 @@ function GM:OnEntityCreated(ent)
 
 end
 
+local function ReplaceFuncTankVolume(ent, volname)
+
+    local newName = "Lambda" .. volname
+
+    ents.WaitForEntityByName(volname, function(vol)
+
+        DbgPrint("Replacing control volume for: " .. tostring(ent), volname)
+
+        local newVol = ents.Create("trigger") -- Yes this actually exists and it has what func_tank needs.
+        newVol:SetKeyValue("StartDisabled", "0")
+        newVol:SetKeyValue("spawnflags", vol:GetSpawnFlags())
+        newVol:SetModel(vol:GetModel())
+        newVol:SetMoveType(vol:GetMoveType())
+        newVol:SetPos(vol:GetPos())
+        newVol:SetAngles(vol:GetAngles())
+        newVol:SetName(newName)
+        newVol:Spawn()
+        newVol:Activate()
+        newVol:AddSolidFlags(FSOLID_TRIGGER)
+        newVol:SetNotSolid(true)
+        newVol:AddEffects(EF_NODRAW)
+
+        -- The previous volume is no longer needed.
+        vol:Remove()
+
+    end)
+
+    return newName
+
+end
+
 function GM:EntityKeyValue(ent, key, val)
 
     if self.MapScript then
@@ -458,11 +489,17 @@ function GM:EntityKeyValue(ent, key, val)
 
     ent.LambdaKeyValues = ent.LambdaKeyValues or {}
 
-    if key == "message" and ent:GetClass() == "env_message" and ent:GetName() ~= "LambdaGameOver" then
+    local entClass = ent:GetClass()
+    if key == "message" and entClass == "env_message" and ent:GetName() ~= "LambdaGameOver" then
         return ""
-    elseif key == "globalstate" and val == "friendly_encounter" and ent:GetClass() == "env_global" then
+    elseif key == "globalstate" and val == "friendly_encounter" and entClass == "env_global" then
         -- HACKHACK: This solves an issue that causes prediction errors because clients arent aware of global states.
         return ""
+    elseif key == "control_volume" and (entClass == "func_tank" or entClass == "func_tankairboatgun") then
+        -- HACKHACK: Because we replace the triggers with lua triggers func_tank will not work with control_volume.
+        --           We replace the volume with a new created trigger that is not from lua.
+        local newTriggerName = ReplaceFuncTankVolume(ent, val)
+        return newTriggerName
     end
 
     if util.IsOutputValue(key) then
