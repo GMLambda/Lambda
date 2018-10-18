@@ -22,6 +22,8 @@ local MODE_SMELL_FOOD = 3
 local MODE_SCARED_BY_ENT = 4
 local MODE_SCARED_BY_LIGHT = 5
 
+local COCKROACH_MDL = "models/decay/cockroach.mdl"
+
 local MODES =
 {
     [MODE_IDLE] = "MODE_IDLE",
@@ -77,7 +79,7 @@ local HIDING_MODELS =
     ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true,
 }
 
-util.PrecacheModel("models/roach.mdl");
+util.PrecacheModel(COCKROACH_MDL);
 
 util.PrecacheSound( "Roach.Walk" );
 util.PrecacheSound( "Roach.Die" );
@@ -141,7 +143,7 @@ function ENT:Initialize()
     self:SetCustomCollisionCheck(true)
     self:UseClientSideAnimation(true)
     self:SetPlaybackRate(10.0)
-    self:SetModel( "models/roach.mdl" )
+    self:SetModel( COCKROACH_MDL )
     self:SetCollisionBounds(Vector(-1.2, -1.2, 0), Vector(1.2, 1.2, 0.2))
     self:AddEffects(EF_NOSHADOW)
     self:SetModelScale(0.5, 0)
