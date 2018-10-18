@@ -229,7 +229,7 @@ DOOR_STATE_OPEN = 2
 DOOR_STATE_CLOSING = 3
 
 function ENTITY_META:GetDoorState()
-    return self:SafeGetInternalVariable("m_eDoorState")
+    return self:GetInternalVariable("m_eDoorState")
 end
 
 function ENTITY_META:IsDoorClosing()
@@ -249,7 +249,7 @@ function ENTITY_META:IsDoorOpen()
 end
 
 function ENTITY_META:IsDoorLocked()
-    return self:SafeGetInternalVariable("m_bLocked") or false
+    return self:GetInternalVariable("m_bLocked") or false
 end
 
 OVERLAY_TEXT_BIT            =   0x00000001      -- show text debug overlay for this entity
@@ -294,27 +294,13 @@ function ENTITY_META:RemoveDebugOverlays(f)
     self:SetSaveValue("m_debugOverlays", flags)
 end
 
-function ENTITY_META:SafeGetInternalVariable(var, default)
-    local res = self:GetInternalVariable(var)
-    if res ~= nil then
-        return res
-    end
-    if VERSION < 180820 then
-        local saveTable = self:GetSaveTable()
-        if saveTable[var] ~= nil then
-            return saveTable[var]
-        end
-    end
-    return default
-end
-
 function ENTITY_META:GetDebugOverlays()
-    return tonumber(self:SafeGetInternalVariable("m_debugOverlays", 0))
+    return tonumber(self:GetInternalVariable("m_debugOverlays", 0))
 end
 
 -- Vehicles
 function ENTITY_META:IsGunEnabled()
-    return self:SafeGetInternalVariable("EnableGun", false)
+    return self:GetInternalVariable("EnableGun", false)
 end
 
 -- Damage
@@ -470,7 +456,7 @@ function ENTITY_META:CopyAnimationDataFrom(other)
     self:AddEffects(other:GetEffects())
     self:SetSequence(other:GetSequence())
 
-    local animTime = other:SafeGetInternalVariable("m_flAnimTime")
+    local animTime = other:GetInternalVariable("m_flAnimTime")
     self:SetSaveValue("m_flAnimTime", animTime)
     self:SetSkin(other:GetSkin())
 
@@ -478,7 +464,7 @@ end
 
 function ENTITY_META:CanTakeDamage()
 
-    local data = self:SafeGetInternalVariable("m_takedamage")
+    local data = self:GetInternalVariable("m_takedamage")
     if data ~= nil then
         return data ~= 0 -- DAMAGE_NO
     else

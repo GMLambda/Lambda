@@ -107,11 +107,10 @@ if SERVER then
 
     function ents.FindByGlobalName(globalname)
         for _,v in pairs(ents.GetAll()) do
-            if v:SafeGetInternalVariable("globalname") == globalname or v:GetNW2String("GlobalName") == globalname then
+            if v:GetInternalVariable("globalname") == globalname or v:GetNWString("GlobalName") == globalname then
                 return v
             end
         end
-
         return nil
     end
 
