@@ -1,11 +1,14 @@
 local DbgPrint = GetLogging("Resource")
 
+local WORKSHOP_BUILD = false
+local WORKSHOP_ID = "780244493"
+
 function GM:InitializeResources()
-    if true then
+    if WORKSHOP_BUILD == false then
         self:AddResourceDir("materials")
         self:AddResourceDir("sound")
     else
-        resource.AddWorkshop("780244493")
+        resource.AddWorkshop(WORKSHOP_ID)
     end
 end
 
