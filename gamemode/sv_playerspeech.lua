@@ -395,7 +395,7 @@ function GM:HandleGrenadeContact(viewer, nate)
     if (nate.ExplosionAcknolwedged ~= true and
        nate:GetPos():Distance(pos) <= 150 and
        viewer:Health() <= 60 and
-       nate:SafeGetInternalVariable("m_flDetonateTime") <= 0.6)
+       nate:GetInternalVariable("m_flDetonateTime") <= 0.6)
     then
         if EmitPlayerSpeech(viewer, "death_imminent", 5, 0.2) == true then
             nate.ExplosionAcknolwedged = true

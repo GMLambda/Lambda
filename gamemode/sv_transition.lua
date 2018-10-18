@@ -439,7 +439,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
         Table = ent:GetTable(),
         Phys = {},
         SourceMap = ent.SourceMap or currentMap,
-        GlobalName = ent:GetNWString("GlobalName", ent:SafeGetInternalVariable("globalname")),
+        GlobalName = ent:GetNWString("GlobalName", ent:GetInternalVariable("globalname")),
     }
 
     if ent.LambdaKeyValues ~= nil then
@@ -489,8 +489,8 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
         if ent:IsDoorLocked() then
             data.SpawnFlags = bit.bor(data.SpawnFlags, 2048) -- Starts Locked
         end
-        data.Pos1 = ent:SafeGetInternalVariable("m_vecPosition1")
-        data.Pos2 = ent:SafeGetInternalVariable("m_vecPosition2")
+        data.Pos1 = ent:GetInternalVariable("m_vecPosition1")
+        data.Pos2 = ent:GetInternalVariable("m_vecPosition2")
     else
         data.Type = ENT_TYPE_GENERIC
     end
@@ -923,7 +923,7 @@ function GM:CreateTransitionObjects()
 
     local function findByGlobalName(name)
         for k,v in pairs(ents.GetAll()) do
-            local globalName = v:GetNWString("GlobalName", v:SafeGetInternalVariable("globalname"))
+            local globalName = v:GetNWString("GlobalName", v:GetInternalVariable("globalname"))
             if globalName == name then
                 DbgPrint("Found global!")
                 return k,v

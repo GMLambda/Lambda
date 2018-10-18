@@ -138,7 +138,7 @@ function GM:CheckStuckScenes()
             continue
         end
 
-        local waitingForActor = ent:SafeGetInternalVariable("m_bWaitingForActor", false)
+        local waitingForActor = ent:GetInternalVariable("m_bWaitingForActor", false)
         if waitingForActor == true then
             if ent.WaitingForActor ~= true then
                 DbgPrint(ent, "now waiting for actor")
