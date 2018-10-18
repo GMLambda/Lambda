@@ -240,6 +240,9 @@ function GM:EntityTakeDamage(target, dmginfo)
                 dmginfo:SetDamageForce(Vector(0, 0, 0))
             end
         end
+    else
+        -- Apply corrected damage also to anything else.
+        self:ApplyCorrectedDamage(dmginfo)
     end
 
     if target.FilterDamage == true then
