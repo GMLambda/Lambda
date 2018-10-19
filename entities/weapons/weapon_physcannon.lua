@@ -83,6 +83,12 @@ local physcannon_dmg_class = CreateConVar("physcannon_dmg_class", "15", bit.bor(
 local physcannon_mega_tracelength = CreateConVar("physcannon_mega_tracelength", "850", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 local physcannon_mega_pullforce = CreateConVar("physcannon_mega_pullforce", "8000", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 local physcannon_ball_cone = CreateConVar("physcannon_ball_cone", "0.997", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
+
+local physcannon_glow
+if CLIENT then
+    physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE) );
+end
+
 -- ConVar physcannon_maxmass( "physcannon_maxmass", "250" );
 
 local SPRITE_SCALE = 12
@@ -149,6 +155,9 @@ local PHYSCANNON_CORE_WARP = "particle/warp1_warp"
 
 local MAT_PHYSBEAM = Material("sprites/physbeam.vmt")
 local MAT_WORLDMDL = Material("models/weapons/w_physics/w_physics_sheet2")
+
+local GLOW_UPDATE_DT = 1 / 30
+
 --
 -- Code
 function SWEP:Precache()
@@ -178,6 +187,8 @@ function SWEP:Initialize()
 
     self.LastPuntedObject = nil
     self.NextPuntTime = CurTime()
+    self.NextGlowUpdate = CurTime()
+    self.NextBeamGlow = CurTime()
 
     self.OldEffectState = EFFECT_NONE
     self.GlowSprites = {}
@@ -1234,10 +1245,51 @@ end
 
 function SWEP:UpdateGlow()
 
-    -- Expiremental
-    do
+    if physcannon_glow:GetBool() == false then
         return
     end
+
+    if self.NextGlowUpdate ~= nil and CurTime() < self.NextGlowUpdate then
+        return
+    end
+
+    local entIndex = nil
+    local entPos = nil
+
+    if self:ShouldDrawUsingViewModel() == true then
+        local vm = LocalPlayer():GetViewModel()
+        if IsValid(vm) then
+            entIndex = vm:EntIndex()
+            entPos = vm:GetPos()
+        else
+            entIndex = self:EntIndex()
+            entPos = self:GetPos()
+        end
+    else
+        entIndex = self:EntIndex()
+        entPos = self:GetPos()
+    end
+
+    -- Expiremental
+    local color = self:GetWeaponColor()
+    local brightness = 1
+    if self:IsMegaPhysCannon() == true then
+        brightness = 2
+    end
+
+    local dlight = DynamicLight( entIndex )
+    if ( dlight ) then
+        dlight.pos = entPos
+        dlight.r = color.r * 255
+        dlight.g = color.g * 255
+        dlight.b = color.b * 255
+        dlight.brightness = brightness
+        dlight.Decay = 0
+        dlight.Size = 60
+        dlight.DieTime = CurTime() + GLOW_UPDATE_DT
+    end
+
+    self.NextGlowUpdate = CurTime() + GLOW_UPDATE_DT
 
 end
 
@@ -2264,6 +2316,9 @@ function SWEP:DrawCoreBeams()
 
     render.SetMaterial(MAT_PHYSBEAM)
 
+    local beamDrawn = false
+    local beamWidth = 0.0
+
     for i = PHYSCANNON_ENDCAP1, PHYSCANNON_ENDCAP3 do
 
         local beamdata = self.BeamParameters[i]
@@ -2280,7 +2335,9 @@ function SWEP:DrawCoreBeams()
 
         local endPos
         local params = self.EffectParameters[i]
-        if params == nil then continue end
+        if params == nil then
+            continue
+        end
 
         local attachmentData = self:GetAttachment(params.Attachment)
         if attachmentData == nil then
@@ -2310,8 +2367,31 @@ function SWEP:DrawCoreBeams()
             continue
         end
 
-        self:DrawBeam(endPos, corePos, width, color)
+        if width > beamWidth then
+            beamWidth = width
+        end
 
+        self:DrawBeam(endPos, corePos, width, color)
+        beamDrawn = true
+    end
+
+    if beamDrawn == true and physcannon_glow:GetBool() == true and CurTime() >= self.NextBeamGlow then
+        local color = self:GetWeaponColor()
+        local mul = (beamWidth / 10) * 255
+
+        local dlight = DynamicLight( self:EntIndex() )
+        if dlight then
+            dlight.pos = self:GetPos()
+            dlight.r = color.r * mul
+            dlight.g = color.g * mul
+            dlight.b = color.b * mul
+            dlight.brightness = 1
+            dlight.Decay = 500
+            dlight.Size = 256
+            dlight.DieTime = CurTime() + GLOW_UPDATE_DT
+        end
+
+        self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
     end
 
 end
@@ -2493,7 +2573,6 @@ end
 function SWEP:StartEffects()
 
     --DbgPrint("StartEffects")
-
     if SERVER then
         return
     end
@@ -2607,9 +2686,12 @@ function SWEP:UpdateEffects()
         local beamdata = self.BeamParameters[i]
 
         if self.CurrentEffect != EFFECT_HOLDING and self:IsObjectAttached() == false and math.random(0, 100) == 0 then
+
             self:EmitSound( "Weapon_MegaPhysCannon.ChargeZap" );
+
             beamdata.Scale:InitFromCurrent(0.5, 0.1)
             beamdata.Lifetime = 0.05 + (math.random() * 0.1)
+
         end
 
     end

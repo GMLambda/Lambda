@@ -319,6 +319,13 @@ function PANEL:Init()
 			gore:SizeToContents()
 			gore:SetConVar("lambda_gore")
 			gore:SetValue(cvars.Number("lambda_gore"))
+
+			local physcannon_glow = vgui.Create("DCheckBoxLabel", PanelPostFx)
+			physcannon_glow:SetPos(5, 45)
+			physcannon_glow:SetText("Gravity Gun Glow")
+			physcannon_glow:SizeToContents()
+			physcannon_glow:SetConVar("physcannon_glow")
+			physcannon_glow:SetValue(cvars.Number("physcannon_glow"))
 		end
 		sheetSettings:AddSheet("Effects", PanelPostFx)
 	end

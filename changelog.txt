@@ -8,12 +8,12 @@
 - Feature: Cockroaches, more or less like the classic ones from Half-Life 1, can be found hiding under objects.
 - Feature: Gore effects when crushed or exploded, set 'lambda_gore' to 0 disable, enabled by default.
 - Feature: Difficulty can be now set via 'lambda_difficulty', values 1: Very Easy, 2: Easy, 3: Normal, 4: Hard, 5: Very Hard
+- Feature: Gravity Gun Glow, can be turned by setting 'physcannon_glow' to 0.
 - Improved: Combine will now emit hurt sounds when taking damage.
 - Improved: Allow to select all known player models the server has.
 - Improved: Player sounds and taunts are now specific to the player model type.
 - Improved: Replaced some killicons, credits to _Kilburn for the icons.
 - Improved: The scoreboard has some improvements to better match gametypes and their rules.
-- Improved: Player sounds will now use the model to estimate what to play for speech.
 - Improved: Flashlight no longer drains suit energy.
 - Improved: Overall performance improvements for server and client.
 - Improved: Players will no longer have empty grenades or slams in their inventory.
