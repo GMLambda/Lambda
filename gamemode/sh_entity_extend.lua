@@ -40,12 +40,9 @@ local function EstimateModelGender(ent)
         end
     end
 
-    if
-        mdl:lower():find("female") or
+    if mdl:lower():find("female") or
         ent:LookupBone("ValveBiped.Bip01_R_Pectoral") or
-        ent:LookupBone("ValveBiped.Bip01_R_Latt") or
-        ent:LookupBone("ValveBiped.Bip01_L_Pectoral") or
-        ent:LookupBone("ValveBiped.Bip01_L_Latt")
+        ent:LookupBone("ValveBiped.Bip01_L_Pectoral")
     then
         return "female"
     end
