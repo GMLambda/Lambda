@@ -5,6 +5,7 @@ local WORKSHOP_ID = "780244493"
 
 function GM:InitializeResources()
     if WORKSHOP_BUILD == false then
+        self:AddResourceDir("models")
         self:AddResourceDir("materials")
         self:AddResourceDir("sound")
     else
