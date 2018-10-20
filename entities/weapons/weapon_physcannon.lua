@@ -156,7 +156,7 @@ local PHYSCANNON_CORE_WARP = "particle/warp1_warp"
 local MAT_PHYSBEAM = Material("sprites/physbeam.vmt")
 local MAT_WORLDMDL = Material("models/weapons/w_physics/w_physics_sheet2")
 
-local GLOW_UPDATE_DT = 1 / 30
+local GLOW_UPDATE_DT = 1 / 60
 
 --
 -- Code
@@ -1258,35 +1258,31 @@ function SWEP:UpdateGlow()
 
     if self:ShouldDrawUsingViewModel() == true then
         local vm = LocalPlayer():GetViewModel()
-        if IsValid(vm) then
-            entIndex = vm:EntIndex()
-            entPos = vm:GetPos()
-        else
-            entIndex = self:EntIndex()
-            entPos = self:GetPos()
-        end
+        local attachment = vm:GetAttachment(1)
+        entIndex = vm:EntIndex()
+        entPos = attachment.Pos
     else
         entIndex = self:EntIndex()
-        entPos = self:GetPos()
+        local attachment = self:GetAttachment(1)
+        entPos = attachment.Pos
     end
 
-    -- Expiremental
     local color = self:GetWeaponColor()
-    local brightness = 1
+    local brightness = 0.5
     if self:IsMegaPhysCannon() == true then
-        brightness = 2
+        brightness = 1
     end
 
     local dlight = DynamicLight( entIndex )
     if ( dlight ) then
         dlight.pos = entPos
-        dlight.r = color.r * 255
-        dlight.g = color.g * 255
-        dlight.b = color.b * 255
+        dlight.r = color.r * 128
+        dlight.g = color.g * 128
+        dlight.b = color.b * 128
         dlight.brightness = brightness
         dlight.Decay = 0
         dlight.Size = 60
-        dlight.DieTime = CurTime() + GLOW_UPDATE_DT
+        dlight.DieTime = CurTime() + GLOW_UPDATE_DT + (FrameTime() * 2)
     end
 
     self.NextGlowUpdate = CurTime() + GLOW_UPDATE_DT
@@ -2376,19 +2372,20 @@ function SWEP:DrawCoreBeams()
     end
 
     if beamDrawn == true and physcannon_glow:GetBool() == true and CurTime() >= self.NextBeamGlow then
+
         local color = self:GetWeaponColor()
-        local mul = (beamWidth / 10) * 255
+        local mul = (beamWidth / 10) * 128
 
         local dlight = DynamicLight( self:EntIndex() )
         if dlight then
-            dlight.pos = self:GetPos()
+            dlight.pos = corePos
             dlight.r = color.r * mul
             dlight.g = color.g * mul
             dlight.b = color.b * mul
-            dlight.brightness = 1
-            dlight.Decay = 500
+            dlight.brightness = 0.5
+            dlight.Decay = 0
             dlight.Size = 256
-            dlight.DieTime = CurTime() + GLOW_UPDATE_DT
+            dlight.DieTime = CurTime() + GLOW_UPDATE_DT + FrameTime()
         end
 
         self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
@@ -2685,12 +2682,42 @@ function SWEP:UpdateEffects()
         local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
         local beamdata = self.BeamParameters[i]
 
-        if self.CurrentEffect != EFFECT_HOLDING and self:IsObjectAttached() == false and math.random(0, 100) == 0 then
+        if self.CurrentEffect != EFFECT_HOLDING and self:IsObjectAttached() == false and math.random(0, 150) == 0 then
 
             self:EmitSound( "Weapon_MegaPhysCannon.ChargeZap" );
 
             beamdata.Scale:InitFromCurrent(0.5, 0.1)
             beamdata.Lifetime = 0.05 + (math.random() * 0.1)
+
+            if physcannon_glow:GetBool() == true then
+
+                local params = self.EffectParameters[i]
+                if params == nil then
+                    return
+                end
+
+                local attachmentData = self:GetAttachment(params.Attachment)
+                if attachmentData == nil then
+                    return
+                end
+
+                local color = self:GetWeaponColor()
+                local mul = 255
+
+                local dlight = DynamicLight( self:EntIndex() )
+                if dlight then
+                    dlight.pos = attachmentData.Pos
+                    dlight.r = color.r * mul
+                    dlight.g = color.g * mul
+                    dlight.b = color.b * mul
+                    dlight.brightness = 1
+                    dlight.Decay = 0
+                    dlight.Size = 256
+                    dlight.DieTime = CurTime() + beamdata.Lifetime
+                end
+
+                self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
+            end
 
         end
 
