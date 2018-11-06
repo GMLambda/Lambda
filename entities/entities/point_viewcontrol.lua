@@ -1,4 +1,6 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 --local DbgPrint = print
 local DbgPrint = GetLogging("ViewControl")
@@ -58,6 +60,7 @@ function ENT:Initialize()
 
 end
 
+
 function ENT:Think()
 
     if CLIENT then
@@ -69,10 +72,49 @@ function ENT:Think()
         return
     end
 
+    if self:MaintainPlayers() == false then
+        return
+    end
+
     self:FollowTarget()
     self:Move()
 
     self:NextThink(CurTime())
+    return true
+
+end
+
+function ENT:MaintainPlayers()
+
+    for k, data in pairs(self.ActivePlayers) do
+        local ply = data.Player
+
+         -- Remove invalid players.
+        if not IsValid(ply) then
+            table.remove(self.ActivePlayers, k)
+            continue
+        end
+
+        if self:HasSpawnFlags(SF_CAMERA_PLAYER_INTERRUPT) == true then
+            -- If players press buttons throw them out.
+            local curButtons = ply:GetButtons()
+            local changed = bit.bxor(curButtons, data.Buttons)
+
+            if changed ~= 0 and curButtons ~= 0 then
+                self:RestorePlayer(ply, data)
+                table.remove(self.ActivePlayers, k)
+            end
+
+            data.Buttons = curButtons
+        end
+    end
+
+    -- If there are no more players we can disable this.
+    if #self.ActivePlayers == 0 then
+        self:Disable()
+        return false
+    end
+
     return true
 
 end
@@ -154,18 +196,6 @@ function ENT:Move()
     if #self.ActivePlayers == 0 then
         return
     end
-    
-    if self:HasSpawnFlags(SF_CAMERA_PLAYER_INTERRUPT) == true then
-
-        for _,ply in pairs(self.ActivePlayers) do
-
-            if IsValid(ply) then
-                 -- FIXME: Disable this once interrupted.
-            end
-
-        end
-
-    end
 
     if not IsValid(self.TargetPath) then
         -- Not on a path, don't move.
@@ -221,7 +251,7 @@ function ENT:Move()
 
         self:SetAbsVelocity(velocity)
         self.LastPos = self:GetPos()
-        
+
     end
 
 end
@@ -244,6 +274,7 @@ function ENT:AddPlayerToControl(ply)
 
     local restoreData = {}
     restoreData.Player = ply
+    restoreData.Buttons = ply:GetButtons()
 
     if IsValid(viewEntity) and viewEntity:GetClass() == "point_viewcontrol" then
         -- Remove the player from the previous one, transition data over.
@@ -410,26 +441,41 @@ function ENT:DisableControl()
 end
 
 function ENT:Enable(data, activator, caller)
-
     DbgPrint(self, "Enable", data, activator, caller)
 
     local ply = nil
-    if IsValid(activator) and activator:IsPlayer() then
+
+    -- HACKHACK: d2_coast_03 uses func_door to relay the input.
+    if IsValid(activator) and activator:GetClass() == "func_door" then
+        -- ["m_hActivator"] = <Player>: Player [1][ζeh Matt]>,
+        print("Coast Hack")
+        ply = activator:GetInternalVariable("m_hActivator")
+    end
+
+    if not IsValid(ply) and IsValid(activator) and activator:IsPlayer() then
         ply = activator
     end
-    if IsValid(caller) and caller:IsPlayer() then
+
+    if not IsValid(ply) and IsValid(caller) and caller:IsPlayer() then
         ply = caller
     end
 
+    -- If we have no valid player at this point and it has not the multiplayer flag
+    -- should we just ignore it?
+
     self:SetNWVar("Disabled", false)
     self:EnableControl(ply)
+
+    return true
 end
 
-function ENT:Disable(data, activator, caller)
-    DbgPrint(self, "Disable", data, activator, caller)
+function ENT:Disable()
+    DbgPrint(self, "Disable")
 
     self:SetNWVar("Disabled", true)
     self:DisableControl()
+
+    return true
 end
 
 function ENT:UpdateTransmitState()
