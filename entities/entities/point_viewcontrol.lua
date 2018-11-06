@@ -76,11 +76,6 @@ function ENT:Think()
 
 end
 
-function ENT:LookAtTarget()
-   local diff = self.TargetEntity:GetPos() - self.Proxy:GetPos()
-   self:SetAngles(diff:Angle())
-end
-
 function ENT:FollowTarget()
 
     local target = self.TargetEntity
@@ -359,7 +354,6 @@ function ENT:EnableControl(ply)
         if pathSpeed > 0 then
             self.TargetSpeed = pathSpeed
         end
-        -- FIXME: Add delay from path.
         self.StopTime = CurTime() + (targetPath:GetInternalVariable("wait") or 0)
     end
 
@@ -369,7 +363,7 @@ function ENT:EnableControl(ply)
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_POSITION) then
         -- Can only do this if a single player is using this.
-        error("NO")
+        
     else
         self:SetAbsVelocity(vec3_origin)
     end
