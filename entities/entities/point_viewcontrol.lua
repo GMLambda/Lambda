@@ -60,6 +60,9 @@ function ENT:Initialize()
 
 end
 
+function ENT:OnRemove()
+    self:Disable()
+end
 
 function ENT:Think()
 
@@ -451,6 +454,11 @@ end
 function ENT:Enable(data, activator, caller)
     DbgPrint(self, "Enable", data, activator, caller)
 
+    -- Avoid doing this.
+    if self:GetNWVar("Disabled") == false then
+        return
+    end
+
     local ply = nil
 
     -- HACKHACK: d2_coast_03 uses func_door to relay the input.
@@ -477,6 +485,11 @@ end
 
 function ENT:Disable()
     DbgPrint(self, "Disable")
+
+    -- Avoid doing this.
+    if self:GetNWVar("Disabled") == true then
+        return
+    end
 
     self:SetNWVar("Disabled", true)
     self:DisableControl()
