@@ -39,16 +39,6 @@ MAPSCRIPT.GlobalStates =
 function MAPSCRIPT:Init()
 end
 
-function MAPSCRIPT:ResetPlayerPos(ply)
-
-    if self.PlayersLocked == true then
-        local gman = ents.FindFirstByName("gman")
-        ply:SetPos(Vector(-14576, -13924, -1290))
-        ply:LockPosition(true, VIEWLOCK_NPC, gman)
-    end
-
-end
-
 function MAPSCRIPT:PostInit()
 
     if SERVER then
@@ -100,9 +90,6 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnTimer lambda_queue_pclip,Disable,,2.5,-1")
         end)
 
-
-        self.PlayersLocked = true
-
         -- Remove all default spawnpoints.
         ents.RemoveByClass("info_player_start")
 
@@ -145,9 +132,9 @@ function MAPSCRIPT:PostInit()
         spawn3:Spawn()
         spawn3.MasterSpawn = false
 
-        -- Fix point_viewcontrol, setup All Players flag.
+        -- Fix point_viewcontrol, affect all players.
         for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
-            v:SetKeyValue("spawnflags", "128")
+            v:SetKeyValue("spawnflags", "128") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
         end
 
         -- Make the cop go outside the hallway so other players can still pass by.
@@ -161,12 +148,9 @@ function MAPSCRIPT:PostInit()
             spawn1.MasterSpawn = false
             spawn2.MasterSpawn = true
 
-            -- Unlock players.
-            self.PlayersLocked = false
-
-            for k,v in pairs(player.GetAll()) do
-                v:LockPosition(false, false)
-                v:SetNoDraw(false)
+            -- Disable them earlier, the black fadeout is gone.
+            for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
+                v:Fire("Disable")
             end
 
         end)
@@ -209,19 +193,7 @@ function MAPSCRIPT:PostInit()
         -- Use a better spot for barney
         local mark_barneyroom_comblock_4 = ents.FindFirstByName("mark_barneyroom_comblock_4")
         mark_barneyroom_comblock_4:SetPos(Vector(-3588, 3, -31))
-    end
-
-end
-
-function MAPSCRIPT:PostPlayerSpawn(ply)
-
-    DbgPrint("PostPlayerSpawn")
-
-    if self.PlayersLocked == true then
-        self:ResetPlayerPos(ply)
-        ply:SetNoDraw(true)
-    else
-        ply:SetNoDraw(false)
+        
     end
 
 end
