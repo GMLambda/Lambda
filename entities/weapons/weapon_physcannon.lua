@@ -1260,7 +1260,7 @@ function SWEP:UpdateGlow()
         local vm = LocalPlayer():GetViewModel()
         local attachment = vm:GetAttachment(1)
         entIndex = vm:EntIndex()
-        entPos = attachment.Pos
+        entPos = attachment.Pos - (LocalPlayer():GetAimVector() * 35)
     else
         entIndex = self:EntIndex()
         local attachment = self:GetAttachment(1)
