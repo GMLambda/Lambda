@@ -1207,6 +1207,7 @@ function GM:StartCommand(ply, cmd)
             cmd:SetViewAngles(ply:GetAngles())
         end
 
+        ply.LastUserCmdButtons = cmd:GetButtons()
         return
     end
 
@@ -1232,6 +1233,8 @@ function GM:StartCommand(ply, cmd)
     if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then
         cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK)))
     end
+
+     ply.LastUserCmdButtons = cmd:GetButtons()
 
 end
 

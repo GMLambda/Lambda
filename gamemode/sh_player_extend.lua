@@ -305,3 +305,10 @@ function PLAYER_META:InsideViewCone(other, tolerance)
     return dot >= (tolerance or 0.6)
 
 end 
+
+function PLAYER_META:GetButtons()
+    if self.LastUserCmdButtons ~= nil then
+        return self.LastUserCmdButtons
+    end
+    return 0
+end
