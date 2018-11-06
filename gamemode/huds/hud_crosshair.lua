@@ -21,6 +21,10 @@ function GM:ShouldDrawCrosshair()
 		return false
 	end
 
+	if ply:GetViewEntity() ~= ply then
+		return false
+	end
+
 	if ply:Alive() == true and ply:InVehicle() == true then
 		local veh = ply:GetVehicle()
 		if veh:GetClass() == "prop_vehicle_jeep" or veh:GetClass() == "prop_vehicle_airboat" then
