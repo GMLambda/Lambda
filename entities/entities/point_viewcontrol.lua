@@ -7,9 +7,9 @@ local DbgPrint = GetLogging("ViewControl")
 
 -- Spawnflags
 local SF_CAMERA_PLAYER_POSITION = 1
-local SF_CAMERA_PLAYER_TARGET = 2
+--local SF_CAMERA_PLAYER_TARGET = 2
 local SF_CAMERA_PLAYER_TAKECONTROL = 4
-local SF_CAMERA_PLAYER_INFINITE_WAIT = 8
+--local SF_CAMERA_PLAYER_INFINITE_WAIT = 8
 local SF_CAMERA_PLAYER_SNAP_TO = 16
 local SF_CAMERA_PLAYER_NOT_SOLID = 32
 local SF_CAMERA_PLAYER_INTERRUPT = 64
@@ -128,9 +128,12 @@ function ENT:FollowTarget()
         return
     end
 
+    -- Not sure what this is about
+    --[[
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false then
         -- TODO: Not wait forever?
     end
+    ]]
 
     local diffAng
 
@@ -361,8 +364,6 @@ function ENT:EnableControl(ply)
     end
 
     local targetEntityName = self:GetNWVar("Target")
-
-    self.InitialPos = self:GetPos()
     self.ReturnTime = CurTime() + self:GetNWVar("Wait")
     self.Speed = self:GetNWVar("Speed")
 
@@ -372,7 +373,7 @@ function ENT:EnableControl(ply)
     end
     self.AttachmentIndex = 0
     self.TargetSpeed = 1
-    self.SnapToTarget = true --self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
+    self.SnapToTarget = self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
 
     if IsValid(self.TargetEntity) then
         local attachmentName = self:GetNWVar("TargetAttachment")
@@ -412,12 +413,19 @@ function ENT:EnableControl(ply)
         self.MoveDistance = 0
     end
 
-    for _, ply in pairs(plys) do
-        self:AddPlayerToControl(ply)
+    for _, v in pairs(plys) do
+        self:AddPlayerToControl(v)
     end
 
-    if self:HasSpawnFlags(SF_CAMERA_PLAYER_POSITION) then
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_POSITION) == true and #self.ActivePlayers == 1 then
         -- Can only do this if a single player is using this.
+        local firstPlayer = self.ActivePlayers[1].Player
+        self:SetPos(firstPlayer:EyePos())
+        self:SetAbsVelocity(firstPlayer:GetAbsVelocity())
+
+        local ang = firstPlayer:GetLocalAngles()
+        ang.z = 0
+        self:SetLocalAngles(ang)
     else
         self:SetAbsVelocity(vec3_origin)
     end
@@ -447,8 +455,6 @@ function ENT:Enable(data, activator, caller)
 
     -- HACKHACK: d2_coast_03 uses func_door to relay the input.
     if IsValid(activator) and activator:GetClass() == "func_door" then
-        -- ["m_hActivator"] = <Player>: Player [1][ζeh Matt]>,
-        print("Coast Hack")
         ply = activator:GetInternalVariable("m_hActivator")
     end
 
