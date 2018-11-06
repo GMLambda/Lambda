@@ -75,11 +75,6 @@ function MAPSCRIPT:PostInit()
             ent:SetHealth(100)
         end)
 
-        -- Adds an overlay to the player view and never gets removed.
-        ents.WaitForEntityByName("telescope_button", function(ent)
-            ent:SetName("Lambda_" .. ent:GetName())
-        end)
-
         ents.WaitForEntityByName("killed_critical_npc", function(ent)
             ent:SetName("killed_critical_npc_2")
         end)
