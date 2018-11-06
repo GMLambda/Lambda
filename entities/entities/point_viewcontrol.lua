@@ -70,6 +70,7 @@ function ENT:Think()
     end
 
     self:FollowTarget()
+    self:Move()
 
     self:NextThink(CurTime())
     return true
@@ -136,8 +137,6 @@ function ENT:FollowTarget()
         self:SetLocalAngularVelocity(angVel)
 
     end
-
-    self:Move()
 
 end
 
@@ -355,6 +354,12 @@ function ENT:EnableControl(ply)
             self.TargetSpeed = pathSpeed
         end
         self.StopTime = CurTime() + (targetPath:GetInternalVariable("wait") or 0)
+
+        if self:HasSpawnFlags(SF_CAMERA_PLAYER_SNAP_TO) == true then
+            -- Teleport to path_track
+            self:SetPos(targetPath:GetPos())
+            self:SetAngles(targetPath:GetAngles())
+        end
     end
 
     for _, ply in pairs(plys) do
