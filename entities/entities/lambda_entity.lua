@@ -1,7 +1,7 @@
 local DbgPrint = GetLogging("LambdaEnt")
 
 ENT.Base = "base_entity"
-ENT.Type = "point"
+ENT.Type = "anim"
 
 AddCSLuaFile()
 
@@ -266,7 +266,7 @@ function ENT:SetNWVars(vars)
     end
 end
 
-if SERVER then
+--if SERVER then
 
     function ENT:AddSpawnFlags(flags)
         local flags = bit.bor(self:GetSpawnFlags(), flags)
@@ -419,4 +419,4 @@ if SERVER then
 
     end
 
-end
+--end
