@@ -150,6 +150,11 @@ end
 
 function ENT:Move()
 
+    -- Don't move if we have no players yet.
+    if #self.ActivePlayers == 0 then
+        return
+    end
+    
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_INTERRUPT) == true then
 
         for _,ply in pairs(self.ActivePlayers) do
@@ -168,7 +173,14 @@ function ENT:Move()
     end
 
     do
-        self.MoveDistance = self.MoveDistance - self:GetNWVar("Speed") * FrameTime()
+        local currentPos = self:GetPos()
+
+        if self.TargetPath:HasSpawnFlags(2 --[[ SF_PATHCORNER_TELEPORT ]]) == true then
+            self:SetPos(self.TargetPath:GetPos())
+            self.MoveDistance = -1
+        else
+            self.MoveDistance = self.MoveDistance - currentPos:Distance(self.LastPos)
+        end
 
         if self.MoveDistance <= 0 then
 
@@ -208,7 +220,8 @@ function ENT:Move()
         local velocity = ((self.MoveDir * self.Speed) * frac) + (self:GetAbsVelocity() * (1.0 - frac))
 
         self:SetAbsVelocity(velocity)
-
+        self.LastPos = self:GetPos()
+        
     end
 
 end
@@ -348,18 +361,24 @@ function ENT:EnableControl(ply)
 
     self.StopTime = CurTime()
     if IsValid(self.TargetPath) then
+
         local targetPath = self.TargetPath
+
         local pathSpeed = (targetPath:GetInternalVariable("speed") or 0)
         if pathSpeed > 0 then
             self.TargetSpeed = pathSpeed
         end
+
+        local targetPathPos = targetPath:GetLocalPos()
+        local localPos = self:GetLocalPos()
+
+        self.MoveDir = targetPathPos - localPos
+        self.MoveDir:Normalize()
+        self.MoveDistance = targetPathPos:Distance(localPos)
         self.StopTime = CurTime() + (targetPath:GetInternalVariable("wait") or 0)
 
-        if self:HasSpawnFlags(SF_CAMERA_PLAYER_SNAP_TO) == true then
-            -- Teleport to path_track
-            self:SetPos(targetPath:GetPos())
-            self:SetAngles(targetPath:GetAngles())
-        end
+    else
+        self.MoveDistance = 0
     end
 
     for _, ply in pairs(plys) do
@@ -368,12 +387,11 @@ function ENT:EnableControl(ply)
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_POSITION) then
         -- Can only do this if a single player is using this.
-        
     else
         self:SetAbsVelocity(vec3_origin)
     end
 
-    self.MoveDistance = 0
+    self.LastPos = self:GetPos()
     self:Move()
 
 end
