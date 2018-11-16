@@ -38,42 +38,43 @@ end
 
 function ENT:Think()
 
+    if self:GetNWVar("Disabled") == true then
+        self:NextThink(CurTime() + 1)
+        return true
+    end
+
     self:NextThink(CurTime() + 0.2)
 
-    if self:GetNWVar("Disabled") == true then 
-        return true
-    end 
-
     local globalState = self:GetNWVar("GlobalState")
-    if globalState ~= "" and game.GetGlobalState(globalState) ~= GLOBAL_ON then 
+    if globalState ~= "" and game.GetGlobalState(globalState) ~= GLOBAL_ON then
         return true
     end
 
     local loadType = ""
     local mapScript = nil
-    if GAMEMODE ~= nil then 
+    if GAMEMODE ~= nil then
         loadType = GAMEMODE:GetMapLoadType()
         mapScript = GAMEMODE:GetMapScript()
-    else 
+    else
         loadType = game.MapLoadType()
-    end 
+    end
 
-    if loadType == "transition" then 
+    if loadType == "transition" then
         if mapScript ~= nil and mapScript.OnMapTransition ~= nil then
             mapScript:OnMapTransition()
         end
         self:FireOutputs("OnMapTransition", nil, nil)
-    elseif loadType == "newgame" then 
+    elseif loadType == "newgame" then
         if mapScript ~= nil and mapScript.OnNewGame ~= nil then
             mapScript:OnNewGame()
         end
         self:FireOutputs("OnNewGame", nil, nil)
-    elseif loadType == "loadgame" then 
+    elseif loadType == "loadgame" then
         if mapScript ~= nil and mapScript.OnLoadGame ~= nil then
             mapScript:OnLoadGame()
         end
         self:FireOutputs("OnLoadGame", nil, nil)
-    elseif loadType == "background" then 
+    elseif loadType == "background" then
         if mapScript ~= nil and mapScript.OnBackgroundMap ~= nil then
             mapScript:OnBackgroundMap()
         end
@@ -83,18 +84,21 @@ function ENT:Think()
     -- Fires without condition.
     self:FireOutputs("OnMapSpawn", nil, nil)
 
-    if self:HasSpawnFlags(SF_AUTO_FIREONCE) == true then 
+    if self:HasSpawnFlags(SF_AUTO_FIREONCE) == true then
         self.Think = function() end
         self:Remove()
+    else
+        -- Stay dormant, for whatever reason.
+        self:Disable()
     end
 
     return true
 
-end 
+end
 
 function ENT:Enable()
     self:SetNWVar("Disabled", false)
-end 
+end
 
 function ENT:Disable()
     self:SetNWVar("Disabled", true)

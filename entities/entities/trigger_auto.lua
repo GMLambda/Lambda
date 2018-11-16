@@ -48,6 +48,8 @@ function ENT:Think()
             self.Disabled = true
             self:Remove()
         end
+        -- Only do it once.
+        self.Disabled = true
     end
 end
 
