@@ -19,6 +19,14 @@ ROUND_INFO_WAITING_FOR_PLAYER = 3
 ROUND_INFO_STARTED = 4
 ROUND_INFO_FINISHED = 5
 
+function GM:ShouldWaitForPlayers()
+    local res = self:GetGameTypeData("WaitForPlayers")
+    if res == nil then
+        return false
+    end
+    return res
+end
+
 function GM:InitializeRoundSystem()
 
     DbgPrint("GM:InitializeRoundSystem")
@@ -30,7 +38,7 @@ function GM:InitializeRoundSystem()
     self:SetRoundState(STATE_IDLE)
     self:SetRoundStartTime(GetSyncedTimestamp())
 
-    self.WaitingForRoundStart = true
+    self.WaitingForRoundStart = self:ShouldWaitForPlayers()
     self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
 
 end
@@ -562,10 +570,7 @@ function GM:StartRound(cleaned)
             DbgError("Unfinished booting")
         end
 
-        if cleaned ~= true then
-        --  GAMEMODE:CleanUpMap()
-        --  DbgPrint("Forcing map refresh.")
-        else
+        if cleaned == true then
             -- Make sure map created vehicles are gone, we take over.
             self:CleanUpVehicles()
         end
@@ -577,10 +582,12 @@ function GM:StartRound(cleaned)
 
     self.WaitingForRoundStart = false
 
-    if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
-        self.WaitingForRoundStart = true
-    elseif player.GetCount() == 0 then
-        self.WaitingForRoundStart = true
+    if self:ShouldWaitForPlayers() == true then
+        if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
+            self.WaitingForRoundStart = true
+        elseif player.GetCount() == 0 then
+            self.WaitingForRoundStart = true
+        end
     end
 
     self:ResetMapScript()

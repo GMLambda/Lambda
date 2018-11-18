@@ -10,6 +10,7 @@ GAMETYPE.BaseGameType = "lambda_base"
 GAMETYPE.MapScript = {}
 GAMETYPE.PlayerSpawnClass = "info_player_start"
 GAMETYPE.UsingCheckpoints = true
+GAMETYPE.WaitForPlayers = true
 GAMETYPE.MapList =
 {
     "c0a0",

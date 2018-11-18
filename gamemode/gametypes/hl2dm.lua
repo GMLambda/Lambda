@@ -10,6 +10,7 @@ GAMETYPE.MapScript = {}
 GAMETYPE.UsingCheckpoints = false
 GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
 GAMETYPE.PlayerTiming = false
+GAMETYPE.WaitForPlayers = false
 
 GAMETYPE.MapList =
 {
