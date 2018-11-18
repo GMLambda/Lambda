@@ -3,8 +3,14 @@ local PANEL = {}
 local W = 375
 local H = 440
 
-local COLOR_PANEL_W = 267
+local COLOR_PANEL_W = 280
 local COLOR_PANEL_H = 206
+
+local border = 4
+local border_w = 5
+local matHover = Material( "gui/ps_hover.png", "nocull" )
+local boxHover = GWEN.CreateTextureBorder( border, border, 64 - border * 2, 64 - border * 2, border_w, border_w, border_w, border_w, matHover )
+
 
 cvars.AddChangeCallback("lambda_playermdl", function()
 	net.Start("LambdaPlayerSettingsChanged")
@@ -17,15 +23,6 @@ function PANEL:Init()
 	self:SetSize(W, H)
 	self:SetPos(20, ScrH() / 2 - (H / 2))
 	self:SetTitle("Settings")
-	self:ShowCloseButton(false)
-
-	local closeb = self:Add("DImageButton")
-	closeb:SetPos(W - 20, 4)
-	closeb:SetImage("lambda/icons/close.png")
-	closeb:SizeToContents()
-	closeb.DoClick = function()
-		self:Close()
-	end
 
 	self.Sheet = self:Add("DPropertySheet")
 	self.Sheet:Dock(LEFT)
@@ -48,6 +45,8 @@ function PANEL:Init()
 
 		icon:SetSize(64, 64)
 		icon:SetTooltip(name)
+
+		icon.PaintOver = function(self, w, h) if self.OverlayFade > 0 then boxHover( 0, 0, w, h, Color( 255, 255, 255, self.OverlayFade ) ) end self:DrawSelections() end
 
 		PanelSelect:AddPanel(icon, { lambda_playermdl = name })
 	end
@@ -423,6 +422,7 @@ function PANEL:Init()
 
 		local difficulty_cmb = vgui.Create("DComboBox", PanelAdmin)
 		difficulty_cmb:SetPos(5, 4 * nwh + 25)
+		difficulty_cmb:SetTextColor(Color(255, 255, 255, 155))
 		difficulty_cmb:SetText("Difficulty")
 		difficulty_cmb:SetSize(100, 22)
 		difficulty_cmb:SetSortItems(false)
