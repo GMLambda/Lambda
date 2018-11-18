@@ -1,3 +1,6 @@
+0.9.3
+- Improved: Allow gametype to auto start without players.
+
 0.9.2:
 - Fix: logic_auto and trigger_auto firing too many events.
 - Improved: Slightly offset the glow on physcannon to prevent culling.
