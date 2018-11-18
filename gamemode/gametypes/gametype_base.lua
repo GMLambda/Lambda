@@ -14,6 +14,7 @@ GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
+GAMETYPE.WaitForPlayers = false
 
 function GAMETYPE:GetPlayerRespawnTime()
     return 0
