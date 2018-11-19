@@ -400,6 +400,16 @@ function GM:PostCleanupMap()
         self:StartRound(true)
     end)
 
+    -- Reset all NPCs.
+    if SERVER then
+        for k,v in pairs(ents.GetAll()) do
+            if v:IsNPC() then
+                v:SetSchedule(SCHED_IDLE_STAND)
+                v:SetNPCState(NPC_STATE_IDLE)
+            end
+        end
+    end
+    
 end
 
 function GM:IsRoundRestarting()

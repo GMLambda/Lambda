@@ -53,6 +53,54 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        local function fixCitizen(ent)
+            ent:SetKeyValue("spawnflags", "16794640")
+        end
+
+        ents.WaitForEntityByName("citizen_queue_start_1", fixCitizen)
+        ents.WaitForEntityByName("citizen_queue_start_2", fixCitizen)
+        ents.WaitForEntityByName("citizen_queue_start_3", fixCitizen)
+
+        ents.RemoveByClass("trigger_once", Vector(-4614.97, -678.03, 16))
+        ents.RemoveByClass("trigger_once", Vector(-4614.97, -806.03, 16))
+        ents.RemoveByClass("trigger_once", Vector(-5022.15, -787.48, 0))
+        ents.RemoveByClass("trigger_once", Vector(-4370.18, -922.25, 20.5))
+
+        ents.WaitForEntityByName("customs_schedule_walk_to_exit", function(ent)
+            ent:SetKeyValue("m_flRadius", "110")
+            ent:SetKeyValue("m_iszEntity", "citizen_queue_start*")
+        end)
+
+        ents.WaitForEntityByName("customs_schedule_walk_to_train", function(ent)
+            ent:SetKeyValue("m_flRadius", "110")
+            ent:SetKeyValue("m_iszEntity", "citizen_queue_start*")
+        end)
+
+        local queueTrigger = ents.Create("trigger_once")
+        queueTrigger:SetupTrigger(Vector(-4322.127441, -922.505859, -27.981224), Angle(0,0,0), Vector(-20, -20, 0), Vector(20, 20, 90))
+        queueTrigger:SetKeyValue("teamwait", 0)
+        queueTrigger:Fire("AddOutput", "OnTrigger customs_relay_send_to_train,Trigger,,0.0,-1")
+        queueTrigger:Fire("AddOutput", "OnTrigger lambda_queue_pclip,Kill,,0.0,-1")
+
+        local pclipBrush = ents.Create("func_brush")
+        pclipBrush:SetPos(Vector(-4330.575195, -922.814453, 35))
+        pclipBrush:SetName("lambda_queue_pclip")
+        pclipBrush:SetModel("*58")
+        pclipBrush:SetKeyValue("disabled", "1")
+        pclipBrush:SetKeyValue("rendermode", "10")
+        pclipBrush:SetKeyValue("excludednpc", "npc_citizen")
+        pclipBrush:Spawn()
+
+        ents.WaitForEntityByName("trigger_watchclock", function(ent)
+            ent:Fire("AddOutput", "OnTrigger customs_queue_timer,Enable,,0.1,-1")
+        end)
+
+        ents.WaitForEntityByName("customs_queue_timer", function(ent)
+            ent:Fire("AddOutput", "OnTimer lambda_queue_pclip,Enable,,0.0,-1")
+            ent:Fire("AddOutput", "OnTimer lambda_queue_pclip,Disable,,2.5,-1")
+        end)
+
+
         self.PlayersLocked = true
 
         -- Remove all default spawnpoints.
@@ -150,8 +198,6 @@ function MAPSCRIPT:PostInit()
         barney_room_trigger.OnTrigger = function(self)
             spawn2.MasterSpawn = false
             spawn3.MasterSpawn = true
-            --ents.WaitForEntityByName("barney_door_2", function(ent) ent:Fire("Close") end)
-            --ents.WaitForEntityByName("barney_door_2", function(ent) ent:Fire("Lock") end)
             ents.WaitForEntityByName("security_intro_02", function(ent) ent:Fire("Start") end)
             ents.WaitForEntityByName("barney_room_blocker", function(ent) ent:Fire("Enable") end)
         end
@@ -159,15 +205,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("barney_door_2", function(ent)
             ent:SetKeyValue("opendir", "2")
         end)
-
-        --[[
-        GAMEMODE:WaitForInput("barney_door_2", "Close", function()
-            GAMEMODE:RemoveInputCallback("barney_door_2", "Close")
-            GAMEMODE:RemoveInputCallback("barney_door_2", "Lock")
-            barney_room_trigger:Fire("Enable")
-            return true -- Supress
-        end)
-        ]]
 
         -- Use a better spot for barney
         local mark_barneyroom_comblock_4 = ents.FindFirstByName("mark_barneyroom_comblock_4")
