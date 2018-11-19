@@ -131,7 +131,6 @@ function ENT:Initialize()
 
     -- NOTE: Lets figure out a way that tells us if we could apply infinite childreen.
     --       one way would be going per NPC type?
-
 end
 
 function ENT:FindSpawnDestination()
@@ -389,10 +388,6 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
             local dir = ang:Forward()
             local testPos = pos + (dir * traceRadius)
 
-            if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
-                continue
-            end
-
             -- Check if they would fall.
             local tr = util.TraceLine(
             {
@@ -415,9 +410,14 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
                 mask = MASK_NPCSOLID,
             })
 
-            if hullTr.Hit == true then 
-                continue 
-            end 
+            if hullTr.Hit == true then
+                continue
+            end
+
+            if checkVisible == true and util.IsPosVisibleToPlayers(testPos) == true then
+                DbgPrint("Visible to player can not spawn NPC")
+                continue
+            end
 
             --PrintTable(hullTr)
             debugoverlay.Box(hullTr.HitPos, hullMins, hullMaxs, 0.1, Color(255, 255, 255))
@@ -429,7 +429,7 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
 
             end
 
-        end 
+        end
 
     end
 
@@ -443,9 +443,9 @@ function ENT:PlaceNPCInRadius(npc, checkVisible)
 
     local hull = { npc:GetHullMins(), npc:GetHullMaxs() }
     local spawnPos = self:GetSpawnPosInRadius(hull, checkVisible)
-    if spawnPos == nil then 
-        return false 
-    end 
+    if spawnPos == nil then
+        return false
+    end
 
     npc:SetPos(spawnPos)
     return true
@@ -463,20 +463,24 @@ function ENT:MakeNPCInRadius()
     local ent
     local classname = self.PrecacheData["classname"]
     local hullData = KNOWN_HULLS[classname]
+    local checkVisible = false
+    if self:HasSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER) == true then
+        checkVisible = true
+    end
 
     -- We can avoid creating the NPC if we already know the hull.
-    if hullData ~= nil then 
-        local spawnSpot = self:GetSpawnPosInRadius(hullData)
-        if spawnSpot == nil then 
-            return 
-        end 
+    if hullData ~= nil then
+        local spawnSpot = self:GetSpawnPosInRadius(hullData, checkVisible)
+        if spawnSpot == nil then
+            return
+        end
         ent = ents.CreateFromData(self.PrecacheData)
         if not IsValid(ent) then
             ErrorNoHalt("Unable to create npc!")
             return
         end
         ent:SetPos(spawnSpot)
-    else 
+    else
         -- Fallback if we have no hull information.
         ent = ents.CreateFromData(self.PrecacheData)
         if not IsValid(ent) then
@@ -484,14 +488,14 @@ function ENT:MakeNPCInRadius()
             return
         end
 
-        if self:PlaceNPCInRadius(ent) == false then
+        if self:PlaceNPCInRadius(ent, checkVisible) == false then
             DbgPrint("Failed to create NPC in radius: " .. tostring(ent))
             ent:Remove()
             return
         else
             DbgPrint("Created NPC in radius: " .. tostring(ent))
         end
-    end 
+    end
 
     ent:AddSpawnFlags(SF_NPC_FALL_TO_GROUND)
     ent:RemoveSpawnFlags(SF_NPC_TEMPLATE)

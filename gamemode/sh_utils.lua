@@ -417,7 +417,7 @@ if SERVER then
     function util.IsPosVisibleToPlayers(pos)
 
         for _,v in pairs(player.GetAll()) do
-            if v:VisibleVec(pos) == true then
+            if v:IsLineOfSightClear(pos) == true then
                 return true
             end
         end

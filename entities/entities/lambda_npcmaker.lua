@@ -285,7 +285,7 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
     local scaledMaxLiveChildren = self:GetScaledMaxLiveChildren()
 
     if maxLiveChildren > 0 and liveChildren >= scaledMaxLiveChildren then
-        DbgPrint(self, "Too many live children")
+        DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
         return false
     end
 
@@ -330,35 +330,8 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
 
         -- Make sure we spawn friendlies and enforced npcs.
         if ForcedNPCS[class] == nil and IsFriendEntityName(class) == false then
-            --DbgPrint("Checking player Distance")
-            for _, ply in pairs(player.GetAll()) do
-
-                --if InPlayerViewCone(ply, pos) and ply:VisibleVec(pos) then
-                --[[
-                if InPlayerViewCone(ply, pos) then
-                    if bit.band(ply:GetFlags(), FL_NOTARGET) == 0 then
-                        DbgPrint("Visible to player")
-                        return false
-                    end
-                end
-
-                local dist = self:GetPos():Distance(ply:GetPos())
-                if dist <= 256 then -- This is somewhat bogus.
-                    DbgPrint("Player too close for: " .. class)
-                    return false
-                end
-                ]]
-
-                if ply:Visible(self) then
-                    return false
-                end
-
-                -- Also add a minimum distance, its not cool if they just spawn behind a wall.
-                local dist = ply:GetPos():Distance(self:GetPos())
-                if dist < 500 then
-                    return false
-                end
-
+            if util.IsPosVisibleToPlayers(self:GetPos()) == true then
+                DbgPrint("Can not make NPC, maker is visible to player")
             end
         end
     else
