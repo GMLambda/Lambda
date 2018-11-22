@@ -111,27 +111,6 @@ function MAPSCRIPT:PostInit()
             ent:SetHealth(1000)
         end)
 
-        -- Spawn infront of G-Man
-        local spawn1 = ents.Create("info_player_start")
-        spawn1:SetPos(Vector(-14576, -13924, -1274))
-        spawn1:SetAngles(Angle(0, 90, 0))
-        spawn1:Spawn()
-        spawn1.MasterSpawn = true
-
-        -- Spawn after the intro.
-        local spawn2 = ents.Create("info_player_start")
-        spawn2:SetPos(Vector(-5182, -2106, -31))
-        spawn2:SetAngles(Angle(0, 0, 0))
-        spawn2:Spawn()
-        spawn2.MasterSpawn = false
-
-        -- Spawn after barney
-        local spawn3 = ents.Create("info_player_start")
-        spawn3:SetPos(Vector(-3549, -347, -31))
-        spawn3:SetAngles(Angle(0, 0, 0))
-        spawn3:Spawn()
-        spawn3.MasterSpawn = false
-
         -- Fix point_viewcontrol, affect all players.
         for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
             v:SetKeyValue("spawnflags", "128") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
@@ -145,8 +124,10 @@ function MAPSCRIPT:PostInit()
 
             DbgPrint("Assigning new spawnpoint")
 
-            spawn1.MasterSpawn = false
-            spawn2.MasterSpawn = true
+            local intro_train_2 = ents.FindFirstByName("intro_train_2")
+            local pos = intro_train_2:LocalToWorld(Vector(-233.685928, 1.246165, 47.031250))
+            local cp = GAMEMODE:SetPlayerCheckpoint({ Pos = pos, Ang = Angle(0, 0, 0)})
+            cp:SetParent(intro_train_2)
 
             -- Disable them earlier, the black fadeout is gone.
             for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
@@ -180,8 +161,9 @@ function MAPSCRIPT:PostInit()
         barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0,0,0), Vector(-150, -130, -50), Vector(150, 150, 50))
         barney_room_trigger:SetKeyValue("teamwait", 1)
         barney_room_trigger.OnTrigger = function(self)
-            spawn2.MasterSpawn = false
-            spawn3.MasterSpawn = true
+
+            GAMEMODE:SetPlayerCheckpoint({ Pos = Vector(-3549, -347, -31), Ang = Angle(0, 0, 0)})
+
             ents.WaitForEntityByName("security_intro_02", function(ent) ent:Fire("Start") end)
             ents.WaitForEntityByName("barney_room_blocker", function(ent) ent:Fire("Enable") end)
         end
