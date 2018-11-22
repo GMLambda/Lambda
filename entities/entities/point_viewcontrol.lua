@@ -32,20 +32,48 @@ function ENT:PreInitialize()
     self:SetInputFunction("Disable", self.Disable)
 
     self:SetupNWVar("Disabled", "bool", { Default = true, KeyValue = "StartDisabled" })
-    self:SetupNWVar("GlobalState", "string", { Default = "", KeyValue = "globalstate" })
-
-    self:SetupNWVar("Acceleration", "float", { Default = 500, KeyValue = "acceleration" })
-    self:SetupNWVar("Deceleration", "float", { Default = 500, KeyValue = "deceleration" })
-    self:SetupNWVar("Wait", "float", { Default = 10, KeyValue = "wait" })
-    self:SetupNWVar("Speed", "float", { Default = 100, KeyValue = "speed" })
-    self:SetupNWVar("MoveTo", "string", { Default = "", KeyValue = "moveto" })
-    self:SetupNWVar("Target", "string", { Default = "", KeyValue = "target" })
-    self:SetupNWVar("TargetAttachment", "string", { Default = "", KeyValue = "targetattachment" })
 
     self.ActivePlayers = {}
+
+    self.GlobalState = ""
+    self.Acceleration = 0
+    self.Deceleration = 0
+    self.Wait = 10
+    self.Speed = 0
+    self.MoveTo = ""
+    self.Target = ""
+    self.TargetAttachment = ""
+    self.InitialSpeed = 0
+
     self.MoveDir = Vector()
     self.MoveDistance = 0
     self.StopTime = 0
+end
+
+function ENT:KeyValue(key, val)
+
+    BaseClass.KeyValue(self, key, val)
+
+    print(self, key, val)
+
+    if key:iequals("globalstate") then
+        self.GlobalState = val
+    elseif key:iequals("acceleration") then
+        self.Acceleration = tonumber(val)
+    elseif key:iequals("deceleration") then
+        self.Deceleration = tonumber(val)
+    elseif key:iequals("wait") then
+        self.Wait = tonumber(val)
+    elseif key:iequals("speed") then
+        self.InitialSpeed = tonumber(val)
+    elseif key:iequals("moveto") then
+        self.MoveTo = val
+    elseif key:iequals("target") then
+        self.Target = val
+    elseif key:iequals("targetattachment") then
+        self.TargetAttachment = val
+    end
+
 end
 
 function ENT:Initialize()
@@ -57,6 +85,13 @@ function ENT:Initialize()
     self:SetSolid(SOLID_NONE)
     self:SetRenderMode(RENDERMODE_TRANSTEXTURE)
     self:SetColor(Color(0, 0, 0, 0))
+
+    if self.Acceleration == 0 then
+        self.Acceleration = 500
+    end
+    if self.Deceleration == 0 then
+        self.Deceleration = 500
+    end
 
 end
 
@@ -79,8 +114,8 @@ function ENT:Think()
         return
     end
 
-    self:FollowTarget()
     self:Move()
+    self:FollowTarget()
 
     self:NextThink(CurTime())
     return true
@@ -162,20 +197,24 @@ function ENT:FollowTarget()
 
     else
 
-        local localAng = self:GetAngles()
+        local localAng = self:GetLocalAngles()
 
         if diffAng.y > 360 then diffAng.y = diffAng.y - 360 end
         if diffAng.y < 0 then diffAng.y = diffAng.y + 360 end
+
+        self:SetLocalAngles(localAng)
+        localAng = self:GetLocalAngles()
 
         local dx = diffAng.x - localAng.x
         local dy = diffAng.y - localAng.y
 
         if dx < -180 then dx = dx + 360 end
         if dx > 180 then dx = dx - 360 end
+
         if dy < -180 then dy = dy + 360 end
         if dy > 180 then dy = dy - 360 end
 
-        local lookSpeed = 60
+        local lookSpeed = 20
 
         local angVel = Angle()
         angVel.x = dx * (lookSpeed * FrameTime())
@@ -184,6 +223,14 @@ function ENT:FollowTarget()
 
         self:SetLocalAngularVelocity(angVel)
 
+    end
+
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_TAKECONTROL) == false then
+        self:SetAbsVelocity( self:GetAbsVelocity() * 0.8 )
+        local vel = self:GetAbsVelocity()
+        if vel:Length() < 10.0 then
+            self:SetAbsVelocity(vec3_origin)
+        end
     end
 
 end
@@ -247,9 +294,9 @@ function ENT:Move()
         end
 
         if self.StopTime > CurTime() then
-            self.Speed = math.Approach(0, self.Speed, self:GetNWVar("Deceleration") * FrameTime())
+            self.Speed = math.Approach(0, self.Speed, self.Deceleration * FrameTime())
         else
-            self.Speed = math.Approach(self.TargetSpeed, self.Speed, self:GetNWVar("Acceleration") * FrameTime())
+            self.Speed = math.Approach(self.TargetSpeed, self.Speed, self.Acceleration * FrameTime())
         end
 
         local frac = 2.0 * FrameTime()
@@ -366,27 +413,29 @@ function ENT:EnableControl(ply)
         return
     end
 
-    local targetEntityName = self:GetNWVar("Target")
-    self.ReturnTime = CurTime() + self:GetNWVar("Wait")
-    self.Speed = self:GetNWVar("Speed")
+    self.ReturnTime = CurTime() + self.Wait
+    self.Speed = self.InitialSpeed
+    self.TargetSpeed = self.InitialSpeed
 
+    local targetEntityName = self.Target
     self.TargetEntity = ents.FindFirstByName(targetEntityName)
     if not IsValid(self.TargetEntity) then
         DbgPrint(self, "Failed to find target entity", targetEntityName)
     end
     self.AttachmentIndex = 0
     self.TargetSpeed = 1
-    self.SnapToTarget = self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
+    self.Speed = self.InitialSpeed
+    -- NOTE: Check out why we have to set snap to target to 1 to get the right effects.
+    self.SnapToTarget = true --self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
 
     if IsValid(self.TargetEntity) then
-        local attachmentName = self:GetNWVar("TargetAttachment")
-        if attachmentName ~= "" then
-            self.AttachmentIndex = self.TargetEntity:LookupAttachment(attachmentName)
-            DbgPrint(self, "Attachment Name", attachmentName, self.AttachmentIndex)
+        if self.TargetAttachment ~= "" then
+            self.AttachmentIndex = self.TargetEntity:LookupAttachment(self.TargetAttachment)
+            DbgPrint(self, "Attachment Name", self.TargetAttachment, self.AttachmentIndex)
         end
     end
 
-    local pathName = self:GetNWVar("MoveTo")
+    local pathName = self.MoveTo
     if pathName ~= "" then
         self.TargetPath = ents.FindFirstByName(pathName)
         if not IsValid(self.TargetPath) then
@@ -434,6 +483,7 @@ function ENT:EnableControl(ply)
     end
 
     self.LastPos = self:GetPos()
+    self.MoveDistance = 0
     self:Move()
 
 end
