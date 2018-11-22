@@ -138,27 +138,6 @@ function ENT:NotifyDTChange()
 
 end
 
---[[
-function ENT:SetupDataTables()
-
-    if self.IsPreInitialized ~= true then
-        self:PreInitialize()
-    end
-
-    DbgPrint(self, "SetupDataTables")
-
-    self.DataTableSetup = true
-
-    for k,v in pairs(self.DTVarTable or {}) do
-        self:SetNWVar(k, v.LastVal)
-    end
-
-    -- Lets stay away from the Think functions form the entities based on this one.
-    hook.Add("Think", self, self.NotifyDTChange)
-
-end
-]]
-
 function ENT:Initialize()
     if self.IsPreInitialized ~= true then
         self:PreInitialize()
@@ -372,6 +351,9 @@ end
 
     function ENT:AcceptInput(name, activator, caller, data)
 
+        -- Scripted entities dont set this for some reason.
+        self.LambdaLastActivator = activator
+
         if GAMEMODE ~= nil and GAMEMODE.AcceptInput ~= nil and GAMEMODE:AcceptInput(self, name, activator, caller, data) == true then
             DbgPrint(self, "Suppressed Input via GAMEMODE:AcceptInput")
             return true
@@ -417,6 +399,25 @@ end
 
         return BaseClass.AcceptInput(name, activator, caller, data)
 
+    end
+
+    function ENT:PropagateActivator(e)
+        local lastActivator
+        while IsValid(e) do
+            lastActivator = e
+            e = e:GetActivator()
+        end
+        return lastActivator
+    end
+
+    function ENT:PropagatePlayerActivator(e)
+        while IsValid(e) do
+            if e:IsPlayer() then
+                return e
+            end
+            e = e:GetActivator()
+        end
+        return nil
     end
 
 --end

@@ -51,6 +51,18 @@ local function EstimateModelGender(ent)
 
 end
 
+function ENTITY_META:GetActivator()
+
+    -- Scripted entities don't have this field so we have to do it ourselves.
+    if self.LambdaLastActivator ~= nil then
+        return self.LambdaLastActivator
+    end
+
+    -- Native entities.
+    return self:GetInternalVariable("m_hActivator")
+
+end    
+
 function ENTITY_META:GetGender()
 
     local oldCache = false
