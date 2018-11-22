@@ -34,6 +34,9 @@ function GM:HUDInit()
     self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
     self.HUDSuit = vgui.Create("HudSuit")
 
+    -- We call this due to resolution changes.
+    self:DeathNoticeHUDInit()
+
 end
 
 function GM:HUDTick()
@@ -118,9 +121,13 @@ end
 
 function GM:HUDPaint()
 
+    if GetConVarNumber("cl_drawhud") == 0 then
+        return
+    end
+    
     hook.Run( "HUDDrawPickupHistory" )
     hook.Run( "HUDDrawHintHistory" )
-    hook.Run( "DrawDeathNotice", 0.85, 0.04 )
+    hook.Run( "DrawDeathNotice" )
     hook.Run( "DrawTauntsMenu" )
     hook.Run( "DrawMetrics" )
 

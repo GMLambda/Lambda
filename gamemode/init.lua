@@ -303,11 +303,11 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
             end
         end
     end
-
     if IsValid(inflictor) then
         data.inflictor = GetEntityData(inflictor)
     end
 
+    data.selfInflicted = victim == attacker
     data.dmgType = dmgType
 
     net.Start("LambdaDeathEvent")
