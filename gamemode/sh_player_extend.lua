@@ -36,6 +36,18 @@ if SERVER then
         DbgPrint(self, "DisablePlayerCollide", tostring(state))
     end
 
+    function PLAYER_META:GetFOVOwner()
+        return self:GetInternalVariable("m_hZoomOwner")
+    end
+
+    function PLAYER_META:SetFOVOwner(ent)
+        self:SetSaveValue("m_hZoomOwner", ent)
+    end
+
+    function PLAYER_META:ClearZoomOwner()
+        self:SetFOVOwner(NULL)
+    end
+        
     function PLAYER_META:LockPosition(poslock, viewlock, viewdata)
 
         if not self:Alive() then
