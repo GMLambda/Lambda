@@ -462,8 +462,8 @@ function ENT:Enable(data, activator, caller)
     local ply = nil
 
     -- HACKHACK: d2_coast_03 uses func_door to relay the input.
-    if IsValid(activator) and activator:GetClass() == "func_door" then
-        ply = activator:GetInternalVariable("m_hActivator")
+    if IsValid(activator) then
+        ply = self:PropagatePlayerActivator(activator)
     end
 
     if not IsValid(ply) and IsValid(activator) and activator:IsPlayer() then
