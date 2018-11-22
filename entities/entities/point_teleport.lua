@@ -5,6 +5,8 @@ local DbgPrint = GetLogging("Trigger")
 ENT.Base = "base_point"
 ENT.Type = "point"
 
+SF_TELEPORT_LAMBDA_CHECKPOINT = 8192
+
 function ENT:Initialize()
     DbgPrint("point_teleport:Initialize")
     self.Target = self.Target or ""
@@ -29,6 +31,10 @@ function ENT:AcceptInput(inputName, activator, called, data)
                 v:TeleportPlayer(pos, ang)
             end
 
+            if self:HasSpawnFlags(SF_TELEPORT_LAMBDA_CHECKPOINT) == true then
+                GAMEMODE:SetPlayerCheckpoint({ Pos = pos, Ang = ang })
+            end
+            
             return true
         else
             -- We have to find them.
