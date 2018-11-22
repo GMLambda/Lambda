@@ -75,10 +75,18 @@ function GM:ResetCheckpoints()
     self.NextCheckpointTest = nil
 end
 
+function GM:CreatePlayerCheckpoint(data)
+    local cp = ents.CreateSimple("lambda_checkpoint", data)
+    return cp
+end
+
 function GM:SetPlayerCheckpoint(checkpoint, gridData)
     local gameType = self:GetGameType()
     if gameType.UsingCheckpoints == false then
         return
+    end
+    if istable(checkpoint) then
+        checkpoint = self:CreatePlayerCheckpoint(checkpoint)
     end
     DbgPrint("Assigned new checkpoint to: " .. tostring(checkpoint))
     self.CurrentCheckpoint = checkpoint
@@ -86,6 +94,7 @@ function GM:SetPlayerCheckpoint(checkpoint, gridData)
     self.CurrentCheckpointPos = cpPos
     gridData = gridData or self:GetGridData(cpPos.x, cpPos.y, cpPos.z)
     gridData.checkpoint = true
+    return checkpoint
 end
 
 function GM:UpdateQueuedVehicleCheckpoints()
