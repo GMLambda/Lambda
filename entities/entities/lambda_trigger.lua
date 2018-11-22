@@ -261,6 +261,10 @@ if SERVER then
         self.DisabledTouchingObjects = self.TouchingObjects or {}
     end
 
+    function ENT:IsDisabled()
+        return self:GetNWVar("Disabled", false)
+    end
+    
     function ENT:Toggle()
         DbgPrint(self, "ENT:Toggle")
         if self:GetNWVar("Disabled") == false then
