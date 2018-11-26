@@ -74,7 +74,9 @@ function MAPSCRIPT:PostInit()
 
             -- Prevent players from going back.
             ents.WaitForEntityByName("returndoor", function(ent)
-                ent:Fire("Close", "", 2.5)
+                ent:Fire("Close")
+                -- Prevent trigger from opening it.
+                ent:SetName("lambda_returndoor")
             end)
 
         end
