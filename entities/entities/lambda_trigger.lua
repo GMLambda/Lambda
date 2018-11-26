@@ -743,8 +743,8 @@ if SERVER then
         if blocked == true then
             local phys = self:GetPhysicsObject()
             if IsValid(phys) then
-                local mesh = phys:GetMesh()
-                net.WriteTable(mesh)
+                local meshData = phys:GetMesh()
+                net.WriteTable(meshData)
             else
                 DbgError(self, "No valid phys object while blocking!")
                 net.WriteTable({})
@@ -850,12 +850,12 @@ else -- CLIENT
 
         local state = net.ReadBool()
         if state == true then
-            local mesh = net.ReadTable()
+            local meshData = net.ReadTable()
             local pos = net.ReadVector()
             local center = net.ReadVector()
             local maxs = net.ReadVector()
             local mins = net.ReadVector()
-            LAMBDA_TRIGGERS[entIndex].MeshData = mesh
+            LAMBDA_TRIGGERS[entIndex].MeshData = meshData
             LAMBDA_TRIGGERS[entIndex].Pos = pos
             LAMBDA_TRIGGERS[entIndex].Center = center
             LAMBDA_TRIGGERS[entIndex].Maxs = maxs
@@ -1032,10 +1032,10 @@ else -- CLIENT
 
     local function DrawTriggerBlockade(data)
 
-        local mesh = data.Mesh
+        local cachedMesh = data.Mesh
 
-        if mesh == nil then
-            mesh = Mesh(MAT_BLOCKED)
+        if cachedMesh == nil then
+            cachedMesh = Mesh(MAT_BLOCKED)
 
             local bounds = data.Maxs - data.Mins
             local meshData = table.Copy(data.MeshData)
@@ -1069,16 +1069,20 @@ else -- CLIENT
                 meshData[i].u = (rel.x % texture_w) / texture_w
             end
 
-            mesh:BuildFromTriangles(meshData)
-            data.Mesh = mesh
+            cachedMesh:BuildFromTriangles(meshData)
+            data.Mesh = cachedMesh
         end
 
         render.SetMaterial(MAT_BLOCKED)
-        mesh:Draw()
+        cachedMesh:Draw()
 
     end
 
-    hook.Add("PostDrawOpaqueRenderables", "LambdaTrigger", function()
+    hook.Add("PostDrawTranslucentRenderables", "LambdaTrigger", function(bDrawingDepth, bDrawingSkybox)
+
+        if bDrawingSkybox == true then
+            return
+        end
 
         for k, data in pairs(LAMBDA_TRIGGERS) do
 
