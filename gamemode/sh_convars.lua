@@ -84,6 +84,7 @@ lambda_prevent_item_move = GM:RegisterConVar("weapon_strip_force", 1, bit.bor(0,
 lambda_limit_default_ammo = GM:RegisterConVar("limit_default_ammo", 1, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "If enabled weapons default ammo will use the sk_* settings for max limit.")
 
 lambda_allow_auto_jump = GM:RegisterConVar("allow_auto_jump", "0", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Allow automatically jumping if on ground")
+lambda_weapondrop = GM:RegisterConVar("weapondrop", "2", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Weapon drop mode on player Death, 0 = Off, 1 = Active Weapon, 2 = Everything")
 
 -- Deathmatch specific convars
 lambda_dm_fraglimit = GM:RegisterConVar("dm_fraglimit", 50, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "When frags are reached the round ends")

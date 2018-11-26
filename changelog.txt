@@ -1,5 +1,6 @@
 0.9.3
 - Improved: Allow gametype to auto start without players.
+- Add: ConVar 'lambda_weapondrop' to specify what players drop on death.
 - Fix: NPC Maker not spawning NPCs in some cases.
 - Fix: d1_trainstation_01 queue sometimes blocking the player.
 

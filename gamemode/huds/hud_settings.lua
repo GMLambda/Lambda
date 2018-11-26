@@ -440,8 +440,34 @@ function PANEL:Init()
 		difficulty_label:SetText("Difficulty")
 		difficulty_label:SizeToContents()
 
+		local DropModes = {
+			[0] = "Nothing",
+			[1] = "Active weapon",
+			[2] = "Everything",
+		}
+
+		local weapondrop_cmb = vgui.Create("DComboBox", PanelAdmin)
+		weapondrop_cmb:SetPos(5, 5 * nwh + 32)
+		weapondrop_cmb:SetTextColor(Color(255, 255, 255, 155))
+		weapondrop_cmb:SetText("Weapon Drop Mode")
+		weapondrop_cmb:SetSize(100, 22)
+		weapondrop_cmb:SetSortItems(false)
+		for k,v in pairs(DropModes) do
+			local choice = GAMEMODE:GetDifficultyText(v)
+			weapondrop_cmb:AddChoice(v, k, lambda_weapondrop:GetInt() == k)
+		end
+		function weapondrop_cmb:OnSelect(idx, value, data)
+			GAMEMODE:ChangeAdminConfiguration("weapondrop", tostring(data))
+		end
+
+		local weapondrop_label = vgui.Create("DLabel", PanelAdmin)
+		weapondrop_label:SetPos(nww + 70 , 5 * nwh + 35)
+		weapondrop_label:SetTextColor(Color(255,255,255,150))
+		weapondrop_label:SetText("Weapon Drop Mode")
+		weapondrop_label:SizeToContents()
+
 		local player_god = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		player_god:SetPos(5, 5 * nwh + 32)
+		player_god:SetPos(5, 6 * nwh + 38)
 		player_god:SetText("Godmode")
 		player_god:SizeToContents()
 		player_god:SetValue(cvars.Number("lambda_player_god"))
@@ -451,7 +477,7 @@ function PANEL:Init()
 		end
 
 		local ply_coll = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_coll:SetPos(5, 6 * nwh + 32)
+		ply_coll:SetPos(5, 7 * nwh + 35)
 		ply_coll:SetText("Player collision")
 		ply_coll:SizeToContents()
 		ply_coll:SetValue(cvars.Number("lambda_playercollision"))
@@ -461,7 +487,7 @@ function PANEL:Init()
 		end
 
 		local ply_track = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_track:SetPos(5, 7 * nwh + 32)
+		ply_track:SetPos(5, 8 * nwh + 35)
 		ply_track:SetText("Player tracking")
 		ply_track:SizeToContents()
 		ply_track:SetValue(cvars.Number("lambda_player_tracker"))
@@ -471,7 +497,7 @@ function PANEL:Init()
 		end
 
 		local ply_friendlyfire = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_friendlyfire:SetPos(5, 8 * nwh + 32)
+		ply_friendlyfire:SetPos(5, 9 * nwh + 35)
 		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on")
 		ply_friendlyfire:SizeToContents()
 		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
@@ -481,7 +507,7 @@ function PANEL:Init()
 		end
 
 		local dynamic_checkpoints = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		dynamic_checkpoints:SetPos(5, 9 * nwh + 32)
+		dynamic_checkpoints:SetPos(5, 10 * nwh + 35)
 		dynamic_checkpoints:SetText("Dynamic checkpoints")
 		dynamic_checkpoints:SizeToContents()
 		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
@@ -491,7 +517,7 @@ function PANEL:Init()
 		end
 
 		local npc_damage = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		npc_damage:SetPos(5, 10 * nwh + 32)
+		npc_damage:SetPos(5, 11 * nwh + 35)
 		npc_damage:SetText("Friendly NPC damage")
 		npc_damage:SizeToContents()
 		npc_damage:SetValue(cvars.Number("lambda_allow_npcdmg"))
@@ -501,7 +527,7 @@ function PANEL:Init()
 		end
 
 		local limit_ammo = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		limit_ammo:SetPos(5, 11 * nwh + 32)
+		limit_ammo:SetPos(5, 12 * nwh + 35)
 		limit_ammo:SetText("Limit default ammo")
 		limit_ammo:SizeToContents()
 		limit_ammo:SetValue(cvars.Number("lambda_limit_default_ammo"))

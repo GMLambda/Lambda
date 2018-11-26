@@ -587,13 +587,18 @@ if SERVER then
         end
 
         local weps = {}
-        for _,v in pairs(ply:GetWeapons()) do
-            weps[v] = true
+
+        if lambda_weapondrop:GetInt() >= 1 then
+            local activeWep = ply:GetActiveWeapon()
+            if IsValid(activeWep) then
+                weps[activeWep] = true
+            end
         end
 
-        local activeWep = ply:GetActiveWeapon()
-        if IsValid(activeWep) then
-            weps[activeWep] = true
+        if lambda_weapondrop:GetInt() == 2 then
+            for _,v in pairs(ply:GetWeapons()) do
+                weps[v] = true
+            end
         end
 
         ply.LastWeaponsDropped = {}
