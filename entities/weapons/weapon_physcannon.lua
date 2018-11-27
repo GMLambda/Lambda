@@ -2515,7 +2515,7 @@ function SWEP:SetupEffects(viewModel)
     for i = PHYSCANNON_ENDCAP1, PHYSCANNON_ENDCAP3 do
 
         local beamdata = {
-            Scale = InterpValue(0.00, 0.1, 0.01),
+            Scale = InterpValue(0, 0, 0),
             Alpha = InterpValue(255, 255, 0),
             Visible = false,
             Col = Color(255, 128, 0, 255),
@@ -2575,7 +2575,6 @@ function SWEP:StartEffects()
     end
 
     -- In case we swap from first to third person, this will recreate all data.
-    local viewChanged = false
     local effect = self.CurrentEffect
 
     local usingViewModel = self:ShouldDrawUsingViewModel()

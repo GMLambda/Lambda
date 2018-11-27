@@ -4,6 +4,7 @@
 - Fix: d1_trainstation_01 queue sometimes blocking the player.
 - Fix: Make sure the door stays locked at d1_town_02.
 - Fix: Don't render player blockades in Skybox rendering pass.
+- Fix: Gravity Gun not resetting beam properly on FP/TP view change.
 
 0.9.2:
 - Fix: logic_auto and trigger_auto firing too many events.
