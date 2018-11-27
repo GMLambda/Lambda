@@ -297,7 +297,27 @@ function PLAYER_META:StopSprinting()
     self:SetSprinting(false)
 end
 
+function PLAYER_META:BodyDirection2D()
+    local ang = self:EyeAngles()
+    local vec = ang:Forward()
+    vec.z = 0
+
+    local len2d = vec:Length2D()
+    if len2d ~= 0.0 then
+        vec.x = vec.x / len2d
+        vec.y = vec.y / len2d
+    else
+        vec.x = 0
+        vec.y = 0
+    end
+    return vec
+end
+
 function PLAYER_META:InsideViewCone(other, tolerance)
+
+    if tolerance == nil then
+        tolerance = self:GetInternalVariable("m_flFieldOfView")
+    end
 
     local otherPos
     if IsEntity(other) then
@@ -312,11 +332,16 @@ function PLAYER_META:InsideViewCone(other, tolerance)
         error("Invalid argument passed")
     end
 
-    local dir = (otherPos - self:EyePos()):GetNormal()
-    local dot = dir:Dot(self:GetAimVector())
-    return dot >= (tolerance or 0.6)
+    local los = otherPos - self:EyePos()
+    los.z = 0
+    los:Normalize()
 
-end 
+    local facingDir = self:BodyDirection2D()
+    local dot = los:Dot(facingDir)
+
+    return dot > tolerance
+
+end
 
 function PLAYER_META:GetButtons()
     if self.LastUserCmdButtons ~= nil then

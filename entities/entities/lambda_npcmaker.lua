@@ -19,34 +19,6 @@ SF_NPCMAKER_NOPRELOADMODELS = 512   -- Suppress preloading into the cache of all
 local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
 
-local function InPlayerViewCone(ply, pos)
-
-    local los = pos - ply:EyePos()
-    los.z = 0
-    los:Normalize()
-
-    local eyeDir = ply:GetAimVector()
-
-    -- 2D eye direction.
-    eyeDir.z = 0
-
-    local len = eyeDir:Length2D()
-    if len ~= 0 then
-        eyeDir = eyeDir / len
-    else
-        eyeDir.x = 0
-        eyeDir.y = 0
-    end
-
-    local dot = los:Dot(eyeDir)
-    if dot > ply:GetFOV() then
-        return true
-    end
-
-    return false
-
-end
-
 function ENT:PreInitialize()
 
     DbgPrint(self, "ENT:PreInitialize")
@@ -230,6 +202,21 @@ function ENT:GetScaledMaxNPCs()
 
 end
 
+-- To prevent spawning NPCs if players just turn their backs for a brief moment
+-- This will check various conditions to see if we should consider distance.
+function ENT:ShouldUseDistance()
+    local multiSpawn = false
+    if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == true then
+        multiSpawn = true
+    elseif self:GetNWVar("MaxNPCCount") == 1 and self:GetScaledMaxNPCs() > self:GetNWVar("MaxNPCCount") then
+        multiSpawn = true
+    end
+    if self:HasSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER) == true and multiSpawn == true and self:GetNWVar("CreatedCount") > 0 then
+        return true
+    end
+    return false
+end
+
 function ENT:IsDepleted()
     if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) or self:GetNWVar("CreatedCount") < self:GetScaledMaxNPCs() then
         return false
@@ -329,13 +316,28 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
         local class = self:GetNPCClass()
 
         -- Make sure we spawn friendlies and enforced npcs.
-        if ForcedNPCS[class] == nil and IsFriendEntityName(class) == false then
-            if util.IsPosVisibleToPlayers(self:GetPos()) == true then
-                DbgPrint("Can not make NPC, maker is visible to player")
+        if ForcedNPCS[class] == nil and IsFriendEntityName(class) == false and util.IsPosVisibleToPlayers(pos) == true then
+            DbgPrint("Can not make NPC, maker is visible to player")
+            return false
+        end
+
+        local closestDist = 999999
+        if self:ShouldUseDistance() == true then
+            for _,v in pairs(player.GetAll()) do
+                if v:IsFlagSet(FL_NOTARGET) then
+                    continue
+                end
+                local dist = v:GetPos():Distance(pos)
+                if dist < closestDist then
+                    closestDist = dist
+                end
+            end
+            -- Seems to be optimal for now.
+            if closestDist < 750 then
+                return false
             end
         end
-    else
-        --DbgPrint("No player visibility check")
+
     end
 
     return true

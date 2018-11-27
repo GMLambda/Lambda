@@ -405,6 +405,9 @@ if SERVER then
     function util.IsEntVisibleToPlayers(ent)
 
         for _,v in pairs(player.GetAll()) do
+            if v:IsFlagSet(FL_NOTARGET) then
+                continue
+            end
             if v:Visible(ent) == true then
                 return true
             end
@@ -417,7 +420,10 @@ if SERVER then
     function util.IsPosVisibleToPlayers(pos)
 
         for _,v in pairs(player.GetAll()) do
-            if v:IsLineOfSightClear(pos) == true then
+            if v:IsFlagSet(FL_NOTARGET) then
+                continue
+            end
+            if v:InsideViewCone(pos) == true and v:VisibleVec(pos) == true then
                 return true
             end
         end
