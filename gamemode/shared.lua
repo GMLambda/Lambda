@@ -82,9 +82,9 @@ function GM:Tick()
 
     -- Make sure physics don't go crazy when we toggle it.
     local collisionChanged = false
-    if self.LastAllowCollisions ~= lambda_playercollision:GetBool() then
+    if self.LastAllowCollisions ~= self:GetSetting("playercollision"):GetBool() then
         collisionChanged = true
-        self.LastAllowCollisions = lambda_playercollision:GetBool()
+        self.LastAllowCollisions = self:GetSetting("playercollision"):GetBool()
     end
 
     local plys = player.GetAll()
@@ -227,6 +227,7 @@ function GM:Initialize()
 
     self:InitializePlayerList()
     self:InitializeRoundSystem()
+    self:CallGameTypeFunc("InitSettings")
 
     if SERVER then
         self:ResetSceneCheck()
@@ -243,6 +244,10 @@ function GM:Initialize()
         self:TransferPlayers()
         self:InitializeResources()
     end
+end
+
+function GM:GetSetting(setting)
+    return GetConVar("lambda_" .. setting)
 end
 
 function GM:ResetSceneCheck()
@@ -279,7 +284,7 @@ end
 function GM:ShouldCollide(ent1, ent2)
 
     if ent1:IsPlayer() and ent2:IsPlayer() then
-        if lambda_playercollision:GetBool() == false then
+        if self:GetSetting("playercollision"):GetBool() == false then
             return false
         end
         if ent1:GetNWBool("DisablePlayerCollide", false) == true or ent2:GetNWBool("DisablePlayerCollide", false) == true then

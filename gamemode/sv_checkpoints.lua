@@ -144,7 +144,7 @@ function GM:UpdateCheckoints()
     end
     self.NextCheckpointTest = CurTime() + 5
 
-    if lambda_dynamic_checkpoints:GetBool() == false then
+    if self:GetSetting("dynamic_checkpoints"):GetBool() == false then
         return
     end
 
