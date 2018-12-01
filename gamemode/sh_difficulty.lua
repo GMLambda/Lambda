@@ -222,7 +222,7 @@ end
 
 function GM:GetDifficulty()
 
-    local difficulty = lambda_difficulty:GetInt()
+    local difficulty = self:GetSetting("difficulty"):GetInt()
     if difficulty > DIFFICULTY_MAX then
         difficulty = DIFFICULTY_MAX
     end

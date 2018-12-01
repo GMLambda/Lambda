@@ -24,7 +24,7 @@ if SERVER then
                 local playerData = self.Players[userId] or {}
 
                 playerData.ConnectTime = GetSyncedTimestamp()
-                playerData.TimeoutTime = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
+                playerData.TimeoutTime = GetSyncedTimestamp() + self:GetSetting("connect_timeout"):GetInt()
                 playerData.Nick = data["Nick"]
                 playerData.SteamID = data["SteamID"]
                 playerData.UserID = userId
@@ -64,7 +64,7 @@ if SERVER then
             playerData.Connecting = bot == false
         end
 
-        playerData.TimeoutTime = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
+        playerData.TimeoutTime = GetSyncedTimestamp() + self:GetSetting("connect_timeout"):GetInt()
 
         self.Players[userid] = playerData
         if playerData.Connecting == true then

@@ -39,7 +39,7 @@ function GM:InitializeRoundSystem()
     self:SetRoundStartTime(GetSyncedTimestamp())
 
     self.WaitingForRoundStart = self:ShouldWaitForPlayers()
-    self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
+    self.RoundStartTimeout = GetSyncedTimestamp() + self:GetSetting("connect_timeout"):GetInt()
 
 end
 
@@ -106,7 +106,7 @@ if SERVER then
 
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_WAITING_FOR_PLAYER, {
             StartTime = self.ServerStartupTime,
-            Timeout = lambda_connect_timeout:GetInt(),
+            Timeout = self:GetSetting("connect_timeout"):GetInt(),
             FullyConnected = self:GetFullyConnectedCount(),
             Connecting = self:GetConnectingCount(),
         })
@@ -134,7 +134,7 @@ if SERVER then
 
         DbgPrint("Requested restart")
 
-        local restartTime = lambda_map_restart_timeout:GetInt()
+        local restartTime = self:GetSetting("map_restart_timeout"):GetInt()
         restartTime = math.Clamp(restartTime, 0, 127)
 
         if self.RoundState ~= STATE_RUNNING then
@@ -636,7 +636,7 @@ function GM:StartRound(cleaned)
         if SERVER then
             self:SetRoundState(STATE_IDLE)
             self:SetRoundStartTime(GetSyncedTimestamp())
-            self.RoundStartTimeout = GetSyncedTimestamp() + lambda_connect_timeout:GetInt()
+            self.RoundStartTimeout = GetSyncedTimestamp() + self:GetSetting("connect_timeout"):GetInt()
             self:NotifyPlayerListChanged()
         end
     end

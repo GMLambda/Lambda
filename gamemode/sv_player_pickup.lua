@@ -100,7 +100,7 @@ local AMMO_LIKE_WEAPONS =
 function GM:PlayerCanPickupAmmo(ply, ent)
 
     -- Limit the ammo to pickup based on the sk convars.
-    if lambda_limit_default_ammo:GetBool() == false then
+    if self:GetSetting("limit_default_ammo"):GetBool() == false then
         return true
     end
 

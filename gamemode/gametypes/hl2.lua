@@ -136,9 +136,11 @@ GAMETYPE.CampaignNames =
     ["DARK ENERGY"] = {s = 70, e = 70},
 }
 
+GAMETYPE.Settings = {}
+
 function GAMETYPE:GetPlayerRespawnTime()
 
-    local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+    local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"):GetInt(), -1, 255)
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
     if total <= 0 then
@@ -232,7 +234,7 @@ end
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
     local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
     -- Friendly fire is controlled by convar in this case.
-    if playerAttacking == true and lambda_friendlyfire:GetBool() == false then
+    if playerAttacking == true and GAMEMODE:GetSetting("friendlyfire"):GetBool() == false then
         return false
     end
     return true
@@ -339,6 +341,19 @@ end
 function GAMETYPE:AllowPlayerTracking()
     self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
     return self.TrackerOption:GetBool()
+end
+
+function GAMETYPE:InitSettings()
+
+		self:AddSetting("difficulty_metrics",{Category = "SERVER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), info = "Shows NPC/Player metrics." })
+		self:AddSetting("dynamic_checkpoints",{Category = "SERVER", NiceName = "#GM_DYNCHECKPOINT", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Dynamically creates checkpoints if the position is appropriate." })
+		self:AddSetting("allow_npcdmg",{Category = "SERVER", NiceName = "#GM_NPCDMG", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "If set to 1 allows players to kill any NPC." })
+		self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = 2, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Difficulty setting, 1 = Very Easy, 2 = Easy, 3 = Normal, 4 = Hard, 5 = Very Hard." })
+		self:AddSetting("player_tracker",{Category = "SERVER", NiceName = "#GM_PLYTRACK", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Allows to see players through walls." })
+		
+		
+		self.Base.InitSettings(self)
+
 end
 
 function GAMETYPE:GetCampaignName(map)

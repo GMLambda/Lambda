@@ -445,8 +445,8 @@ if SERVER then
         -- Bloody fucking hell.
         ply:SetSaveValue("m_bPreventWeaponPickup", false)
 
-        ply:SetRunSpeed(lambda_sprintspeed:GetInt()) -- TODO: Put this in a convar.
-        ply:SetWalkSpeed(lambda_normspeed:GetInt())
+        ply:SetRunSpeed(self:GetSetting("sprintspeed"):GetInt()) -- TODO: Put this in a convar.
+        ply:SetWalkSpeed(self:GetSetting("normspeed"):GetInt())
 
         if ply:IsBot() then
             local r = 0.3 + (math.sin(ply:EntIndex()) * 0.7)
@@ -828,7 +828,7 @@ if SERVER then
 
     function GM:LimitPlayerAmmo(ply)
 
-        if lambda_limit_default_ammo:GetBool() == false then
+        if self:GetSetting("limit_default_ammo"):GetBool() == false then
             return
         end
 
@@ -856,7 +856,7 @@ if SERVER then
 
         ply.LastPickupTime = ply.LastPickupTime or 0
 
-        local pickupDelay = lambda_pickup_delay:GetFloat()
+        local pickupDelay = self:GetSetting("pickup_delay"):GetFloat()
         local curTime = CurTime()
         if curTime - ply.LastPickupTime < pickupDelay then
             return false
@@ -1168,8 +1168,8 @@ function GM:PlayerStartSprinting(ply, mv)
         end
     end
 
-    ply:SetRunSpeed(lambda_sprintspeed:GetInt()) -- TODO: Put this in a convar.
-    ply:SetWalkSpeed(lambda_normspeed:GetInt())
+    ply:SetRunSpeed(self:GetSetting("sprintspeed"):GetInt()) -- TODO: Put this in a convar.
+    ply:SetWalkSpeed(self:GetSetting("normspeed"):GetInt())
     ply:SetSprinting(true)
 
     --DbgPrint("Sprint State: " .. tostring(ply:GetSprinting()))
@@ -1181,8 +1181,8 @@ function GM:PlayerEndSprinting(ply, mv)
     --DbgPrint("PlayerEndSprinting: " .. tostring(ply) )
 
     ply:RemoveSuitDevice(SUIT_DEVICE_SPRINT)
-    ply:SetRunSpeed(lambda_normspeed:GetInt()) -- TODO: Put this in a convar.
-    ply:SetWalkSpeed(lambda_normspeed:GetInt())
+    ply:SetRunSpeed(self:GetSetting("normspeed"):GetInt()) -- TODO: Put this in a convar.
+    ply:SetWalkSpeed(self:GetSetting("normspeed"):GetInt())
     ply:SetSprinting(false)
 
 end
@@ -1217,7 +1217,7 @@ function GM:StartCommand(ply, cmd)
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK2)) )
         end
 
-        if lambda_allow_auto_jump:GetBool() == true and lambda_auto_jump:GetBool() == true then
+        if self:GetSetting("allow_auto_jump"):GetBool() == true and lambda_auto_jump:GetBool() == true then
             if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
                 cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )
             end
