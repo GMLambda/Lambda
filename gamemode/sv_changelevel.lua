@@ -5,10 +5,10 @@ function GM:InitializeCurrentLevel()
 
     DbgPrint("GM:InitializeCurrentLevel")
 
-    local changelevel = tobool(util.GetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "Changelevel", "0"))
-    local prevMap = util.GetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "PrevMap", nil)
-    local targetMap = util.GetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "NextMap", nil)
-    local landmark = util.GetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "Landmark", nil)
+    local changelevel = tobool(util.GetPData("Lambda" .. lambda_instance_id:GetString(), "Changelevel", "0"))
+    local prevMap = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", nil)
+    local targetMap = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", nil)
+    local landmark = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "Landmark", nil)
 
     self.PreviousMap = prevMap
     if targetMap == self:GetCurrentMap() then
@@ -26,9 +26,9 @@ function GM:InitializeCurrentLevel()
 
     self.ChangingLevel = false
 
-    util.RemovePData("Lambda" .. self:GetSetting("instance_id"):GetString(), "Changelevel")
-    util.RemovePData("Lambda" .. self:GetSetting("instance_id"):GetString(), "Landmark")
-    util.RemovePData("Lambda" .. self:GetSetting("instance_id"):GetString(), "PrevMap")
+    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Changelevel")
+    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Landmark")
+    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "PrevMap")
 
     DbgPrint("Used Changelevel: " .. tostring(self.IsChangeLevel))
 

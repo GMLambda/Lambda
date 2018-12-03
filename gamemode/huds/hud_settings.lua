@@ -6,6 +6,8 @@ local H = 440
 local COLOR_PANEL_W = 280
 local COLOR_PANEL_H = 206
 
+local colWHITE = Color(255, 255, 255, 195)
+
 local border = 4
 local border_w = 5
 local matHover = Material( "gui/ps_hover.png", "nocull" )
@@ -56,108 +58,11 @@ function PANEL:Init()
 	colsetb:SetImage("lambda/icons/palette.png")
 	colsetb:SizeToContents()
 	colsetb:SetTooltip("Edit colors")
-	colsetb.DoClick = function() if !IsValid(self.CMFrame) then self:ShowColorOption() else self.CMFrame:Remove() end end
+	colsetb.DoClick = function() if not IsValid(self.CMFrame) then self:ShowColorOption() else self.CMFrame:Remove() end end
 
 	self.Sheet:AddSheet( "Player", PanelSelect, "lambda/icons/player_settings.png" )
 
-	local PanelVote = self.Sheet:Add("DPanel")
-
-		local buttonSizeW = 110
-
-		local restartvoteb = vgui.Create("DButton", PanelVote)
-		restartvoteb:SetPos(5, 5)
-		restartvoteb:SetText("Restart map")
-		restartvoteb:SetSize(buttonSizeW, 22)
-		restartvoteb:SetTextColor(Color(255, 255, 255, 155))
-		restartvoteb.DoClick = function() RunConsoleCommand("lambda_voterestart") self:Close() end
-
-		local skipvoteb = vgui.Create("DButton", PanelVote)
-		skipvoteb:SetPos(5, 32)
-		skipvoteb:SetText("Skip to next map")
-		skipvoteb:SetSize(buttonSizeW, 22)
-		skipvoteb:SetTextColor(Color(255, 255, 255, 155))
-		skipvoteb.DoClick = function() RunConsoleCommand("lambda_voteskip") self:Close() end
-
-		local cmap = vgui.Create("DComboBox", PanelVote)
-		local mapList = GAMEMODE:GetGameTypeData("MapList") or {}
-		local curMap = string.lower(game.GetMap())
-		cmap:SetPos(5 + buttonSizeW + 5, 59)
-		cmap:SetSize(100, 22)
-		cmap:SetVisible(false)
-		for _, v in pairs(mapList) do
-			if v:iequals(curMap) == true then
-				continue
-			end
-			cmap:AddChoice(v)
-		end
-
-		local cbmap = vgui.Create("DButton", PanelVote)
-		cbmap:SetPos(5 + buttonSizeW + 5 + 100 + 5, 59)
-		cbmap:SetSize(22, 22)
-		cbmap:SetVisible(false)
-		cbmap:SetIcon("lambda/icons/tick.png")
-		cbmap:SetText("")
-		cbmap.DoClick = function()
-			local selected = cmap:GetSelected()
-			RunConsoleCommand("lambda_votemap", selected) self:Close()
-		end
-
-		local cmvoteb = vgui.Create("DButton", PanelVote)
-		cmvoteb:SetPos(5, 59)
-		cmvoteb:SetText("Change map")
-		cmvoteb:SetSize(buttonSizeW, 22)
-		cmvoteb:SetTextColor(Color(255, 255, 255, 155))
-		cmvoteb.DoClick = function()
-			if !cmap:IsVisible() and !cbmap:IsVisible() then
-				cmap:SetVisible(true)
-				cbmap:SetVisible(true)
-			else
-				cmap:SetVisible(false)
-				cbmap:SetVisible(false)
-			end
-			if self.pnlPlayersFrame ~= nil then
-				self.pnlPlayersFrame:Remove()
-				self.pnlPlayersFrame = nil
-			end
-		end
-
-		local cplayer = vgui.Create("DComboBox", PanelVote)
-		cplayer:SetPos(5 + buttonSizeW + 5, 86)
-		cplayer:SetSize(100, 22)
-		cplayer:SetVisible(false)
-		for _, v in pairs(player.GetAll()) do
-			if v == LocalPlayer() then
-				continue
-			end
-			cplayer:AddChoice(v:Name(), v:UserID())
-		end
-
-		local cbkick = vgui.Create("DButton", PanelVote)
-		cbkick:SetPos(5 + buttonSizeW + 5 + 100 + 5, 86)
-		cbkick:SetSize(22, 22)
-		cbkick:SetVisible(false)
-		cbkick:SetIcon("lambda/icons/tick.png")
-		cbkick:SetText("")
-		cbkick.DoClick = function()
-			local ply, steamid = cplayer:GetSelected()
-			RunConsoleCommand("lambda_votekick", steamid) self:Close()
-		end
-
-		local kickvoteb = vgui.Create("DButton", PanelVote)
-		kickvoteb:SetPos(5, 86)
-		kickvoteb:SetText("Kick player")
-		kickvoteb:SetSize(buttonSizeW, 22)
-		kickvoteb:SetTextColor(Color(255, 255, 255, 155))
-		kickvoteb.DoClick = function()
-			if cplayer:IsVisible() == true then
-				cplayer:SetVisible(false)
-				cbkick:SetVisible(false)
-			else
-				cplayer:SetVisible(true)
-				cbkick:SetVisible(true)
-			end
-		end
-
+	local PanelVote = self.Sheet:Add("VoteTabPanel")
 	self.Sheet:AddSheet("Vote", PanelVote, "lambda/icons/poll.png")
 
 	local PanelSettings = self.Sheet:Add("DPanel")
@@ -332,186 +237,9 @@ function PANEL:Init()
 
 	local pl = LocalPlayer()
 	if pl:IsAdmin() then
-
-		local PanelAdmin = self.Sheet:Add("DPanel")
-
-		local nww = 40
-		local nwh = 20
-
-		local resp_time = vgui.Create("DNumberWang", PanelAdmin)
-		resp_time:SetPos(5, 5)
-		resp_time:SetSize(nww, nwh)
-		resp_time:SetCursorColor(Color(255,255,255,255))
-		resp_time:SetMinMax(-1, 127)
-		resp_time:SetValue(cvars.Number("lambda_max_respawn_timeout"))
-		function resp_time:OnValueChanged(val)
-			GAMEMODE:ChangeAdminConfiguration("max_respawn_timeout", val)
+			local PanelAdmin = self.Sheet:Add("SettingsTabPanel")
+			self.Sheet:AddSheet("Admin Settings", PanelAdmin, "lambda/icons/admin_settings.png")
 		end
-
-		local resp_time_label = vgui.Create("DLabel", PanelAdmin)
-		resp_time_label:SetPos(nww + 10 , 7)
-		resp_time_label:SetTextColor(Color(255,255,255,150))
-		resp_time_label:SetText("Respawn time")
-		resp_time_label:SizeToContents()
-
-		local no_resp = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		no_resp:SetPos(nww + 100, 7)
-		no_resp:SetText("No respawn")
-		no_resp:SizeToContents()
-		function no_resp:OnChange(val)
-			resp_time:SetVisible(val == false)
-			if val then resp_time:SetValue(-1) else resp_time:SetValue(GetConVar("lambda_max_respawn_timeout"):GetDefault()) end
-		end
-
-		---
-
-		local rest_time = vgui.Create("DNumberWang", PanelAdmin)
-		rest_time:SetPos(5, nwh + 10)
-		rest_time:SetSize(nww, nwh)
-		rest_time:SetCursorColor(Color(255,255,255,255))
-		rest_time:SetValue(cvars.Number("lambda_map_restart_timeout"))
-		function rest_time:OnValueChanged(val)
-			GAMEMODE:ChangeAdminConfiguration("map_restart_timeout", tostring(val))
-		end
-
-		local rest_time_label = vgui.Create("DLabel", PanelAdmin)
-		rest_time_label:SetPos(nww + 10 , 32)
-		rest_time_label:SetTextColor(Color(255,255,255,150))
-		rest_time_label:SetText("Restart time")
-		rest_time_label:SizeToContents()
-
-		---
-
-		local change_time = vgui.Create("DNumberWang", PanelAdmin)
-		change_time:SetPos(5, 2 * nwh + 15)
-		change_time:SetSize(nww, nwh)
-		change_time:SetCursorColor(Color(255,255,255,255))
-		change_time:SetValue(cvars.Number("lambda_map_change_timeout"))
-		change_time:SetMinMax(0, 100)
-
-		function change_time:OnValueChanged(val)
-			if tonumber(val) > 100 then val = 100 change_time:SetValue(val) end
-			GAMEMODE:ChangeAdminConfiguration("map_change_timeout", tostring(val))
-		end
-
-		local change_time_label = vgui.Create("DLabel", PanelAdmin)
-		change_time_label:SetPos(nww + 10 , 57)
-		change_time_label:SetTextColor(Color(255,255,255,150))
-		change_time_label:SetText("Map change timeout")
-		change_time_label:SizeToContents()
-
-		---
-
-		local pick_delay = vgui.Create("DNumberWang", PanelAdmin)
-		pick_delay:SetPos(5, 3 * nwh + 20)
-		pick_delay:SetSize(nww, nwh)
-		pick_delay:SetCursorColor(Color(255,255,255,255))
-		pick_delay:SetDecimals(1)
-		pick_delay:SetMinMax(0.0, 3.0)
-		pick_delay:SetValue(cvars.Number("lambda_pickup_delay"))
-
-		function pick_delay:OnValueChanged(val)
-			GAMEMODE:ChangeAdminConfiguration("pickup_delay", tostring(val))
-		end
-
-		local pick_delay_label = vgui.Create("DLabel", PanelAdmin)
-		pick_delay_label:SetPos(nww + 10 , 82)
-		pick_delay_label:SetTextColor(Color(255,255,255,150))
-		pick_delay_label:SetText("Pickup delay")
-		pick_delay_label:SizeToContents()
-
-		local difficulty_cmb = vgui.Create("DComboBox", PanelAdmin)
-		difficulty_cmb:SetPos(5, 4 * nwh + 25)
-		difficulty_cmb:SetTextColor(Color(255, 255, 255, 155))
-		difficulty_cmb:SetText("Difficulty")
-		difficulty_cmb:SetSize(100, 22)
-		difficulty_cmb:SetSortItems(false)
-		for _,v in pairs(GAMEMODE:GetDifficulties()) do
-			local choice = GAMEMODE:GetDifficultyText(v)
-			difficulty_cmb:AddChoice(choice, v, GAMEMODE:GetDifficulty() == v)
-		end
-		function difficulty_cmb:OnSelect(idx, value, data)
-			GAMEMODE:ChangeAdminConfiguration("difficulty", tostring(data))
-		end
-
-		local difficulty_label = vgui.Create("DLabel", PanelAdmin)
-		difficulty_label:SetPos(nww + 70 , 4 * nwh + 30)
-		difficulty_label:SetTextColor(Color(255,255,255,150))
-		difficulty_label:SetText("Difficulty")
-		difficulty_label:SizeToContents()
-
-		local player_god = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		player_god:SetPos(5, 5 * nwh + 32)
-		player_god:SetText("Godmode")
-		player_god:SizeToContents()
-		player_god:SetValue(cvars.Number("lambda_player_god"))
-		function player_god:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("player_god", val)
-		end
-
-		local ply_coll = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_coll:SetPos(5, 6 * nwh + 32)
-		ply_coll:SetText("Player collision")
-		ply_coll:SizeToContents()
-		ply_coll:SetValue(cvars.Number("lambda_playercollision"))
-		function ply_coll:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("playercollision", val)
-		end
-
-		local ply_track = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_track:SetPos(5, 7 * nwh + 32)
-		ply_track:SetText("Player tracking")
-		ply_track:SizeToContents()
-		ply_track:SetValue(cvars.Number("lambda_player_tracker"))
-		function ply_track:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("player_tracker", val)
-		end
-
-		local ply_friendlyfire = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		ply_friendlyfire:SetPos(5, 8 * nwh + 32)
-		ply_friendlyfire:SetText("Friendly fire. Only works with player collision on")
-		ply_friendlyfire:SizeToContents()
-		ply_friendlyfire:SetValue(cvars.Number("lambda_friendlyfire"))
-		function ply_friendlyfire:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("friendlyfire", val)
-		end
-
-		local dynamic_checkpoints = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		dynamic_checkpoints:SetPos(5, 9 * nwh + 32)
-		dynamic_checkpoints:SetText("Dynamic checkpoints")
-		dynamic_checkpoints:SizeToContents()
-		dynamic_checkpoints:SetValue(cvars.Number("lambda_dynamic_checkpoints"))
-		function dynamic_checkpoints:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("dynamic_checkpoints", val)
-		end
-
-		local npc_damage = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		npc_damage:SetPos(5, 10 * nwh + 32)
-		npc_damage:SetText("Friendly NPC damage")
-		npc_damage:SizeToContents()
-		npc_damage:SetValue(cvars.Number("lambda_allow_npcdmg"))
-		function npc_damage:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("allow_npcdmg", val)
-		end
-
-		local limit_ammo = vgui.Create("DCheckBoxLabel", PanelAdmin)
-		limit_ammo:SetPos(5, 11 * nwh + 32)
-		limit_ammo:SetText("Limit default ammo")
-		limit_ammo:SizeToContents()
-		limit_ammo:SetValue(cvars.Number("lambda_limit_default_ammo"))
-		function limit_ammo:OnChange(val)
-			if val then val = "1" else val = "0" end
-			GAMEMODE:ChangeAdminConfiguration("limit_default_ammo", val)
-		end
-
-		self.Sheet:AddSheet("Admin Settings", PanelAdmin, "lambda/icons/admin_settings.png")
-	end
 
 end
 
@@ -527,6 +255,7 @@ function PANEL:OnClose()
 end
 
 function PANEL:ShowColorOption()
+
 	self.Tabs = {}
 	self.CMs = {}
 
@@ -636,8 +365,185 @@ function PANEL:Think()
 	end
 
 end
-
 vgui.Register("HudPlayerSettings", PANEL, "DFrame")
+
+local VoteTab = {}
+
+VoteTab.Options = {["lambda_voterestart"] = "Restart Map", ["lambda_voteskip"] = "Skip map", ["lambda_votemap"] = "Change map", ["lambda_votekick"] = "Kick player"}
+VoteTab.Extended = {["lambda_votemap"] = function(map) RunConsoleCommand("lambda_votemap", map) end, ["lambda_votekick"] = function(sid) RunConsoleCommand("lambda_votekick",sid) end}
+
+function VoteTab:Init()
+
+	self.Selected = nil
+	local btnW, btnH, x, y = 110, 22, 5, 5
+
+	for k, v in pairs(self.Options) do
+		self.z = self:Add("DButton")
+		self.z:SetPos(x, y)
+		self.z:SetSize(btnW, btnH)
+		self.z:SetTextColor(colWHITE)
+		self.z:SetText(v)
+		self.z.DoClick = function()
+			if self.Extended[k] then
+				self.Combo:SetPos(130, 5)
+				self.Combo:SetVisible(true)
+				self.btn:SetVisible(true)
+				self:Extend(k)
+			else
+				RunConsoleCommand(k)
+			end
+	end
+		y = y + btnH + 5
+	end
+
+	self.Combo = self:Add("DComboBox")
+	self.Combo:SetSize(100, 22)
+	self.Combo:SetVisible(false)
+	self.Combo:SetTextColor(colWHITE)
+	self.btn = self:Add("DButton")
+	self.btn:SetPos(240, 5)
+	self.btn:SetSize(btnH, btnH)
+	self.btn:SetVisible(false)
+	self.btn:SetIcon("lambda/icons/tick.png")
+	self.btn:SetText("")
+	self.btn.DoClick = function()
+		local w, z = self.Combo:GetSelected()
+		if not self.Combo:GetSelected() then
+			self:Hide() return
+		end
+		if w and z then
+			self.Extended[self.Selected](z)
+		else
+			self.Extended[self.Selected](w)
+		end
+		self:Hide()
+	end
+
+end
+
+function VoteTab:Extend(vote)
+
+	local mapList = GAMEMODE:GetGameTypeData("MapList") or {}
+	self.Selected = vote
+	if vote == "lambda_votemap" then
+		for _, v in pairs(mapList) do
+			if v:iequals(game.GetMap()) == true then
+				continue
+			end
+			self.Combo:AddChoice(v)
+		end
+	end
+	if vote == "lambda_votekick" then
+		for _, v in pairs(player.GetAll()) do
+			if v == LocalPlayer() then
+				continue
+			end
+			self.Combo:AddChoice(v:Name(), v:UserID())
+		end
+	end
+
+end
+
+function VoteTab:Hide()
+
+	self.Combo:SetVisible(false)
+	self.btn:SetVisible(false)
+	self.Combo:Clear()
+
+end
+vgui.Register("VoteTabPanel", VoteTab, "DPanel")
+
+local SettingsTab = {}
+
+Derma_Install_Convar_Functions(SettingsTab)
+
+function SettingsTab:Init()
+
+	local gametypeSettings = GAMEMODE:GetGameTypeData("Settings") or {}
+	local y = 5
+	local n = 0
+
+	for k, v in pairs(gametypeSettings) do
+		if v.value_type == "int" and v.Category == "SERVER" then
+			self:AddIntOption(y, k, v)
+			y = y + 25
+			n = n + 1
+		end
+	end
+	local _y = (25 * n) + 10
+	for k, v in pairs(gametypeSettings) do
+		if v.value_type == "bool" and v.Category == "SERVER" then
+			self:AddCheckOption(_y, k, v)
+			_y = _y + 20
+		end
+	end
+	for k, v in pairs(gametypeSettings) do
+		if v.value_type == "string"  and v.Category == "SERVER" then
+			self:AddComboOption(10, k, v)
+		end
+	end
+
+end
+
+function SettingsTab:AddIntOption(y, id, tbl)
+
+	local w, h = 40, 20
+	self.numw = self:Add("DNumberWang")
+	self.numw:SetPos(5, 5 + y)
+	self.numw:SetSize(w, h)
+	self.numw:SetCursorColor(colWHITE)
+	self.numw:SetMinMax(-1, tbl.maxv)
+	self.numw:SetValue(tbl.value)
+	self.numw:SetVisible(true)
+
+	self.numw.lbl = self:Add("DLabel")
+	self.numw.lbl:SetPos(w + 10, y + 7)
+	self.numw.lbl:SetTextColor(colWHITE)
+	self.numw.lbl:SetText(tbl.info)
+	self.numw.lbl:SizeToContents()
+	self.numw.lbl:SetVisible(true)
+
+	function self.numw:OnValueChanged(v)
+		GAMEMODE:ChangeAdminConfiguration(id, v)
+	end
+
+end
+
+function SettingsTab:AddComboOption(y, id, tbl)
+
+	self.cb = self:Add("DComboBox")
+	self.cb:SetPos( 5 + 2 * 60, y)
+	self.cb:SetTextColor(colWHITE)
+	self.cb:SetText(tbl.info)
+	self.cb:SetSize(100, 20)
+	self.cb:SetSortItems(false)
+
+	self.cb.lbl = self:Add("DLabel")
+	self.cb.lbl:SetPos(135 + 100, y)
+	self.cb.lbl:SetTextColor(colWHITE)
+	self.cb.lbl:SetText(tbl.info)
+
+	for k, v in pairs(GAMEMODE:GetDifficulties()) do
+		local choice = GAMEMODE:GetDifficultyText(v)
+		self.cb:AddChoice(choice, v, GAMEMODE:GetDifficulty() == v)
+	end
+
+	function self.cb:OnSelect(idx, val, data)
+		GAMEMODE:ChangeAdminConfiguration(id,tostring(data))
+	end
+
+end
+
+function SettingsTab:AddCheckOption(y, id, tbl)
+
+	self.checkb = self:Add("DCheckBoxLabel")
+	self.checkb:SetPos(5, y)
+	self.checkb:SetText(tbl.info)
+	self.checkb:SizeToContents()
+	self.checkb:SetConVar("lambda_" .. id)
+
+end
+vgui.Register("SettingsTabPanel", SettingsTab, "DScrollPanel")
 
 net.Receive("LambdaPlayerSettings", function(len)
 

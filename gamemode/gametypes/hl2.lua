@@ -345,14 +345,11 @@ end
 
 function GAMETYPE:InitSettings()
 
-		self:AddSetting("difficulty_metrics",{Category = "SERVER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), info = "Shows NPC/Player metrics." })
-		self:AddSetting("dynamic_checkpoints",{Category = "SERVER", NiceName = "#GM_DYNCHECKPOINT", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Dynamically creates checkpoints if the position is appropriate." })
-		self:AddSetting("allow_npcdmg",{Category = "SERVER", NiceName = "#GM_NPCDMG", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "If set to 1 allows players to kill any NPC." })
-		self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = 2, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Difficulty setting, 1 = Very Easy, 2 = Easy, 3 = Normal, 4 = Hard, 5 = Very Hard." })
-		self:AddSetting("player_tracker",{Category = "SERVER", NiceName = "#GM_PLYTRACK", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Allows to see players through walls." })
-		
-		
-		self.Base.InitSettings(self)
+	self.Base.InitSettings(self)
+
+	self:AddSetting("dynamic_checkpoints",{Category = "SERVER", NiceName = "#GM_DYNCHECKPOINT", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Dynamic checkpoints" })
+	self:AddSetting("allow_npcdmg",{Category = "SERVER", NiceName = "#GM_NPCDMG", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Friendly NPC damage" })
+	self:AddSetting("player_tracker",{Category = "SERVER", NiceName = "#GM_PLYTRACK", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1,info = "Player tracking" })
 
 end
 
@@ -370,7 +367,7 @@ function GAMETYPE:GetScoreboardInfo()
         { name = "LAMBDA_Map", value = game.GetMap() },
     }
     local campaign = self:GetCampaignName(GAMEMODE:GetCurrentMap())
-    if campaign ~= nil then 
+    if campaign ~= nil then
         table.insert(scoreboardInfo, { name = "LAMBDA_Chapter", value = campaign } )
     end
     return scoreboardInfo
