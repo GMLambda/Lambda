@@ -127,12 +127,13 @@ function GAMETYPE:AddSetting(id, option)
     end
 
     local convar = CreateConVar(actualName, actualValue, option.flags, option.info)
-    --local gametypeSettings = self.Settings
     self.Settings[id] = option
+    self.Settings[id].getCvar = convar
 
-    if fn ~= nil and isfunction(fn) then
-        cvars.AddChangeCallback(actualName, fn)
-    end
+    cvars.AddChangeCallback(actualName, function(cvar, oldval, newval)
+        local cv = string.TrimLeft(cvar, prefix)
+        self.Settings[cv].value = newval
+    end)
 
     return convar
 
@@ -142,21 +143,23 @@ end
 function GAMETYPE:InitSettings()
 
     --SERVER
-    self:AddSetting("walkspeed",{Category = "SERVER", NiceName = "#GM_WALKSPEED", value_type = "string", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Walk speed" })
-    self:AddSetting("normspeed",{Category = "SERVER", NiceName = "#GM_NORMSPEED", value_type = "string", value = 190, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Walk speed" })
-    self:AddSetting("sprintspeed",{Category = "SERVER", NiceName = "#GM_SPRINTSPEED", value_type = "string", value = 320, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Sprint speed" })
-    self:AddSetting("connect_timeout",{Category = "SERVER", NiceName = "#GM_CONNECTTIMEOUT", value_type = "string", value = 120, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Time required before player is considered to time out." })
-    self:AddSetting("playercollision",{Category = "SERVER", NiceName = "#GM_PLAYERCOLLISION", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Enables or disables collisions between players." })
-    self:AddSetting("friendlyfire",{Category = "SERVER", NiceName = "#GM_FRIENDLYFIRE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Enables friendly fire, only works if player collisions enabled." })
-    self:AddSetting("weapon_strip_force",{Category = "SERVER", NiceName = "#GM_PREVENTITEMMOVE", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Prevents players from moving weapons and items from by shooting." })
-    self:AddSetting("limit_default_ammo",{Category = "SERVER", NiceName = "#GM_DEFAMMO", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "If enabled weapons default ammo will use the sk_* settings for max limit." })
-    self:AddSetting("allow_auto_jump",{Category = "SERVER", NiceName = "#GM_AUTOJUMP", value_type = "bool", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Allow automatically jumping if on ground" })
-    self:AddSetting("max_respawn_timeout",{Category = "SERVER", NiceName = "#GM_RESPAWNTIME", value_type = "string", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Time before player can respawn" })
-    self:AddSetting("map_restart_timeout",{Category = "SERVER", NiceName = "#GM_RESTARTTIME", value_type = "string", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), info = "Time before a new round starts when all players are dead" })
-    self:AddSetting("instance_id",{Category = "SERVER", NiceName = "#GM_INSTANCEID", value_type = "string", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY), info = "Allows to assign a unique instance id to support multiple srcds instances at once from the same directory." })
-    self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "string", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), info = "Time before changing level as soon first player gets to it." })
-    self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), info = "Player god mode." })
-    self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "string", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), info = "The time to wait before player can pickup again" })
+    self:AddSetting("walkspeed",{Category = "SERVER", NiceName = "#GM_WALKSPEED", value_type = "int", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
+    self:AddSetting("normspeed",{Category = "SERVER", NiceName = "#GM_NORMSPEED", value_type = "int", value = 190, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
+    self:AddSetting("sprintspeed",{Category = "SERVER", NiceName = "#GM_SPRINTSPEED", value_type = "int", value = 320, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Sprint speed" })
+    self:AddSetting("connect_timeout",{Category = "SERVER", NiceName = "#GM_CONNECTTIMEOUT", value_type = "int", value = 120, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Timeout limit" })
+    self:AddSetting("playercollision",{Category = "SERVER", NiceName = "#GM_PLAYERCOLLISION", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Player collision" })
+    self:AddSetting("friendlyfire",{Category = "SERVER", NiceName = "#GM_FRIENDLYFIRE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Friendly fire" })
+    self:AddSetting("prevent_item_move",{Category = "SERVER", NiceName = "#GM_PREVENTITEMMOVE", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Prevent item moving" })
+    self:AddSetting("limit_default_ammo",{Category = "SERVER", NiceName = "#GM_DEFAMMO", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Limit default ammo" })
+    self:AddSetting("allow_auto_jump",{Category = "SERVER", NiceName = "#GM_AUTOJUMP", value_type = "bool", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Auto jump" })
+    self:AddSetting("max_respawn_timeout",{Category = "SERVER", NiceName = "#GM_RESPAWNTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, extra = {["No respawn"] = "bool"}, info = "Respawn time" })
+    self:AddSetting("map_restart_timeout",{Category = "SERVER", NiceName = "#GM_RESTARTTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Restart time" })
+    self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
+    self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
+    self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "float", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 10, info = "Pickup delay" })
+    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = 2, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, info = "Difficulty" })
+    self:AddSetting("difficulty_metrics",{Category = "DEVELOPER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1, info = "NPC/Player metrics" })
+
 
 end
 

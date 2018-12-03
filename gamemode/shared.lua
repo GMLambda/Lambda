@@ -169,6 +169,7 @@ function GM:OnGamemodeLoaded()
 
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
+    self:CallGameTypeFunc("InitSettings")
     self:MountRequiredContent()
 
 end
@@ -181,6 +182,7 @@ function GM:OnReloaded()
 
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
+    self:CallGameTypeFunc("InitSettings")
 end
 
 function GM:MountRequiredContent()
@@ -227,7 +229,6 @@ function GM:Initialize()
 
     self:InitializePlayerList()
     self:InitializeRoundSystem()
-    self:CallGameTypeFunc("InitSettings")
 
     if SERVER then
         self:ResetSceneCheck()
@@ -247,7 +248,12 @@ function GM:Initialize()
 end
 
 function GM:GetSetting(setting)
-    return GetConVar("lambda_" .. setting)
+    if self:GetGameTypeData("Settings")[setting] then
+        local res = self:GetGameTypeData("Settings")[setting]
+        return res.getCvar
+    else
+        return false or "0"
+    end
 end
 
 function GM:ResetSceneCheck()

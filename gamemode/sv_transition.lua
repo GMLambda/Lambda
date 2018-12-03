@@ -38,7 +38,7 @@ function GM:InitializeTransitionData()
     -- I know this is not ideal but lets be honest, I have so much more important work left :3
 
     if self.IsChangeLevel == true then
-        local transitionData = util.GetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "TransitionData", DEFAULT_TRANSITION_DATA)
+        local transitionData = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "TransitionData", DEFAULT_TRANSITION_DATA)
         self.TransitionData = util.JSONToTable(transitionData)
 
     else
@@ -48,7 +48,7 @@ function GM:InitializeTransitionData()
     DbgPrint("TransitionData containts " .. tostring(table.Count(self.TransitionData)) .. " objects")
 
     --PrintTable(self.TransitionData)
-    util.RemovePData("Lambda" .. self:GetSetting("instance_id"):GetString(), "TransitionData")
+    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
 
 end
 
@@ -132,7 +132,7 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
         end
     end
 
-    util.SetPData("Lambda" .. self:GetSetting("instance_id"):GetString(), "TransitionData", util.TableToJSON(transitionData))
+    util.SetPData("Lambda" .. lambda_instance_id:GetString(), "TransitionData", util.TableToJSON(transitionData))
 
 end
 

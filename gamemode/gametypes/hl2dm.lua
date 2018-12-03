@@ -5,12 +5,14 @@ end
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 
-GAMETYPE.Name = "Deathmatch"
+GAMETYPE.Name = "Half-Life 2 Deathmatch"
+GAMETYPE.BaseGameType = "lambda_base"
 GAMETYPE.MapScript = {}
 GAMETYPE.UsingCheckpoints = false
 GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
+GAMETYPE.Settings = {}
 
 GAMETYPE.MapList =
 {
@@ -45,19 +47,18 @@ end
 
 function GAMETYPE:IsTeamOnly()
 
-    return lambda_dm_teamonly:GetBool()
 
 end
 
 function GAMETYPE:GetFragLimit()
 
-    return lambda_dm_fraglimit:GetInt()
+    return self.Settings["dm_fraglimit"].value
 
 end
 
 function GAMETYPE:GetTimeLimit()
 
-    return lambda_dm_timelimit:GetInt() * 60
+    return self.Settings["dm_timelimit"].value * 60
 
 end
 
@@ -190,6 +191,18 @@ end
 function GAMETYPE:IsPlayerEnemy(ply1, ply2)
     -- TODO: TDM
     return true
+end
+
+function GAMETYPE:InitSettings()
+
+    self.Base.InitSettings(self)
+
+    self:AddSetting("dm_fraglimit",{Category = "SERVER", NiceName = "#GM_DM_FRAGLIMIT", value_type = "int", value = 50, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1000, info = "Frag limit" })
+    self:AddSetting("dm_timelimit",{Category = "SERVER", NiceName = "#GM_DM_TIMELIMIT", value_type = "int", value = 10, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 30, info = "Time limit" })
+    self:AddSetting("dm_teamonly",{Category = "SERVER", NiceName = "#GM_DM_TEAMONLY", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Team based" })
+
+    -- manually exclude difficulty for now
+    self.Settings["difficulty"].Category = "HIDDEN"
 end
 
 function GAMETYPE:GetScoreboardInfo()
