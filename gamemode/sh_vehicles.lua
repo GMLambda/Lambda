@@ -495,6 +495,9 @@ else -- CLIENT
             view.origin = viewPos + (view.angles:Forward() * 3)
         end
 
+        -- Don't roll the camera
+        view.angles.z = 0
+        
         if vehicle.GetThirdPersonMode == nil or ply:GetViewEntity() ~= ply then
             -- This should never happen.
             return
@@ -503,9 +506,6 @@ else -- CLIENT
         if vehicle:GetThirdPersonMode() == false then
             return view
         end
-
-        -- Don't roll the camera
-        view.angles.roll = 0
 
         local mn, mx = vehicle:GetRenderBounds()
         local radius = ( mn - mx ):Length()
