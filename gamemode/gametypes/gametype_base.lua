@@ -132,7 +132,7 @@ function GAMETYPE:AddSetting(id, option)
 
     cvars.AddChangeCallback(actualName, function(cvar, oldval, newval)
         local cv = string.TrimLeft(cvar, prefix)
-        self.Settings[cv].value = newval
+        self.Settings[cv].value = tonumber(newval)
     end)
 
     return convar
