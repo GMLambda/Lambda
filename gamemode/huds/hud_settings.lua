@@ -53,13 +53,6 @@ function PANEL:Init()
 		PanelSelect:AddPanel(icon, { lambda_playermdl = name })
 	end
 
-	local colsetb = vgui.Create("DImageButton", self.Sheet)
-	colsetb:SetPos(W - 30 , 3)
-	colsetb:SetImage("lambda/icons/palette.png")
-	colsetb:SizeToContents()
-	colsetb:SetTooltip("Edit colors")
-	colsetb.DoClick = function() if not IsValid(self.CMFrame) then self:ShowColorOption() else self.CMFrame:Remove() end end
-
 	self.Sheet:AddSheet( "Player", PanelSelect, "lambda/icons/player_settings.png" )
 
 	local PanelVote = self.Sheet:Add("VoteTabPanel")
@@ -200,11 +193,11 @@ function PANEL:Init()
 			chAdaptive:SetConVar("lambda_crosshair_adaptive")
 			chAdaptive:SetValue(cvars.Number("lambda_crosshair_adaptive"))
 
-			local chAdaptive = vgui.Create("DCheckBoxLabel", PanelCrosshair)
-			chAdaptive:SetPos(5, 165)
-			chAdaptive:SetText("Dynamic")
-			chAdaptive:SetConVar("lambda_crosshair_dynamic")
-			chAdaptive:SetValue(cvars.Number("lambda_crosshair_dynamic"))
+			local chDynamic = vgui.Create("DCheckBoxLabel", PanelCrosshair)
+			chDynamic:SetPos(5, 165)
+			chDynamic:SetText("Dynamic")
+			chDynamic:SetConVar("lambda_crosshair_dynamic")
+			chDynamic:SetValue(cvars.Number("lambda_crosshair_dynamic"))
 		end
 		sheetSettings:AddSheet("Crosshair", PanelCrosshair)
 
@@ -232,6 +225,66 @@ function PANEL:Init()
 			physcannon_glow:SetValue(cvars.Number("physcannon_glow"))
 		end
 		sheetSettings:AddSheet("Effects", PanelPostFx)
+
+		local PanelColor = sheetSettings:Add("DPanel")
+		PanelColor:SetPaintBackground(false)
+		do
+			local colOptions = {["ply"] = "Player", ["wep"] = "Weapon", ["hudBG"] = "HUD Background", ["hudTXT"] = "HUD Text"}
+			local colTabs = {}
+			local colMixers = {}
+
+			local function strColorToVector(str)
+				local color = string.Explode(" ", str)
+				return Color(color[1] , color[2],color[3])
+			end
+
+			local function retrieveColor(k)
+				if k == "hudBG" then
+					return strColorToVector(lambda_hud_bg_color:GetString())
+				else
+					return strColorToVector(lambda_hud_text_color:GetString())
+				end
+			end
+
+			local function retrieveVec(k)
+				if k == "ply" then
+					return LocalPlayer():GetPlayerColor()
+				else
+					return LocalPlayer():GetWeaponColor()
+				end
+			end
+
+			local colSheet = vgui.Create("DPropertySheet", PanelColor)
+			colSheet:Dock(FILL)
+
+			for k, v in pairs(colOptions) do
+				colTabs[k] = vgui.Create("DPanel", colSheet)
+				colTabs[k]:SetPaintBackground(false)
+				colMixers[k] = vgui.Create("DColorMixer", colTabs[k])
+				colMixers[k]:SetPos(0, 0)
+				colMixers[k]:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
+				colMixers[k]:SetAlphaBar(false)
+				colMixers[k]:SetPalette(false)
+				colSheet:AddSheet(v, colTabs[k])
+			end
+
+			for k, v in pairs(colMixers) do
+				if k == "hudTXT" or k == "hudBG" then
+					v:SetColor(retrieveColor(k))
+				else
+					v:SetVector(retrieveVec(k))
+				end
+
+				v.ValueChanged = function()
+					if k == "hudTXT" or k == "hudBG" then
+						self:UpdateColorSettings(k, v:GetColor())
+					else
+						self:UpdateColorSettings(k, v:GetVector())
+					end
+				end
+			end
+		end
+		sheetSettings:AddSheet("Color", PanelColor)
 	end
 	self.Sheet:AddSheet("Settings", PanelSettings, "lambda/icons/settings.png")
 
@@ -246,86 +299,9 @@ end
 
 function PANEL:OnClose()
 
-	if IsValid(self.CMFrame) then self.CMFrame:Remove() end
-
 	net.Start("LambdaPlayerSettings")
 	net.WriteBool(false)
 	net.SendToServer()
-
-end
-
-function PANEL:ShowColorOption()
-
-	self.Tabs = {}
-	self.CMs = {}
-
-	self.CMFrame = vgui.Create("DFrame")
-	self.CMFrame:SetPos(395, ScrH() / 2 - (H / 2))
-	self.CMFrame:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
-	self.CMFrame:SetSkin("Lambda")
-	self.CMFrame:ShowCloseButton(false)
-	self.CMFrame:SetDraggable(false)
-	self.CMFrame:SetTitle("Color Settings")
-
-	local function strColorToVector(str)
-		local color = string.Explode(" ", str)
-		return Color(color[1] , color[2],color[3])
-	end
-
-	local function retrieveColor(k)
-		if k == "hudBG" then
-			return strColorToVector(lambda_hud_bg_color:GetString())
-		else
-			return strColorToVector(lambda_hud_text_color:GetString())
-		end
-	end
-
-	local function retrieveVec(k)
-		if k == "ply" then
-			return LocalPlayer():GetPlayerColor()
-		else
-			return LocalPlayer():GetWeaponColor()
-		end
-	end
-
-
-	self.CMSheet = vgui.Create("DPropertySheet", self.CMFrame)
-	self.CMSheet:Dock(FILL)
-
-	self.Tabs.ply =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("Player", self.Tabs.ply)
-
-	self.Tabs.wep =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("Weapon", self.Tabs.wep)
-
-	self.Tabs.hudBG =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("HUD Background", self.Tabs.hudBG)
-
-	self.Tabs.hudTXT =  vgui.Create("DPanel", self.CMSheet)
-	self.CMSheet:AddSheet("HUD Text", self.Tabs.hudTXT)
-
-	for k,v in pairs(self.Tabs) do
-		self.CMs[k] = vgui.Create("DColorMixer", self.Tabs[k])
-		self.CMs[k]:SetAlphaBar(false)
-		self.CMs[k]:SetPalette(false)
-		self.CMs[k]:Dock(FILL)
-
-		if k == "hudTXT" or k == "hudBG" then
-			self.CMs[k]:SetColor(retrieveColor(k))
-		else
-			self.CMs[k]:SetVector(retrieveVec(k))
-		end
-
-		self.CMs[k].ValueChanged = function()
-			if k == "hudTXT" or k == "hudBG" then
-				self:UpdateColorSettings(k, self.CMs[k]:GetColor())
-			else
-				self:UpdateColorSettings(k, self.CMs[k]:GetVector())
-			end
-		end
-	end
-
-	self.CMFrame:MakePopup()
 
 end
 
@@ -352,18 +328,6 @@ function PANEL:OnKeyCodePressed(key)
 	if key == KEY_F1 then
 		self:Close()
 	end
-end
-
-
-function PANEL:Think()
-
-	if self.Sheet.OldActiveTab ~= self.Sheet:GetActiveTab() then
-		self.Sheet.OldActiveTab = self.Sheet:GetActiveTab()
-		if IsValid( self.CMFrame ) then
-			self.CMFrame:Remove()
-		end
-	end
-
 end
 vgui.Register("HudPlayerSettings", PANEL, "DFrame")
 
@@ -475,11 +439,13 @@ function SettingsTab:Init()
 		if v.value_type == "bool" and v.Category == "SERVER" then
 			self:AddCheckOption(_y, k, v)
 			_y = _y + 20
+			n = n + 1
 		end
 	end
 	for k, v in pairs(gametypeSettings) do
 		if v.value_type == "string"  and v.Category == "SERVER" then
-			self:AddComboOption(10, k, v)
+			self:AddComboOption(_y, k, v)
+			_y = _y + 20
 		end
 	end
 
@@ -512,14 +478,14 @@ end
 function SettingsTab:AddComboOption(y, id, tbl)
 
 	self.cb = self:Add("DComboBox")
-	self.cb:SetPos( 5 + 2 * 60, y)
+	self.cb:SetPos(5, y)
 	self.cb:SetTextColor(colWHITE)
 	self.cb:SetText(tbl.info)
 	self.cb:SetSize(100, 20)
 	self.cb:SetSortItems(false)
 
 	self.cb.lbl = self:Add("DLabel")
-	self.cb.lbl:SetPos(135 + 100, y)
+	self.cb.lbl:SetPos(110, y)
 	self.cb.lbl:SetTextColor(colWHITE)
 	self.cb.lbl:SetText(tbl.info)
 
