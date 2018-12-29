@@ -163,6 +163,11 @@ end
 
 function GAMETYPE:InitSettings()
 
+    local choices = {}
+    for k, v in pairs(self:GetDifficulties()) do
+        table.insert(choices, v)
+    end
+    PrintTable(choices)
     --SERVER
     self:AddSetting("walkspeed",{Category = "SERVER", NiceName = "#GM_WALKSPEED", value_type = "int", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
     self:AddSetting("normspeed",{Category = "SERVER", NiceName = "#GM_NORMSPEED", value_type = "int", value = 190, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
@@ -178,7 +183,7 @@ function GAMETYPE:InitSettings()
     self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
     self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
     self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "float", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 10, info = "Pickup delay" })
-    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, extra = {value_type = "combo", options = "GetDifficulties", current = "GetDifficulty"}, info = "Difficulty" })
+    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, extra = {value_type = "combo", options = choices, current = "GetDifficulty"}, info = "Difficulty" })
     self:AddSetting("difficulty_metrics",{Category = "DEVELOPER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1, info = "NPC/Player metrics" })
 
 
