@@ -178,7 +178,7 @@ function GAMETYPE:InitSettings()
     self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
     self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
     self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "float", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 10, info = "Pickup delay" })
-    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, GetDifficulty = function() return GAMEMODE:GetDifficulty() end, choices = GAMEMODE:GetDifficulties(), choices_text = function(n) return GAMEMODE:GetDifficultyText(n) end, info = "Difficulty" })
+    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, current_choice = function() return GAMEMODE:GetDifficulty() end, choices = GAMEMODE:GetDifficulties(), choices_text = function(n) return GAMEMODE:GetDifficultyText(n) end, info = "Difficulty" })
     self:AddSetting("difficulty_metrics",{Category = "DEVELOPER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1, info = "NPC/Player metrics" })
 
 
