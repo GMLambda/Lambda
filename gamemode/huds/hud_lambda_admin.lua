@@ -68,43 +68,43 @@ end
 
 function PANEL:AddComboOption(x, y, id, tbl)
 
-	self.cb = self:Add("DComboBox")
-	self.cb:SetPos(x, y)
-	self.cb:SetTextColor(colWHITE)
-	self.cb:SetText(tbl.info)
-	self.cb:SetSize(100, 20)
-	self.cb:SetSortItems(false)
+	self.Settings[id].cb = self:Add("DComboBox")
+	self.Settings[id].cb:SetPos(x, y)
+	self.Settings[id].cb:SetTextColor(colWHITE)
+	self.Settings[id].cb:SetText(tbl.info)
+	self.Settings[id].cb:SetSize(100, 20)
+	self.Settings[id].cb:SetSortItems(false)
 
-	self.cb.lbl = self:Add("DLabel")
-	self.cb.lbl:SetPos(110, y)
-	self.cb.lbl:SetTextColor(colWHITE)
-	self.cb.lbl:SetText(tbl.info)
+	self.Settings[id].cb.lbl = self:Add("DLabel")
+	self.Settings[id].cb.lbl:SetPos(110, y)
+	self.Settings[id].cb.lbl:SetTextColor(colWHITE)
+	self.Settings[id].cb.lbl:SetText(tbl.info)
 
 	for k, v in pairs(tbl.choices) do
 		local text = tbl.choices_text(v)
-		self.cb:AddChoice(text, v, tbl.GetDifficulty() == v)
+		self.Settings[id].cb:AddChoice(text, v, tbl.current_choice() == v)
 	end
 
-	function self.cb:OnSelect(idx, val, data)
-		GAMEMODE:ChangeAdminConfiguration(id,data)
+	self.Settings[id].cb.OnSelect = function(self, index, value, data)
+		GAMEMODE:ChangeAdminConfiguration(id, data)
 	end
 
 end
 
 function PANEL:AddCheckOption(x, y, id, tbl)
 
-	self.checkb = self:Add("DCheckBoxLabel")
-	self.checkb:SetPos(x, y)
-	self.checkb:SetText(tbl.info)
-	self.checkb:SizeToContents()
-	self.checkb.extra = false
+	self.Settings[id].checkb = self:Add("DCheckBoxLabel")
+	self.Settings[id].checkb:SetPos(x, y)
+	self.Settings[id].checkb:SetText(tbl.info)
+	self.Settings[id].checkb:SizeToContents()
+	self.Settings[id].checkb.extra = false
 
 	if not tbl.extra then
-		self.checkb:SetConVar("lambda_" .. id)
+		self.Settings[id].checkb:SetConVar("lambda_" .. id)
 	else
-		self.checkb:SetText(tbl.extra.info)
-		self.checkb:SetValue(tbl.extra.value)
-		self.checkb.extra = true
+		self.Settings[id].checkb:SetText(tbl.extra.info)
+		self.Settings[id].checkb:SetValue(tbl.extra.value)
+		self.Settings[id].checkb.extra = true
 		tbl.extra.cached = tbl.value
 	end
 
@@ -118,7 +118,7 @@ function PANEL:AddCheckOption(x, y, id, tbl)
 		 end
 	end
 
-	function self.checkb:OnChange(val)
+	self.Settings[id].checkb.OnChange = function(self, val)
 		if val then val = "1" else val = "0" end
 			if tbl.extra and val == "1" then
 				Toggled(true)
@@ -128,7 +128,7 @@ function PANEL:AddCheckOption(x, y, id, tbl)
 				GAMEMODE:ChangeAdminConfiguration(id, tbl.extra.cached)
 			else
 			GAMEMODE:ChangeAdminConfiguration(id, val)
-			end
+		end
 	end
 
 end
