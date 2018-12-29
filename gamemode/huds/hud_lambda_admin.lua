@@ -27,7 +27,7 @@ function PANEL:Init()
 		end
 	end
 	for k, v in pairs(self.Settings) do
-		if v.value_type == "string" and v.extra.value_type == "combo"  and v.Category == "SERVER" then
+		if v.value_type == "string"  and v.extra.value_type == "combo" and v.Category == "SERVER" then
 			self:AddComboOption(x, _y, k, v)
 			_y = _y + 20
 		end
@@ -80,7 +80,7 @@ function PANEL:AddComboOption(x, y, id, tbl)
 	self.Settings[id].cb.lbl:SetTextColor(colWHITE)
 	self.Settings[id].cb.lbl:SetText(tbl.info)
 
-	for k, v in pairs(GAMEMODE:CallGameTypeFunc(tbl.extra.options)) do
+	for k, v in pairs(tbl.extra.options) do
 		self.Settings[id].cb:AddChoice(v, k, GAMEMODE:CallGameTypeFunc(tbl.extra.current) == k)
 	end
 
