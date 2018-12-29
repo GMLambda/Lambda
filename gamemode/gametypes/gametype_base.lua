@@ -108,7 +108,21 @@ end
 
 function GAMETYPE:AddSetting(id, option)
 
-    if CLIENT and bit.band(option.flags, FCVAR_REPLICATED) ~= 0 and bit.band(option.flags, FCVAR_ARCHIVE) ~= 0 then 
+    local function GetCVarValue(cvar)
+        if ConVarExists(cvar) then
+            if option.value_type == "int" and option.value_type == "bool" then
+                return GetConVar(cvar):GetInt()
+            elseif option.value_type == "float" then
+                    return GetConVar(cvar):GetFloat()
+            else
+                    return GetConVar(cvar):GetString()
+            end
+        else
+            return false
+        end
+    end
+
+    if CLIENT and bit.band(option.flags, FCVAR_REPLICATED) ~= 0 and bit.band(option.flags, FCVAR_ARCHIVE) ~= 0 then
         DbgPrint("Removing FCVAR_ARCHIVE from " .. id)
         flags = bit.band(option.flags, bit.bnot(FCVAR_ARCHIVE))
     end
@@ -118,21 +132,28 @@ function GAMETYPE:AddSetting(id, option)
     local actualName = prefix .. id
     local actualValue = ""
 
-    if isbool(value) then
-        actualValue = tostring(tonumber(value))
-    elseif isstring(value) then
-        actualValue = value
-    else
+    local storedVal = GetCVarValue(actualName)
+
+    if storedVal then
+        value = storedVal
+    end
+
+    if option.value_type == "int" or option.value_type == "float" or option.value_type == "bool" then
+        actualValue = tonumber(value)
+    end
+
+    if option.value_type == "string" then
         actualValue = tostring(value)
     end
 
     local convar = CreateConVar(actualName, actualValue, option.flags, option.info)
     self.Settings[id] = option
     self.Settings[id].getCvar = convar
+    self.Settings[id].value = actualValue
 
     cvars.AddChangeCallback(actualName, function(cvar, oldval, newval)
         local cv = string.TrimLeft(cvar, prefix)
-        self.Settings[cv].value = tonumber(newval)
+        self.Settings[cv].value = newval
     end)
 
     return convar
@@ -157,7 +178,7 @@ function GAMETYPE:InitSettings()
     self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
     self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
     self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "float", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 10, info = "Pickup delay" })
-    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = 2, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, info = "Difficulty" })
+    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, info = "Difficulty" })
     self:AddSetting("difficulty_metrics",{Category = "DEVELOPER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1, info = "NPC/Player metrics" })
 
 

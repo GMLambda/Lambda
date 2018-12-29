@@ -82,9 +82,9 @@ function GM:Tick()
 
     -- Make sure physics don't go crazy when we toggle it.
     local collisionChanged = false
-    if self.LastAllowCollisions ~= self:GetSetting("playercollision"):GetBool() then
+    if self.LastAllowCollisions ~= self:GetSetting("playercollision") then
         collisionChanged = true
-        self.LastAllowCollisions = self:GetSetting("playercollision"):GetBool()
+        self.LastAllowCollisions = self:GetSetting("playercollision")
     end
 
     local plys = player.GetAll()
@@ -248,12 +248,24 @@ function GM:Initialize()
 end
 
 function GM:GetSetting(setting)
-    if self:GetGameTypeData("Settings")[setting] then
-        local res = self:GetGameTypeData("Settings")[setting]
-        return res.getCvar
-    else
-        return false or "0"
+    if not self:GetGameTypeData("Settings")[setting] then return false end
+    local res = self:GetGameTypeData("Settings")[setting]
+    if res.value_type == "int" then
+        return res.getCvar:GetInt()
     end
+
+    if res.value_type == "bool" then
+        return res.getCvar:GetBool()
+    end
+
+    if res.value_type == "string" then
+        return res.getCvar:GetString()
+    end
+
+    if res.value_type == "float" then
+        return res.getCvar:GetFloat()
+    end
+
 end
 
 function GM:ResetSceneCheck()
@@ -290,7 +302,7 @@ end
 function GM:ShouldCollide(ent1, ent2)
 
     if ent1:IsPlayer() and ent2:IsPlayer() then
-        if self:GetSetting("playercollision"):GetBool() == false then
+        if self:GetSetting("playercollision") == false then
             return false
         end
         if ent1:GetNWBool("DisablePlayerCollide", false) == true or ent2:GetNWBool("DisablePlayerCollide", false) == true then

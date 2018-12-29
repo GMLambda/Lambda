@@ -193,7 +193,7 @@ function GM:EntityTakeDamage(target, dmginfo)
         local isRestricted = restrictedNPCNames[npcName] == true or restrictedNPCClasses[targetClass] == true
         local attackerIsPlayer = ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()))
         -- Check if player is attacking friendlies.
-        if attackerIsPlayer == true and isRestricted == true and self:GetSetting("allow_npcdmg"):GetBool() == false then
+        if attackerIsPlayer == true and isRestricted == true and self:GetSetting("allow_npcdmg") == false then
             DbgPrint("Filtering damage on restricted NPC")
             dmginfo:ScaleDamage(0)
             return true
@@ -230,12 +230,12 @@ function GM:EntityTakeDamage(target, dmginfo)
         end
 
         -- NOTE: Blocking too early would not register any damage.
-        if self:GetSetting("player_god"):GetBool() == true then
+        if self:GetSetting("player_god") == true then
             return true
         end
 
     elseif target:IsWeapon() == true or target:IsItem() == true then
-        if self:GetSetting("prevent_item_move"):GetBool() == true then
+        if self:GetSetting("prevent_item_move") == true then
             if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
                 dmginfo:SetDamageForce(Vector(0, 0, 0))
             end

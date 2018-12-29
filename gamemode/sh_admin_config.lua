@@ -14,7 +14,7 @@ if SERVER then
             DbgPrint("Player " .. tostring(ply) .. " attempted to change settings with invalid auth token.")
             return
         end
-        local registeredCvar = self:GetSetting(cvar)
+        local registeredCvar = self:GetGameTypeData("Settings")[cvar].getCvar
         if registeredCvar == nil then
             DbgPrint("Attempted to access unregistered cvar: " .. tostring(cvar) .. ", player: " .. tostring(ply))
             return
