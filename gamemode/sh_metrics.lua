@@ -48,7 +48,7 @@ local NEXT_NETWORK_UPDATE = CurTime()
 
 local function NetworkUpdate()
 
-    if GAMEMODE:GetSetting("difficulty_metrics"):GetBool() == false then
+    if GAMEMODE:GetSetting("difficulty_metrics") == false then
         return
     end
     
@@ -143,7 +143,7 @@ end
 
 function GM:DrawMetrics()
 
-    if self:GetSetting("difficulty_metrics"):GetBool() == false then
+    if self:GetSetting("difficulty_metrics") == false then
         return
     end
 

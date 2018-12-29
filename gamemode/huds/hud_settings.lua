@@ -24,11 +24,14 @@ function PANEL:Init()
 	self:SetSkin("Lambda")
 	self:SetSize(W, H)
 	self:SetPos(20, ScrH() / 2 - (H / 2))
-	self:SetTitle("Settings")
+	self:SetTitle("Settings - " .. GAMEMODE:GetGameTypeData("Name"))
 
 	self.Sheet = self:Add("DPropertySheet")
 	self.Sheet:Dock(LEFT)
 	self.Sheet:SetSize(W - 10, H)
+
+	local PanelVote = self.Sheet:Add("VoteTabPanel")
+	self.Sheet:AddSheet("Vote", PanelVote, "lambda/icons/poll.png")
 
 	PanelSelect = self.Sheet:Add("DPanelSelect")
 
@@ -54,9 +57,6 @@ function PANEL:Init()
 	end
 
 	self.Sheet:AddSheet( "Player", PanelSelect, "lambda/icons/player_settings.png" )
-
-	local PanelVote = self.Sheet:Add("VoteTabPanel")
-	self.Sheet:AddSheet("Vote", PanelVote, "lambda/icons/poll.png")
 
 	local PanelSettings = self.Sheet:Add("DPanel")
 	do
@@ -423,26 +423,26 @@ Derma_Install_Convar_Functions(SettingsTab)
 
 function SettingsTab:Init()
 
-	local gametypeSettings = GAMEMODE:GetGameTypeData("Settings") or {}
+	self.Settings = GAMEMODE:GetGameTypeData("Settings") or {}
 	local y = 5
 	local n = 0
 
-	for k, v in pairs(gametypeSettings) do
-		if v.value_type == "int" and v.Category == "SERVER" then
+	for k, v in pairs(self.Settings) do
+		if v.value_type == "int" or v.value_type == "float" and v.Category == "SERVER" then
 			self:AddIntOption(y, k, v)
 			y = y + 25
 			n = n + 1
 		end
 	end
 	local _y = (25 * n) + 10
-	for k, v in pairs(gametypeSettings) do
+	for k, v in pairs(self.Settings) do
 		if v.value_type == "bool" and v.Category == "SERVER" then
 			self:AddCheckOption(_y, k, v)
 			_y = _y + 20
 			n = n + 1
 		end
 	end
-	for k, v in pairs(gametypeSettings) do
+	for k, v in pairs(self.Settings) do
 		if v.value_type == "string"  and v.Category == "SERVER" then
 			self:AddComboOption(_y, k, v)
 			_y = _y + 20
@@ -469,8 +469,13 @@ function SettingsTab:AddIntOption(y, id, tbl)
 	self.numw.lbl:SizeToContents()
 	self.numw.lbl:SetVisible(true)
 
+	local function Update(id, v)
+		self.Settings[id].value = tonumber(v)
+	end
+
 	function self.numw:OnValueChanged(v)
 		GAMEMODE:ChangeAdminConfiguration(id, v)
+		Update(id, v)
 	end
 
 end
@@ -508,6 +513,14 @@ function SettingsTab:AddCheckOption(y, id, tbl)
 	self.checkb:SizeToContents()
 	self.checkb:SetConVar("lambda_" .. id)
 
+	function self.checkb:OnChange(val)
+			if val then val = "1" else val = "0" end
+			GAMEMODE:ChangeAdminConfiguration(id, val)
+	end
+
+end
+
+function SettingsTab:Think()
 end
 vgui.Register("SettingsTabPanel", SettingsTab, "DScrollPanel")
 

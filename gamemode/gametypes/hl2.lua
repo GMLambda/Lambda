@@ -140,7 +140,7 @@ GAMETYPE.Settings = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
 
-    local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"):GetInt(), -1, 255)
+    local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
     if total <= 0 then
@@ -234,7 +234,7 @@ end
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
     local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
     -- Friendly fire is controlled by convar in this case.
-    if playerAttacking == true and GAMEMODE:GetSetting("friendlyfire"):GetBool() == false then
+    if playerAttacking == true and GAMEMODE:GetSetting("friendlyfire") == false then
         return false
     end
     return true
