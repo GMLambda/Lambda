@@ -698,6 +698,10 @@ if SERVER then
 
     function ENT:CmdShowTeamWaiting(ply, state, timeout)
 
+        if self:GetNWVar("ShowWait") == false then
+            return
+        end
+        
         DbgPrint(self, "Sending trigger update: ", state, timeout)
 
         if ply == nil then
