@@ -183,7 +183,7 @@ function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
     end
     if ply:HasWeapon(wep:GetClass()) == true then
         -- Only allow a new pickup once if there is ammo in the weapon.
-        if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -2 then
+        if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then
             return false
         end
         return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true

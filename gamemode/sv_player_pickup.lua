@@ -10,45 +10,84 @@ function GM:RegisterPlayerItemPickup(ply, item)
     ply.ObjectPickupTable[item.UniqueEntityId] = true
 end
 
-function GM:RespawnObject(obj, delay)
-    DbgPrintPickup("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
+function GM:InitializeItemRespawn()
+    self.RespawnQueue = {}
+end
 
-    local data = self:GetLevelDesignerPlacedData(obj)
-    local class = obj:GetClass()
-    local pos = obj:GetPos()
-    local ang = obj:GetAngles()
-    local uniqueId = obj.UniqueEntityId
+function GM:UpdateItemRespawn()
 
-    if data ~= nil then
-        pos = data.pos
-        ang = data.ang
-    end
+    local function respawnItem(data)
 
-    util.RunDelayed(function()
+        DbgPrintPickup("Respawning object " .. data.class)
 
-        local e = ents.Create(class)
-        e.UniqueEntityId = uniqueId
-        e:SetPos(pos)
-        e:SetAngles(ang)
+        local e = ents.Create(data.class)
+        e.UniqueEntityId = data.uniqueId
+        e:SetPos(data.pos)
+        e:SetAngles(data.ang)
+        e:SetName(data.name)
         e:Spawn()
         e:Activate()
 
         -- Keep it as level designer placed object.
-        if data ~= nil then
+        if data.levelDesignerPlaced == true then
             self:InsertLevelDesignerPlacedObject(e)
         end
 
-        if delay > 0.0 then
+        if data.delay > 0.0 then
             e:EmitSound("AlyxEmp.Charge")
 
             local effectdata = EffectData()
-            effectdata:SetOrigin( pos )
+            effectdata:SetOrigin( data.pos )
             effectdata:SetScale(1)
             effectdata:SetMagnitude(5)
             util.Effect( "ElectricSpark", effectdata )
         end
 
-    end, CurTime() + delay)
+    end
+
+    local curTime = CurTime()
+    for k,v in pairs(self.RespawnQueue) do
+        if curTime >= v.respawnTime then
+            respawnItem(v)
+            table.remove(self.RespawnQueue, k)
+        end
+    end
+
+end
+
+function GM:RespawnObject(obj, delay)
+
+    DbgPrintPickup("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
+
+    for _,v in pairs(self.RespawnQueue) do
+        if v.item == obj then
+            -- Only update time.
+            DbgPrintPickup("Updating respawn of " .. tostring(obj))
+            v.respawnTime = CurTime() + delay
+            return
+        end
+    end
+
+    -- Create new entry in queue.
+    local data = self:GetLevelDesignerPlacedData(obj)
+
+    if data == nil then
+        data = {}
+        data.class = obj:GetClass()
+        data.pos = obj:GetPos()
+        data.ang = obj:GetAngles()
+        data.name = obj:GetName()
+        data.levelDesignerPlaced = false
+    else
+        data = table.Copy(data)
+        data.levelDesignerPlaced = true
+    end
+    data.uniqueId = obj.UniqueEntityId
+    data.respawnTime = CurTime() + delay
+    data.delay = delay
+    data.item = obj
+
+    table.insert(self.RespawnQueue, data)
 
 end
 
@@ -215,10 +254,12 @@ function GM:PlayerCanPickupWeapon(ply, wep)
         local clip1 = wep:Clip1()
         if clip1 > 0 then
             ply:GiveAmmo(clip1, wep:GetPrimaryAmmoType(), false)
+            wep:SetClip1(0)
         end
         local clip2 = wep:Clip2()
         if clip2 > 0 then
             ply:GiveAmmo(clip2, wep:GetSecondaryAmmoType(), false)
+            wep:SetClip2(0)
         end
         self:RegisterPlayerItemPickup(ply, wep)
         return false

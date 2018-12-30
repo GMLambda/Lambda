@@ -64,6 +64,7 @@ function GM:Tick()
     end
 
     if SERVER then
+        self:UpdateItemRespawn()
         self:CheckPlayerTimeouts()
         self:RoundThink()
         self:VehiclesThink()
@@ -163,11 +164,6 @@ function GM:CheckStuckScenes()
 
 end
 
-function GM:Think()
-
-
-end
-
 function GM:OnGamemodeLoaded()
     self.ServerStartupTime = GetSyncedTimestamp()
 
@@ -234,6 +230,7 @@ function GM:Initialize()
 
     if SERVER then
         self:ResetSceneCheck()
+        self:InitializeItemRespawn()
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
         self:InitializeGlobalStates()

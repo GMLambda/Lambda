@@ -48,7 +48,7 @@ end
 
 function GM:InsertLevelDesignerPlacedObject(obj)
     local objects = self.LevelRelevantObjects or {}
-    objects[obj] = { pos = obj:GetPos(), ang = obj:GetAngles() }
+    objects[obj] = { class = obj:GetClass(), pos = obj:GetPos(), ang = obj:GetAngles(), name = obj:GetName() }
     self.LevelRelevantObjects = objects
 end
 
