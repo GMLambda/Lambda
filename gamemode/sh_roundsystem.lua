@@ -380,6 +380,9 @@ function GM:PreCleanupMap()
         self:ResetCheckpoints()
         self:ResetSceneCheck()
         self:ClearLevelDesignerPlacedObjects()
+
+        -- Reset all pending functions.
+        util.ResetFunctionQueue()
     end
 end
 
