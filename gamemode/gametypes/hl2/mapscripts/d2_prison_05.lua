@@ -63,6 +63,23 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        -- Rename some things.
+        ents.WaitForEntityByName("combine_crusherwall1_ss", function(ent)
+            ent:SetName("lambda_combine_crusherwall1_ss")
+        end)
+        ents.WaitForEntityByName("combine_crusherwall2_ss", function(ent)
+            ent:SetName("lambda_combine_crusherwall2_ss")
+        end)
+        ents.WaitForEntityByName("combine_crusherwall3_ss", function(ent)
+            ent:SetName("lambda_combine_crusherwall3_ss")
+        end)
+        ents.WaitForEntityByName("combine_crusherwall4_ss", function(ent)
+            ent:SetName("lambda_combine_crusherwall4_ss")
+        end)
+        ents.WaitForEntityByName("point_of_no_return", function(ent)
+            ent:SetName("lambda_point_of_no_return")
+        end)
+
         -- 1386.760010 946.409973 385.000000
         -- Make sure the player spawns at the correct spot.
         local spawn = ents.Create("info_player_start")
@@ -123,6 +140,22 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint4)
         end
 
+        -- Allow all players to be crushed in a safe non game breaking way.
+        -- -4733.655273 -775.621887 498.795654
+        local crushTrigger = ents.Create("trigger_once")
+        crushTrigger:SetupTrigger(
+            Vector(-4733.655273, -775.621887, 498.795654),
+            Angle(0, 0, 0),
+            Vector(-1200, -550, -100),
+            Vector(1100, 550, 200)
+        )
+        crushTrigger:SetKeyValue("TeamWait", "1")
+        crushTrigger:SetKeyValue("ShowWait", "0")
+        crushTrigger:Fire("AddOutput", "OnTrigger lambda_point_of_no_return,Enable,,0.0")
+        crushTrigger:Fire("AddOutput", "OnTrigger lambda_combine_crusherwall1_ss,BeginSequence,,5.0")
+        crushTrigger:Fire("AddOutput", "OnTrigger lambda_combine_crusherwall3_ss,BeginSequence,,15.0")
+        crushTrigger:Fire("AddOutput", "OnTrigger lambda_combine_crusherwall4_ss,BeginSequence,,30.0")
+        crushTrigger:Fire("AddOutput", "OnTrigger lambda_combine_crusherwall2_ss,BeginSequence,,45.0")
 
     end
 
