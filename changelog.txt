@@ -1,5 +1,6 @@
 0.9.3
 - Improved: Allow gametype to auto start without players.
+- Improved: (F1) Player menu overhaul.
 - Fix: NPC Maker not spawning NPCs in some cases.
 - Fix: d1_trainstation_01 queue sometimes blocking the player.
 - Fix: Make sure the door stays locked at d1_town_02.
