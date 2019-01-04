@@ -9,7 +9,8 @@ local DIFFICULTY_EASY = 2
 local DIFFICULTY_NORMAL = 3
 local DIFFICULTY_HARD = 4
 local DIFFICULTY_VERYHARD = 5
-local DIFFICULTY_MAX = DIFFICULTY_VERYHARD
+local DIFFICULTY_SURVIVOR = 6
+local DIFFICULTY_MAX = DIFFICULTY_SURVIVOR
 
 DMG_SCALE_PVN = 1
 DMG_SCALE_NVP = 2
@@ -173,6 +174,37 @@ local DIFFICULTY_DATA =
             [HITGROUP_RIGHTLEG] = 1,
         },
     },
+    [DIFFICULTY_SURVIVOR] = {
+        Proficiency = WEAPON_PROFICIENCY_PERFECT,
+        Skill = 3,
+        NPCSpawningScale = 1,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 2,
+            [DMG_SCALE_NVP] = 15,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1,
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 5,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1,
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 5,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1,
+        },
+    },
 }
 
 cvars.AddChangeCallback("lambda_difficulty", function(cvar, oldVal, newVal)
@@ -239,7 +271,8 @@ local DIFFICULTY_NAME =
     [DIFFICULTY_EASY] = "Easy",
     [DIFFICULTY_NORMAL] = "Normal",
     [DIFFICULTY_HARD] = "Hard",
-    [DIFFICULTY_VERYHARD] = "Very Hard"
+    [DIFFICULTY_VERYHARD] = "Very Hard",
+    [DIFFICULTY_SURVIVOR] = "Survivor",
 }
 
 local PROFICIENCY_NAME =
@@ -248,7 +281,7 @@ local PROFICIENCY_NAME =
     [WEAPON_PROFICIENCY_AVERAGE] = "Average",
     [WEAPON_PROFICIENCY_GOOD] = "Good",
     [WEAPON_PROFICIENCY_VERY_GOOD] = "Very Good",
-    [WEAPON_PROFICIENCY_PERFECT] = "Perfect"
+    [WEAPON_PROFICIENCY_PERFECT] = "Perfect",
 }
 
 local DIFFICULTIES =
@@ -258,6 +291,7 @@ local DIFFICULTIES =
     [3] = DIFFICULTY_NORMAL,
     [4] = DIFFICULTY_HARD,
     [5] = DIFFICULTY_VERYHARD,
+    [6] = DIFFICULTY_SURVIVOR,
 }
 
 function GM:GetDifficulties()
