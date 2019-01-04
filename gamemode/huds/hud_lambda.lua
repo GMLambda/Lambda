@@ -31,7 +31,6 @@ function PANEL:Init()
 	end
 end
 
-
 function PANEL:OnClose()
 	net.Start("LambdaPlayerSettings")
 	net.WriteBool(false)

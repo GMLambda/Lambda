@@ -24,8 +24,10 @@ end
 
 function ENT:Initialize()
 
+    local timeout = GAMEMODE:GetSetting("map_change_timeout")
+    
     self:SetKeyValue("teamwait", "1")
-    self:SetKeyValue("timeout", lambda_map_change_timeout:GetInt())
+    self:SetKeyValue("timeout", timeout)
     self:SetKeyValue("lockplayers", "1")
     self:SetNWVar("DisableEndTouch", true)
 

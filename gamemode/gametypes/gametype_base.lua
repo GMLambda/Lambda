@@ -106,16 +106,16 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
     return false
 end
 
-function GAMETYPE:AddSetting(id, option)
+function GAMETYPE:AddSetting(id, option, fn)
 
     local function GetCVarValue(cvar)
         if ConVarExists(cvar) then
-            if option.value_type == "int" and option.value_type == "bool" then
+            if option.value_type == "int" or option.value_type == "bool" then
                 return GetConVar(cvar):GetInt()
             elseif option.value_type == "float" then
-                    return GetConVar(cvar):GetFloat()
+                return GetConVar(cvar):GetFloat()
             else
-                    return GetConVar(cvar):GetString()
+                return GetConVar(cvar):GetString()
             end
         else
             return false
@@ -151,10 +151,9 @@ function GAMETYPE:AddSetting(id, option)
     self.Settings[id].getCvar = convar
     self.Settings[id].value = actualValue
 
-    cvars.AddChangeCallback(actualName, function(cvar, oldval, newval)
-        local cv = string.TrimLeft(cvar, prefix)
-        self.Settings[cv].value = newval
-    end)
+    if fn ~= nil and isfunction(fn) then
+        self.Settings[id].fn = fn
+    end
 
     return convar
 
@@ -167,7 +166,6 @@ function GAMETYPE:InitSettings()
     for k, v in pairs(self:GetDifficulties()) do
         table.insert(choices, v)
     end
-    PrintTable(choices)
     --SERVER
     self:AddSetting("walkspeed",{Category = "SERVER", NiceName = "#GM_WALKSPEED", value_type = "int", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
     self:AddSetting("normspeed",{Category = "SERVER", NiceName = "#GM_NORMSPEED", value_type = "int", value = 190, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
@@ -178,7 +176,8 @@ function GAMETYPE:InitSettings()
     self:AddSetting("prevent_item_move",{Category = "SERVER", NiceName = "#GM_PREVENTITEMMOVE", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Prevent item moving" })
     self:AddSetting("limit_default_ammo",{Category = "SERVER", NiceName = "#GM_DEFAMMO", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Limit default ammo" })
     self:AddSetting("allow_auto_jump",{Category = "SERVER", NiceName = "#GM_AUTOJUMP", value_type = "bool", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Auto jump" })
-    self:AddSetting("max_respawn_timeout",{Category = "SERVER", NiceName = "#GM_RESPAWNTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, extra = {NiceName = "#GM_NORESPAWN", value_type = "bool", value = 0, cached = 0, info = "No Respawn"}, info = "Respawn time" })
+    self:AddSetting("max_respawn_timeout",{Category = "SERVER", NiceName = "#GM_RESPAWNTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Respawn time" })
+    self:AddSetting("no_respawn",{Category = "SERVER", NiceName = "#GM_NORESPAWN", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "No respawn"}, function(val) if val == "1" then val = -1 else val = 20 end GAMEMODE:ChangeAdminConfiguration("max_respawn_timeout", val) return "max_respawn_timeout" end)
     self:AddSetting("map_restart_timeout",{Category = "SERVER", NiceName = "#GM_RESTARTTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Restart time" })
     self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
     self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
