@@ -658,12 +658,12 @@ if SERVER then
 
         end
 
-        local dmgForce = dmgInfo:GetDamageForce() * 0.03
+        local dmg = dmgInfo:GetDamage()
 
         for _,v in ipairs(ply.LastWeaponsDropped) do
             local phys = v:GetPhysicsObject()
             if IsValid(phys) then
-                phys:SetVelocity(dmgForce)
+                phys:SetVelocity(dmgInfo:GetDamageForce() * 0.03)
             end
         end
 
@@ -679,24 +679,32 @@ if SERVER then
         -- We always create the ragdoll, client decides what to do with it.
         ply:CreateRagdoll()
 
-        if enableGore == true and dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
-            -- Exploded
-            self:GibPlayer(ply, dmgForce, true)
-        elseif enableGore == true and dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then
-            -- Crushed
-            local totalMass = 0
-            for i = 0, attacker:GetPhysicsObjectCount() - 1 do
-                local physObj = attacker:GetPhysicsObjectNum(i)
-                if IsValid(physObj) then
-                    totalMass = totalMass + physObj:GetMass()
+        if enableGore == true then
+            local dmgForce = dmgInfo:GetDamageForce() * 0.1
+            local damageForceLen = dmgForce:Length2D()
+            print(damageForceLen, dmg)
+
+            if dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
+                -- Exploded
+                self:GibPlayer(ply, dmgForce, true)
+            elseif dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then
+                -- Crushed
+                local totalMass = 0
+                for i = 0, attacker:GetPhysicsObjectCount() - 1 do
+                    local physObj = attacker:GetPhysicsObjectNum(i)
+                    if IsValid(physObj) then
+                        totalMass = totalMass + physObj:GetMass()
+                    end
                 end
-            end
-            local forceLen = dmgForce:Length2D()
-            if forceLen <= 0 then
-                forceLen = 1
-            end
-            local forceWithMass = totalMass * forceLen
-            if forceWithMass >= 150000 or totalMass >= 10000 then
+                local forceLen = dmgForce:Length2D()
+                if forceLen <= 0 then
+                    forceLen = 1
+                end
+                local forceWithMass = totalMass * forceLen
+                if forceWithMass >= 150000 or totalMass >= 10000 then
+                    self:GibPlayer(ply, dmgForce, false)
+                end
+            elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 100 then
                 self:GibPlayer(ply, dmgForce, false)
             end
         end
@@ -870,7 +878,7 @@ if SERVER then
 
     function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
 
-        local DbgPrint = DbgPrintDmg 
+        local DbgPrint = DbgPrintDmg
 
         DbgPrint("ScalePlayerDamage", ply, hitgroup)
 
@@ -901,6 +909,7 @@ if SERVER then
             if scale ~= nil then
                 DbgPrint("Scaling difficulty damage: " .. tostring(scale))
                 dmginfo:ScaleDamage(scale)
+                dmginfo:SetDamageForce(dmginfo:GetDamageForce() * (scale * 0.3))
             end
         end
 

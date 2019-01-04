@@ -81,43 +81,6 @@ function GM:ClearLevelDesignerPlacedObjects()
     self.LevelRelevantObjects = {}
 end
 
-function GM:ApplyCorrectedDamage(dmginfo)
-
-    local DbgPrint = DbgPrintDmg
- 
-    DbgPrint("ApplyCorrectedDamage")
-
-    local attacker = dmginfo:GetAttacker()
-
-    if IsValid(attacker) and (dmginfo:IsDamageType(DMG_BULLET) or dmginfo:IsDamageType(DMG_CLUB)) then
-
-        local weaponTable = nil
-        local wep = nil
-
-        if attacker:IsPlayer() then
-            weaponTable = self.PLAYER_WEAPON_DAMAGE
-            wep = attacker:GetActiveWeapon()
-        elseif attacker:IsNPC() then
-            weaponTable = self.NPC_WEAPON_DAMAGE
-            wep = attacker:GetActiveWeapon()
-        end
-
-        if weaponTable ~= nil and IsValid(wep) then
-            local class = wep:GetClass()
-            local dmgCVar = weaponTable[class]
-            if dmgCVar ~= nil then
-                local dmgAmount = dmgCVar:GetInt()
-                DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
-                dmginfo:SetDamage(dmgAmount)
-            end
-        end
-
-    end
-
-    return dmginfo
-
-end
-
 local DMG_TYPES =
 {
     [DMG_GENERIC] = "Generic",
@@ -172,6 +135,43 @@ local function GetDamageTypeText(dmginfo)
     return text .. " : " .. dmginfo:GetDamageType()
 end
 
+function GM:ApplyCorrectedDamage(dmginfo)
+
+    local DbgPrint = DbgPrintDmg
+ 
+    DbgPrint("ApplyCorrectedDamage")
+
+    local attacker = dmginfo:GetAttacker()
+
+    if IsValid(attacker) and (dmginfo:IsDamageType(DMG_BULLET) or dmginfo:IsDamageType(DMG_CLUB)) then
+
+        local weaponTable = nil
+        local wep = nil
+
+        if attacker:IsPlayer() then
+            weaponTable = self.PLAYER_WEAPON_DAMAGE
+            wep = attacker:GetActiveWeapon()
+        elseif attacker:IsNPC() then
+            weaponTable = self.NPC_WEAPON_DAMAGE
+            wep = attacker:GetActiveWeapon()
+        end
+
+        if weaponTable ~= nil and IsValid(wep) then
+            local class = wep:GetClass()
+            local dmgCVar = weaponTable[class]
+            if dmgCVar ~= nil then
+                local dmgAmount = dmgCVar:GetInt()
+                DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
+                dmginfo:SetDamage(dmgAmount)
+            end
+        end
+
+    end
+
+    return dmginfo
+
+end
+
 function GM:EntityTakeDamage(target, dmginfo)
 
     local DbgPrint = DbgPrintDmg
@@ -190,6 +190,12 @@ function GM:EntityTakeDamage(target, dmginfo)
     DbgPrint(target, "PhysgunDamage: " .. tostring(target.IsPhysgunDamage))
 
     if target:IsNPC() then
+
+        if dmginfo:IsDamageType(DMG_CLUB) or dmginfo:IsDamageType(DMG_SLASH) then
+            -- BUG: https://github.com/Facepunch/garrysmod-issues/issues/3704
+            -- Only trace attacks will call scale.
+            self:ScaleNPCDamage(target, HITGROUP_GENERIC, dmginfo)
+        end
 
         local restrictedNPCNames = self:GetGameTypeData("ImportantPlayerNPCNames") or {}
         local restrictedNPCClasses = self:GetGameTypeData("ImportantPlayerNPCClasses") or {}
@@ -220,6 +226,12 @@ function GM:EntityTakeDamage(target, dmginfo)
             end
         end
 
+        if dmginfo:IsDamageType(DMG_CLUB) or dmginfo:IsDamageType(DMG_SLASH) then
+            -- BUG: https://github.com/Facepunch/garrysmod-issues/issues/3704
+            -- Only trace attacks will call scale.
+            self:ScalePlayerDamage(target, HITGROUP_GENERIC, dmginfo)
+        end
+
         local dmg = dmginfo:GetDamage()
         if dmg > 0 then
             local hitGroup = HITGROUP_GENERIC
@@ -245,7 +257,7 @@ function GM:EntityTakeDamage(target, dmginfo)
             end
         end
     else
-        -- Apply corrected damage also to anything else.
+        -- For any other entity, this is called in ScalePlayerDamage and ScaleNPCDamage otherwise.
         self:ApplyCorrectedDamage(dmginfo)
     end
 
