@@ -14,13 +14,20 @@ if SERVER then
             DbgPrint("Player " .. tostring(ply) .. " attempted to change settings with invalid auth token.")
             return
         end
-        local registeredCvar = self:GetGameTypeData("Settings")[cvar].getCvar
-        if registeredCvar == nil then
+        local registeredCvar = self:GetGameTypeData("Settings")[cvar]
+        if registeredCvar.getCvar == nil then
             DbgPrint("Attempted to access unregistered cvar: " .. tostring(cvar) .. ", player: " .. tostring(ply))
             return
         end
-        registeredCvar:SetString(val)
+        if registeredCvar.value_type == "int" or registeredCvar.value_type == "bool" or registeredCvar.value_type == "float" then
+            registeredCvar.getCvar:SetInt(val)
+            registeredCvar.value = tonumber(val)
+        else
+            registeredCvar.getCvar:SetString(val)
+            registeredCvar.value = tostring(val)
+        end
     end
+
 
     net.Receive("LambdaAdminSetting", function(len, ply)
 
