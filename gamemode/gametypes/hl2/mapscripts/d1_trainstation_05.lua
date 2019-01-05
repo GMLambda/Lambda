@@ -105,7 +105,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- -6569.488281 -1150.120850 0.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-6569.488281, -1150.120850, 0.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6569.488281, -1150.120850, 0.031250), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-6482.711914, -1095.658813, 0.031250),

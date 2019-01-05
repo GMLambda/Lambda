@@ -74,7 +74,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- 5487.663574 1408.772949 0.031250 10.626 -1.579 0.000
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(5329.144043, 1568.602905, 0.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(5329.144043, 1568.602905, 0.031250), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(5487.663574, 1408.772949, 0.031250),
@@ -87,7 +87,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- 4817.152344 1203.166138 0.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(4817.152344, 1203.166138, 0.031250), Ang = Angle(0, -90, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(4817.152344, 1203.166138, 0.031250), Angle(0, -90, 0))
         ents.WaitForEntityByName("lcs_pregate01_trigger", function(ent)
             ent:ResizeTriggerBox(Vector(-180, -100, -40), Vector(180, 400, 60))
             ent:SetKeyValue("teamwait", "1")
@@ -101,7 +101,7 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- New trigger to close the gate.
-        local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(7399.153809, 1336.154907, 0.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(7399.153809, 1336.154907, 0.031250), Angle(0, 0, 0))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(8031.499512, 1544.012939, -3.968811),

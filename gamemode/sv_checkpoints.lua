@@ -77,6 +77,22 @@ end
 
 function GM:CreatePlayerCheckpoint(data)
     local cp = ents.CreateSimple("lambda_checkpoint", data)
+    cp:SetDynamicCheckpoint(false)
+    return cp
+end
+
+function GM:CreateCheckpoint(pos, ang, dynamic)
+    if dynamic == nil then
+        dynamic = false
+    end
+    if ang == nil then
+        ang = Angle(0, 0, 0)
+    end
+    local cp = ents.Create("lambda_checkpoint")
+    cp:SetPos(pos)
+    cp:SetAngles(ang)
+    cp:SetDynamicCheckpoint(dynamic)
+    cp:Spawn()
     return cp
 end
 
@@ -94,6 +110,11 @@ function GM:SetPlayerCheckpoint(checkpoint, gridData)
     self.CurrentCheckpointPos = cpPos
     gridData = gridData or self:GetGridData(cpPos.x, cpPos.y, cpPos.z)
     gridData.checkpoint = true
+
+    if IsValid(checkpoint) and checkpoint:GetClass() == "lambda_checkpoint" then
+        checkpoint:SetActivated()
+    end
+
     return checkpoint
 end
 
@@ -333,15 +354,12 @@ function GM:UpdateCheckoints()
             end
         end
 
-        local cp = ents.Create("lambda_checkpoint")
         ang = selectedPlayer:GetAngles()
         if vehiclePos ~= nil then
             ang = (vehiclePos - bestPos):Angle()
         end
-        cp:SetPos(bestPos)
-        cp:SetAngles(ang)
-        cp:Spawn()
 
+        local cp = self:CreateCheckpoint(bestPos, ang, true)
         self:SetPlayerCheckpoint(cp, data)
 
         --debugoverlay.Box(bestPos, CHECKPOINT_MINS, CHECKPOINT_MAXS, 5, Color( 255, 255, 255, 100 ))
@@ -381,7 +399,5 @@ function GM:SetVehicleCheckpoint(pos, ang)
 end
 
 function GM:ResetVehicleCheckpoint()
-
     self.VehicleCheckpoint = nil
-
 end

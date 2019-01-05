@@ -80,7 +80,7 @@ function MAPSCRIPT:PostInit()
             ents.WaitForEntityByName("logic_startScene", function(ent) ent:Fire("Trigger") end)
 
             -- Make sure players dont spawn outside the base
-            local checkpoint = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-66.911217, 2753.892822, -1279.968750), Ang = Angle(0, 0, 0) })
+            local checkpoint = GAMEMODE:CreateCheckpoint(Vector(-66.911217, 2753.892822, -1279.968750), Angle(0, 0, 0))
             GAMEMODE:SetPlayerCheckpoint(checkpoint)
         end
 
@@ -93,7 +93,7 @@ function MAPSCRIPT:PostInit()
                 DbgPrint("All players in elevator")
 
                 local elevator_lab = ents.FindFirstByName("elevator_lab")
-                local checkpoint = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(454.184753, 1670.932373, -1281.335693), Ang = Angle(0, 90, 0) })
+                local checkpoint = GAMEMODE:CreateCheckpoint(Vector(454.184753, 1670.932373, -1281.335693), Angle(0, 90, 0))
                 checkpoint:SetParent(elevator_lab)
 
                 GAMEMODE:SetPlayerCheckpoint(checkpoint)

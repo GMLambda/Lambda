@@ -109,7 +109,9 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("speed", 60)
         end)
 
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-604.471130, 840.267578, -2688.000000), Ang = Angle(0, -90, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-604.471130, 840.267578, -2688.000000), Angle(0, -90, 0))
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-600.126587, 1066.952637, -2687.968750), Angle(0, 90, 0))
+        checkpoint2:AddEffects(EF_NODRAW)
 
         -- Players must gather nearby alyx.
         ents.WaitForEntityByName("trigger_scrapyard_start", function(ent)
@@ -127,16 +129,14 @@ function MAPSCRIPT:PostInit()
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("trigger_scrapyard_start")
-            trigger.OnTrigger = function(self)
+            trigger.OnTrigger = function(s)
                 DbgPrint("Starting scrapeyard scene")
                 GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+                checkpoint2:RemoveEffects(EF_NODRAW)
             end
 
             ent:Remove()
         end)
-
-
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-600.126587, 1066.952637, -2687.968750), Ang = Angle(0, 90, 0) })
 
         -- Players must be inside before doors close again.
         ents.WaitForEntityByName("trigger_attack02", function(ent)
@@ -154,7 +154,7 @@ function MAPSCRIPT:PostInit()
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("trigger_attack02")
-            trigger.OnTrigger = function(self)
+            trigger.OnTrigger = function(s)
                 DbgPrint("Starting attack")
                 GAMEMODE:SetPlayerCheckpoint(checkpoint2)
             end

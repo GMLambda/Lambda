@@ -59,7 +59,7 @@ function MAPSCRIPT:PostInit()
     if SERVER then
 
         -- 1921.614014 -5632.266602 320.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(1921.614014, -5632.266602, 320.031250), Ang = Angle(0, 180, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(1921.614014, -5632.266602, 320.031250), Angle(0, 180, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(1921.614014, -5632.266602, 320.031250),
@@ -72,7 +72,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- 896.339966 -4236.764160 384.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(830.641296, -4235.453125, 128.031250), Ang = Angle(0, 90, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(830.641296, -4235.453125, 128.031250), Angle(0, 90, 0))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(831.859619, -4104.012695, 128.031250),
@@ -85,7 +85,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- 1793.683350 -3479.405762 320.031250
-        local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(1793.683350, -3479.405762, 320.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(1793.683350, -3479.405762, 320.031250), Angle(0, 0, 0))
         local checkpointTrigger3 = ents.Create("trigger_once")
         checkpointTrigger3:SetupTrigger(
             Vector(1793.683350, -3479.405762, 320.031250),
@@ -98,7 +98,7 @@ function MAPSCRIPT:PostInit()
         end
 
         -- 1600.604126 -3304.045898 -63.968750
-        local checkpoint4 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(1597.989380, -3329.118408, -63.968750), Ang = Angle(0, 0, 0) })
+        local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(1597.989380, -3329.118408, -63.968750), Angle(0, 0, 0))
         local checkpointTrigger4 = ents.Create("trigger_once")
         checkpointTrigger4:SetupTrigger(
             Vector(1597.989380, -3329.118408, -63.968750),

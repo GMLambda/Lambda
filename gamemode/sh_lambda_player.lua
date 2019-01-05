@@ -1220,6 +1220,11 @@ function GM:StartCommand(ply, cmd)
         return
     end
 
+    -- Fixes a prediction error when starting noclip in water and flying out.
+    if ply:GetMoveType() == MOVETYPE_NOCLIP and ply:WaterLevel() == 0 then
+        ply:RemoveFlags(FL_INWATER)
+    end
+
     if CLIENT then
         if self:IsScoreboardOpen() == true then
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK)) )

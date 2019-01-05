@@ -51,7 +51,8 @@ function MAPSCRIPT:PostInit()
             ent:Remove()
         end)
 
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(2643.776611, -1465.673584, -3839.968750), Ang = Angle(0, 90, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(2643.776611, -1465.673584, -3839.968750), Angle(0, 90, 0))
+        checkpoint1:SetVisiblePos(Vector(3005.009521, -1394.904053, -3783.968750))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(3007.881836, -1393.500732, -3783.968750),
@@ -63,14 +64,14 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 
-
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(2018.717896, -1513.990112, -3839.968750), Ang = Angle(0, 90, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(2018.717896, -1513.990112, -3839.968750), Angle(0, 90, 0))
+        checkpoint2:SetVisiblePos(Vector(2029.538086, -1425.406128, -3839.968750))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
-            Vector(1936.609863, -1431.232666, -3775.968750),
+            Vector(2029.538086, -1425.406128, -3839.968750),
             Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 70)
+            Vector(-90, -100, 0),
+            Vector(70, 200, 50)
         )
         checkpointTrigger2.OnTrigger = function()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)

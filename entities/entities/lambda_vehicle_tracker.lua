@@ -4,19 +4,16 @@ AddCSLuaFile()
 
 ENT.Base = "base_anim"
 ENT.Type = "anim"
-ENT.RenderGroup = RENDERGROUP_OPAQUE
+ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 function ENT:Initialize()
     if CLIENT then
         -- I know this seems insane but otherwise it would clip the purpose.
         self:SetRenderBounds(Vector(-10000, -10000, -10000), Vector(10000, 10000, 10000))
-
-        hook.Add("HUDPaint", self, function(ent)
-            ent:RenderVehicleStatus()
-        end)
+        self:SetRenderMode(RENDERMODE_GLOW)
     end
     self:DrawShadow(false)
-    self:AddEffects(EF_NODRAW)
+    --self:AddEffects(EF_NODRAW)
 end
 
 function ENT:AttachToVehicle(vehicle)
@@ -24,7 +21,7 @@ function ENT:AttachToVehicle(vehicle)
     self:SetPos(vehicle:GetPos())
     self:SetAngles(vehicle:GetAngles())
     self:SetParent(vehicle)
-    self:AddEffects(EF_NODRAW)
+    --self:AddEffects(EF_NODRAW)
     self:DrawShadow(false)
 
     self.Vehicle = vehicle
@@ -69,6 +66,42 @@ elseif CLIENT then
     local aux_w = 100
     local aux_h = 5
 
+   surface.CreateFont( "LAMBDA_1_VEHICLE",
+    {
+        font = "Arial",
+        size = 66,
+        weight = 600,
+        blursize = 10,
+        scanlines = 0,
+        antialias = true,
+        underline = false,
+        italic = false,
+        strikeout = false,
+        symbol = false,
+        rotary = false,
+        shadow = true,
+        additive = false,
+        outline = true,
+    } )
+
+    surface.CreateFont( "LAMBDA_2_VEHICLE",
+    {
+        font = "Arial",
+        size = 66,
+        weight = 600,
+        blursize = 0,
+        scanlines = 0,
+        antialias = true,
+        underline = false,
+        italic = false,
+        strikeout = false,
+        symbol = false,
+        rotary = false,
+        shadow = false,
+        additive = false,
+        outline = false,
+    } )
+
     local function IsVehicleVisible(vehicle)
 
         local localPly = LocalPlayer()
@@ -92,9 +125,83 @@ elseif CLIENT then
 
     end
 
-    local VEHICLE_MAT = Material("lambda/vehicle.png")
+    local VEHICLE_MAT = Material("lambda/vehicle.vmt")
 
-    function ENT:RenderVehicleStatus()
+    local function GetTextColor()
+        local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
+        return Vector(col.x / 255, col.y / 255, col.z / 255)
+    end
+
+    local function GetBGColor()
+        local col = util.StringToType(lambda_hud_bg_color:GetString(), "vector")
+        return Vector(col.x / 255, col.y / 255, col.z / 255)
+    end
+
+    function ENT:RenderVehicleStatus(alpha, haveVehicle, isTaken, belongsToUs, owner)
+
+        local vehicle = self:GetParent()
+
+        render.SuppressEngineLighting(true)
+
+        local offset = Vector(0, 0, 100 + (math.sin(CurTime() * 5) * 10))
+        local pos = vehicle:GetPos() + offset
+        local ang = EyeAngles()
+        local ang = (pos - EyePos()):Angle()
+        local signsize = 24
+        local colorBg = GetBGColor()
+        local textColor = GetTextColor()
+
+        local text = ""
+        if belongsToUs == true then
+            text = "Your Vehicle"
+        elseif isTaken == false then
+            if haveVehicle == true then
+                text = "Reserved Vehicle"
+                alpha = alpha * 0.08
+            else
+                text = "Available Vehicle"
+            end
+        elseif isTaken == true then
+            local ownerName = "???"
+            if IsValid(owner) then
+                ownerName = owner:GetName()
+            end
+            text = "Vehicle belongs to " .. ownerName
+            alpha = alpha * 0.08
+        end
+
+        ang:Normalize()
+
+        cam.IgnoreZ(true)
+
+        VEHICLE_MAT:SetVector("$tint", textColor)
+        VEHICLE_MAT:SetFloat("$alpha", alpha)
+
+        render.SetMaterial( VEHICLE_MAT )
+        render.DrawQuadEasy( pos,
+                             -ang:Forward(),
+                             signsize, signsize,
+                             Color( 255, 255, 255, 255 ),
+                             180)
+
+        ang:RotateAroundAxis( ang:Forward(), 90 )
+        ang:RotateAroundAxis( ang:Right(), 90 )
+
+        colorBg = Color(colorBg.x * 255, colorBg.y * 255, colorBg.z * 255, alpha * 255)
+        textColor = Color(textColor.x * 255, textColor.y * 255, textColor.z * 255, alpha * 255)
+
+        cam.Start3D2D(pos - Vector(0, 0, 13), ang, 0.1)
+            draw.DrawText( text, "LAMBDA_1_VEHICLE", 0, 0, colorBg, TEXT_ALIGN_CENTER )
+            draw.DrawText( text, "LAMBDA_2_VEHICLE", 0, 0, textColor, TEXT_ALIGN_CENTER )
+        cam.End3D2D()
+
+        cam.IgnoreZ(false)
+
+        render.SuppressEngineLighting(false)
+
+    end
+
+    function ENT:Draw()
 
         local vehicle = self:GetParent()
         if not IsValid(vehicle) then
@@ -120,45 +227,30 @@ elseif CLIENT then
         end
 
         local ownedVehicle = localPly:GetNWEntity("LambdaOwnedVehicle")
-        local isTaken = self:GetNWBool("LambdaVehicleTaken")
-        local vehiclePly = self:GetNWEntity("LambdaVehicleOwner")
-        local displayIcon = false
+        local isVehicleTaken = self:GetNWBool("LambdaVehicleTaken")
+        local vehicleOwner = self:GetNWEntity("LambdaVehicleOwner")
+        local belongsToUs = false
 
-        if isTaken == false then
-            if IsValid(ownedVehicle) == false then
-                displayIcon = true
-            end
-        else
-            if vehiclePly == localPly then
-                displayIcon = true
+        if IsValid(ownedVehicle) and IsValid(vehicleOwner) then
+            if ownedVehicle == vehicle then
+                -- Owned by us.
+                belongsToUs = true
+            else
+                -- Owned by another player.
+                belongsToUs = false
             end
         end
 
-        if displayIcon ~= true then
+        if IsValid(vehicleOwner) and vehicleOwner:GetVehicle() == vehicle then
+            -- If the owner is inside the vehicle don't render anything.
             return
         end
 
-        local eyePos = EyePos()
-        local distance = eyePos:Distance(pos)
-        local distanceScale = distance * 0.0008
-        distanceScale = math.Clamp(distanceScale, 0.25, 5.5)
-
-        local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5) * 5
-        pos = pos + (Vector(0, 0, 1) * bounce)
-        pos = pos + (Vector(0, 0, 60) * distanceScale)
-
-        local screenPos = pos:ToScreen()
-
-        surface.SetDrawColor( 255, 255, 255, alphaDist * 200 )
-        surface.SetMaterial( VEHICLE_MAT )
-        surface.DrawTexturedRect( screenPos.x, screenPos.y, 60, 60 )
-
-    end
-
-    function ENT:Draw()
+        self:RenderVehicleStatus(alphaDist, IsValid(ownedVehicle), isVehicleTaken, belongsToUs, vehicleOwner)
     end
 
     function ENT:DrawTranslucent()
+        self:Draw()
     end
 
 end

@@ -1,7 +1,7 @@
 EFFECT.Mat1 = Material( "lambda/ring1.png" )
 EFFECT.Mat2 = Material( "lambda/ring2.png" )
 EFFECT.Mat3 = Material( "lambda/ring3.png" )
-EFFECT.Mat4 = Material( "lambda/run_point.png" )
+EFFECT.Mat4 = Material( "lambda/run_point.vmt" )
 
 function EFFECT:Init( data )
 
@@ -26,6 +26,7 @@ function EFFECT:Init( data )
 	self.Dist = 0
 
 	self:SetPos( data:GetOrigin() )
+	self:SetRenderMode(RENDERMODE_GLOW)
 
 end
 
@@ -46,31 +47,31 @@ function EFFECT:Render( )
 
 	if  (self.Alpha < 0 ) then return end
 
-	render.SuppressEngineLighting(true)
+	local normal = self.Normal * self.Direction
+	normal:Normalize()
 
-	local Normal = self.Normal
-	local dir = Normal:Angle()
+	local dir = normal:Angle()
 	local ply = LocalPlayer()
 	local ang = ply:GetPos() - self:GetPos()
 	local dist = ply:GetPos():Distance(self:GetPos())
 
 	render.SetMaterial( self.Mat1 )
-	render.DrawQuadEasy( self:GetPos() + Normal,
-						 Normal:GetNormalized() * self.Direction,
+	render.DrawQuadEasy( self:GetPos() + normal,
+						 normal,
 						 self.Size, self.Size,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
 						 -(self.Alpha * 400) )
 
 	render.SetMaterial( self.Mat2 )
-	render.DrawQuadEasy( self:GetPos() + Normal,
-						 Normal:GetNormalized() * self.Direction,
+	render.DrawQuadEasy( self:GetPos() + normal,
+						 normal,
 						 self.Size, self.Size,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
 						 self.Alpha * 500)
 
 	render.SetMaterial( self.Mat3 )
-	render.DrawQuadEasy( self:GetPos() + Normal,
-						 Normal:GetNormalized() * self.Direction,
+	render.DrawQuadEasy( self:GetPos() + normal,
+						 normal,
 						 self.Size, self.Size,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
 						 -(self.Alpha * 800) )
@@ -84,7 +85,5 @@ function EFFECT:Render( )
 						 signsize, signsize,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),
 						 180)
-
-	render.SuppressEngineLighting(false)
 
 end

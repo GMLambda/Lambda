@@ -16,6 +16,7 @@ local DTVAR_TO_TYPE =
     ["float"] = function(val) return util.StringToType(val, "float") end,
     ["int"] = function(val) return util.StringToType(val, "int") end,
     ["angle"] = function(val) return util.StringToType(val, "angle") end,
+    ["vector"] = function(val) return util.StringToType(val, "vector") end,
     ["entity"] = function(val) error("Can not use entity as key value") end,
 }
 
@@ -26,6 +27,7 @@ local DTVAR_TO_STRING =
     ["float"] = function(val) return util.TypeToString(val) end,
     ["int"] = function(val) return util.TypeToString(val) end,
     ["angle"] = function(val) return util.TypeToString(val) end,
+    ["vector"] = function(val) return util.TypeToString(val) end,
     ["entity"] = function(val) error("Can not use entity as key value") end,
 }
 
@@ -39,6 +41,7 @@ if NW2_VARS == true then
         ["int"] = function(ent, key, index, val) ent:SetNW2Int(key, val) end,
         ["angle"] = function(ent, key, index, val) ent:SetNW2Angle(key, val) end,
         ["entity"] = function(ent, key, index, val) ent:SetNW2Entity(key, val) end,
+        ["vector"] = function(ent, key, index, val) ent:SetNW2Vector(key, val) end,
     }
 else
     DTVAR_SET =
@@ -49,6 +52,7 @@ else
         ["int"] = function(ent, key, index, val) ent:SetDTInt(index, val) end,
         ["angle"] = function(ent, key, index, val) ent:SetDTAngle(index, val) end,
         ["entity"] = function(ent, key, index, val) ent:SetDTEntity(index, val) end,
+        ["vector"] = function(ent, key, index, val) ent:SetDTVector(index, val) end,
     }
 end
 
@@ -62,6 +66,7 @@ if NW2_VARS == true then
         ["int"] = function(ent, key, index, fallback) return ent:GetNW2Int(key, fallback) end,
         ["angle"] = function(ent, key, index, fallback) return ent:GetNW2Angle(key, fallback) end,
         ["entity"] = function(ent, key, index, fallback) return ent:GetNW2Entity(key, fallback) end,
+        ["vector"] = function(ent, key, index, fallback) return ent:GetNW2Vector(key, fallback) end,
     }
 else
     DTVAR_GET =
@@ -72,6 +77,7 @@ else
         ["int"] = function(ent, key, index, fallback) return ent:GetDTInt(index) or fallback end,
         ["angle"] = function(ent, key, index, fallback) return ent:GetDTAngle(index) or fallback end,
         ["entity"] = function(ent, key, index, fallback) return ent:GetDTEntity(index) or fallback end,
+        ["vector"] = function(ent, key, index, fallback) return ent:GetDTVector(index) or fallback end,
     }
 end
 
@@ -91,6 +97,7 @@ function ENT:PreInitialize()
         ["int"] = { Index = 0, Max = 32 },
         ["angle"] = { Index = 0, Max = 32 },
         ["entity"] = { Index = 0, Max = 32 },
+        ["vector"] = { Index = 0, Max = 32 },
     }
     self.DTVarTable = self.DTVarTable or {}
     self.DTListener = self.DTListener or {}
