@@ -1,4 +1,4 @@
-EFFECT.Mat1 = Material( "lambda/death_point.png" )
+EFFECT.Mat1 = Material( "lambda/death_point.vmt" )
 
 function EFFECT:Init( data )
 
@@ -63,6 +63,8 @@ function EFFECT:Render( )
 	local offset_z = math.Clamp(dist / 20, 50, 200)
 
 	cam.IgnoreZ(true)
+
+	self.Mat1:SetFloat("$alpha", ((self.Alpha ^ 1.1) * 255) / 255)
 
 	render.SetMaterial( self.Mat1 )
 	render.DrawQuadEasy( self:GetPos() + (dir:Forward() * (offset_z + self.Dist)) ,

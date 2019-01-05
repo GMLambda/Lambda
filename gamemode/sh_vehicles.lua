@@ -8,6 +8,9 @@ VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
 
 local VEHICLE_JEEP = 0
 local VEHICLE_AIRBOAT = 1
+local NEXT_VEHICLE_SPAWN = CurTime()
+local VEHICLE_SPAWN_TIME = 2
+
 --local VEHICLE_JALOPY = 2
 
 if SERVER then
@@ -33,7 +36,6 @@ if SERVER then
                 table.insert(self.MapVehicles, v)
             end
         end
-
 
     end
 
@@ -331,6 +333,10 @@ if SERVER then
 
     function GM:CanSpawnVehicle()
 
+        if CurTime() < NEXT_VEHICLE_SPAWN then
+            return false
+        end
+
         local alivePlayers = 0
         local playerCount = 0
 
@@ -388,6 +394,7 @@ if SERVER then
         newVehicle:Activate()
 
         DbgPrint("Created new vehicle: " .. tostring(newVehicle))
+        NEXT_VEHICLE_SPAWN = CurTime() + VEHICLE_SPAWN_TIME
 
     end
 

@@ -44,6 +44,7 @@ MAPSCRIPT.EntityFilterByName =
 {
     --["test_name"] = true,
     ["player_spawn_items"] = true,
+    ["player_spawn_items_maker"] = true,
     ["invulnerable"] = true,
 }
 
@@ -105,20 +106,14 @@ function MAPSCRIPT:PostInit()
 
         end)
 
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-5971.663574, 3534.091064, 269.338867), Ang = Angle(4.653, 55.612, 0.000) })
-        if not IsValid(checkpoint1) then
-            DbgError("Unable to create checkpoint")
-        end
-
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-5971.663574, 3534.091064, 269.338867), Angle(4.653, 55.612, 0.000))
         GAMEMODE:WaitForInput("spypost_template", "ForceSpawn", function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
             GAMEMODE:SetVehicleCheckpoint(Vector(-5811.580566, 3605.574463, 257.262878), Angle(0, 0, 0))
         end)
 
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(6494.825195, 4199.202637, 260.031250), Ang = Angle(0, 0, 0) })
-        if not IsValid(checkpoint2) then
-            DbgError("Unable to create checkpoint")
-        end
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(6494.825195, 4199.202637, 260.031250), Angle(0, 0, 0))
+        checkpoint2:SetVisiblePos(Vector(7322.962402, 4037.665527, 257.896637))
         GAMEMODE:WaitForInput("aisc_pre_ingreeterrange", "Enable", function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
             GAMEMODE:SetVehicleCheckpoint(Vector(6610.592285, 4405.477539, 264.207794), Angle(0.091, -121.466, 0.363))
@@ -129,7 +124,7 @@ function MAPSCRIPT:PostInit()
             ent:AddTemplateData("squadname", "lambda_gunships")
             ent:SetKeyValue("SpawnFrequency", "10")
             ent:Enable()
-            ent.OnAllSpawnedDead = function(ent)
+            ent.OnAllSpawnedDead = function(e)
                 TriggerOutputs({
                     {"ag_siren", "StopSound", 0.0, ""},
                     {"lr_radioloop", "Disable", 0.0, ""},

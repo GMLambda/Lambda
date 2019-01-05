@@ -90,7 +90,8 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -6381.103027 8103.064453 896.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-6533.443848, 8131.516602, 896.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6533.443848, 8131.516602, 896.031250), Angle(0, 0, 0))
+        checkpoint1:SetVisiblePos(Vector(-6447.585449, 8024.932129, 896.031250))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-6381.103027, 8103.064453, 896.031250),
@@ -148,7 +149,8 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -3500.986816 7756.634766 896.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-4065.605957, 7748.239258, 896.032776), Ang = Angle(3.366, 19.338, 0.000) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-4065.605957, 7748.239258, 896.032776), Angle(3.366, 19.338, 0.000))
+        checkpoint2:SetVisiblePos(Vector(-3477.525879, 7750.378906, 896.031250))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(-3500.986816, 7756.634766, 896.031250),
@@ -200,7 +202,7 @@ function MAPSCRIPT:PostInit()
 
         -- Checkpoint
         -- -1123.785400 10358.985352 896.031250
-        local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1098.884766, 10457.261719, 896.031250), Ang = Angle(0, -180, 0.000) })
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1098.884766, 10457.261719, 896.031250), Angle(0, -180, 0.000))
         local checkpointTrigger3 = ents.Create("trigger_once")
         checkpointTrigger3:SetupTrigger(
             Vector(-1123.785400, 10358.985352, 896.031250),
@@ -211,7 +213,6 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger3.OnTrigger = function()
             GAMEMODE:SetPlayerCheckpoint(checkpoint3)
         end
-
 
         -- Better changelevel trigger.
         local changelevelTrigger = ents.CreateSimple("trigger_changelevel", {

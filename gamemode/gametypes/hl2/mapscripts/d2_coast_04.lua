@@ -122,10 +122,11 @@ function MAPSCRIPT:PostInit()
 
         -- rush checkpoint
         -- 2835.472412 -1599.243896 142.031235, 1864.473999 -3026.903076 256.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(1864.473999, -3026.903076, 256.031250), Ang = Angle(0, 90, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(1864.473999, -3026.903076, 256.031250), Angle(0, 90, 0))
+        checkpoint1:SetVisiblePos(Vector(2385.852539, -2325.066406, 256.031250))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
-            Vector(2835.472412, -1599.243896, 142.031235),
+            Vector(2385.852539, -2325.066406, 256.031250),
             Angle(0, 0, 0),
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
@@ -137,7 +138,8 @@ function MAPSCRIPT:PostInit()
 
         -- bridge checkpoint
         -- 5068.378418 -2688.673828 384.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(5189.114258, -2913.917236, 384.031250), Ang = Angle(0, 90, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(5189.114258, -2913.917236, 384.031250), Angle(0, 90, 0))
+        checkpoint2:SetVisiblePos(Vector(5037.148438, -2688.796875, 384.031250))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(5068.378418, -2688.673828, 384.031250),
@@ -202,7 +204,8 @@ function MAPSCRIPT:PostInit()
 
         -- fall checkpoint
         -- 1826.217529 2.297394 928.031250
-        local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1328.088135, -1649.725464, 958.014343), Ang = Angle(0, 90, 0) })
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1328.088135, -1649.725464, 958.014343), Angle(0, 90, 0))
+        checkpoint3:SetVisiblePos(Vector(-1826.550537, -1218.092041, 928.031250))
         local checkpointTrigger3 = ents.Create("trigger_once")
         checkpointTrigger3:SetupTrigger(
             Vector(-1823.722290, -1220.703369, 928.031250),

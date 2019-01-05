@@ -891,7 +891,7 @@ else -- CLIENT
 
     end)
 
-    local MAT_POINTER = Material( "lambda/trigger.png" )
+    local MAT_POINTER = Material( "lambda/trigger.vmt" )
 
     surface.CreateFont( "LAMBDA_1",
     {
@@ -929,6 +929,16 @@ else -- CLIENT
         outline = false,
     } )
 
+    local function GetTextColor()
+        local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
+        return col
+    end
+
+    local function GetBGColor()
+        local col = util.StringToType(lambda_hud_bg_color:GetString(), "vector")
+        return col
+    end
+
     local function DrawTriggerWaiting(activePlayers, scheduledTime, pos, ang, obbMins, obbMaxs, realPos)
 
         local playerCount = 0
@@ -947,6 +957,8 @@ else -- CLIENT
         local distance = eyePos:Distance(pos)
         local localView = false
         local allowLocalView = true
+        local textColor = GetTextColor()
+        local colorBg = GetBGColor()
 
         local showRunner = true
         if distance < 50 then
@@ -1003,31 +1015,35 @@ else -- CLIENT
             local spacing = 10
 
             text = "Waiting for players: " .. tostring(activePlayerCount) .. " / " .. tostring(playerCount)
-            draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-            draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
+            draw.DrawText( text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER )
+            draw.DrawText( text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER )
             w,h = surface.GetTextSize( text )
             textY = textY + h + spacing
 
             text = "Game will continue once all players are here"
-            draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-            draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
+            draw.DrawText( text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER )
+            draw.DrawText( text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER )
             textY = textY + h + spacing
 
             if scheduledTime > 0 then
 
                 text = "Timeout in " .. string.format("%.02f", remaining) .. " seconds"
 
-                draw.DrawText( text, "LAMBDA_1", x, y + textY, Color( 10, 10, 10 ), TEXT_ALIGN_CENTER )
-                draw.DrawText( text, "LAMBDA_2", x, y + textY, Color( 200, 200, 200 ), TEXT_ALIGN_CENTER )
+                draw.DrawText( text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER )
+                draw.DrawText( text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER )
                 textY = textY + h + spacing
 
             end
 
             if showRunner == true then
-                surface.SetDrawColor( 255, 255, 255, 200 )
+                textColor = Vector(textColor.r / 255, textColor.g / 255, textColor.b / 255)
+                MAT_POINTER:SetVector("$tint", textColor)
+
+                surface.SetDrawColor( textColor.r, textColor.g, textColor.b, 200 )
                 surface.SetMaterial( MAT_POINTER )
-                surface.DrawTexturedRect( x + -30, y + textY + 30 + (-bounce * 10), 60, 60 )
+                surface.DrawTexturedRect( x + -40, y + textY + 40 + (-bounce * 10), 80, 80 )
             end
+
         end)
 
     end

@@ -64,16 +64,14 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -3183.032227 -3624.933350 384.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-3789.004150, -3686.312256, 564.031250), Ang = Angle(0, -180, 0) })
-        local checkpointTrigger1 = ents.Create("trigger_multiple")
-        checkpointTrigger1:SetupTrigger(
+        local doorBracerTrigger = ents.Create("trigger_multiple")
+        doorBracerTrigger:SetupTrigger(
             Vector(-3183.032227, -3624.933350, 384.031250),
             Angle(0,0,0),
             Vector(-500, -200, 0),
             Vector(200, 300, 280)
         )
-        checkpointTrigger1.OnEndTouchAll = function(trigger)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        doorBracerTrigger.OnEndTouchAll = function(trigger)
             supressKickdownEvent = false
             TriggerOutputs({
                 {"kickdown_relay", "Trigger", 0, ""},
@@ -83,17 +81,16 @@ function MAPSCRIPT:PostInit()
             DbgPrint("All players left")
         end
 
-        -- -6975.404297 -4207.044922 520.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-6974.692383, -4174.132813, 520.031250), Ang = Angle(0, 90, 0) })
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
-            Vector(-6974.692383, -4254.132813, 520.031250),
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-5132.465332, -3575.130127, 698.892090), Angle(0, -180, 0))
+        local checkpointTrigger1 = ents.Create("trigger_once")
+        checkpointTrigger1:SetupTrigger(
+            Vector(-5132.465332, -3575.130127, 698.892090),
             Angle(0,0,0),
-            Vector(-130, -20, 0),
-            Vector(130, 20, 180)
+            Vector(-200, -200, 0),
+            Vector(200, 200, 100)
         )
-        checkpointTrigger2.OnEndTouchAll = function(trigger)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger1.OnTrigger = function(trigger)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 
         -- We skip the knockout scene because its not shown anyway.
@@ -121,9 +118,7 @@ function MAPSCRIPT:PostInit()
             ent:ResizeTriggerBox(Vector(-70, -70, -60), Vector(50, 70, 60))
             ent:SetKeyValue("teamwait", "1")
             ent.OnTrigger = function(ent)
-                local checkpoint = ents.Create("lambda_checkpoint")
-                checkpoint:SetPos(Vector(-7740.829590, -3959.260010, 388.031250))
-                checkpoint:Spawn()
+                local checkpoint = GAMEMODE:CreateCheckpoint(Vector(-7740.829590, -3959.260010, 388.031250))
                 checkpoint:SetParent(tracktrain_elevator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint)
 
@@ -168,13 +163,14 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -7176.394043 -3890.482178 384.031250
-        local checkpoint3 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-7204.497070, -3997.591064, 384.031250), Ang = Angle(0, -180, 0) })
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-7204.497070, -3997.591064, 384.031250), Angle(0, -180, 0))
+        checkpoint3:SetVisiblePos(Vector(-7275.987793, -3983.696533, 384.031250))
         local checkpointTrigger3 = ents.Create("trigger_once")
         checkpointTrigger3:SetupTrigger(
-            Vector(-7176.394043, -3890.482178, 384.031250),
+            Vector(-7275.987793, -3983.696533, 384.031250),
             Angle(0,0,0),
-            Vector(-130, -130, 0),
-            Vector(130, 130, 180)
+            Vector(-50, -130, 0),
+            Vector(160, 130, 100)
         )
         checkpointTrigger3.OnTrigger = function(trigger)
             GAMEMODE:SetPlayerCheckpoint(checkpoint3)

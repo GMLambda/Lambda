@@ -44,7 +44,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
-    ["player_spawn_items"] = true,
+    ["player_spawn_items_maker"] = true,
 }
 
 MAPSCRIPT.VehicleGuns = true
@@ -58,7 +58,7 @@ function MAPSCRIPT:PostInit()
 
         if GAMEMODE:GetPreviousMap() == "d2_coast_08" then
             --- 3304.103271 5262.621094 1536.031250
-            local checkpointTransfer = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(3304.103271, 5262.621094, 1536.031250), Ang = Angle(0, 90, 0) })
+            local checkpointTransfer = GAMEMODE:CreateCheckpoint(Vector(3304.103271, 5262.621094, 1536.031250), Angle(0, 90, 0))
             GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
             ents.WaitForEntityByName("village_squad", function(ent)
                 ent:Fire("ForceSpawn")
@@ -67,8 +67,9 @@ function MAPSCRIPT:PostInit()
                 ent:Fire("Enable")
             end)
         end
+
         -- -1074.218628 9386.666016 1664.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1469.086060, 9136.386719, 1666.920044), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1469.086060, 9136.386719, 1666.920044), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-1074.218628, 9386.666016, 1664.031250),
@@ -81,7 +82,8 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(3302.857178, 5274.505859, 1536.031250), Ang = Angle(0, 180, 0) })
+        --[[
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(3302.857178, 5274.505859, 1536.031250), Angle(0, 180, 0))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(3302.857178, 5274.505859, 1536.031250),
@@ -93,6 +95,7 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetVehicleCheckpoint(Vector(1950.889160, 6521.036621, 1538.650757), Angle(0.372, 3.839, 1.433))
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
         end
+        ]]
 
         -- The game isnt over if someone falls down, we clear the outputs and just kill the player.
         for _,v in pairs(ents.FindByName("fall_trigger")) do

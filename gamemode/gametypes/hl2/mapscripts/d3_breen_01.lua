@@ -93,7 +93,7 @@ function MAPSCRIPT:PostInit()
 
         -- -1836.434814 -1.664792 1344.031250
 
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1965.112183, 24.634741, 578.822021), Ang = Angle(0, -90, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1965.112183, 24.634741, 578.822021), Angle(0, -90, 0))
         ents.WaitForEntityByName("Train_lift", function(ent)
             checkpoint1:SetParent(ent)
         end)
@@ -121,7 +121,7 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnPlayerPickup lambda_physcannon,AddPhyscannon,,0.0,-1")
         end)
 
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-1059.245605, 455.159790, 1302.171143), Ang = Angle(0, -90, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1059.245605, 455.159790, 1302.171143), Angle(0, -90, 0))
         ents.WaitForEntityByName("Train_lift_TP", function(ent)
             checkpoint2:SetParent(ent)
         end)

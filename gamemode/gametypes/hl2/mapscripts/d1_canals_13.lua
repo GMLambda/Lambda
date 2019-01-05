@@ -50,7 +50,9 @@ function MAPSCRIPT:PostInit()
         -- TODO: Duplicate canals_npc_reservoircopter01 (player / 2) times
         -- TODO: Trigger helicopter OnDeath outputs only if all of them are dead.
 
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(3435.695557, 1247.184448, -385.343903), Ang = Angle(0, 90, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3435.695557, 1247.184448, -385.343903), Angle(0, 90, 0))
+        checkpoint1:SetVisiblePos(Vector(3369.119873, 2166.538818, -367.946716))
+
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(3425.643555, 2139.872314, -476.733490),

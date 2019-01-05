@@ -42,6 +42,21 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        -- 140.128403 6230.728516 -91.836014
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-244.051270, 5727.869141, -237.508698), Angle(0, 90, 0))
+        checkpoint1:SetVisiblePos(Vector(236.710632, 6244.615234, -75.189445))
+        local checkpointTrigger1 = ents.Create("trigger_once")
+        checkpointTrigger1:SetupTrigger(
+            Vector(140.128403, 6230.728516, -91.836014),
+            Angle(0, 0, 0),
+            Vector(-550, -500, -150),
+            Vector(350, 100, 180)
+        )
+        checkpointTrigger1.OnTrigger = function()
+            GAMEMODE:SetVehicleCheckpoint(Vector(-405.258606, 5841.114258, -212.960327), Angle(0, 0, 0))
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        end
+
     end
 
 end

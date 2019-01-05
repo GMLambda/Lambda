@@ -62,7 +62,7 @@ function MAPSCRIPT:PostInit()
     if SERVER then
 
         -- setpos -497.127838 29.422707 576.030090;setang 1.708000 -178.566528 0.000000
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-497.127838, 29.422707, 512.03009), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-497.127838, 29.422707, 512.03009), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-497.127838, 29.422707, 576.030090),
@@ -88,13 +88,13 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -956.561707 820.578613 960.031250
-        local checkpoint1 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-956.561707, 820.578613, 960.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-956.561707, 820.578613, 960.031250), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-709.431885, 820.863708, 960.031250),
             Angle(0, 0, 0),
             Vector(-400, -300, -10),
-            Vector(500, 180, 250)
+            Vector(500, 130, 250)
         )
         checkpointTrigger1:SetKeyValue("teamwait", "1")
         checkpointTrigger1.OnTrigger = function(ent)
@@ -113,7 +113,8 @@ function MAPSCRIPT:PostInit()
 
         -- Inverse
         -- -579.983948 563.455078 928.031250
-        local checkpoint2 = ents.CreateSimple("lambda_checkpoint", { Pos = Vector(-579.983948, 563.455078, 928.031250), Ang = Angle(0, 0, 0) })
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-579.983948, 563.455078, 928.031250), Angle(0, 0, 0))
+        checkpoint2:SetVisiblePos(Vector(-442.803680, 529.028320, 928.031250))
         local checkpointTrigger2 = ents.Create("trigger_multiple")
         checkpointTrigger2:SetupTrigger(
             Vector(-709.431885, 820.863708, 960.031250),
