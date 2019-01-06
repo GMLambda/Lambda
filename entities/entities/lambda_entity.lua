@@ -323,8 +323,8 @@ end
         local caller = caller or self
         local activator = activator or self
         local outputs = self.OutputTable[name] or {}
-        DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
-        util.RunNextFrame(function()
+        util.EnqueueOutput(function()
+            DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
             util.TriggerOutputs(outputs, activator, caller, param, self)
         end)
     end
