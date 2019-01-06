@@ -48,6 +48,7 @@ MAPSCRIPT.EntityFilterByClass =
 MAPSCRIPT.EntityFilterByName =
 {
     ["player_spawn_items"] = true,
+    ["lobby_frontdoors_counter"] = true, -- Use custom counter.
 }
 
 function MAPSCRIPT:Init()
@@ -56,6 +57,25 @@ end
 function MAPSCRIPT:PostInit()
 
     if SERVER then
+
+        for _,v in pairs(ents.FindByName("steps_soldier_makers")) do
+            v:SetKeyValue("DisableScaling", "1")
+        end
+
+        -- Adjust some logic to support npc scaling
+        local newCounter = ents.Create("math_counter")
+        newCounter:SetKeyValue("max", "3")
+        newCounter:SetKeyValue("StartDisabled", "0")
+        newCounter:SetKeyValue("targetname", "lambda_lobby_frontdoors_counter")
+        newCounter:Fire("AddOutput", "OnHitMax atrium_securitydoors,Close,,4.0,-1")
+        newCounter:Fire("AddOutput", "OnHitMax lobby_frontdoors_sounds,StopSound,,14.0,-1")
+        newCounter:Spawn()
+
+        for k,v in pairs(ents.FindByName("lobby_frontdoors_soldier_makers")) do
+            v:Fire("AddOutput", "OnSpawnNPC lobby_frontdoors_assault,Activate,,0.05,-1")
+            v:Fire("AddOutput", "OnSpawnNPC lobby_frontdoors_assault,BeginAssault,,0.50,-1")
+            v:Fire("AddOutput", "OnAllSpawned lambda_lobby_frontdoors_counter,Add,1,0.0,-1")
+        end
 
         -- Make sure the player spawns at the correct spot.
         local spawn = ents.Create("info_player_start")
@@ -75,19 +95,6 @@ function MAPSCRIPT:PostInit()
         )
         checkpointTrigger1.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
-        end
-
-        -- -1407.534912 4417.064453 128.031250
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1416.659668, 4142.781738, 128.031250), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
-            Vector(-1407.534912, 4417.064453, 128.031250),
-            Angle(0, 0, 0),
-            Vector(-60, -60, 0),
-            Vector(60, 60, 100)
-        )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
         end
 
         -- -1404.743896 8211.465820 128.031250

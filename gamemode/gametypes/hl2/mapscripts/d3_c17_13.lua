@@ -52,6 +52,10 @@ MAPSCRIPT.EntityFilterByName =
     ["player_spawn_items"] = true,
     ["escape_attempt_killtrigger"] = true,
     ["ss_dog_drop"] = true,
+    ["bigdestroy1_fade"] = true,
+    ["bigdestroy2_fade"] = true,
+    ["bigdestroy3_fade"] = true,
+    ["damagefilter_barney"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -61,14 +65,13 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-        -- 5629.913086 -1056.541016 -127.968750
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(5895.568359, -1049.733887, -127.968750), Angle(0, -180, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(5629.913086, -1056.541016, -127.968750),
             Angle(0, 0, 0),
-            Vector(-20, -300, 0),
-            Vector(20, 150, 100)
+            Vector(-200, -300, 0),
+            Vector(400, 150, 100)
         )
         checkpointTrigger1.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
@@ -101,6 +104,33 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint3)
         end
 
+        -- Make sure they are only used once.
+        ents.WaitForEntityByName("bigdestroy1_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger !self,Kill,,0.1,-1")
+        end)
+        ents.WaitForEntityByName("bigdestroy2_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger !self,Kill,,0.1,-1")
+        end)
+        ents.WaitForEntityByName("bigdestroy3_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger !self,Kill,,0.1,-1")
+        end)
+
+        -- Last resort.
+        local striderCounter = ents.Create("math_counter")
+        striderCounter:SetKeyValue("targetname", "lambda_strider_counter")
+        striderCounter:SetKeyValue("max", "2")
+        striderCounter:SetKeyValue("StartDisabled", "0")
+        striderCounter:Fire("AddOutput", "OnHitMax bigdestroy1_relay,Trigger,,0.0,-1")
+        striderCounter:Fire("AddOutput", "OnHitMax bigdestroy2_relay,Trigger,,0.0,-1")
+        striderCounter:Fire("AddOutput", "OnHitMax bigdestroy3_relay,Trigger,,0.0,-1")
+        striderCounter:Spawn()
+
+        ents.WaitForEntityByName("strider1", function(ent)
+            ent:Fire("AddOutput", "OnDeath lambda_strider_counter,Add,1,0.0,-1")
+        end)
+        ents.WaitForEntityByName("strider2", function(ent)
+            ent:Fire("AddOutput", "OnDeath lambda_strider_counter,Add,1,0.0,-1")
+        end)
 
     end
 

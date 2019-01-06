@@ -65,6 +65,19 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnTrigger plaza_exit_relay,Trigger,,40,-1")
         end)
 
+        -- setpos -497.127838 29.422707 576.030090;setang 1.708000 -178.566528 0.000000
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-2706.719727, -2843.710449, -3.968750), Angle(0, 90, 0))
+        local checkpointTrigger1 = ents.Create("trigger_once")
+        checkpointTrigger1:SetupTrigger(
+            Vector(-2706.719727, -2843.710449, -3.968750),
+            Angle(0, 0, 0),
+            Vector(-350, -300, 0),
+            Vector(350, 300, 100)
+        )
+        checkpointTrigger1.OnTrigger = function(ent)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        end
+
     end
 
 end

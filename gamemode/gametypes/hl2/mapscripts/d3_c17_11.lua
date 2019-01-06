@@ -58,21 +58,9 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-        -- 1141.241089 6502.354492 896.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(843.202148, 8012.508301, 960.031250), Angle(0, -90, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(910.880127, 7848.197266, 960.031250),
-            Angle(0, 0, 0),
-            Vector(-20, -20, 0),
-            Vector(20, 20, 100)
-        )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
-        end
-
         -- 1448.796265 4695.322266 960.031250
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(917.399902, 4806.428223, 960.031250), Angle(0, 0, 0))
+        checkpoint2:SetVisiblePos(Vector(1350.315063, 4729.931641, 960.031250))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
             Vector(1448.796265, 4695.322266, 960.031250),
@@ -84,6 +72,9 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
         end
 
+        ents.WaitForEntityByName("dropship_maker", function(ent)
+            ent:Fire("AddOutput", "OnSpawnNPC !self,Kill,,0.0,-1")
+        end)
 
     end
 
