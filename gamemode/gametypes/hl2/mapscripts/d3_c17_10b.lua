@@ -62,10 +62,10 @@ function MAPSCRIPT:PostInit()
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(4184.389160, -740.649597, 512.031250), Angle(0, 180, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
-            Vector(3887.857910, -514.078979, 512.031250),
+            Vector(4177.301758, -713.936646, 512.031250),
             Angle(0, 0, 0),
-            Vector(-160, -160, 0),
-            Vector(160, 160, 100)
+            Vector(-140, -140, 0),
+            Vector(140, 140, 100)
         )
         checkpointTrigger1.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)

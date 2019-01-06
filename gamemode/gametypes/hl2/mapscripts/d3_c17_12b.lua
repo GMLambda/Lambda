@@ -43,12 +43,15 @@ MAPSCRIPT.InputFilters =
 MAPSCRIPT.EntityFilterByClass =
 {
     --["env_global"] = true,
+    ["npc_cscanner"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
     ["player_spawn_items"] = true,
     ["pclip_gate1"] = true,
+    ["entry_ceiling_debris_1"] = true,
+    ["entry_ceiling_debris_clip_1"] = true,
 }
 
 function MAPSCRIPT:Init()
@@ -83,6 +86,20 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
         end
 
+        -- UGH
+        --- -5204.569824 -29.101088 0.031250
+        local striderTrigger = ents.Create("trigger_once")
+        striderTrigger:SetupTrigger(
+            Vector(-5204.569824, -29.101088, 0.031250),
+            Angle(0, 0, 0),
+            Vector(-300, -300, 0),
+            Vector(300, 300, 100)
+        )
+
+        striderTrigger:Fire("AddOutput", "OnTrigger tunnel_strider_1,DisableCrouchWalk,,0.0,-1")
+        striderTrigger:Fire("AddOutput", "OnTrigger tunnel_strider_1,Stand,,0.0,-1")
+        striderTrigger:Fire("AddOutput", "OnTrigger tunnel_strider_1,SetTargetPath,tunnel_strider_1_path_3,0.1,-1")
+        striderTrigger:Fire("AddOutput", "OnTrigger tunnel_strider_1,SetCannonTarget,second_floor_beam_1_bullseye_1,0.1,-1")
     end
 
 end

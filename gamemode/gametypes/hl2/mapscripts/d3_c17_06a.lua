@@ -58,14 +58,15 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-        -- 3081.572754 -1725.475098 -287.968750
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3081.572754, -1725.475098, -287.968750), Angle(0, 90, 0))
+        -- 1921.614014 -5632.266602 320.031250
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3187.333984, 2184.848145, -312.009857), Angle(0, 180, 0))
+        checkpoint1:SetVisiblePos(Vector(3034.239258, 2188.360840, -318.995728))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
-            Vector(3081.572754, -1725.475098, -287.968750),
+            Vector(3187.333984, 2184.848145, -312.009857),
             Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 100)
+            Vector(-250, -110, 0),
+            Vector(110, 110, 100)
         )
         checkpointTrigger1.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)

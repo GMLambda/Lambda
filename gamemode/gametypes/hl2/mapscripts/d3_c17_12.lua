@@ -66,27 +66,27 @@ function MAPSCRIPT:PostInit()
         spawn:SetKeyValue("spawnflags", "1")
         spawn:Spawn()
 
-        -- -1550.889771 7297.707520 128.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1505.414917, 7372.614258, -59.968750), Angle(0, 180, 0))
+        --  645.813293 3391.362061 192.031250
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(645.813293, 3391.362061, 192.031250), Angle(0, -180, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
-            Vector(-1550.889771, 7297.707520, 128.031250),
+            Vector(645.813293, 3391.362061, 192.031250),
             Angle(0, 0, 0),
-            Vector(-250, -250, 0),
-            Vector(250, 250, 100)
+            Vector(-50, -50, 0),
+            Vector(50, 50, 100)
         )
         checkpointTrigger1.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 
-        -- -1370.895020 6269.638184 66.207535
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1505.414917, 7372.614258, -59.968750), Angle(0, -90, 0))
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-2476.636963, 6708.353516, 128.031250), Angle(0, 90, 0))
+        checkpoint2:SetVisiblePos(Vector(-2494.347412, 6463.139648, 128.031250))
         local checkpointTrigger2 = ents.Create("trigger_once")
         checkpointTrigger2:SetupTrigger(
-            Vector(-1370.895020, 6269.638184, 66.207535),
+            Vector(-2494.347412, 6463.139648, 128.031250),
             Angle(0, 0, 0),
-            Vector(-80, -80, 0),
-            Vector(80, 80, 100)
+            Vector(-50, -50, 0),
+            Vector(50, 50, 100)
         )
         checkpointTrigger2.OnTrigger = function(ent)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
