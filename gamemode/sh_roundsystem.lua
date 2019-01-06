@@ -372,6 +372,21 @@ function GM:PreCleanupMap()
             v:EnableRespawn(false)
         end
 
+        -- NOTE: Sometimes scripted scenes can play after map cleanup.
+        --       So we cancel everything before that.
+        do
+            for _,v in pairs(ents.FindByClass("logic_choreographed_scene")) do
+                -- Cancel all scenes.
+                DbgPrint("Cancel scene " .. tostring(v))
+                v:Fire("Cancel")
+            end
+
+            for _,v in pairs(ents.FindByClass("npc_*")) do
+                DbgPrint("Cancel scripting " .. tostring(v))
+                v:Fire("StopScripting")
+            end
+        end
+
         -- Cleanup the input/output system.
         self:SetRoundState(STATE_RESTARTING)
 
