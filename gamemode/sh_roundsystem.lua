@@ -575,6 +575,32 @@ function GM:PostRoundSetup()
         v:Fire("Enable")
     end
 
+    local loadType = self:GetMapLoadType()
+    local mapScript = self:GetMapScript()
+
+    if loadType == "transition" then
+        if mapScript ~= nil and mapScript.OnMapTransition ~= nil then
+            mapScript:OnMapTransition()
+        end
+    elseif loadType == "newgame" then
+        if mapScript ~= nil and mapScript.OnNewGame ~= nil then
+            mapScript:OnNewGame()
+        end
+    elseif loadType == "loadgame" then
+        if mapScript ~= nil and mapScript.OnLoadGame ~= nil then
+            mapScript:OnLoadGame()
+        end
+    elseif loadType == "background" then
+        if mapScript ~= nil and mapScript.OnBackgroundMap ~= nil then
+            mapScript:OnBackgroundMap()
+        end
+    end
+
+    -- Fires without condition.
+    if mapScript ~= nil and mapScript.OnMapSpawn ~= nil then
+        mapScript:OnMapSpawn()
+    end
+
     util.RunDelayed(function()
         if IsValid(self.LambdaChapterMessage) then
             self.LambdaChapterMessage:Fire("ShowMessage")
