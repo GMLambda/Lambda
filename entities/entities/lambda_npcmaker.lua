@@ -167,6 +167,9 @@ function ENT:GetScaledMaxLiveChildren()
     res = maxLiveChildren + extraCount
     self.CachedMaxLiveChildren = res
 
+    if res > 100 then
+        res = 100
+    end
     return res
 
 end
@@ -198,6 +201,9 @@ function ENT:GetScaledMaxNPCs()
         end
     end
 
+    if res > 100 then
+        res = 100
+    end
     return res
 
 end
@@ -373,6 +379,10 @@ function ENT:DeathNotice(ent)
     end
 
     self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") - 1)
+
+    if self:GetNWVar("SpawnFrequency") == -1 then
+        self:MakeNPC()
+    end
 
     if self:GetNWVar("LiveChildren") <= 0 then
 
