@@ -91,9 +91,19 @@ GAMETYPE.ClassesEnemyNPC =
     ["npc_combine"] = true,
     ["npc_combine_s"] = true,
     ["npc_zombie"] = true,
+    ["npc_fastzombie"] = true,
+    ["npc_poisonzombie"] = true,
     ["npc_headcrab"] = true,
     ["npc_sniper"] = true,
+    ["npc_strider"] = true,
     ["npc_headcrab_fast"] = true,
+    ["npc_headcrab_black"] = true,
+    ["npc_manhack"] = true,
+    ["npc_cscanner"] = true,
+    ["npc_clawscanner"] = true,
+    ["npc_helicopter"] = true,
+    ["npc_combinedropship"] = true,
+    ["npc_combinegunship"] = true,
 }
 
 GAMETYPE.DefaultGlobalState =
