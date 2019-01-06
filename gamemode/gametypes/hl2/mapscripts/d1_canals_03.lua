@@ -64,13 +64,17 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2)
         end
 
+        -- Let him stay alive if no one kills him.
+        ents.RemoveByClass("trigger_once", Vector(378, 2620, -770))
+
         local matt
         ents.WaitForEntityByName("matt", function(ent)
             matt = ent
+            matt:SetHealth(100)
             matt.ImportantNPC = true
         end)
 
-        GAMEMODE:WaitForInput("matt", "giveweapon", function(ent)
+        GAMEMODE:WaitForInput("door_manhack_break_1p", "EnableMotion", function(ent)
             if IsValid(matt) then
                 matt.ImportantNPC = false -- Feel free to die now.
             end
