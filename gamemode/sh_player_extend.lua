@@ -103,7 +103,7 @@ if SERVER then
             return nil
         end
 
-        e:SetLocalPos(self:GetLocalPos())
+        e:SetPos(self:EyePos())
 
         local SF_NORESPAWN = 0x40000000
         e:AddSpawnFlags(SF_NORESPAWN)
