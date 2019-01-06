@@ -94,7 +94,7 @@ if SERVER then
 
             end
 
-            util.RunDelayed(triggerOutput, CurTime() + delay)
+            util.EnqueueOutput(triggerOutput, CurTime() + delay)
 
             if times > 0 and called >= times then
                 --DbgPrint("Removing output")
@@ -135,7 +135,7 @@ if SERVER then
             --times = outputs[k].Times
             --DbgPrint("Output: (Caller: " .. tostring(caller) .. ", " .. caller:GetName() .. ") -> (Target: " .. tostring(entname) .. ", Cmd: " .. cmd .. ", Delay:" .. tostring(delay) .. ", Param:" .. param .. ", Times: " .. tostring(times) .. ")")
 
-            util.RunDelayed(function()
+            util.EnqueueOutput(function()
 
                 local targetents
 
@@ -444,41 +444,41 @@ else -- CLIENT
 
 end
 
-local thinkCount = 0
-local funcQueue = {}
+local LAMBDA_CURRENT_TICK = 0
+local LAMBDA_FUNCTION_QUEUE = {}
 
 hook.Add("Think", "LambdaRunNextFrame", function()
 
-    for k,v in pairs(funcQueue) do
-        if v.thinkId == thinkCount then
+    local k = 1
+
+    while k <= #LAMBDA_FUNCTION_QUEUE do
+        local v = LAMBDA_FUNCTION_QUEUE[k]
+        if v.thinkId == LAMBDA_CURRENT_TICK then
             -- In case it was added before Think was called.
+            k = k + 1
             continue
         end
         if v.timestamp ~= nil and CurTime() < v.timestamp then
+            k = k + 1
             continue
         end
-        table.remove(funcQueue, k)
+        table.remove(LAMBDA_FUNCTION_QUEUE, k)
         v.func()
     end
 
-    thinkCount = thinkCount + 1
+    LAMBDA_CURRENT_TICK = LAMBDA_CURRENT_TICK + 1
 
 end)
-
-function util.ResetFunctionQueue()
-
-    funcQueue = {}
-
-end
 
 function util.RunNextFrame(func)
 
     local data =
     {
         func = func,
-        thinkId = thinkCount,
+        thinkId = LAMBDA_CURRENT_TICK,
+        output = false,
     }
-    table.insert(funcQueue, data)
+    table.insert(LAMBDA_FUNCTION_QUEUE, data)
 
 end
 
@@ -488,11 +488,45 @@ function util.RunDelayed(func, ts)
     {
         func = func,
         timestamp = ts,
-        thinkId = thinkCount,
+        thinkId = LAMBDA_CURRENT_TICK,
+        output = false,
     }
-    table.insert(funcQueue, data)
+    table.insert(LAMBDA_FUNCTION_QUEUE, data)
 
 end
+
+function util.ResetFunctionQueue()
+    LAMBDA_CURRENT_TICK = 0
+    LAMBDA_FUNCTION_QUEUE = {}
+end
+
+function util.EnqueueOutput(func, ts)
+
+    local data =
+    {
+        func = func,
+        thinkId = LAMBDA_CURRENT_TICK,
+        output = true,
+    }
+    if ts ~= nil then
+        data.timestamp = ts
+    end
+    table.insert(LAMBDA_FUNCTION_QUEUE, data)
+
+end
+
+function util.ResetOutputQueue()
+
+    -- Safely remove all elements
+    for i = #LAMBDA_FUNCTION_QUEUE, 1, -1 do
+        local v = LAMBDA_FUNCTION_QUEUE[i]
+        if v.output == true then
+            table.remove(LAMBDA_FUNCTION_QUEUE, i)
+        end
+    end
+
+end
+
 
 function util.RandomFloat(min, max)
 

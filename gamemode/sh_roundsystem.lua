@@ -362,7 +362,9 @@ end
 
 function GM:PreCleanupMap()
     DbgPrint("GM:PreCleanupMap")
+
     if SERVER then
+
         for _,v in pairs(player.GetAll()) do
             v:KillSilent()
         end
@@ -396,14 +398,21 @@ function GM:PreCleanupMap()
         self:ResetSceneCheck()
         self:ClearLevelDesignerPlacedObjects()
 
-        -- Reset all pending functions.
+        -- Reset all queued functions.
         util.ResetFunctionQueue()
+
     end
 end
 
 function GM:PostCleanupMap()
 
     DbgPrint("GM:PostCleanupMap")
+
+    -- Make sure there are no builtin outputs
+    RunConsoleCommand("ent_cancelpendingentfires")
+
+    -- Make sure no lambda outputs are created during restart.
+    util.ResetOutputQueue()
 
     if self:GetRoundState() ~= STATE_RESTARTING then
         return
