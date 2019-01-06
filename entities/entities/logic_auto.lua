@@ -51,33 +51,19 @@ function ENT:Think()
     end
 
     local loadType = ""
-    local mapScript = nil
     if GAMEMODE ~= nil then
         loadType = GAMEMODE:GetMapLoadType()
-        mapScript = GAMEMODE:GetMapScript()
     else
         loadType = game.MapLoadType()
     end
 
     if loadType == "transition" then
-        if mapScript ~= nil and mapScript.OnMapTransition ~= nil then
-            mapScript:OnMapTransition()
-        end
         self:FireOutputs("OnMapTransition", nil, nil)
     elseif loadType == "newgame" then
-        if mapScript ~= nil and mapScript.OnNewGame ~= nil then
-            mapScript:OnNewGame()
-        end
         self:FireOutputs("OnNewGame", nil, nil)
     elseif loadType == "loadgame" then
-        if mapScript ~= nil and mapScript.OnLoadGame ~= nil then
-            mapScript:OnLoadGame()
-        end
         self:FireOutputs("OnLoadGame", nil, nil)
     elseif loadType == "background" then
-        if mapScript ~= nil and mapScript.OnBackgroundMap ~= nil then
-            mapScript:OnBackgroundMap()
-        end
         self:FireOutputs("OnBackgroundMap", nil, nil)
     end
 
