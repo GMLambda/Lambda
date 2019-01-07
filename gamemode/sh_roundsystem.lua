@@ -560,6 +560,8 @@ function GM:PostRoundSetup()
         StartTime = self:GetRoundStartTime(),
     })
 
+    self:ResetPlayerRespawnQueue()
+
     DbgPrint("Spawning players")
     for _,v in pairs(player.GetAll()) do
         v.TransitionData = self:GetPlayerTransitionData(v)

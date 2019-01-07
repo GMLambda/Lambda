@@ -4,7 +4,6 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-
 GAMETYPE.Name = "Half-Life 2 Deathmatch"
 GAMETYPE.BaseGameType = "lambda_base"
 GAMETYPE.MapScript = {}
@@ -13,98 +12,66 @@ GAMETYPE.PlayerSpawnClass = "info_player_deathmatch"
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
 GAMETYPE.Settings = {}
-
-GAMETYPE.MapList =
-{
-    "dm_lockdown",
-    "dm_overwatch",
-    "dm_steamlab",
-    "dm_underpass",
-    "dm_resistance",
-    "dm_powerhouse",
-    "dm_runoff",
-    "halls3"
-}
-
-GAMETYPE.ClassesEnemyNPC =
-{
-}
-
-GAMETYPE.ImportantPlayerNPCNames =
-{
-}
-
-GAMETYPE.ImportantPlayerNPCClasses =
-{
-}
+GAMETYPE.MapList = {"dm_lockdown", "dm_overwatch", "dm_steamlab", "dm_underpass", "dm_resistance", "dm_powerhouse", "dm_runoff", "halls3"}
+GAMETYPE.ClassesEnemyNPC = {}
+GAMETYPE.ImportantPlayerNPCNames = {}
+GAMETYPE.ImportantPlayerNPCClasses = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
-
     local timeout = 2
-    return timeout
 
+    return timeout
 end
 
 function GAMETYPE:IsTeamOnly()
-
-
 end
 
 function GAMETYPE:GetFragLimit()
-
     return self.Settings["dm_fraglimit"].value
-
 end
 
 function GAMETYPE:GetTimeLimit()
-
     return self.Settings["dm_timelimit"].value * 60
-
 end
 
 function GAMETYPE:GetAllFrags()
     local f = 0
+
     for k, v in pairs(player.GetAll()) do
         f = f + v:Frags()
     end
+
     return f
 end
 
 function GAMETYPE:ShouldRestartRound(roundTime)
-
     return false
-
 end
 
 function GAMETYPE:ShouldEndRound(roundTime)
-
-    if roundTime >= self:GetTimeLimit() then 
-        return true 
-    end 
+    if roundTime >= self:GetTimeLimit() then return true end
 
     for _, ply in pairs(player.GetAll()) do
-        if ply:Frags() >= self:GetFragLimit() then
-            return true
-        end
+        if ply:Frags() >= self:GetFragLimit() then return true end
     end
 
     return false
-
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
-    ply:AddDeaths( 1 )
+    ply:AddDeaths(1)
 
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
+
         return
     end
 
     if IsValid(attacker) and attacker:IsPlayer() then
-        attacker:AddFrags( 1 )
+        attacker:AddFrags(1)
     elseif IsValid(inflictor) and inflictor:IsPlayer() then
-        inflictor:AddFrags( 1 )
+        inflictor:AddFrags(1)
     end
 end
 
@@ -115,20 +82,13 @@ end
 
 function GAMETYPE:GetPlayerLoadout()
     return {
-        Weapons =
-        {
-            "weapon_crowbar",
-            "weapon_physcannon",
-            "weapon_smg1",
-            "weapon_pistol",
-        },
-        Ammo =
-        {
+        Weapons = {"weapon_crowbar", "weapon_physcannon", "weapon_smg1", "weapon_pistol"},
+        Ammo = {
             ["Pistol"] = 20,
-            ["SMG1"] = 60,
+            ["SMG1"] = 60
         },
         Armor = 0,
-        HEV = true,
+        HEV = true
     }
 end
 
@@ -144,17 +104,15 @@ end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
     local SF_NORESPAWN = 1073741824 -- (1 << 30)
-    if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then
-        return false
-    end
+    if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then return false end
+
     return true
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
     local SF_NORESPAWN = 1073741824 -- (1 << 30)
-    if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then
-        return false
-    end
+    if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then return false end
+
     return true
 end
 
@@ -168,15 +126,16 @@ end
 
 function GAMETYPE:CanPlayerSpawn(ply, spawn)
     local pos = spawn:GetPos()
-    local tr = util.TraceHull(
-    {
+
+    local tr = util.TraceHull({
         start = pos,
         endpos = pos + Vector(0, 0, 1),
         mins = HULL_HUMAN_MINS,
         maxs = HULL_HUMAN_MAXS,
         mask = MASK_SOLID,
-        filter = ply,
+        filter = ply
     })
+
     return tr.Fraction == 1.0
 end
 
@@ -194,31 +153,66 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 end
 
 function GAMETYPE:InitSettings()
-
     self.Base.InitSettings(self)
 
-    self:AddSetting("dm_fraglimit",{Category = "SERVER", NiceName = "#GM_DM_FRAGLIMIT", value_type = "int", value = 50, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1000, info = "Frag limit" })
-    self:AddSetting("dm_timelimit",{Category = "SERVER", NiceName = "#GM_DM_TIMELIMIT", value_type = "int", value = 10, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 30, info = "Time limit" })
-    self:AddSetting("dm_teamonly",{Category = "SERVER", NiceName = "#GM_DM_TEAMONLY", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Team based" })
+    GAMEMODE:AddSetting("dm_fraglimit", {
+        Category = "SERVER",
+        NiceName = "#GM_DM_FRAGLIMIT",
+        Type = "int",
+        Value = 50,
+        flags = bit.bor(0, FCVAR_REPLICATED),
+        maxv = 1000,
+        info = "Frag limit"
+    })
 
-    -- manually exclude difficulty for now
-    self.Settings["difficulty"].Category = "HIDDEN"
+    GAMEMODE:AddSetting("dm_timelimit", {
+        Category = "SERVER",
+        NiceName = "#GM_DM_TIMELIMIT",
+        Type = "int",
+        Value = 10,
+        flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        maxv = 30,
+        info = "Time limit"
+    })
+
+    GAMEMODE:AddSetting("dm_teamonly", {
+        Category = "SERVER",
+        NiceName = "#GM_DM_TEAMONLY",
+        Type = "bool",
+        Value = 0,
+        flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        maxv = 1,
+        info = "Team based"
+    })
+
 end
 
 function GAMETYPE:GetScoreboardInfo()
     local timeElapsed = GAMEMODE:RoundElapsedTime()
     local timeLimit = self:GetTimeLimit()
     local timeLeft = timeLimit - timeElapsed
-    if timeLeft < 0 then 
+
+    if timeLeft < 0 then
         timeLeft = 0
     end
+
     local fragsleft = self:GetFragLimit() - self:GetAllFrags()
-    local scoreboardInfo = 
-    {
-        { name = "LAMBDA_Map", value = game.GetMap() },
-        { name = "LAMBDA_Timeleft", value = string.NiceTime(timeLeft) },
-        { name = "LAMBDA_Frags", value = fragsleft },
+
+    local scoreboardInfo = {
+        {
+            name = "LAMBDA_Map",
+            value = game.GetMap()
+        },
+        {
+            name = "LAMBDA_Timeleft",
+            value = string.NiceTime(timeLeft)
+        },
+        {
+            name = "LAMBDA_Frags",
+            value = fragsleft
+        }
     }
+
     return scoreboardInfo
 end
 
@@ -228,12 +222,10 @@ end)
 
 if CLIENT then
     language.Add("hl2_AmmoFull", "FULL")
-
     language.Add("HL2_GameOver_Object", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PRESERVE MISSION-CRITICAL RESOURCES")
     language.Add("HL2_GameOver_Ally", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PRESERVE MISSION-CRITICAL PERSONNEL")
     language.Add("HL2_GameOver_Timer", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PREVENT TIME-CRITICAL SEQUENCE")
     language.Add("HL2_GameOver_Stuck", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: DEMONSTRATION OF EXCEEDINGLY POOR JUDGMENT")
-
     language.Add("HL2_357Handgun", ".357 MAGNUM")
     language.Add("HL2_Pulse_Rifle", "PULSE-RIFLE")
     language.Add("HL2_Bugbait", "BUGBAIT")
@@ -245,7 +237,6 @@ if CLIENT then
     language.Add("HL2_RPG", "RPG")
     language.Add("HL2_Shotgun", "SHOTGUN")
     language.Add("HL2_SMG1", "SMG")
-
     language.Add("World", "Cruel World")
     language.Add("base_ai", "Creature")
 end

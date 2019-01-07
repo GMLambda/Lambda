@@ -1,127 +1,125 @@
 local PANEL = {}
 local colWHITE = Color(255, 255, 255, 195)
-
 Derma_Install_Convar_Functions(PANEL)
 
 function PANEL:Init()
 
-	self.Settings = GAMEMODE:GetGameTypeData("Settings") or {}
+	self.Settings = {}
+
+	local availableSettings = GAMEMODE:GetSettingsTable() or {}
+
 	local y, x, n = 5, 5, 0
 
-	for k, v in pairs(self.Settings) do
-		if v.value_type == "int" or v.value_type == "float" and v.Category == "SERVER" then
+	for k, v in pairs(availableSettings) do
+		if v.Type == "int" or v.Type == "float" and v.Category == "SERVER" then
 			self:AddIntOption(x, y, k, v)
 			y = y + 25
 			n = n + 1
 		end
 	end
+
 	local _y = (25 * n) + 10
-	for k, v in pairs(self.Settings) do
-		if v.value_type == "bool" and v.Category == "SERVER" then
+
+	for k, v in pairs(availableSettings) do
+		if v.Type == "bool" and v.Category == "SERVER" then
 			self:AddCheckOption(x, _y, k, v)
 			_y = _y + 20
 			n = n + 1
 		end
 	end
-	for k, v in pairs(self.Settings) do
-		if v.value_type == "string"  and v.extra.value_type == "combo" and v.Category == "SERVER" then
+
+	for k, v in pairs(availableSettings) do
+		if v.Extra ~= nil and v.Extra.Type == "combo" and v.Category == "SERVER" then
 			self:AddComboOption(x, _y, k, v)
 			_y = _y + 20
 		end
 	end
-
 end
 
 function PANEL:OnClose()
 	self.Settings = {}
 end
 
-function PANEL:AddIntOption(x, y, id, tbl)
-
+function PANEL:AddIntOption(x, y, id, setting)
 	local w, h = 40, 20
-	self.Settings[id].numw = self:Add("DNumberWang")
-	self.Settings[id].numw:SetPos(x, 5 + y)
-	self.Settings[id].numw:SetSize(w, h)
-	self.Settings[id].numw:SetCursorColor(colWHITE)
-	self.Settings[id].numw:SetMinMax(-1, tbl.maxv)
-	self.Settings[id].numw:SetVisible(true)
 
-	if tbl.value == -1 then Disable(true,id) end
-	self.Settings[id].numw:SetValue(tbl.value)
+	local pnl = self:Add("DNumberWang")
+	pnl:SetPos(x, 5 + y)
+	pnl:SetSize(w, h)
+	pnl:SetCursorColor(colWHITE)
 
-	self.Settings[id].numw.lbl = self:Add("DLabel")
-	self.Settings[id].numw.lbl:SetPos(w + 10, y + 7)
-	self.Settings[id].numw.lbl:SetTextColor(colWHITE)
-	self.Settings[id].numw.lbl:SetText(tbl.info)
-	self.Settings[id].numw.lbl:SizeToContents()
-	self.Settings[id].numw.lbl:SetVisible(true)
-
-	local function Update(id, v)
-		self.Settings[id].value = tonumber(v)
-		if tbl.extra then
-			self.Settings[id].extra.cached = tonumber(v)
+	local minVal = 0
+	local maxValue = 0xFFFFFFFF
+	if setting.Clamp ~= nil then
+		if setting.Clamp.Min ~= nil then
+			minVal = setting.Clamp.Min
+		end
+		if setting.Clamp.Max ~= nil then
+			maxValue = setting.Clamp.Max
 		end
 	end
-	self.Settings[id].numw.OnValueChanged = function(self, v)
+	pnl:SetMinMax(minVal, maxValue)
+	pnl:SetVisible(true)
+
+	pnl:SetValue(setting:GetValue())
+	pnl.lbl = self:Add("DLabel")
+	pnl.lbl:SetPos(w + 10, y + 7)
+	pnl.lbl:SetTextColor(colWHITE)
+	pnl.lbl:SetText(setting.Description)
+	pnl.lbl:SizeToContents()
+	pnl.lbl:SetVisible(true)
+
+	pnl.OnValueChanged = function(self, v)
 		GAMEMODE:ChangeAdminConfiguration(id, v)
-		Update(id, v)
 	end
 
-	function Disable(b,v)
-		if v == nil then return end
-		if b then
-			self.Settings[v].numw:SetEnabled(false)
-			self.Settings[v].numw:SetEditable(false)
-			self.Settings[v].numw:SetValue(-1)
-		else
-			self.Settings[v].numw:SetEnabled(true)
-			self.Settings[v].numw:SetEditable(true)
-			self.Settings[v].numw:SetValue(20)
-		 end
-	end
+	self.Settings[id] = pnl
+
 end
 
-function PANEL:AddComboOption(x, y, id, tbl)
+function PANEL:AddComboOption(x, y, id, setting)
 
-	self.Settings[id].cb = self:Add("DComboBox")
-	self.Settings[id].cb:SetPos(x, y)
-	self.Settings[id].cb:SetTextColor(colWHITE)
-	self.Settings[id].cb:SetText(tbl.info)
-	self.Settings[id].cb:SetSize(100, 20)
-	self.Settings[id].cb:SetSortItems(false)
+	local pnl = self:Add("DComboBox")
+	pnl:SetPos(x, y)
+	pnl:SetTextColor(colWHITE)
+	pnl:SetText(setting.Description)
+	pnl:SetSize(100, 20)
+	pnl:SetSortItems(false)
+	pnl.lbl = self:Add("DLabel")
+	pnl.lbl:SetPos(110, y)
+	pnl.lbl:SetTextColor(colWHITE)
+	pnl.lbl:SetText(setting.Description)
 
-	self.Settings[id].cb.lbl = self:Add("DLabel")
-	self.Settings[id].cb.lbl:SetPos(110, y)
-	self.Settings[id].cb.lbl:SetTextColor(colWHITE)
-	self.Settings[id].cb.lbl:SetText(tbl.info)
-
-	for k, v in pairs(tbl.extra.options) do
-		self.Settings[id].cb:AddChoice(v, k, GAMEMODE:CallGameTypeFunc(tbl.extra.current) == k)
+	for k, v in pairs(setting.Extra.Choices) do
+		local isSelected = tostring(setting:GetValue()) == tostring(k)
+		pnl:AddChoice(v, k, isSelected)
 	end
 
-	self.Settings[id].cb.OnSelect = function(self, index, value, data)
+	pnl.OnSelect = function(self, index, value, data)
 		GAMEMODE:ChangeAdminConfiguration(id, data)
 	end
 
+	self.Settings[id] = pnl
+
 end
 
-function PANEL:AddCheckOption(x, y, id, tbl)
+function PANEL:AddCheckOption(x, y, id, setting)
+	local pnl = self:Add("DCheckBoxLabel")
+	pnl:SetPos(x, y)
+	pnl:SetText(setting.Description)
+	pnl:SizeToContents()
+	pnl:SetValue(setting:GetValue())
 
-	self.Settings[id].checkb = self:Add("DCheckBoxLabel")
-	self.Settings[id].checkb:SetPos(x, y)
-	self.Settings[id].checkb:SetText(tbl.info)
-	self.Settings[id].checkb:SizeToContents()
-	self.Settings[id].checkb:SetValue(tobool(tbl.value))
-
-
-	self.Settings[id].checkb.OnChange = function(self, val)
-		if val then val = "1" else val = "0" end
+	pnl.OnChange = function(self, val)
+		if val then
+			val = "1"
+		else
+			val = "0"
+		end
 		GAMEMODE:ChangeAdminConfiguration(id, val)
-		tbl.value = tonumber(val)
-		if tbl.fn ~= nil and isfunction(tbl.fn) then
-			Disable(tobool(val),tbl.fn(val))
-		end
-		end
+	end
 
+	self.Settings[id] = pnl
 end
+
 vgui.Register("LambdaAdminPanel", PANEL, "DScrollPanel")

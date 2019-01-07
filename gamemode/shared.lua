@@ -42,12 +42,12 @@ include("sh_spectate.lua")
 include("sh_playermodels.lua")
 include("sh_globalstate.lua")
 include("sh_userauth.lua")
+include("sh_settings.lua")
 include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
 include("sh_gibs.lua")
-
 --Disabled for now
 --include("sh_gibs.lua")
 
@@ -169,7 +169,7 @@ function GM:OnGamemodeLoaded()
 
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
-    self:CallGameTypeFunc("InitSettings")
+    self:InitSettings()
     self:MountRequiredContent()
 
 end
@@ -182,7 +182,7 @@ function GM:OnReloaded()
 
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
-    self:CallGameTypeFunc("InitSettings")
+    self:InitSettings()
 end
 
 function GM:MountRequiredContent()
@@ -232,6 +232,7 @@ function GM:Initialize()
 
     if SERVER then
         self:ResetSceneCheck()
+        self:ResetPlayerRespawnQueue()
         self:InitializeItemRespawn()
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
@@ -245,27 +246,6 @@ function GM:Initialize()
         self:TransferPlayers()
         self:InitializeResources()
     end
-end
-
-function GM:GetSetting(setting)
-    if not self:GetGameTypeData("Settings")[setting] then return false end
-    local res = self:GetGameTypeData("Settings")[setting]
-    if res.value_type == "int" then
-        return res.getCvar:GetInt()
-    end
-
-    if res.value_type == "bool" then
-        return res.getCvar:GetBool()
-    end
-
-    if res.value_type == "string" then
-        return res.getCvar:GetString()
-    end
-
-    if res.value_type == "float" then
-        return res.getCvar:GetFloat()
-    end
-
 end
 
 function GM:ResetSceneCheck()

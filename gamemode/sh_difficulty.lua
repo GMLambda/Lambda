@@ -4,207 +4,18 @@ end
 
 local DbgPrint = GetLogging("Difficulty")
 
-local DIFFICULTY_VERYEASY = 1
-local DIFFICULTY_EASY = 2
-local DIFFICULTY_NORMAL = 3
-local DIFFICULTY_HARD = 4
-local DIFFICULTY_VERYHARD = 5
-local DIFFICULTY_SURVIVOR = 6
-local DIFFICULTY_MAX = DIFFICULTY_SURVIVOR
-
 DMG_SCALE_PVN = 1
 DMG_SCALE_NVP = 2
 DMG_SCALE_PVP = 3
 DMG_SCALE_NVN = 4
 
-local DIFFICULTY_DATA =
+local PROFICIENCY_NAME =
 {
-    [DIFFICULTY_VERYEASY] = {
-        Proficiency = WEAPON_PROFICIENCY_POOR,
-        Skill = 1,
-        NPCSpawningScale = 0.0,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 2,
-            [DMG_SCALE_NVP] = 0.5,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
-    [DIFFICULTY_EASY] = {
-        Proficiency = WEAPON_PROFICIENCY_AVERAGE,
-        Skill = 1,
-        NPCSpawningScale = 0.2,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 1.5,
-            [DMG_SCALE_NVP] = 0.7,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
-    [DIFFICULTY_NORMAL] = {
-        Proficiency = WEAPON_PROFICIENCY_GOOD,
-        Skill = 2,
-        NPCSpawningScale = 0.3,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 1,
-            [DMG_SCALE_NVP] = 1,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
-    [DIFFICULTY_HARD] = {
-        Proficiency = WEAPON_PROFICIENCY_VERY_GOOD,
-        Skill = 2,
-        NPCSpawningScale = 0.7,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 1,
-            [DMG_SCALE_NVP] = 1,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
-    [DIFFICULTY_VERYHARD] = {
-        Proficiency = WEAPON_PROFICIENCY_PERFECT,
-        Skill = 3,
-        NPCSpawningScale = 1,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 1,
-            [DMG_SCALE_NVP] = 1,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
-    [DIFFICULTY_SURVIVOR] = {
-        Proficiency = WEAPON_PROFICIENCY_PERFECT,
-        Skill = 3,
-        NPCSpawningScale = 1,
-        DamageScale = {
-            [DMG_SCALE_PVN] = 2,
-            [DMG_SCALE_NVP] = 15,
-            [DMG_SCALE_PVP] = 1,
-            [DMG_SCALE_NVN] = 1,
-        },
-        HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 5,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-        HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 5,
-            [HITGROUP_CHEST] = 1,
-            [HITGROUP_STOMACH] = 1,
-            [HITGROUP_LEFTARM] = 1,
-            [HITGROUP_RIGHTARM] = 1,
-            [HITGROUP_LEFTLEG] = 1,
-            [HITGROUP_RIGHTLEG] = 1,
-        },
-    },
+    [WEAPON_PROFICIENCY_POOR] = "Poor",
+    [WEAPON_PROFICIENCY_AVERAGE] = "Average",
+    [WEAPON_PROFICIENCY_GOOD] = "Good",
+    [WEAPON_PROFICIENCY_VERY_GOOD] = "Very Good",
+    [WEAPON_PROFICIENCY_PERFECT] = "Perfect",
 }
 
 cvars.AddChangeCallback("lambda_difficulty", function(cvar, oldVal, newVal)
@@ -253,62 +64,39 @@ function GM:RegisterRoundWon()
 end
 
 function GM:GetDifficulty()
-
-    local difficulty = tonumber(self:GetSetting("difficulty"))
-    if difficulty > DIFFICULTY_MAX then
-        difficulty = DIFFICULTY_MAX
-    end
-    if difficulty < DIFFICULTY_VERYEASY then
-        difficulty = DIFFICULTY_VERYEASY
-    end
-    return difficulty
-
+    return self:GetSetting("difficulty")
 end
 
-local DIFFICULTY_NAME =
-{
-    [DIFFICULTY_VERYEASY] = "Very Easy",
-    [DIFFICULTY_EASY] = "Easy",
-    [DIFFICULTY_NORMAL] = "Normal",
-    [DIFFICULTY_HARD] = "Hard",
-    [DIFFICULTY_VERYHARD] = "Very Hard",
-    [DIFFICULTY_SURVIVOR] = "Survivor",
-}
-
-local PROFICIENCY_NAME =
-{
-    [WEAPON_PROFICIENCY_POOR] = "Poor",
-    [WEAPON_PROFICIENCY_AVERAGE] = "Average",
-    [WEAPON_PROFICIENCY_GOOD] = "Good",
-    [WEAPON_PROFICIENCY_VERY_GOOD] = "Very Good",
-    [WEAPON_PROFICIENCY_PERFECT] = "Perfect",
-}
-
-local DIFFICULTIES =
-{
-    [1] = DIFFICULTY_VERYEASY,
-    [2] = DIFFICULTY_EASY,
-    [3] = DIFFICULTY_NORMAL,
-    [4] = DIFFICULTY_HARD,
-    [5] = DIFFICULTY_VERYHARD,
-    [6] = DIFFICULTY_SURVIVOR,
-}
-
-function GM:GetDifficulties()
-    return table.Copy(DIFFICULTIES)
+function GM:GetDifficultyData()
+    local gameType = self:GetGameType()
+    return self:GetGameTypeData("DifficultyData")
 end
 
 function GM:GetDifficultyText(d)
     if d == nil then
         d = self:GetDifficulty()
     end
-    return DIFFICULTY_NAME[d]
+    local entries = self:GetDifficultyData()
+    local entry = entries[d]
+    if entry == nil then
+        error("Invalid difficulty parameter: " .. tostring(d))
+    end
+    return entry.Name
+end
+
+function GM:GetCurrentDifficultyData()
+    local difficulty = self:GetSetting("difficulty")
+    local entries = self:GetDifficultyData()
+    local entry = entries[difficulty]
+    if entry == nil then
+        error("Invalid difficulty selected")
+    end
+    return entry
 end
 
 function GM:GetDifficultyDamageScale(type)
 
-    local difficulty = self:GetDifficulty()
-    local data = DIFFICULTY_DATA[difficulty]
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -320,8 +108,7 @@ end
 
 function GM:GetDifficultyNPCHitgroupDamageScale(group)
 
-    local difficulty = self:GetDifficulty()
-    local data = DIFFICULTY_DATA[difficulty]
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -332,8 +119,8 @@ function GM:GetDifficultyNPCHitgroupDamageScale(group)
 end
 
 function GM:GetDifficultyWeaponProficiency()
-    local difficulty = self:GetDifficulty()
-    local data = DIFFICULTY_DATA[difficulty]
+
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -349,8 +136,7 @@ end
 
 function GM:GetDifficultyPlayerHitgroupDamageScale(group)
 
-    local difficulty = self:GetDifficulty()
-    local data = DIFFICULTY_DATA[difficulty]
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -362,8 +148,7 @@ end
 
 -- Returns the scale the game should base on player count.
 function GM:GetNPCSpawningScale()
-    local difficulty = self:GetDifficulty()
-    local data = DIFFICULTY_DATA[difficulty]
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -379,9 +164,9 @@ function GM:AdjustDifficulty()
     end
 
     local difficulty = self:GetDifficulty()
-    DbgPrint("Difficulty: " .. difficulty)
+    DbgPrint("Difficulty Adjustment: " .. difficulty)
 
-    local data = DIFFICULTY_DATA[difficulty]
+    local data = self:GetCurrentDifficultyData()
     if data == nil then
         error("Invalid difficulty selected")
         return
@@ -403,13 +188,13 @@ end
 function GM:AdjustNPCDifficulty(npc, data)
 
     if data == nil then
-        local difficulty = self:GetDifficulty()
-        data = DIFFICULTY_DATA[difficulty]
+        data = self:GetCurrentDifficultyData()
         if data == nil then
             error("Invalid difficulty selected")
             return
         end
     end
+
     DbgPrint("Adjusting NPC difficulty: " .. tostring(npc) .. ", Prof: " .. data.Proficiency)
     npc:SetCurrentWeaponProficiency(data.Proficiency)
 

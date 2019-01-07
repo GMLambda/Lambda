@@ -4,89 +4,15 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-
 GAMETYPE.Name = "Half-Life 2"
 GAMETYPE.BaseGameType = "lambda_base"
 GAMETYPE.MapScript = {}
 GAMETYPE.PlayerSpawnClass = "info_player_start"
 GAMETYPE.UsingCheckpoints = true
 GAMETYPE.WaitForPlayers = true
-GAMETYPE.MapList =
-{
-    "d1_trainstation_01",
-    "d1_trainstation_02",
-    "d1_trainstation_03",
-    "d1_trainstation_04",
-    "d1_trainstation_05",
-    "d1_trainstation_06",
-    "d1_canals_01",
-    "d1_canals_01a",
-    "d1_canals_02",
-    "d1_canals_03",
-    "d1_canals_05",
-    "d1_canals_06",
-    "d1_canals_07",
-    "d1_canals_08",
-    "d1_canals_09",
-    "d1_canals_10",
-    "d1_canals_11",
-    "d1_canals_12",
-    "d1_canals_13",
-    "d1_eli_01",
-    "d1_eli_02",
-    "d1_town_01",
-    "d1_town_01a",
-    "d1_town_02",
-    "d1_town_03",
-    "d1_town_02",
-    "d1_town_02a",
-    "d1_town_04",
-    "d1_town_05",
-    "d2_coast_01",
-    "d2_coast_03",
-    "d2_coast_04",
-    "d2_coast_05",
-    "d2_coast_07",
-    "d2_coast_08",
-    "d2_coast_07",
-    "d2_coast_09",
-    "d2_coast_10",
-    "d2_coast_11",
-    "d2_coast_12",
-    "d2_prison_01",
-    "d2_prison_02",
-    "d2_prison_03",
-    "d2_prison_04",
-    "d2_prison_05",
-    "d2_prison_06",
-    "d2_prison_07",
-    "d2_prison_08",
-    "d3_c17_01",
-    "d3_c17_02",
-    "d3_c17_03",
-    "d3_c17_04",
-    "d3_c17_05",
-    "d3_c17_06a",
-    "d3_c17_06b",
-    "d3_c17_07",
-    "d3_c17_08",
-    "d3_c17_09",
-    "d3_c17_10a",
-    "d3_c17_10b",
-    "d3_c17_11",
-    "d3_c17_12",
-    "d3_c17_12b",
-    "d3_c17_13",
-    "d3_citadel_01",
-    "d3_citadel_02",
-    "d3_citadel_03",
-    "d3_citadel_04",
-    "d3_citadel_05",
-    "d3_breen_01"
-}
+GAMETYPE.MapList = {"d1_trainstation_01", "d1_trainstation_02", "d1_trainstation_03", "d1_trainstation_04", "d1_trainstation_05", "d1_trainstation_06", "d1_canals_01", "d1_canals_01a", "d1_canals_02", "d1_canals_03", "d1_canals_05", "d1_canals_06", "d1_canals_07", "d1_canals_08", "d1_canals_09", "d1_canals_10", "d1_canals_11", "d1_canals_12", "d1_canals_13", "d1_eli_01", "d1_eli_02", "d1_town_01", "d1_town_01a", "d1_town_02", "d1_town_03", "d1_town_02", "d1_town_02a", "d1_town_04", "d1_town_05", "d2_coast_01", "d2_coast_03", "d2_coast_04", "d2_coast_05", "d2_coast_07", "d2_coast_08", "d2_coast_07", "d2_coast_09", "d2_coast_10", "d2_coast_11", "d2_coast_12", "d2_prison_01", "d2_prison_02", "d2_prison_03", "d2_prison_04", "d2_prison_05", "d2_prison_06", "d2_prison_07", "d2_prison_08", "d3_c17_01", "d3_c17_02", "d3_c17_03", "d3_c17_04", "d3_c17_05", "d3_c17_06a", "d3_c17_06b", "d3_c17_07", "d3_c17_08", "d3_c17_09", "d3_c17_10a", "d3_c17_10b", "d3_c17_11", "d3_c17_12", "d3_c17_12b", "d3_c17_13", "d3_citadel_01", "d3_citadel_02", "d3_citadel_03", "d3_citadel_04", "d3_citadel_05", "d3_breen_01"}
 
-GAMETYPE.ClassesEnemyNPC =
-{
+GAMETYPE.ClassesEnemyNPC = {
     ["npc_metropolice"] = true,
     ["npc_combine"] = true,
     ["npc_combine_s"] = true,
@@ -103,20 +29,18 @@ GAMETYPE.ClassesEnemyNPC =
     ["npc_clawscanner"] = true,
     ["npc_helicopter"] = true,
     ["npc_combinedropship"] = true,
-    ["npc_combinegunship"] = true,
+    ["npc_combinegunship"] = true
 }
 
-GAMETYPE.DefaultGlobalState =
-{
+GAMETYPE.DefaultGlobalState = {
     ["gordon_precriminal"] = GLOBAL_OFF,
     ["gordon_invulnerable"] = GLOBAL_OFF,
     ["antlion_allied"] = GLOBAL_OFF,
     ["super_phys_gun"] = GLOBAL_OFF,
-    ["friendly_encounter"] = GLOBAL_OFF,
+    ["friendly_encounter"] = GLOBAL_OFF
 }
 
-GAMETYPE.ImportantPlayerNPCClasses =
-{
+GAMETYPE.ImportantPlayerNPCClasses = {
     ["npc_alyx"] = true,
     ["npc_barney"] = true,
     ["npc_odessa"] = true,
@@ -125,81 +49,318 @@ GAMETYPE.ImportantPlayerNPCClasses =
     ["npc_eli"] = true,
     ["npc_mossman"] = true,
     ["npc_monk"] = true,
-    ["npc_breen"] = true,
+    ["npc_breen"] = true
 }
 
-GAMETYPE.CampaignNames =
-{
-    ["POINT INSERTION"] = {s = 1, e = 4},
-    ["A RED LETTER DAY"] = {s = 5, e = 6},
-    ["ROUTE KANAL"] = {s = 7, e = 11},
-    ["WATER HAZARD"] = {s = 12, e = 19},
-    ["BLACK MESA EAST"] = {s = 20, e = 21},
-    ["WE DON'T GO TO RAVENHOLM"] = {s = 22, e = 29},
-    ["HIGHWAY 17"] = {s = 30, e = 36},
-    ["SANDTRAPS"] = {s = 37, e = 41},
-    ["NOVA PROSPEKT"] = {s = 42, e = 45},
-    ["ENTANGLEMENT"] = {s = 46, e = 49},
-    ["ANTICITIZEN ONE"] = {s = 50, e = 57},
-    ["FOLLOW FREEMAN!"] = {s = 58, e = 64},
-    ["OUR BENEFACTORS"] = {s = 65, e = 69},
-    ["DARK ENERGY"] = {s = 70, e = 70},
+GAMETYPE.CampaignNames = {
+    ["POINT INSERTION"] = {
+        s = 1,
+        e = 4
+    },
+    ["A RED LETTER DAY"] = {
+        s = 5,
+        e = 6
+    },
+    ["ROUTE KANAL"] = {
+        s = 7,
+        e = 11
+    },
+    ["WATER HAZARD"] = {
+        s = 12,
+        e = 19
+    },
+    ["BLACK MESA EAST"] = {
+        s = 20,
+        e = 21
+    },
+    ["WE DON'T GO TO RAVENHOLM"] = {
+        s = 22,
+        e = 29
+    },
+    ["HIGHWAY 17"] = {
+        s = 30,
+        e = 36
+    },
+    ["SANDTRAPS"] = {
+        s = 37,
+        e = 41
+    },
+    ["NOVA PROSPEKT"] = {
+        s = 42,
+        e = 45
+    },
+    ["ENTANGLEMENT"] = {
+        s = 46,
+        e = 49
+    },
+    ["ANTICITIZEN ONE"] = {
+        s = 50,
+        e = 57
+    },
+    ["FOLLOW FREEMAN!"] = {
+        s = 58,
+        e = 64
+    },
+    ["OUR BENEFACTORS"] = {
+        s = 65,
+        e = 69
+    },
+    ["DARK ENERGY"] = {
+        s = 70,
+        e = 70
+    }
+}
+
+GAMETYPE.DifficultyData = {
+    [0] = {
+        Name = "Very Easy",
+        Proficiency = WEAPON_PROFICIENCY_POOR,
+        Skill = 1,
+        NPCSpawningScale = 0.0,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 2,
+            [DMG_SCALE_NVP] = 0.5,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+    [1] = {
+        Name = "Easy",
+        Proficiency = WEAPON_PROFICIENCY_AVERAGE,
+        Skill = 1,
+        NPCSpawningScale = 0.2,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 1.5,
+            [DMG_SCALE_NVP] = 0.7,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+    [2] = {
+        Name = "Normal",
+        Proficiency = WEAPON_PROFICIENCY_GOOD,
+        Skill = 2,
+        NPCSpawningScale = 0.3,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 1,
+            [DMG_SCALE_NVP] = 1,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 2,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 2,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+    [3] = {
+        Name = "Hard",
+        Proficiency = WEAPON_PROFICIENCY_VERY_GOOD,
+        Skill = 2,
+        NPCSpawningScale = 0.7,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 1,
+            [DMG_SCALE_NVP] = 1,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+    [4] = {
+        Name = "Very Hard",
+        Proficiency = WEAPON_PROFICIENCY_PERFECT,
+        Skill = 3,
+        NPCSpawningScale = 1,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 1,
+            [DMG_SCALE_NVP] = 1,
+            [DMG_SCALE_PVP] = 1,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 2,
+            [HITGROUP_STOMACH] = 2,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 2,
+            [HITGROUP_STOMACH] = 2,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+    [5] = {
+        Name = "Survivor",
+        Proficiency = WEAPON_PROFICIENCY_PERFECT,
+        Skill = 3,
+        NPCSpawningScale = 1,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 3,
+            [DMG_SCALE_NVP] = 3,
+            [DMG_SCALE_PVP] = 3,
+            [DMG_SCALE_NVN] = 3
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 3,
+            [HITGROUP_STOMACH] = 3,
+            [HITGROUP_LEFTARM] = 0.2,
+            [HITGROUP_RIGHTARM] = 0.2,
+            [HITGROUP_LEFTLEG] = 0.2,
+            [HITGROUP_RIGHTLEG] = 0.2
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 3,
+            [HITGROUP_CHEST] = 3,
+            [HITGROUP_STOMACH] = 3,
+            [HITGROUP_LEFTARM] = 0.2,
+            [HITGROUP_RIGHTARM] = 0.2,
+            [HITGROUP_LEFTLEG] = 0.2,
+            [HITGROUP_RIGHTLEG] = 0.2
+        }
+    }
 }
 
 GAMETYPE.Settings = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
-
     local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
+
     if total <= 0 then
         total = 1
     end
-    local timeoutAmount = math.Round(alive / total * timeout)
-    return timeoutAmount
 
+    local timeoutAmount = math.Round(alive / total * timeout)
+
+    return timeoutAmount
 end
 
 function GAMETYPE:ShouldRestartRound()
-
     local playerCount = 0
     local aliveCount = 0
 
     -- Collect how many players exist and how many are alive, in case they are all dead
     -- we have to restart the round.
-    for _,ply in pairs(player.GetAll()) do
+    for _, ply in pairs(player.GetAll()) do
         if ply:Alive() then
             aliveCount = aliveCount + 1
         end
+
         playerCount = playerCount + 1
     end
 
-    if playerCount > 0 and aliveCount == 0  then
+    if playerCount > 0 and aliveCount == 0 then
         DbgPrint("All players are dead, restart required")
+
         return true
     end
 
     return false
-
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
     local class = wep:GetClass()
+
     if class == "weapon_frag" then
-        if ply:HasWeapon(class) and ply:GetAmmoCount("grenade") >= sk_max_grenade:GetInt() then
-            return false
-        end
+        if ply:HasWeapon(class) and ply:GetAmmoCount("grenade") >= sk_max_grenade:GetInt() then return false end
     elseif class == "weapon_annabelle" then
         return false -- Not supposed to have this.
     end
+
     if ply:HasWeapon(wep:GetClass()) == true then
         -- Only allow a new pickup once if there is ammo in the weapon.
-        if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then
-            return false
-        end
+        if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -1 then return false end
+
         return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
     end
+
     return true
 end
 
@@ -216,37 +377,34 @@ function GAMETYPE:GetItemRespawnTime()
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-
-    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then
-        return false
-    end
+    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then return false end
 
     return true
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
-    ply:AddDeaths( 1 )
+    ply:AddDeaths(1)
 
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
+
         return
     end
 
     -- Friendly kill?
     if IsValid(attacker) and attacker:IsPlayer() then
-        attacker:AddFrags( -1 )
+        attacker:AddFrags(-1)
     elseif IsValid(inflictor) and inflictor:IsPlayer() then
-        inflictor:AddFrags( -1 )
+        inflictor:AddFrags(-1)
     end
 end
 
 function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
     local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
     -- Friendly fire is controlled by convar in this case.
-    if playerAttacking == true and GAMEMODE:GetSetting("friendlyfire") == false then
-        return false
-    end
+    if playerAttacking == true and GAMEMODE:GetSetting("friendlyfire") == false then return false end
+
     return true
 end
 
@@ -259,38 +417,21 @@ function GAMETYPE:ShouldRespawnItem(ent)
 end
 
 function GAMETYPE:PlayerSelectSpawn(spawns)
-    for k,v in pairs(spawns) do
-        if v.MasterSpawn == true then
-            return v
-        end
+    for k, v in pairs(spawns) do
+        if v.MasterSpawn == true then return v end
     end
-    for k,v in pairs(spawns) do
-        if v:HasSpawnFlags(1) == true then
-            return v
-        end
+
+    for k, v in pairs(spawns) do
+        if v:HasSpawnFlags(1) == true then return v end
     end
+
     return spawns[1]
 end
 
 function GAMETYPE:GetPlayerLoadout()
-    return self.MapScript.DefaultLoadout or
-    {
-        Weapons =
-        {
-            "weapon_crowbar",
-            "weapon_pistol",
-            "weapon_smg1",
-            "weapon_357",
-            "weapon_physcannon",
-            "weapon_frag",
-            "weapon_shotgun",
-            "weapon_ar2",
-            "weapon_rpg",
-            "weapon_crossbow",
-            "weapon_bugbait",
-        },
-        Ammo =
-        {
+    return self.MapScript.DefaultLoadout or {
+        Weapons = {"weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
+        Ammo = {
             ["Pistol"] = 20,
             ["SMG1"] = 45,
             ["357"] = 6,
@@ -299,10 +440,10 @@ function GAMETYPE:GetPlayerLoadout()
             ["AR2"] = 50,
             ["RPG_Round"] = 8,
             ["SMG1_Grenade"] = 3,
-            ["XBowBolt"] = 4,
+            ["XBowBolt"] = 4
         },
         Armor = 60,
-        HEV = true,
+        HEV = true
     }
 end
 
@@ -312,12 +453,10 @@ end
 
 local function GetFileContent(filepath, gamepath)
     local f = file.Open(filepath, "rb", gamepath)
-    if f == nil then
-        return nil
-    end
-
+    if f == nil then return nil end
     local data = f:Read(f:Size())
     f:Close()
+
     return data
 end
 
@@ -350,36 +489,67 @@ end
 
 function GAMETYPE:AllowPlayerTracking()
     self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
+
     return self.TrackerOption:GetBool()
 end
 
 function GAMETYPE:InitSettings()
+    self.Base.InitSettings(self)
 
-	self.Base.InitSettings(self)
+    GAMEMODE:AddSetting("dynamic_checkpoints", {
+        Category = "SERVER",
+        NiceName = "#GM_DYNCHECKPOINT",
+        Description = "Dynamic checkpoints",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
 
-	self:AddSetting("dynamic_checkpoints",{Category = "SERVER", NiceName = "#GM_DYNCHECKPOINT", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Dynamic checkpoints" })
-	self:AddSetting("allow_npcdmg",{Category = "SERVER", NiceName = "#GM_NPCDMG", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Friendly NPC damage" })
-	self:AddSetting("player_tracker",{Category = "SERVER", NiceName = "#GM_PLYTRACK", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1,info = "Player tracking" })
+    GAMEMODE:AddSetting("allow_npcdmg", {
+        Category = "SERVER",
+        NiceName = "#GM_NPCDMG",
+        Description = "Friendly NPC damage",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
 
+    GAMEMODE:AddSetting("player_tracker", {
+        Category = "SERVER",
+        NiceName = "#GM_PLYTRACK",
+        Description = "Player tracking",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
 end
 
 function GAMETYPE:GetCampaignName(map)
     local curMap = GAMEMODE:GetCurrentMap()
-    local n = GAMEMODE:GetMapIndex( GAMEMODE:GetPreviousMap(), curMap )
+    local n = GAMEMODE:GetMapIndex(GAMEMODE:GetPreviousMap(), curMap)
+
     for k, v in pairs(self.CampaignNames) do
         if n >= v.s and n <= v.e then return k end
     end
 end
 
 function GAMETYPE:GetScoreboardInfo()
-    local scoreboardInfo =
-    {
-        { name = "LAMBDA_Map", value = game.GetMap() },
+    local scoreboardInfo = {
+        {
+            name = "LAMBDA_Map",
+            value = game.GetMap()
+        }
     }
+
     local campaign = self:GetCampaignName(GAMEMODE:GetCurrentMap())
+
     if campaign ~= nil then
-        table.insert(scoreboardInfo, { name = "LAMBDA_Chapter", value = campaign } )
+        table.insert(scoreboardInfo, {
+            name = "LAMBDA_Chapter",
+            value = campaign
+        })
     end
+
     return scoreboardInfo
 end
 
@@ -403,14 +573,11 @@ if CLIENT then
     language.Add("HL2_Chapter12_Title", "OUR BENEFACTORS")
     language.Add("HL2_Chapter13_Title", "DARK ENERGY")
     language.Add("HL2_Chapter14_Title", "CREDITS")
-
     language.Add("hl2_AmmoFull", "FULL")
-
     language.Add("HL2_GameOver_Object", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PRESERVE MISSION-CRITICAL RESOURCES")
     language.Add("HL2_GameOver_Ally", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PRESERVE MISSION-CRITICAL PERSONNEL")
     language.Add("HL2_GameOver_Timer", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: FAILURE TO PREVENT TIME-CRITICAL SEQUENCE")
     language.Add("HL2_GameOver_Stuck", "ASSIGNMENT: TERMINATED\nSUBJECT: FREEMAN\nREASON: DEMONSTRATION OF EXCEEDINGLY POOR JUDGMENT")
-
     language.Add("HL2_357Handgun", ".357 MAGNUM")
     language.Add("HL2_Pulse_Rifle", "PULSE-RIFLE")
     language.Add("HL2_Bugbait", "BUGBAIT")
@@ -422,9 +589,7 @@ if CLIENT then
     language.Add("HL2_RPG", "RPG")
     language.Add("HL2_Shotgun", "SHOTGUN")
     language.Add("HL2_SMG1", "SMG")
-
     language.Add("HL2_Saved", "Saved...")
-
     language.Add("HL2_Credits_VoicesTitle", "Voices:")
     language.Add("HL2_Credits_Eli", "Robert Guillaume - Dr. Eli Vance")
     language.Add("HL2_Credits_Breen", "Robert Culp - Dr. Wallace Breen")
@@ -438,21 +603,16 @@ if CLIENT then
     language.Add("HL2_Credits_Misc1", "John Patrick Lowrie - Citizens\\Misc. characters")
     language.Add("HL2_Credits_Misc2", "Mary Kae Irvin - Citizens\\Misc. characters")
     language.Add("HL2_Credits_Overwatch", "Ellen McLain - Overwatch")
-
     language.Add("HL2_Credits_VoiceCastingTitle", "Voice Casting:")
     language.Add("HL2_Credits_VoiceCastingText", "Shana Landsburg\\Teri Fiddleman")
-
     language.Add("HL2_Credits_VoiceRecordingTitle", "Voice Recording:")
     language.Add("HL2_Credits_VoiceRecordingText1", "Pure Audio, Seattle, WA")
     language.Add("HL2_Credits_VoiceRecordingText2", "LA Studios, LA, CA")
-
     language.Add("HL2_Credits_VoiceSchedulingTitle", "Voice recording scheduling and logistics:")
     language.Add("HL2_Credits_VoiceSchedulingText", "Pat Cockburn, Pure Audio")
-
     language.Add("HL2_Credits_LegalTeam", "Crack Legal Team:")
     language.Add("HL2_Credits_FacesThanks", "Thanks to the following for the use of their faces:")
     language.Add("HL2_Credits_SpecialThanks", "Special thanks to everyone at:")
-
     language.Add("HL2_HIT_CANCOP_WITHCAN_NAME", "Defiant")
     language.Add("HL2_HIT_CANCOP_WITHCAN_DESC", "Hit the trashcan cop with the can.")
     language.Add("HL2_PUT_CANINTRASH_NAME", "Submissive")
@@ -521,7 +681,6 @@ if CLIENT then
     language.Add("HL2_BEAT_GAME_DESC", "Destroy the Citadel's reactor core.")
     language.Add("HL2_FIND_ALLLAMBDAS_NAME", "Lambda Locator")
     language.Add("HL2_FIND_ALLLAMBDAS_DESC", "Find all lambda caches in Half-Life 2.")
-
     language.Add("World", "Cruel World")
     language.Add("base_ai", "Creature")
 end

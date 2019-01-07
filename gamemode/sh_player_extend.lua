@@ -145,7 +145,15 @@ if SERVER then
         return e
     end
 
+    function PLAYER_META:SetSpawningBlocked(blocked)
+        self:SetNWBool("LambdaSpawnBlocked", blocked)
+    end
+
 end -- SERVER
+
+function PLAYER_META:IsSpawningBlocked()
+    return self:GetNWBool("LambdaSpawnBlocked", false)
+end
 
 function PLAYER_META:IsPositionLocked()
 

@@ -113,6 +113,7 @@ function GM:SetPlayerCheckpoint(checkpoint, gridData)
 
     if IsValid(checkpoint) and checkpoint:GetClass() == "lambda_checkpoint" then
         checkpoint:SetActivated()
+        self:ResetPlayerRespawnQueue()
     end
 
     return checkpoint
