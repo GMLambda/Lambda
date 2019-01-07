@@ -352,8 +352,8 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
             local targetPos = ply:EyePos()
             local targetAng = ply:EyeAngles()
 
-            self.CurrentViewPos = LerpVector(p, self.StartViewPos, targetPos)
-            self.CurrentViewAng = LerpAngle(p, self.StartViewAng, targetAng)
+            self.CurrentViewPos = LerpVector(p, self.StartViewPos or ply:GetPos(), targetPos)
+            self.CurrentViewAng = LerpAngle(p, self.StartViewAng or ply:EyeAngles(), targetAng)
         end
 
         view.origin = self.CurrentViewPos

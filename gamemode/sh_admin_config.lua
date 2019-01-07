@@ -14,17 +14,17 @@ if SERVER then
             DbgPrint("Player " .. tostring(ply) .. " attempted to change settings with invalid auth token.")
             return
         end
-        local registeredCvar = self:GetGameTypeData("Settings")[cvar]
-        if registeredCvar.getCvar == nil then
+        local registeredCvar = GAMEMODE:GetSettingData(cvar)
+        if registeredCvar.CVar == nil then
             DbgPrint("Attempted to access unregistered cvar: " .. tostring(cvar) .. ", player: " .. tostring(ply))
             return
         end
-        if registeredCvar.value_type == "int" or registeredCvar.value_type == "bool" or registeredCvar.value_type == "float" then
-            registeredCvar.getCvar:SetInt(val)
-            registeredCvar.value = tonumber(val)
+        if registeredCvar.Type == "int" or registeredCvar.Type == "bool" or registeredCvar.Type == "float" then
+            registeredCvar.CVar:SetInt(val)
+            registeredCvar.Value = tonumber(val)
         else
-            registeredCvar.getCvar:SetString(val)
-            registeredCvar.value = tostring(val)
+            registeredCvar.CVar:SetString(val)
+            registeredCvar.Value = tostring(val)
         end
     end
 

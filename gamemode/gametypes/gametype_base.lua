@@ -4,7 +4,6 @@ end
 
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
-
 GAMETYPE.Name = "Lambda Base"
 GAMETYPE.MapScript = {}
 GAMETYPE.PlayerSpawnClass = "info_player_start"
@@ -15,7 +14,19 @@ GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
-GAMETYPE.Settings = {}
+GAMETYPE.DifficultyData = {}
+
+function GAMETYPE:GetData(name)
+    local base = self
+
+    while base ~= nil do
+        local var = base[name]
+        if var ~= nil and isfunction(var) == false then return var end
+        base = base.Base
+    end
+
+    return nil
+end
 
 function GAMETYPE:GetPlayerRespawnTime()
     return 0
@@ -46,19 +57,20 @@ function GAMETYPE:ShouldRespawnWeapon(ent)
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
-    ply:AddDeaths( 1 )
+    ply:AddDeaths(1)
 
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
+
         return
     end
 
     -- Friendly kill?
     if IsValid(attacker) and attacker:IsPlayer() then
-        attacker:AddFrags( -1 )
+        attacker:AddFrags(-1)
     elseif IsValid(inflictor) and inflictor:IsPlayer() then
-        inflictor:AddFrags( -1 )
+        inflictor:AddFrags(-1)
     end
 end
 
@@ -81,8 +93,10 @@ end
 function GAMETYPE:LoadMapScript(path, name)
     local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/" .. path .. "/mapscripts/" .. name .. ".lua"
     self.MapScript = nil
+
     if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
         self.MapScript = include(MAPSCRIPT_FILE)
+
         if self.MapScript ~= nil then
             DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
         else
@@ -106,98 +120,171 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
     return false
 end
 
-function GAMETYPE:AddSetting(id, option, fn)
-
-    local function GetCVarValue(cvar)
-        if ConVarExists(cvar) then
-            if option.value_type == "int" or option.value_type == "bool" then
-                return GetConVar(cvar):GetInt()
-            elseif option.value_type == "float" then
-                return GetConVar(cvar):GetFloat()
-            else
-                return GetConVar(cvar):GetString()
-            end
-        else
-            return false
-        end
-    end
-
-    if CLIENT and bit.band(option.flags, FCVAR_REPLICATED) ~= 0 and bit.band(option.flags, FCVAR_ARCHIVE) ~= 0 then
-        DbgPrint("Removing FCVAR_ARCHIVE from " .. id)
-        flags = bit.band(option.flags, bit.bnot(FCVAR_ARCHIVE))
-    end
-
-    local value = option.value
-    local prefix = "lambda_"
-    local actualName = prefix .. id
-    local actualValue = ""
-
-    local storedVal = GetCVarValue(actualName)
-
-    if storedVal then
-        value = storedVal
-    end
-
-    if option.value_type == "int" or option.value_type == "float" or option.value_type == "bool" then
-        actualValue = tonumber(value)
-    end
-
-    if option.value_type == "string" then
-        actualValue = tostring(value)
-    end
-
-    local convar = CreateConVar(actualName, actualValue, option.flags, option.info)
-    self.Settings[id] = option
-    self.Settings[id].getCvar = convar
-    self.Settings[id].value = actualValue
-
-    if fn ~= nil and isfunction(fn) then
-        self.Settings[id].fn = fn
-    end
-
-    return convar
-
-end
-
-
 function GAMETYPE:InitSettings()
+    local difficulties = {}
 
-    local choices = {}
-    for k, v in pairs(self:GetDifficulties()) do
-        table.insert(choices, v)
+    for k, v in pairs(self.DifficultyData or {}) do
+        difficulties[k] = v.Name
     end
+
     --SERVER
-    self:AddSetting("walkspeed",{Category = "SERVER", NiceName = "#GM_WALKSPEED", value_type = "int", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
-    self:AddSetting("normspeed",{Category = "SERVER", NiceName = "#GM_NORMSPEED", value_type = "int", value = 190, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Walk speed" })
-    self:AddSetting("sprintspeed",{Category = "SERVER", NiceName = "#GM_SPRINTSPEED", value_type = "int", value = 320, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1000, info = "Sprint speed" })
-    self:AddSetting("connect_timeout",{Category = "SERVER", NiceName = "#GM_CONNECTTIMEOUT", value_type = "int", value = 120, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Timeout limit" })
-    self:AddSetting("playercollision",{Category = "SERVER", NiceName = "#GM_PLAYERCOLLISION", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Player collision" })
-    self:AddSetting("friendlyfire",{Category = "SERVER", NiceName = "#GM_FRIENDLYFIRE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Friendly fire" })
-    self:AddSetting("prevent_item_move",{Category = "SERVER", NiceName = "#GM_PREVENTITEMMOVE", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Prevent item moving" })
-    self:AddSetting("limit_default_ammo",{Category = "SERVER", NiceName = "#GM_DEFAMMO", value_type = "bool", value = 1, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Limit default ammo" })
-    self:AddSetting("allow_auto_jump",{Category = "SERVER", NiceName = "#GM_AUTOJUMP", value_type = "bool", value = 150, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "Auto jump" })
-    self:AddSetting("max_respawn_timeout",{Category = "SERVER", NiceName = "#GM_RESPAWNTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Respawn time" })
-    self:AddSetting("no_respawn",{Category = "SERVER", NiceName = "#GM_NORESPAWN", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 1, info = "No respawn"}, function(val) if val == "1" then val = -1 else val = 20 end GAMEMODE:ChangeAdminConfiguration("max_respawn_timeout", val) return "max_respawn_timeout" end)
-    self:AddSetting("map_restart_timeout",{Category = "SERVER", NiceName = "#GM_RESTARTTIME", value_type = "int", value = 20, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 300, info = "Restart time" })
-    self:AddSetting("map_change_timeout",{Category = "SERVER", NiceName = "#GM_MAPCHANGETIME", value_type = "int", value = 60, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 300, info = "Map change time" })
-    self:AddSetting("player_god",{Category = "SERVER", NiceName = "#GM_GODMODE", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 1, info = "Player god mode" })
-    self:AddSetting("pickup_delay",{Category = "SERVER", NiceName = "#GM_PICKUPDELAY", value_type = "float", value = 0.5, flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED ), maxv = 10, info = "Pickup delay" })
-    self:AddSetting("difficulty",{Category = "SERVER", NiceName = "#GM_DIFFICULTY", value_type = "string", value = "2", flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), maxv = 5, extra = {value_type = "combo", options = choices, current = "GetDifficulty"}, info = "Difficulty" })
-    self:AddSetting("difficulty_metrics",{Category = "DEVELOPER", NiceName = "#GM_DIFFMETRICS", value_type = "bool", value = 0, flags = bit.bor(0, FCVAR_REPLICATED), maxv = 1, info = "NPC/Player metrics" })
+    GAMEMODE:AddSetting("walkspeed", {
+        Category = "SERVER",
+        NiceName = "#GM_WALKSPEED",
+        Description = "Walk speed",
+        Type = "int",
+        Default = 150,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 1, Max = 1000 },
+    })
 
+    GAMEMODE:AddSetting("normspeed", {
+        Category = "SERVER",
+        NiceName = "#GM_NORMSPEED",
+        Description = "Run speed",
+        Type = "int",
+        Default = 190,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 1, Max = 1000 },
+    })
 
-end
+    GAMEMODE:AddSetting("sprintspeed", {
+        Category = "SERVER",
+        NiceName = "#GM_SPRINTSPEED",
+        Description = "Sprint speed",
+        Type = "int",
+        Default = 320,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 1, Max = 1000 },
+    })
 
-function GAMETYPE:GetDifficulties()
-    local tbl = {}
-    for k, v in pairs(GAMEMODE:GetDifficulties()) do
-        tbl[k] = GAMEMODE:GetDifficultyText(v)
-    end
-    return tbl
-end
+    GAMEMODE:AddSetting("connect_timeout", {
+        Category = "SERVER",
+        NiceName = "#GM_CONNECTTIMEOUT",
+        Description = "Timeout limit",
+        Type = "int",
+        Default = 120,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Max = 60 * 3 },
+    })
 
-function GAMETYPE:GetDifficulty()
-    return GAMEMODE:GetDifficulty()
+    GAMEMODE:AddSetting("playercollision", {
+        Category = "SERVER",
+        NiceName = "#GM_PLAYERCOLLISION",
+        Description = "Player collision",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("friendlyfire", {
+        Category = "SERVER",
+        NiceName = "#GM_FRIENDLYFIRE",
+        Description = "Friendly fire",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("prevent_item_move", {
+        Category = "SERVER",
+        NiceName = "#GM_PREVENTITEMMOVE",
+        Description = "Prevent item moving",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("limit_default_ammo", {
+        Category = "SERVER",
+        NiceName = "#GM_DEFAMMO",
+        Description = "Limit default ammo",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("allow_auto_jump", {
+        Category = "SERVER",
+        NiceName = "#GM_AUTOJUMP",
+        Description = "Auto jump",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("max_respawn_timeout", {
+        Category = "SERVER",
+        NiceName = "#GM_RESPAWNTIME",
+        Description = "Respawn time",
+        Type = "int",
+        Default = 20,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = -1, Max = 600 },
+    })
+
+    GAMEMODE:AddSetting("map_restart_timeout", {
+        Category = "SERVER",
+        NiceName = "#GM_RESTARTTIME",
+        Description = "Restart time",
+        Type = "int",
+        Default = 20,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 100 },
+    })
+
+    GAMEMODE:AddSetting("map_change_timeout", {
+        Category = "SERVER",
+        NiceName = "#GM_MAPCHANGETIME",
+        Description = "Map change time",
+        Type = "int",
+        Default = 60,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 100 },
+    })
+
+    GAMEMODE:AddSetting("player_god", {
+        Category = "SERVER",
+        NiceName = "#GM_GODMODE",
+        Description = "Player god mode",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("pickup_delay", {
+        Category = "SERVER",
+        NiceName = "#GM_PICKUPDELAY",
+        Description = "Pickup delay",
+        Type = "float",
+        Default = 0.5,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        maxv = 10,
+    })
+
+    GAMEMODE:AddSetting("difficulty_metrics", {
+        Category = "DEVELOPER",
+        NiceName = "#GM_DIFFMETRICS",
+        Description = "NPC/Player metrics",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_REPLICATED),
+        maxv = 1,
+    })
+
+    GAMEMODE:AddSetting("difficulty", {
+        Category = "SERVER",
+        NiceName = "#GM_DIFFICULTY",
+        Description = "Difficulty",
+        Type = "int",
+        Default = 2,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = difficulties,
+        },
+    })
+
 end
 
 function GAMETYPE:GetScoreboardInfo()

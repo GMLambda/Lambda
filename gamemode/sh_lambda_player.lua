@@ -66,6 +66,31 @@ if SERVER then
 
     end)
 
+    function GM:ResetPlayerRespawnQueue()
+        print("Reset respawn queue")
+        self.PlayerRespawnQueue = {}
+    end
+
+    function GM:AddPlayerToRespawnQueue(ply)
+        print("Adding " .. tostring(ply) .. " to respawn queue")
+        self.PlayerRespawnQueue[ply] = true
+    end
+
+    function GM:IsPlayerInRespawnQueue(ply)
+        if not IsValid(ply) or ply:Alive() == true then
+            return false
+        end
+        return self.PlayerRespawnQueue[ply] == true
+    end
+
+    function GM:RemovePlayerFromRespawnQueue(ply)
+        if not IsValid(ply) then
+            return
+        end
+        print("Removing " .. tostring(ply) .. " from respawn queue")
+        self.PlayerRespawnQueue[ply] = nil
+    end
+    
     function GM:CanPlayerSuicide(ply)
 
         if ply:Alive() == false then
@@ -81,6 +106,9 @@ if SERVER then
     end
 
     function GM:PlayerDisconnected(ply)
+
+        -- Remove from queue.
+        self:RemovePlayerFromRespawnQueue(ply)
 
         if ply.LambdaPlayerData then
             --PLAYER_ROLES_TAKEN[ply.LambdaPlayerData.Id] = nil
@@ -124,6 +152,7 @@ if SERVER then
         end
 
         self:AssignPlayerAuthToken(ply)
+        self:AddPlayerToRespawnQueue(ply)
 
         BaseClass.PlayerInitialSpawn( self, ply )
 
@@ -172,11 +201,19 @@ if SERVER then
     end
 
     function GM:CanPlayerSpawn(ply)
-        local gameType = self:GetGameType()
+
+        -- If the round has not yet started nobody can spawn.
         if self.WaitingForRoundStart == true then
             return false
         end
+
+        local gameType = self:GetGameType()
         if gameType.UsingCheckpoints == true then
+            -- Check if the player is waiting for the next checkpoint.
+            if self:IsPlayerInRespawnQueue(ply) == true then
+                return false
+            end
+
             -- Check if players reached a checkpoint.
             if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
                 return true
@@ -399,6 +436,8 @@ if SERVER then
         ply.IsCurrentlySpawning = true
         ply.DeathAcknowledged = false
 
+        -- If we managed to spawn somehow else.
+        self:RemovePlayerFromRespawnQueue(ply)
         self:PlayerSetModel(ply)
         self:InitializePlayerPickup(ply)
         self:InitializePlayerSpeech(ply)
@@ -751,15 +790,32 @@ if SERVER then
         local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
         ply.RespawnTime = ply.DeathTime + respawnTime
 
+        if respawnTime < 0 then
+            self:AddPlayerToRespawnQueue(ply)
+        end
+
         if self:IsRoundRestarting() == false and self:CallGameTypeFunc("ShouldRestartRound") == false then
-            DbgPrint("Notifying respawn")
-            self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
-            {
-                EntIndex = ply:EntIndex(),
-                Respawn = true,
-                StartTime = ply.DeathTime,
-                Timeout = respawnTime,
-            })
+            if self:CanPlayerSpawn(ply) == true then
+                DbgPrint("Notifying respawn")
+                self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
+                {
+                    EntIndex = ply:EntIndex(),
+                    Respawn = true,
+                    StartTime = ply.DeathTime,
+                    Timeout = respawnTime,
+                })
+            else
+                DbgPrint("Notifying spawn blocked")
+                self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
+                {
+                    EntIndex = ply:EntIndex(),
+                    Respawn = true,
+                    StartTime = ply.DeathTime,
+                    Timeout = 0,
+                    SpawnBlocked = true,
+                })
+                ply:SetSpawningBlocked(true)
+            end
         end
 
     end
@@ -782,12 +838,14 @@ if SERVER then
         end
 
         local timeout = self:CallGameTypeFunc("GetPlayerRespawnTime")
-        if timeout == -1 then
-            return false
+        if timeout >= 0 then
+            if GetSyncedTimestamp() < ply.RespawnTime then
+                return false
+            end
         end
 
         if self:CanPlayerSpawn(ply) == false then
-            if ply.SpawnBlocked ~= true then
+            if ply:IsSpawningBlocked() ~= true then
                 DbgPrint("Notifying spawn blocked")
                 self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
                 {
@@ -797,12 +855,14 @@ if SERVER then
                     Timeout = 0,
                     SpawnBlocked = true,
                 })
-                ply.SpawnBlocked = true
+                ply:SetSpawningBlocked(true)
             end
+            -- Can't spawn.
             return false
         end
 
-        if ply.SpawnBlocked == true then
+        -- If the player was previously blocked, notify.
+        if ply:IsSpawningBlocked() == true then
             DbgPrint("Notifying spawn free")
             self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN,
             {
@@ -812,9 +872,8 @@ if SERVER then
                 Timeout = 0,
                 SpawnBlocked = false,
             })
+            ply:SetSpawningBlocked(false)
         end
-
-        ply.SpawnBlocked = false
 
         if ply:KeyReleased(IN_JUMP) then
             ply:Spawn()
