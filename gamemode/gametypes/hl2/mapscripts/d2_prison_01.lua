@@ -64,6 +64,16 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        ents.WaitForEntityByName("tower_4_spawner", function(ent)
+            ent:Fire("ForceSpawn")
+            ent:SetName("lambda_tower_4_spawner")
+        end)
+
+        ents.WaitForEntityByName("fallback_spawner_1", function(ent)
+            ent:Fire("ForceSpawn")
+            ent:SetName("lambda_fallback_spawner_1")
+        end)
+
         -- Enable the changelevel trigger like it would normally.
         ents.WaitForEntityByName("changelevel_01-02", function(ent)
             ent:SetKeyValue("spawnflags", "1") -- Remove no-touch
