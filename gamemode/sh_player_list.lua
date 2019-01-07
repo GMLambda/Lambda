@@ -79,7 +79,6 @@ if SERVER then
 
         local playerData = self.Players[userid]
         if playerData == nil then
-            DbgError("ERROR: User never signaled a connect: " .. userid)
             return
         end
 
