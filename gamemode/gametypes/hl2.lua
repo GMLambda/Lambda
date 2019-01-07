@@ -281,7 +281,7 @@ GAMETYPE.DifficultyData = {
             [DMG_SCALE_PVN] = 3,
             [DMG_SCALE_NVP] = 3,
             [DMG_SCALE_PVP] = 3,
-            [DMG_SCALE_NVN] = 3
+            [DMG_SCALE_NVN] = 1
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
