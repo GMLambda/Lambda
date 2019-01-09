@@ -562,11 +562,12 @@ function GM:VehicleMove(ply, vehicle, mv)
 
     -- We have to call it here because PlayerTick wont be called if we are inside a vehicle.
     self:UpdateSuit(ply, mv)
+    self:PlayerWeaponTick(ply, mv)
 
     --
     -- On duck toggle third person view
     --
-    if  mv:KeyPressed( IN_DUCK ) and vehicle.SetThirdPersonMode  then
+    if mv:KeyPressed( IN_DUCK ) and vehicle.SetThirdPersonMode then
         vehicle:SetThirdPersonMode( not vehicle:GetThirdPersonMode() )
     end
 

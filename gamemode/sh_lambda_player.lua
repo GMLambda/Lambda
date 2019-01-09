@@ -1115,7 +1115,7 @@ end
 local GEIGER_DELAY = 0.25
 local GEIGER_SOUND_DELAY = 0.06
 
-function GM:UpdateGeigerCounter(ply, mv, ucmd)
+function GM:UpdateGeigerCounter(ply, mv)
 
     local curTime = CurTime()
 
@@ -1538,7 +1538,7 @@ function GM:ShouldChargeSuitPower(ply)
 
 end
 
-function GM:UpdateSuit(ply, mv, ucmd)
+function GM:UpdateSuit(ply, mv)
 
     if ply:IsSuitEquipped() == false then
         return
@@ -1582,7 +1582,7 @@ function GM:UpdateSuit(ply, mv, ucmd)
 
     end
 
-    self:UpdateGeigerCounter(ply, mv, ucmd)
+    self:UpdateGeigerCounter(ply, mv)
 
 end
 
@@ -1657,11 +1657,22 @@ function GM:PlayerCheckDrowning(ply)
 
 end
 
+function GM:PlayerWeaponTick(ply, mv, ucmd)
+
+    -- HACKHACK: Because Think is broken on SWEPS and only called when
+    --           the weapon is active we do this for the medkit.
+    for _,wep in pairs(ply:GetWeapons()) do
+        if wep.PredictedThink ~= nil then
+            wep:PredictedThink()
+        end
+    end
+
+end
+
 function GM:PlayerTick(ply, mv)
 
-    -- Predicted, must be called here.
-    local ucmd = ply:GetCurrentCommand()
-    self:UpdateSuit(ply, mv, ucmd)
+    self:UpdateSuit(ply, mv)
+    self:PlayerWeaponTick(ply, mv)
 
     if SERVER then
         self:LimitPlayerAmmo(ply)
@@ -1678,13 +1689,6 @@ function GM:PlayerTick(ply, mv)
         if ply:HasWeapon("weapon_slam") and ply:GetAmmoCount("slam") == 0 then
             ply:StripWeapon("weapon_frag")
         end
-    end
-
-    -- HACKHACK: Because Think is broken on SWEPS and only called when
-    --           the weapon is active we do this for the medkit.
-    local wep = ply:GetWeapon("weapon_lambda_medkit")
-    if wep ~= nil and IsValid(wep) and wep.PredictedThink ~= nil then
-        wep:PredictedThink()
     end
 
 end
