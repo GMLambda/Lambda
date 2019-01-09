@@ -61,7 +61,6 @@ function GM:ClientThink()
     end
 
     self:BulletsThink()
-    self:UpdateGibs()
 end
 
 local HL2_BOB_CYCLE_MAX = 0.40
