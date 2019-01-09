@@ -31,7 +31,7 @@ function PANEL:Init()
 	for k, v in pairs(availableSettings) do
 		if v.Extra ~= nil and v.Extra.Type == "combo" and v.Category == "SERVER" then
 			self:AddComboOption(x, _y, k, v)
-			_y = _y + 20
+			_y = _y + 25
 		end
 	end
 end
@@ -85,10 +85,12 @@ function PANEL:AddComboOption(x, y, id, setting)
 	pnl:SetText(setting.Description)
 	pnl:SetSize(100, 20)
 	pnl:SetSortItems(false)
+
 	pnl.lbl = self:Add("DLabel")
-	pnl.lbl:SetPos(110, y)
+	pnl.lbl:SetPos(110, y + 3)
 	pnl.lbl:SetTextColor(colWHITE)
 	pnl.lbl:SetText(setting.Description)
+	pnl.lbl:SizeToContents()
 
 	for k, v in pairs(setting.Extra.Choices) do
 		local isSelected = tostring(setting:GetValue()) == tostring(k)
