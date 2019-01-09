@@ -430,7 +430,7 @@ end
 
 function GAMETYPE:GetPlayerLoadout()
     return self.MapScript.DefaultLoadout or {
-        Weapons = {"weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
+        Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
         Ammo = {
             ["Pistol"] = 20,
             ["SMG1"] = 45,
