@@ -592,6 +592,15 @@ if SERVER then
             ply.TrackerEntity:AttachToPlayer(ply)
         end
 
+        if IsValid(ply:GetRagdollManager()) == false then
+            print("Creating ragdoll manager")
+            local mgr = ents.Create("lambda_ragdoll")
+            mgr:SetOwner(ply)
+            mgr:SetParent(ply)
+            mgr:Spawn()
+            ply:SetRagdollManager(mgr)
+        end
+
         ply.IsCurrentlySpawning = false
 
     end
@@ -714,18 +723,18 @@ if SERVER then
 
         local damgeDist = dmgInfo:GetDamagePosition():Distance(ply:GetPos())
         local enableGore = true
-
-        -- We always create the ragdoll, client decides what to do with it.
-        ply:CreateRagdoll()
+        local gibPlayer = false
+        local didExplode = false
+        local dmgForce = dmgInfo:GetDamageForce() * 0.1
 
         if enableGore == true then
-            local dmgForce = dmgInfo:GetDamageForce() * 0.1
             local damageForceLen = dmgForce:Length2D()
             print(damageForceLen, dmg)
 
             if dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
                 -- Exploded
-                self:GibPlayer(ply, dmgForce, true)
+                gibPlayer = true
+                didExplode = true
             elseif dmgInfo:IsDamageType(DMG_CRUSH) and IsValid(attacker) then
                 -- Crushed
                 local totalMass = 0
@@ -741,11 +750,16 @@ if SERVER then
                 end
                 local forceWithMass = totalMass * forceLen
                 if forceWithMass >= 150000 or totalMass >= 10000 then
-                    self:GibPlayer(ply, dmgForce, false)
+                    gibPlayer = true
                 end
             elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 100 then
-                self:GibPlayer(ply, dmgForce, false)
+                gibPlayer = true
             end
+        end
+
+        local ragdollMgr = ply:GetRagdollManager()
+        if IsValid(ragdollMgr) then
+            ragdollMgr:CreateRagdoll(dmgForce, gibPlayer, didExplode)
         end
 
         local inflictor = dmgInfo:GetInflictor()
@@ -1628,6 +1642,13 @@ function GM:PlayerTick(ply, mv)
         if ply:HasWeapon("weapon_slam") and ply:GetAmmoCount("slam") == 0 then
             ply:StripWeapon("weapon_frag")
         end
+    end
+
+    -- HACKHACK: Because Think is broken on SWEPS and only called when
+    --           the weapon is active we do this for the medkit.
+    local wep = ply:GetWeapon("weapon_lambda_medkit")
+    if wep ~= nil and IsValid(wep) and wep.PredictedThink ~= nil then
+        wep:PredictedThink()
     end
 
 end

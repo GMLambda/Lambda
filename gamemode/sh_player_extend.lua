@@ -149,7 +149,16 @@ if SERVER then
         self:SetNWBool("LambdaSpawnBlocked", blocked)
     end
 
+    function PLAYER_META:SetRagdollManager(rag)
+        self:SetNWEntity("LambdaRagdollManager", rag)
+    end
+    
+
 end -- SERVER
+
+function PLAYER_META:GetRagdollManager()
+    return self:GetNWEntity("LambdaRagdollManager")
+end
 
 function PLAYER_META:IsSpawningBlocked()
     return self:GetNWBool("LambdaSpawnBlocked", false)
