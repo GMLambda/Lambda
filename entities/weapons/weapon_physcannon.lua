@@ -401,6 +401,8 @@ function SWEP:PrimaryAttack()
         self:PrimaryFireEffect()
         self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 
+        owner:SetAnimation(PLAYER_ATTACK1)
+
         return
 
     end
@@ -542,6 +544,8 @@ function SWEP:SecondaryAttack()
     local controller = self:GetMotionController()
     --print(controller, controller:IsObjectAttached())
 
+    local owner = self:GetOwner()
+
     if controller:IsObjectAttached() == true --[[ self:GetNW2Bool("Holding") == true ]] then
 
         self:SetNextPrimaryFire(CurTime() + 0.5)
@@ -550,6 +554,8 @@ function SWEP:SecondaryAttack()
 
         self:DetachObject(false)
         self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
+        owner:SetAnimation(PLAYER_ATTACK1)
 
         return true
 
@@ -563,6 +569,7 @@ function SWEP:SecondaryAttack()
         if res == OBJECT_FOUND then
             self.Secondary.Automatic = false -- No longer automatic, debounce.
             self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+            owner:SetAnimation(PLAYER_ATTACK1)
             self:WeaponSound("Weapon_PhysCannon.Pickup")
             self:SetNextSecondaryFire(CurTime() + 0.5)
             self:SetNextPrimaryFire(CurTime() + 0.5)
@@ -910,6 +917,7 @@ function SWEP:FindObject()
             self:WeaponSound("Weapon_PhysCannon.TooHeavy")
             self.NextDenySoundTime = CurTime() + 0.9
             self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+            owner:SetAnimation(PLAYER_ATTACK1)
         end
         return OBJECT_NOT_FOUND
     end
@@ -1591,6 +1599,9 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
     self:PrimaryFireEffect()
     self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 
+    local owner = self:GetOwner()
+    owner:SetAnimation(PLAYER_ATTACK1)
+
     self.ElementDebounce = CurTime() + 0.5
     self.CheckSuppressTime = CurTime() + 0.25
     self.ChangeState = ELEMENT_STATE_CLOSED
@@ -1710,6 +1721,9 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
     self:PrimaryFireEffect()
     self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 
+    local owner = self:GetOwner()
+    owner:SetAnimation(PLAYER_ATTACK1)
+
     self.ChangeState = ELEMENT_STATE_CLOSED
     self.ElementDebounce = CurTime() + 0.5
     self.CheckSuppressTime = CurTime() + 0.25
@@ -1760,6 +1774,8 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
 
     self:PrimaryFireEffect()
     self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
+
+    owner:SetAnimation(PLAYER_ATTACK1)
 
     self.ChangeState = ELEMENT_STATE_CLOSED
     self.ElementDebounce = CurTime() + 0.5
