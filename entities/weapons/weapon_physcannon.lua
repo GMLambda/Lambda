@@ -171,6 +171,7 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Bool", 0, "ElementOpen")
     self:NetworkVar("Bool", 1, "MegaEnabled")
     self:NetworkVar("Float", 0, "ElementDestination")
+    self:NetworkVar("Float", 1, "NextIdleTime")
     self:NetworkVar("Entity", 0, "MotionController")
     self:NetworkVar("Vector", 0, "TargetOffset")
     self:NetworkVar("Angle", 0, "TargetAngle")
@@ -197,7 +198,7 @@ function SWEP:Initialize()
     self.ElementOpen = nil
     self.OldOpen = false
     self.UpdateName = true
-    self.NextIdleTime = CurTime()
+    self:SetNextIdleTime(CurTime())
     self.EffectsSetup = false
     self.ObjectAttached = false
     self.PullingObject = false
@@ -569,19 +570,22 @@ function SWEP:SecondaryAttack()
             self:OpenElements()
         elseif res == OBJECT_NOT_FOUND then
             self:SetNextSecondaryFire(CurTime() + 0.4)
+            self:SetNextPrimaryFire(CurTime() + 0.4)
             self.Secondary.Automatic = true
             self:CloseElements()
             self:DoEffect(EFFECT_READY)
-            self.NextIdleTime = CurTime() + 0.2
+            self:SetNextIdleTime(CurTime() + 0.2)
         elseif res == OBJECT_BEING_PULLED then
             self:SetNextSecondaryFire(CurTime() + 0.1)
+            self:SetNextPrimaryFire(CurTime() + 0.1)
             self.Secondary.Automatic = true
             self:OpenElementsHalf()
             self:DoEffect(EFFECT_PULLING)
-            self.NextIdleTime = CurTime() + 0.2
+            self:SetNextIdleTime(CurTime() + 0.2)
             self.ElementDebounce = CurTime() + 0.2
         elseif res == OBJECT_BEING_DETACHED then
             self:SetNextSecondaryFire(CurTime() + 0.01)
+            self:SetNextPrimaryFire(CurTime() + 0.4)
             self.Secondary.Automatic = true
             self:DoEffect(EFFECT_HOLDING)
         end
@@ -1089,42 +1093,6 @@ function SWEP:CloseElements()
 
 end
 
-function SWEP:Startup()
-    self:StartEffects()
-    self.ShouldDrawGlow = true
-    self:WeaponIdle()
-
-    if self:IsMegaPhysCannon() == true then
-        self:OpenElements()
-    else 
-        self:CloseElements()
-    end
-
-    if CLIENT then
-        self:UpdateEffects()
-    end 
-
-    self:DoEffect(EFFECT_READY)
-end 
-
-function SWEP:Equip()
-
-    DbgPrint("Equip")
-
-    self:Startup()
-
-end
-
-function SWEP:Deploy()
-
-    DbgPrint("Deploy")
-
-    self:Startup()
-
-    return true
-
-end
-
 function SWEP:WeaponIdle()
 
     local owner = self:GetOwner()
@@ -1143,15 +1111,15 @@ function SWEP:WeaponIdle()
         self:SetElementDestination(1)
     end
 
-    if self.NextIdleTime == -1 then
+    if self:GetNextIdleTime() == -1 then
         return
     end
 
-    if CurTime() < self.NextIdleTime then
+    if CurTime() < self:GetNextIdleTime() then
         return
     end
 
-    self.NextIdleTime = -1
+    self:SetNextIdleTime(-1)
     self.LastDenySoundPlayed = false
 
     if controller:IsObjectAttached() == true then
@@ -1464,7 +1432,7 @@ function SWEP:AttachObject(ent, tr)
 
     self:DoEffect(EFFECT_HOLDING)
     self:OpenElements()
-    self.NextIdleTime = CurTime() + 0.2
+    self:SetNextIdleTime(CurTime() + 0.2)
 
     local snd = self:GetMotorSound()
     if snd ~= nil and snd ~= NULL then
@@ -1547,7 +1515,7 @@ function SWEP:DetachObject(launched)
     end
 
     self:DoEffect(EFFECT_READY)
-    self.NextIdleTime = CurTime() + 0.2
+    self:SetNextIdleTime(CurTime() + 0.2)
 
     if launched ~= true and ent:GetClass() == "prop_combine_ball" and IsValid(phys) then
         -- If we just release it then it will be simply stuck mid air.
@@ -1566,7 +1534,7 @@ function SWEP:DryFire()
     self:EmitSound("Weapon_PhysCannon.DryFire")
 
     self:DoEffect(EFFECT_READY)
-    self.NextIdleTime = CurTime() + 0.2
+    self:SetNextIdleTime(CurTime() + 0.2)
 
 end
 
@@ -1616,7 +1584,7 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
 
         ent:DispatchTraceAttack(dmgInfo, tr, fwd)
         self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
-        self.NextIdleTime = CurTime() + 0.2
+        self:SetNextIdleTime(CurTime() + 0.2)
 
     end
 
@@ -1747,7 +1715,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
     self.CheckSuppressTime = CurTime() + 0.25
 
     self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
-    self.NextIdleTime = CurTime() + 0.2
+    self:SetNextIdleTime(CurTime() + 0.2)
 
     self:SetNextPrimaryFire(CurTime() + 0.5)
     self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -1798,7 +1766,7 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
     self.CheckSuppressTime = CurTime() + 0.25
 
     self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
-    self.NextIdleTime = CurTime() + 0.2
+    self:SetNextIdleTime(CurTime() + 0.2)
 
     self:SetNextPrimaryFire(CurTime() + 0.5)
     self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -2122,40 +2090,39 @@ function SWEP:Holster(ent)
     self:DetachObject()
     self.ShouldDrawGlow = false
 
+    self:SendWeaponAnim(ACT_VM_HOLSTER)
+
     return true
 end
 
 function SWEP:Startup()
     self:StartEffects()
     self.ShouldDrawGlow = true
-    self:WeaponIdle()
+
+    self:SendWeaponAnim(ACT_VM_DEPLOY)
+    self:SetNextIdleTime(CurTime() + 0.1)
 
     if self:IsMegaPhysCannon() == true then
         self:OpenElements()
-        self:SendWeaponAnim(ACT_VM_RELOAD)
-    else 
+    else
         self:CloseElements()
-        self:SendWeaponAnim(ACT_VM_IDLE)
     end
 
     if CLIENT then
         self:UpdateEffects()
-    end 
+    end
 
     self:DoEffect(EFFECT_READY)
-end 
+end
 
 function SWEP:Equip()
     DbgPrint("Equip")
-
     self:Startup()
 end
 
 function SWEP:Deploy()
     DbgPrint("Deploy")
-
     self:Startup()
-
     return true
 end
 
