@@ -664,13 +664,20 @@ if SERVER then
         end
 
         local weps = {}
-        for _,v in pairs(ply:GetWeapons()) do
-            weps[v] = true
-        end
+        local dropMode = self:GetSetting("weapondropmode")
+        if dropMode >= 1 then
+            -- Add active weapon.
+            local activeWep = ply:GetActiveWeapon()
+            if IsValid(activeWep) then
+                weps[activeWep] = true
+            end
 
-        local activeWep = ply:GetActiveWeapon()
-        if IsValid(activeWep) then
-            weps[activeWep] = true
+            -- Drop everything.
+            if dropMode >= 2 then
+                for _,v in pairs(ply:GetWeapons()) do
+                    weps[v] = true
+                end
+            end
         end
 
         ply.LastWeaponsDropped = {}

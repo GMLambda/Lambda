@@ -285,6 +285,19 @@ function GAMETYPE:InitSettings()
         },
     })
 
+    GAMEMODE:AddSetting("weapondropmode", {
+        Category = "SERVER",
+        NiceName = "#GM_WEAPONDROP",
+        Description = "Weapon Drop Mode",
+        Type = "int",
+        Default = 1,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = { [0] = "Nothing", [1] = "Active", [2] = "Everything" },
+        },
+    })
+
 end
 
 function GAMETYPE:GetScoreboardInfo()
