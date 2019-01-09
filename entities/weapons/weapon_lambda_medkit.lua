@@ -21,7 +21,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = true
 SWEP.Secondary.Ammo = "none"
 
-SWEP.HoldType = "physgun"
+SWEP.HoldType = "slam"
 SWEP.Weight = 5
 SWEP.AutoSwitchTo = false
 SWEP.AutoSwitchFrom = false
@@ -82,6 +82,7 @@ function SWEP:Initialize()
     DbgPrint(self, "Initialize")
 
     self:Precache()
+    self:SetHoldType(self.HoldType)
 
     self.AmmoID = game.GetAmmoID(self.Primary.Ammo)
 
@@ -219,6 +220,9 @@ function SWEP:PrimaryAttack()
 
     self:SetNextPrimaryFire(CurTime() + 1)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
+    local owner = self:GetOwner()
+    owner:SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:CanSecondaryAttack()
@@ -291,6 +295,22 @@ function SWEP:UpdateCharging()
     self:SetNextSecondaryFire(CurTime() + STEP_TIME)
 end
 
+local ZAP_SOUNDS =
+{
+    "weapons/stunstick/spark1.wav",
+    "weapons/stunstick/spark2.wav",
+    "weapons/stunstick/spark3.wav",
+}
+
+sound.Add({
+    name = "lambda_player_revive",
+    channel = CHAN_STATIC,
+    volume = 1,
+    level = 80,
+    pitch = { 95, 110 },
+    sound = "ambient/energy/electric_loop.wav",
+})
+
 function SWEP:ReleaseCharge()
     self:EmitSound("lambda/defibrillator_release.wav")
     self:SetState(STATE_IDLE)
@@ -298,14 +318,76 @@ function SWEP:ReleaseCharge()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:ConsumeEnergy(self:GetChargeEnergy())
     self:SetChargeEnergy(0.0)
+
+    local owner = self:GetOwner()
+    owner:SetAnimation(PLAYER_ATTACK1)
+
+    local ragdoll = self:GetActorForReviving()
+    if not IsValid(ragdoll) then
+        return
+    end
+
     if SERVER then
-        local ragdoll = self:GetActorForReviving()
-        if IsValid(ragdoll) then
-            local owner = ragdoll:GetOwner()
-            if IsValid(owner) then
-                owner:Revive(ragdoll:GetPos(), ragdoll:GetAngles(), 30)
+        local respawnTime = 2.5
+
+        ragdoll:Fire("StartRagdollBoogie")
+        ragdoll.NextZapTime = CurTime() + 0.1
+        ragdoll.RespawnTime = CurTime() + respawnTime
+
+        local respawnPos = ragdoll:GetPos()
+        local respawnAng = ragdoll:GetAngles()
+
+        -- We set the position of the player to the current ragdoll position.
+        local owner = ragdoll:GetOwner()
+        owner:SetPos(respawnPos)
+        owner:SetAngles(respawnAng)
+        owner:TeleportPlayer(respawnPos, respawnAng)
+
+        ragdoll:EmitSound("lambda_player_revive")
+
+        -- Now we interpolate the ragdoll towards the player.
+        hook.Add("Think", ragdoll, function(rag)
+
+            local owner = rag:GetOwner()
+            if not IsValid(owner) then
+                hook.Remove("Think", rag)
+                return
             end
-        end
+
+            local curTime = CurTime()
+            local left = ragdoll.RespawnTime - curTime
+            if left < 0 then
+                left = 0
+            end
+            local alpha = (left / respawnTime)
+            local invAlpha = 1 - alpha
+
+            for i = 0, rag:GetPhysicsObjectCount() - 1 do
+                local bone = rag:GetPhysicsObjectNum(i)
+                if IsValid(bone) then
+                    local boneId = rag:TranslatePhysBoneToBone(i)
+                    local bp, ba = owner:GetBonePosition(boneId)
+                    if bp and ba then
+                        local delta = bp - bone:GetPos()
+                        local randOffset = 200 * alpha
+                        delta = delta + (VectorRand() * randOffset)
+                        bone:SetVelocity( delta * (invAlpha * 2) )
+                    end
+                end
+            end
+
+            if CurTime() < rag.RespawnTime then
+                return
+            end
+
+            rag:StopSound("lambda_player_revive")
+
+            -- No longer need this hook.
+            hook.Remove("Think", rag)
+            owner:Revive(respawnPos, respawnAng, 30)
+
+        end)
+
     end
 end
 
