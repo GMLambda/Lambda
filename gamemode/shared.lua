@@ -47,9 +47,6 @@ include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
-include("sh_gibs.lua")
---Disabled for now
---include("sh_gibs.lua")
 
 include("sh_gametypes.lua")
 
@@ -430,8 +427,6 @@ function GM:OnEntityCreated(ent)
         if ent:IsVehicle() then
             self:HandleVehicleCreation(ent)
         end
-    else
-        -- Nothing for now.
     end
 
 end
