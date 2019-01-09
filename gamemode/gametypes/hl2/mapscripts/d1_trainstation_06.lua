@@ -6,7 +6,7 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = { "weapon_lambda_medkit" },
     Ammo = {},
     Armor = 30,
     HEV = true,

@@ -16,6 +16,7 @@ DEFAULT_MAPSCRIPT.DefaultLoadout =
 {
     Weapons =
     {
+        "weapon_lambda_medkit",
         "weapon_crowbar",
         "weapon_pistol",
         "weapon_smg1",
