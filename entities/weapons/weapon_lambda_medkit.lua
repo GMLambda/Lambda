@@ -327,6 +327,8 @@ function SWEP:ReleaseCharge()
         return
     end
 
+    local owner = ragdoll:GetOwner()
+
     if SERVER then
         local respawnTime = 2.5
 
@@ -338,7 +340,6 @@ function SWEP:ReleaseCharge()
         local respawnAng = ragdoll:GetAngles()
 
         -- We set the position of the player to the current ragdoll position.
-        local owner = ragdoll:GetOwner()
         owner:SetPos(respawnPos)
         owner:SetAngles(respawnAng)
         owner:TeleportPlayer(respawnPos, respawnAng)
@@ -387,7 +388,6 @@ function SWEP:ReleaseCharge()
             owner:Revive(respawnPos, respawnAng, 30)
 
         end)
-
     end
 end
 

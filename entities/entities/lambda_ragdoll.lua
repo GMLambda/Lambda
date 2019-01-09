@@ -194,6 +194,7 @@ function ENT:Think()
     if CLIENT then
         local ragdoll = self:GetRagdoll()
         if IsValid(ragdoll) and ragdoll.GetPlayerColor == nil then
+            ragdoll:SnatchModelInstance(ragdoll:GetOwner())
             ragdoll.GetPlayerColor = function(s)
                 local ownerEnt = s:GetOwner()
                 if IsValid(ownerEnt) and ownerEnt.GetPlayerColor ~= nil then
