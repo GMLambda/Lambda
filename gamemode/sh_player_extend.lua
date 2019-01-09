@@ -152,7 +152,10 @@ if SERVER then
     function PLAYER_META:SetRagdollManager(rag)
         self:SetNWEntity("LambdaRagdollManager", rag)
     end
-    
+
+    function PLAYER_META:Revive(pos, ang, health)
+        GAMEMODE:RevivePlayer(self, pos, ang, health)
+    end
 
 end -- SERVER
 

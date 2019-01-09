@@ -124,12 +124,7 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
         return
     end
 
-    local ragdoll = self:GetRagdoll()
-    if IsValid(ragdoll) then
-        ragdoll:Remove()
-    end
-
-    self:SetRagdoll(NULL)
+    self:RemoveRagdoll()
 
     if gibPlayer == true then
         return self:GibPlayer(dmgForce, gibPlayer, didExplode)
@@ -147,14 +142,18 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     ragdoll:SetOwner(self:GetOwner())
     ragdoll:Spawn()
     ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+    --ragdoll:SetSolidFlags(FSOLID_USE_TRIGGER_BOUNDS)
     ragdoll.GetPlayerColor = function(s)
         if IsValid(owner) and owner.GetPlayerColor ~= nil then
             return owner:GetPlayerColor()
         end
     end
     ragdoll:CallOnRemove("OnLambdaRagdollRemove", function()
+        -- Only used for when something external deletes the ragdoll.
         if IsValid(self) then
-            self:SetRagdoll(NULL)
+            if self:GetRagdoll() == ragdoll then
+                self:SetRagdoll(NULL)
+            end
         end
     end)
 
@@ -173,6 +172,17 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     end
 
     self:SetRagdoll(ragdoll)
+
+end
+
+function ENT:RemoveRagdoll()
+
+    local ragdoll = self:GetRagdoll()
+    if IsValid(ragdoll) then
+        print("Removing previous ragdoll")
+        ragdoll:Remove()
+        self:SetRagdoll(NULL)
+    end
 
 end
 
