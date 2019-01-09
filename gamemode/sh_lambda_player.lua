@@ -421,6 +421,20 @@ if SERVER then
 
     end
 
+    function GM:RevivePlayer(ply, pos, ang, health)
+
+        pos = pos or ply:GetPos()
+        ang = ang or ply:GetAngles()
+
+        ply.Reviving = true
+        ply:Spawn()
+        ply.Reviving = false
+
+        ply:SetHealth(health)
+        ply:TeleportPlayer(pos, ang)
+
+    end
+
     function GM:PlayerSpawn(ply)
 
         DbgPrint("GM:PlayerSpawn")
@@ -430,7 +444,19 @@ if SERVER then
             return
         end
 
+        if self.TeamBased and ( ply:Team() == TEAM_SPECTATOR or ply:Team() == TEAM_UNASSIGNED ) then
+            self:PlayerSpawnAsSpectator( ply )
+            return
+        end
+
+        print("PlayerSpawn Start")
+
+        -- Stop observer mode
+        ply:UnSpectate()
+        ply:SetupHands()
+
         ply:EndSpectator()
+
         ply.SpawnBlocked = false
         ply.LambdaSpawnTime = CurTime()
         ply.IsCurrentlySpawning = true
@@ -448,22 +474,20 @@ if SERVER then
         self:UpdateQueuedVehicleCheckpoints()
 
         -- Lets remove whatever the player left on vehicles behind before he got killed.
-        self:RemovePlayerVehicles(ply)
+        if ply.Reviving ~= true then
+            self:RemovePlayerVehicles(ply)
+            -- Should we really do this?
+            ply.WeaponDuplication = {}
+            ply:StripAmmo()
+            ply:StripWeapons()
+            ply:SetTeam(LAMBDA_TEAM_ALIVE)
+            ply:RemoveSuit()
 
-        -- Should we really do this?
-        ply.WeaponDuplication = {}
-        ply:StripAmmo()
-        ply:StripWeapons()
-        ply:SetupHands()
-        ply:SetTeam(LAMBDA_TEAM_ALIVE)
+            hook.Call( "PlayerLoadout", GAMEMODE, ply )
+            hook.Call( "PlayerSetModel", GAMEMODE, ply )
+        end
+
         ply:SetCustomCollisionCheck(true)
-        ply:RemoveSuit()
-
-        -- We call this first in order to call PlayerLoadout, once we enter a vehicle we can not
-        -- get any weapons.
-        BaseClass.PlayerSpawn(self, ply)
-
-        DbgPrint("Base finished")
 
         if self.MapScript.PrePlayerSpawn ~= nil then
             self.MapScript:PrePlayerSpawn(ply)
@@ -476,10 +500,11 @@ if SERVER then
         ply:SetSprinting(false)
         ply:SetDuckSpeed(0.4)
         ply:SetUnDuckSpeed(0.2)
+
         if ply:IsBot() == false then
             ply:SetInactive(true)
+            ply:DisablePlayerCollide(true)
         end
-        ply:DisablePlayerCollide(true)
 
         -- Bloody fucking hell.
         ply:SetSaveValue("m_bPreventWeaponPickup", false)
@@ -494,95 +519,97 @@ if SERVER then
             ply:SetWeaponColor(Vector(r, g, b))
         end
 
-        local transitionData = ply.TransitionData
-        local useSpawnpoint = true
+        if ply.Reviving ~= true then
+            local transitionData = ply.TransitionData
+            local useSpawnpoint = true
 
-        if transitionData ~= nil and transitionData.Include == true then
+            if transitionData ~= nil and transitionData.Include == true then
 
-            DbgPrint("Player " .. tostring(ply) .. " has transition data.")
+                DbgPrint("Player " .. tostring(ply) .. " has transition data.")
 
-            -- We keep those.
-            ply:SetFrags(transitionData.Frags)
-            ply:SetDeaths(transitionData.Deaths)
+                -- We keep those.
+                ply:SetFrags(transitionData.Frags)
+                ply:SetDeaths(transitionData.Deaths)
 
-            if transitionData.Vehicle ~= nil then
+                if transitionData.Vehicle ~= nil then
 
-                local vehicle = self:FindEntityByTransitionReference(transitionData.Vehicle)
-                if IsValid(vehicle) then
-                    DbgPrint("Putting player " .. tostring(ply) .. " back in vehicle: " .. tostring(vehicle))
+                    local vehicle = self:FindEntityByTransitionReference(transitionData.Vehicle)
+                    if IsValid(vehicle) then
+                        DbgPrint("Putting player " .. tostring(ply) .. " back in vehicle: " .. tostring(vehicle))
 
-                    -- Sometimes does crazy things to the view angles, this only helps to a certain amount.
-                    local eyeAng = vehicle:WorldToLocalAngles(transitionData.EyeAng)
+                        -- Sometimes does crazy things to the view angles, this only helps to a certain amount.
+                        local eyeAng = vehicle:WorldToLocalAngles(transitionData.EyeAng)
 
-                    -- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
-                    -- FIXME: I noticed that delaying it until the next frame won't always work, we use a fixed delay now.
-                    util.RunDelayed(function()
-                        if IsValid(ply) and IsValid(vehicle) then
-                            vehicle:SetVehicleEntryAnim(false)
-                            vehicle.ResetVehicleEntryAnim = true
-                            ply:EnterVehicle(vehicle)
-                            ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
-                        end
-                    end, CurTime() + 0.2)
-                    useSpawnpoint = false
+                        -- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
+                        -- FIXME: I noticed that delaying it until the next frame won't always work, we use a fixed delay now.
+                        util.RunDelayed(function()
+                            if IsValid(ply) and IsValid(vehicle) then
+                                vehicle:SetVehicleEntryAnim(false)
+                                vehicle.ResetVehicleEntryAnim = true
+                                ply:EnterVehicle(vehicle)
+                                ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
+                            end
+                        end, CurTime() + 0.2)
+                        useSpawnpoint = false
+                    else
+                        DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))
+                    end
+
+                elseif transitionData.Ground ~= nil then
+
+                    local groundEnt = self:FindEntityByTransitionReference(transitionData.Ground)
+                    if IsValid(groundEnt) then
+                        local newPos = groundEnt:LocalToWorld(transitionData.GroundPos)
+                        DbgPrint("Using func_tracktrain as spawn position reference.", newPos, groundEnt)
+                        ply:TeleportPlayer(newPos, transitionData.Ang)
+                        useSpawnpoint = false
+                    else
+                        DbgPrint("Ground set but not found")
+                    end
+
                 else
-                    DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))
+
+                    DbgPrint("Player " .. tostring(ply) .. " uses normal position")
+                    ply:TeleportPlayer(transitionData.Pos, transitionData.Ang)
+                    ply:SetAngles(transitionData.Ang)
+                    ply:SetEyeAngles(transitionData.EyeAng)
+                    useSpawnpoint = false
+
                 end
 
-            elseif transitionData.Ground ~= nil then
+            end
 
-                local groundEnt = self:FindEntityByTransitionReference(transitionData.Ground)
-                if IsValid(groundEnt) then
-                    local newPos = groundEnt:LocalToWorld(transitionData.GroundPos)
-                    DbgPrint("Using func_tracktrain as spawn position reference.", newPos, groundEnt)
-                    ply:TeleportPlayer(newPos, transitionData.Ang)
-                    useSpawnpoint = false
-                else
-                    DbgPrint("Ground set but not found")
-                end
+            if useSpawnpoint == true and IsValid(ply.SelectedSpawnpoint) then
+                ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
+                ply.SelectedSpawnpoint = nil
+            end
 
+            DbgPrint("Selecting best weapon for " .. tostring(ply))
+            if ply.ScheduledActiveWeapon ~= nil then
+                ply:SelectWeapon(ply.ScheduledActiveWeapon)
+                ply.ScheduledActiveWeapon = nil
             else
-
-                DbgPrint("Player " .. tostring(ply) .. " uses normal position")
-                ply:TeleportPlayer(transitionData.Pos, transitionData.Ang)
-                ply:SetAngles(transitionData.Ang)
-                ply:SetEyeAngles(transitionData.EyeAng)
-                useSpawnpoint = false
-
+                self:SelectBestWeapon(ply)
             end
 
-        end
-
-        if useSpawnpoint == true and IsValid(ply.SelectedSpawnpoint) then
-            ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
-            ply.SelectedSpawnpoint = nil
-        end
-
-        DbgPrint("Selecting best weapon for " .. tostring(ply))
-        if ply.ScheduledActiveWeapon ~= nil then
-            ply:SelectWeapon(ply.ScheduledActiveWeapon)
-            ply.ScheduledActiveWeapon = nil
-        else
-            self:SelectBestWeapon(ply)
-        end
-
-        if ply.ScheduledLastWeapon ~= nil then
-            local wep = ply:GetWeapon(ply.ScheduledLastWeapon)
-            if IsValid(wep) then
-                ply:SetSaveValue("m_hLastWeapon", wep)
+            if ply.ScheduledLastWeapon ~= nil then
+                local wep = ply:GetWeapon(ply.ScheduledLastWeapon)
+                if IsValid(wep) then
+                    ply:SetSaveValue("m_hLastWeapon", wep)
+                end
             end
+
+            util.RunNextFrame(function()
+                if SERVER then
+                    self:CheckPlayerNotStuck(ply)
+                end
+                if self.MapScript.PostPlayerSpawn ~= nil then
+                    self.MapScript:PostPlayerSpawn(ply)
+                end
+            end)
+
+            ply.TransitionData = nil -- Make sure we erase it because this only happens on a new round.
         end
-
-        util.RunNextFrame(function()
-            if SERVER then
-                self:CheckPlayerNotStuck(ply)
-            end
-            if self.MapScript.PostPlayerSpawn ~= nil then
-                self.MapScript:PostPlayerSpawn(ply)
-            end
-        end)
-
-        ply.TransitionData = nil -- Make sure we erase it because this only happens on a new round.
 
         -- Adjust difficulty, we want later some dynamic system that adjusts depending on the players.
         self:AdjustDifficulty()
@@ -592,13 +619,16 @@ if SERVER then
             ply.TrackerEntity:AttachToPlayer(ply)
         end
 
-        if IsValid(ply:GetRagdollManager()) == false then
+        local ragdollMgr = ply:GetRagdollManager()
+        if IsValid(ragdollMgr) == false then
             print("Creating ragdoll manager")
             local mgr = ents.Create("lambda_ragdoll")
             mgr:SetOwner(ply)
             mgr:SetParent(ply)
             mgr:Spawn()
             ply:SetRagdollManager(mgr)
+        else
+            ragdollMgr:RemoveRagdoll()
         end
 
         ply.IsCurrentlySpawning = false
@@ -625,7 +655,6 @@ if SERVER then
     function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 
         DbgPrint("GM:DoPlayerDeath", ply)
-
         if ply.LastWeaponsDropped ~= nil then
             for _,v in pairs(ply.LastWeaponsDropped) do
                 if IsValid(v) and not IsValid(v:GetOwner()) then
