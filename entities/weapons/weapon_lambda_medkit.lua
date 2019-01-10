@@ -105,7 +105,10 @@ function SWEP:PredictedThink()
     if not IsValid(owner) then
         return
     end
-
+    -- Only recharge in idle state.
+    if self:GetState() ~= STATE_IDLE then
+        return
+    end
     local rechargeAmount = 1 * FrameTime()
     local energy = math.Clamp(self:GetEnergy() + rechargeAmount, 0, 100)
     self:SetEnergy(energy)
@@ -157,6 +160,9 @@ function SWEP:GetActorForReviving()
 end
 
 function SWEP:CanPrimaryAttack()
+    if self:GetState() ~= STATE_IDLE then
+        return false
+    end
     return true
 end
 
@@ -264,6 +270,7 @@ function SWEP:PrimaryAttack()
 
     if not IsValid(actor) or self:CanHealActor(actor) == false then
         self:SetNextPrimaryFire(CurTime() + 0.5)
+        self:SetNextSecondaryFire(CurTime() + 0.5)
         self:DryFire()
         return
     end
@@ -279,6 +286,7 @@ function SWEP:PrimaryAttack()
     self:ConsumeEnergy(healAmount)
 
     self:SetNextPrimaryFire(CurTime() + 1)
+    self:SetNextSecondaryFire(CurTime() + 1)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
     local owner = self:GetOwner()
@@ -327,11 +335,15 @@ end
 
 function SWEP:StopChargeSound()
     if self.SndCharge ~= nil and self.SndCharge ~= NULL then
+        self.SndCharge:ChangeVolume(0.0, 0.0)
         self.SndCharge:Stop()
     end
 end
 
 function SWEP:StartCharging()
+    if self:GetState() ~= STATE_IDLE then
+        return
+    end
     self:SetChargeEnergy(0.0)
     self:EmitChargingSound()
     self:SetState(STATE_CHARGING)
@@ -339,6 +351,9 @@ function SWEP:StartCharging()
 end
 
 function SWEP:StopCharging()
+    if self:GetState() ~= STATE_CHARGING then
+        return
+    end
     self:StopChargeSound()
     self:SetState(STATE_IDLE)
     self:SetChargeEnergy(0.0)
@@ -374,6 +389,7 @@ sound.Add({
 function SWEP:ReleaseCharge()
     self:EmitSound("lambda/defibrillator_release.wav")
     self:SetState(STATE_IDLE)
+    self:SetNextPrimaryFire(CurTime() + 1)
     self:SetNextSecondaryFire(CurTime() + 1)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:ConsumeEnergy(self:GetChargeEnergy())
@@ -459,14 +475,16 @@ end
 
 function SWEP:SecondaryAttack()
 
-    if self:CanPrimaryAttack() == false then
+    if self:CanSecondaryAttack() == false then
         return
     end
 
     local ragdoll = self:GetActorForReviving()
     if ragdoll == nil or self:GetEnergy() < REVIVE_AMOUNT or self:CanReviveActor(ragdoll) == false then
+        self:SetNextPrimaryFire(CurTime() + 0.5)
         self:SetNextSecondaryFire(CurTime() + 0.5)
         self:DryFire()
+        self:StopCharging()
         self:SetState(STATE_IDLE)
         return
     end
