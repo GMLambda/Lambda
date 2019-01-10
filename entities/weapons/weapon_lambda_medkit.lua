@@ -177,6 +177,67 @@ function SWEP:CanHealActor(actor)
     return true
 end
 
+function SWEP:FindGroundPosition(actor)
+
+    local owner = actor:GetOwner()
+    if not IsValid(owner) then
+        return actor:GetPos()
+    end
+
+    local startPos = actor:GetPos()
+    local filter = { actor, owner, self:GetOwner() }
+
+    -- Trace line down to find ground first.
+    local tr = util.TraceLine({
+        start = startPos,
+        endpos = startPos - Vector(0, 0, 32),
+        filter = filter,
+    })
+
+    startPos = tr.HitPos
+
+    local mins = Vector(-16, -16, 0)
+    local maxs = Vector(16, 16, 1)
+    local offsetZ = 0
+
+    while tr.Fraction ~= 1 and offsetZ < 8 do
+        tr = util.TraceHull({
+            start = startPos + Vector(0, 0, offsetZ),
+            endpos = startPos + Vector(0, 0, offsetZ + 1),
+            mins = mins,
+            maxs = maxs,
+            filter = filter
+        })
+        offsetZ = offsetZ + 1
+    end
+
+    return startPos + Vector(0, 0, offsetZ)
+
+end
+
+function SWEP:CanReviveActor(actor)
+
+    local owner = actor:GetOwner()
+    if not IsValid(owner) then
+        return false
+    end
+
+    local startPos = self:FindGroundPosition(actor)
+    local offsetZ = 72 -- Only standing works.
+
+    local tr = util.TraceLine({
+        start = startPos,
+        endpos = startPos + Vector(0, 0, offsetZ),
+        filter = { actor, owner, self:GetOwner() },
+    })
+
+    if tr.Fraction ~= 1 then
+        return false
+    end
+
+    return true
+end
+
 function SWEP:ConsumeEnergy(amount)
 
     local energy = self:GetEnergy()
@@ -335,7 +396,7 @@ function SWEP:ReleaseCharge()
         ragdoll.NextZapTime = CurTime() + 0.1
         ragdoll.RespawnTime = CurTime() + respawnTime
 
-        local respawnPos = ragdoll:GetPos()
+        local respawnPos = self:FindGroundPosition(ragdoll)
         local respawnAng = ragdoll:GetAngles()
 
         -- We set the position of the player to the current ragdoll position.
@@ -397,7 +458,7 @@ function SWEP:SecondaryAttack()
     end
 
     local ragdoll = self:GetActorForReviving()
-    if ragdoll == nil or self:GetEnergy() < REVIVE_AMOUNT then
+    if ragdoll == nil or self:GetEnergy() < REVIVE_AMOUNT or self:CanReviveActor(ragdoll) == false then
         self:SetNextSecondaryFire(CurTime() + 0.5)
         self:DryFire()
         self:SetState(STATE_IDLE)

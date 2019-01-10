@@ -598,15 +598,18 @@ if SERVER then
             end
 
             util.RunNextFrame(function()
-                if SERVER then
-                    self:CheckPlayerNotStuck(ply)
-                end
                 if self.MapScript.PostPlayerSpawn ~= nil then
                     self.MapScript:PostPlayerSpawn(ply)
                 end
             end)
 
             ply.TransitionData = nil -- Make sure we erase it because this only happens on a new round.
+        end
+
+        if SERVER then
+            util.RunNextFrame(function()
+                self:CheckPlayerNotStuck(ply)
+            end)
         end
 
         -- Adjust difficulty, we want later some dynamic system that adjusts depending on the players.
