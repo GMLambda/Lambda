@@ -190,8 +190,14 @@ function SWEP:FindGroundPosition(actor)
         return actor:GetPos()
     end
 
+    local wepOwner = self:GetOwner()
+
     local startPos = actor:GetPos()
-    local filter = { actor, owner, self:GetOwner() }
+    local filter = function(e)
+        if e == actor or e == owner or e == wepOwner or e:IsPlayer() then
+            return false
+        end
+    end
 
     -- Trace line down to find ground first.
     local tr = util.TraceLine({
@@ -217,7 +223,10 @@ function SWEP:FindGroundPosition(actor)
         offsetZ = offsetZ + 1
     end
 
-    return startPos + Vector(0, 0, offsetZ)
+    local pos = startPos + Vector(0, 0, offsetZ)
+    debugoverlay.Cross(pos,20,10, Color( 255, 0, 0 ),true)
+
+    return pos
 
 end
 
@@ -367,6 +376,7 @@ function SWEP:UpdateCharging()
     if current >= REVIVE_AMOUNT then
         return self:ReleaseCharge()
     end
+    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:SetNextSecondaryFire(CurTime() + STEP_TIME)
 end
 
@@ -406,7 +416,7 @@ function SWEP:ReleaseCharge()
     local owner = ragdoll:GetOwner()
 
     if SERVER then
-        local respawnTime = 2.5
+        local respawnTime = 2.0
 
         ragdoll.RespawnTime = CurTime() + respawnTime
 
@@ -416,7 +426,6 @@ function SWEP:ReleaseCharge()
         -- We set the position of the player to the current ragdoll position.
         owner:SetPos(respawnPos)
         owner:SetAngles(respawnAng)
-        owner:TeleportPlayer(respawnPos, respawnAng)
 
         -- NOTE: The reason we do this is to make the player emit a hurt sound.
         --       If the health is <= 0 it wouldn't do anything.
@@ -424,6 +433,13 @@ function SWEP:ReleaseCharge()
         owner:TakeDamage(1, self, self)
 
         ragdoll:EmitSound("lambda_player_revive")
+
+        for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+            local bone = ragdoll:GetPhysicsObjectNum(i)
+            if IsValid(bone) then
+                bone:EnableCollisions(false)
+            end
+        end
 
         -- Now we interpolate the ragdoll towards the player.
         hook.Add("Think", ragdoll, function(rag)
@@ -433,6 +449,11 @@ function SWEP:ReleaseCharge()
                 hook.Remove("Think", rag)
                 return
             end
+
+            owner:SetPos(respawnPos)
+            owner:SetAngles(respawnAng)
+            owner:SetAnimation(PLAYER_WALK)
+            owner:AnimRestartMainSequence()
 
             local curTime = CurTime()
             local left = ragdoll.RespawnTime - curTime
@@ -448,13 +469,10 @@ function SWEP:ReleaseCharge()
                     local boneId = rag:TranslatePhysBoneToBone(i)
                     local bp, ba = owner:GetBonePosition(boneId)
                     if bp and ba then
-                        local delta = bp - bone:GetPos()
-                        local randFactor = 150 * alpha
-                        local randOffset = VectorRand() * randFactor
-                        randOffset.z = 0
-
-                        delta = delta + randOffset
-                        bone:SetVelocity( delta * (invAlpha * 3.5) )
+                        local deltaPos = bp - bone:GetPos()
+                        local ang = LerpAngle(FrameTime(), bone:GetAngles(), ba)
+                        bone:SetAngles(ang)
+                        bone:SetVelocity(deltaPos * 3)
                     end
                 end
             end
