@@ -392,8 +392,6 @@ function SWEP:ReleaseCharge()
     if SERVER then
         local respawnTime = 2.5
 
-        ragdoll:Fire("StartRagdollBoogie")
-        ragdoll.NextZapTime = CurTime() + 0.1
         ragdoll.RespawnTime = CurTime() + respawnTime
 
         local respawnPos = self:FindGroundPosition(ragdoll)
@@ -403,6 +401,11 @@ function SWEP:ReleaseCharge()
         owner:SetPos(respawnPos)
         owner:SetAngles(respawnAng)
         owner:TeleportPlayer(respawnPos, respawnAng)
+
+        -- NOTE: The reason we do this is to make the player emit a hurt sound.
+        --       If the health is <= 0 it wouldn't do anything.
+        owner:SetHealth(2)
+        owner:TakeDamage(1, self, self)
 
         ragdoll:EmitSound("lambda_player_revive")
 
@@ -430,9 +433,12 @@ function SWEP:ReleaseCharge()
                     local bp, ba = owner:GetBonePosition(boneId)
                     if bp and ba then
                         local delta = bp - bone:GetPos()
-                        local randOffset = 200 * alpha
-                        delta = delta + (VectorRand() * randOffset)
-                        bone:SetVelocity( delta * (invAlpha * 2) )
+                        local randFactor = 150 * alpha
+                        local randOffset = VectorRand() * randFactor
+                        randOffset.z = 0
+
+                        delta = delta + randOffset
+                        bone:SetVelocity( delta * (invAlpha * 3.5) )
                     end
                 end
             end
@@ -498,45 +504,11 @@ function SWEP:DrawWorldModelTranslucent()
     self:DrawModel()
 end
 
-function SWEP:FormatViewModelAttachment(pos, inverse)
-
-    local origin = EyePos()
-    local fov = LocalPlayer():GetFOV()
-    local worldx = math.tan( fov * math.pi / 360.0 )
-    local viewx = math.tan( self.ViewModelFOV * math.pi / 360.0 )
-    local factorX = worldx / viewx
-    local factorY = factorX
-
-    local ang = EyeAngles()
-    local right = ang:Right()
-    local up = ang:Up()
-    local fwd = ang:Forward()
-
-    local tmp = pos - origin
-    local transformed = Vector( right:Dot(tmp), up:Dot(tmp), fwd:Dot(tmp) )
-
-    if inverse then
-        if factorX ~= 0 and factorY ~= 0 then
-            transformed.x = transformed.x / factorX
-            transformed.y = transformed.y / factorX
-        else
-            transformed.x = 0
-            transformed.y = 0
-        end
-    else
-        transformed.x = transformed.x * factorX
-        transformed.y = transformed.y * factorX
-    end
-
-    local res = origin + (right * transformed.x) + (up * transformed.y) + (fwd * transformed.z)
-    return res
-
-end
-
-function SWEP:ViewModelDrawn(vm)
-end
-
 function SWEP:Ammo1()
     local energy = math.Clamp(self:GetEnergy() - self:GetChargeEnergy(), 0, 100)
     return energy
+end
+
+function SWEP:Ammo2()
+    return 0
 end
