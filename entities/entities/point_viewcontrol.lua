@@ -54,8 +54,6 @@ function ENT:KeyValue(key, val)
 
     BaseClass.KeyValue(self, key, val)
 
-    print(self, key, val)
-
     if key:iequals("globalstate") then
         self.GlobalState = val
     elseif key:iequals("acceleration") then

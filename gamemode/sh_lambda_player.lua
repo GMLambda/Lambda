@@ -67,12 +67,12 @@ if SERVER then
     end)
 
     function GM:ResetPlayerRespawnQueue()
-        print("Reset respawn queue")
+        DbgPrint("Reset respawn queue")
         self.PlayerRespawnQueue = {}
     end
 
     function GM:AddPlayerToRespawnQueue(ply)
-        print("Adding " .. tostring(ply) .. " to respawn queue")
+        DbgPrint("Adding " .. tostring(ply) .. " to respawn queue")
         self.PlayerRespawnQueue[ply] = true
     end
 
@@ -87,7 +87,7 @@ if SERVER then
         if not IsValid(ply) then
             return
         end
-        print("Removing " .. tostring(ply) .. " from respawn queue")
+        DbgPrint("Removing " .. tostring(ply) .. " from respawn queue")
         self.PlayerRespawnQueue[ply] = nil
     end
     
@@ -449,8 +449,6 @@ if SERVER then
             return
         end
 
-        print("PlayerSpawn Start")
-
         -- Stop observer mode
         ply:UnSpectate()
         ply:SetupHands()
@@ -621,7 +619,6 @@ if SERVER then
 
         local ragdollMgr = ply:GetRagdollManager()
         if IsValid(ragdollMgr) == false then
-            print("Creating ragdoll manager")
             local mgr = ents.Create("lambda_ragdoll")
             mgr:SetOwner(ply)
             mgr:SetParent(ply)
@@ -765,7 +762,7 @@ if SERVER then
 
         if enableGore == true then
             local damageForceLen = dmgForce:Length2D()
-            print(damageForceLen, dmg)
+            --print(damageForceLen, dmg)
 
             if dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
                 -- Exploded
