@@ -151,7 +151,6 @@ function ENT:Initialize()
 
     local phys = self:GetPhysicsObject()
     if IsValid(phys) then
-        print("Adjusting mass")
         phys:SetMass(1)
     end
 

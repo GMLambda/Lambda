@@ -196,7 +196,6 @@ function SWEP:PrimaryAttack()
     DbgPrint(self, "PrimaryAttack")
 
     if self:CanPrimaryAttack() == false then
-        print("Cant attack")
         return
     end
 
@@ -394,7 +393,6 @@ end
 function SWEP:SecondaryAttack()
 
     if self:CanPrimaryAttack() == false then
-        print("Cant secondary attack")
         return
     end
 

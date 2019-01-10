@@ -142,20 +142,11 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     ragdoll:SetOwner(self:GetOwner())
     ragdoll:Spawn()
     ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
-    --ragdoll:SetSolidFlags(FSOLID_USE_TRIGGER_BOUNDS)
     ragdoll.GetPlayerColor = function(s)
         if IsValid(owner) and owner.GetPlayerColor ~= nil then
             return owner:GetPlayerColor()
         end
     end
-    ragdoll:CallOnRemove("OnLambdaRagdollRemove", function()
-        -- Only used for when something external deletes the ragdoll.
-        if IsValid(self) then
-            if self:GetRagdoll() == ragdoll then
-                self:SetRagdoll(NULL)
-            end
-        end
-    end)
 
     local vel = ent:GetVelocity()
 
@@ -179,7 +170,6 @@ function ENT:RemoveRagdoll()
 
     local ragdoll = self:GetRagdoll()
     if IsValid(ragdoll) then
-        print("Removing previous ragdoll")
         ragdoll:Remove()
         self:SetRagdoll(NULL)
     end
@@ -191,8 +181,12 @@ function ENT:Think()
         self:Initialize()
     end
 
+    local ragdoll = self:GetRagdoll()
+    if ragdoll ~= nil and ragdoll ~= NULL and not IsValid(ragdoll) then
+        self:SetRagdoll(NULL)
+    end
+
     if CLIENT then
-        local ragdoll = self:GetRagdoll()
         if IsValid(ragdoll) and ragdoll.GetPlayerColor == nil then
             ragdoll:SnatchModelInstance(ragdoll:GetOwner())
             ragdoll.GetPlayerColor = function(s)
@@ -346,8 +340,6 @@ function ENT:CreateGibPart(boneName, pos, ang, posOffset, angOffset, mdl, dmgFor
     if IsValid(phys) then
         phys:SetVelocity(dmgForce)
         --phys:EnableMotion(false)
-    else
-        print("Unable to create gib physics")
     end
 
     -- Rendering.
