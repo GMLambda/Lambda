@@ -213,7 +213,7 @@ if SERVER then
             -- Waiting for players
             if self.RoundStartTimeout ~= nil and GetSyncedTimestamp() >= self.RoundStartTimeout then
                 DbgPrint("Timeout, round will start now")
-                self:StartRound()
+                self:StartRound(false, true)
             end
         elseif self.WaitingForRoundStart == true and playerCount > 0 and self:GetConnectingCount() == 0 then
             DbgPrint("All players available")
@@ -611,7 +611,7 @@ function GM:PostRoundSetup()
 
 end
 
-function GM:StartRound(cleaned)
+function GM:StartRound(cleaned, force)
 
     -- Initialize map script.
     DbgPrint("GM:StartRound")
@@ -647,7 +647,7 @@ function GM:StartRound(cleaned)
 
     self.WaitingForRoundStart = false
 
-    if self:ShouldWaitForPlayers() == true then
+    if force ~= true and self:ShouldWaitForPlayers() == true then
         if self:GetConnectingCount() > 0 and self.RoundState ~= STATE_RESTARTING then
             self.WaitingForRoundStart = true
         elseif player.GetCount() == 0 then
