@@ -14,7 +14,7 @@ MAPSCRIPT.DefaultLoadout =
     },
     Ammo =
     {
-        ["Pistol"] = 10,
+        ["Pistol"] = 18,
     },
     Armor = 0,
     HEV = true,
