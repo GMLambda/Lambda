@@ -30,7 +30,7 @@ SWEP.ViewModel = "models/weapons/c_medkit.mdl"
 SWEP.WorldModel = "models/weapons/w_medkit.mdl"
 
 if CLIENT then
-    SWEP.Slot = 0
+    SWEP.Slot = 5
     SWEP.SlotPos = 2
     SWEP.DrawAmmo = true
     SWEP.DrawCrosshair = true
@@ -554,4 +554,49 @@ end
 
 function SWEP:Ammo2()
     return 0
+end
+
+if CLIENT then
+    surface.CreateFont("LambdaMedkitFont",
+    {
+        font = "HalfLife2",
+        size = util.ScreenScaleH(64),
+        weight = 0,
+        blursize = 0,
+        scanlines = 0,
+        antialias = true,
+        additive = true,
+    })
+
+    surface.CreateFont("LambdaMedkitFont2",
+    {
+        font = "HalfLife2",
+        size = util.ScreenScaleH(64),
+        weight = 0,
+        blursize = util.ScreenScaleH(4),
+        scanlines = 2,
+        antialias = true,
+        additive = true,
+    })
+end
+
+function SWEP:DrawWeaponSelection( x, y, wide, tall, alpha )
+
+    surface.SetTextColor( 255, 220, 0, alpha )
+
+    surface.SetFont( "LambdaMedkitFont" )
+    local w, h = surface.GetTextSize( "+" )
+
+    surface.SetTextPos( x + ( wide / 2 ) - ( w / 2 ),
+                        y + ( tall / 2 ) - ( h / 2 ) )
+
+    surface.SetFont( "LambdaMedkitFont2" )
+    surface.DrawText( "+" )
+
+    surface.SetTextPos( x + ( wide / 2 ) - ( w / 2 ),
+                        y + ( tall / 2 ) - ( h / 2 ) )
+
+    surface.SetFont( "LambdaMedkitFont" )
+    surface.DrawText( "+" )
+
 end
