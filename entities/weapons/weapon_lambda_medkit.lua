@@ -51,13 +51,18 @@ game.AddAmmoType( {
     maxsplash = 0,
 } )
 
-local TRACE_LEN = 52
+local TRACE_LEN = 75
 
 local HEAL_AMOUNT = 10
 local REVIVE_AMOUNT = 50
 
 local STATE_IDLE = 0
 local STATE_CHARGING = 1
+
+local RECHARGE_DELAY = 3
+local RECHARGE_AMOUNT = 5
+
+local HEAL_DELAY = 0.5
 
 --
 -- ConVars
@@ -75,6 +80,7 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Float", 0, "NextHealTime")
     self:NetworkVar("Float", 1, "Energy")
     self:NetworkVar("Float", 2, "ChargeEnergy")
+    self:NetworkVar("Float", 3, "NextRechargeTime")
     self:NetworkVar("Int", 0, "State")
 end
 
@@ -88,6 +94,7 @@ function SWEP:Initialize()
 
     if SERVER then
         self:SetEnergy(100)
+        self:SetNextRechargeTime(CurTime() + RECHARGE_DELAY)
     end
 
 end
@@ -109,8 +116,12 @@ function SWEP:PredictedThink()
     if self:GetState() ~= STATE_IDLE then
         return
     end
-    local rechargeAmount = 1 * FrameTime()
-    local energy = math.Clamp(self:GetEnergy() + rechargeAmount, 0, 100)
+    if CurTime() < self:GetNextRechargeTime() then
+        return
+    end
+    self:SetNextRechargeTime(CurTime() + RECHARGE_DELAY)
+
+    local energy = math.Clamp(self:GetEnergy() + RECHARGE_AMOUNT, 0, 100)
     self:SetEnergy(energy)
 end
 
@@ -278,8 +289,8 @@ function SWEP:PrimaryAttack()
     local actor = self:GetActorForHealing()
 
     if not IsValid(actor) or self:CanHealActor(actor) == false then
-        self:SetNextPrimaryFire(CurTime() + 0.5)
-        self:SetNextSecondaryFire(CurTime() + 0.5)
+        self:SetNextPrimaryFire(CurTime() + HEAL_DELAY)
+        self:SetNextSecondaryFire(CurTime() + HEAL_DELAY)
         self:DryFire()
         return
     end
@@ -294,8 +305,8 @@ function SWEP:PrimaryAttack()
     self:EmitSound("items/medshot4.wav")
     self:ConsumeEnergy(healAmount)
 
-    self:SetNextPrimaryFire(CurTime() + 1)
-    self:SetNextSecondaryFire(CurTime() + 1)
+    self:SetNextPrimaryFire(CurTime() + HEAL_DELAY)
+    self:SetNextSecondaryFire(CurTime() + HEAL_DELAY)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
     local owner = self:GetOwner()
@@ -360,9 +371,6 @@ function SWEP:StartCharging()
 end
 
 function SWEP:StopCharging()
-    if self:GetState() ~= STATE_CHARGING then
-        return
-    end
     self:StopChargeSound()
     self:SetState(STATE_IDLE)
     self:SetChargeEnergy(0.0)
@@ -397,13 +405,12 @@ sound.Add({
 })
 
 function SWEP:ReleaseCharge()
+    self:ConsumeEnergy(self:GetChargeEnergy())
+    self:StopCharging()
     self:EmitSound("lambda/defibrillator_release.wav")
-    self:SetState(STATE_IDLE)
     self:SetNextPrimaryFire(CurTime() + 1)
     self:SetNextSecondaryFire(CurTime() + 1)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self:ConsumeEnergy(self:GetChargeEnergy())
-    self:SetChargeEnergy(0.0)
 
     local owner = self:GetOwner()
     owner:SetAnimation(PLAYER_ATTACK1)
@@ -499,8 +506,8 @@ function SWEP:SecondaryAttack()
 
     local ragdoll = self:GetActorForReviving()
     if ragdoll == nil or self:GetEnergy() < REVIVE_AMOUNT or self:CanReviveActor(ragdoll) == false then
-        self:SetNextPrimaryFire(CurTime() + 0.5)
-        self:SetNextSecondaryFire(CurTime() + 0.5)
+        self:SetNextPrimaryFire(CurTime() + HEAL_DELAY)
+        self:SetNextSecondaryFire(CurTime() + HEAL_DELAY)
         self:DryFire()
         self:StopCharging()
         self:SetState(STATE_IDLE)
