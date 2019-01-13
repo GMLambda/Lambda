@@ -434,3 +434,6 @@ function ENT:OnRemove()
         self.GibParts = {}
     end
 end
+
+function ENT:Draw()
+end
