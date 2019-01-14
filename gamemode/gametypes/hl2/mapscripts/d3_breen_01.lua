@@ -100,8 +100,8 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("trigger_player_Breenelevator", function(ent)
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function()
-                GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            ent.OnTrigger = function(_, activator)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             end
         end)
 
@@ -138,8 +138,8 @@ function MAPSCRIPT:PostInit()
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("Trigger_lift_control")
-            trigger.OnTrigger = function()
-                GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            trigger.OnTrigger = function(_, activator)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
                 self.AllowPhyscannon = true
             end
             ent:Remove()

@@ -69,8 +69,8 @@ function MAPSCRIPT:PostInit()
             Vector(-20, -20, 0),
             Vector(20, 20, 100)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 3477.289062 1116.633179 0.031250 -0.188 -90.478 0.000
@@ -82,8 +82,8 @@ function MAPSCRIPT:PostInit()
             Vector(-60, -60, 0),
             Vector(60, 60, 100)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- 3575.494873 1570.045532 256.031250 26.014 90.459 0.000
@@ -95,8 +95,8 @@ function MAPSCRIPT:PostInit()
             Vector(-60, -60, 0),
             Vector(60, 60, 100)
         )
-        checkpointTrigger3.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         ents.WaitForEntityByName("wench_1_lever_1", function(ent)
@@ -112,8 +112,8 @@ function MAPSCRIPT:PostInit()
             Vector(-30, -30, 0),
             Vector(30, 30, 100)
         )
-        checkpointTrigger4.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4)
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
         ents.WaitForEntityByName("wench_2_lever_1", function(ent)
@@ -129,8 +129,8 @@ function MAPSCRIPT:PostInit()
             Vector(-40, -40, 0),
             Vector(40, 40, 100)
         )
-        checkpointTrigger5.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint5)
+        checkpointTrigger5.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
 
 

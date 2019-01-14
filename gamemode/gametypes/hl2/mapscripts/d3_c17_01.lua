@@ -75,8 +75,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 200)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         ents.WaitForEntityByName("kleiner", function(ent)

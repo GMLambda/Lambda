@@ -132,9 +132,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(3377.796875, -1352.083008, 9.863693), Angle(0, 0, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- bridge checkpoint
@@ -148,9 +148,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger2.OnTrigger = function()
+        checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(5128.125488, -2679.885986, 384.031250), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- More enemies inside the warehouse
@@ -185,21 +185,21 @@ function MAPSCRIPT:PostInit()
             Vector(-400, -350, 0),
             Vector(400, 350, 100)
         )
-        bridgeKillTrigger.OnTrigger = function(self, ent)
-            if ent:IsVehicle() then
-                local driver = ent:GetDriver()
+        bridgeKillTrigger.OnTrigger = function(_, activator)
+            if activator:IsVehicle() then
+                local driver = activator:GetDriver()
                 if IsValid(driver) and driver:Alive() then
                     driver:Kill()
                 end
-                local passengerSeat = ent:GetNWEntity("PassengerSeat")
+                local passengerSeat = activator:GetNWEntity("PassengerSeat")
                 if IsValid(passengerSeat) then
                     local passenger = passengerSeat:GetDriver()
                     if IsValid(passenger) and passenger:Alive() then
                         passenger:Kill()
                     end
                 end
-            elseif ent:IsPlayer() and ent:Alive() then
-                ent:Kill()
+            elseif activator:IsPlayer() and activator:Alive() then
+                activator:Kill()
             end
         end
 
@@ -214,9 +214,9 @@ function MAPSCRIPT:PostInit()
             Vector(-200, -100, 0),
             Vector(200, 100, 180)
         )
-        checkpointTrigger3.OnTrigger = function()
+        checkpointTrigger3.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(-1352.137207, -1540.197876, 951.312805), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
 

@@ -49,8 +49,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1368.427856, -69.149689, -1023.968750), Angle(0, 0, 0))
@@ -61,8 +61,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger2.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- Let him stay alive if no one kills him.
@@ -98,8 +98,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger3.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         -- -446.415466 -526.288147 -1017.968750
@@ -111,8 +111,8 @@ function MAPSCRIPT:PostInit()
             Vector(-60, -60, 0),
             Vector(60, 60, 60)
         )
-        checkpointTrigger4.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4)
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
         local a = ents.CreateSimple("prop_physics_override", {

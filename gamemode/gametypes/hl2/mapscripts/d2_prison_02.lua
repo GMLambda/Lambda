@@ -78,8 +78,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -130, 0),
             Vector(50, 100, 200)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- cp 2 setpos -1951.139526 2554.889893 576.031250;setang 6.475924 -93.248947 0.000000
@@ -92,8 +92,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 200)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
 

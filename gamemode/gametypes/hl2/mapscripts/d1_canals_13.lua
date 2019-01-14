@@ -62,9 +62,9 @@ function MAPSCRIPT:PostInit()
             Vector(200, 400, 280)
         )
         --checkpointTrigger1:RemoveEffects(EF_NODRAW)
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(3437.813477, 1579.182251, -455.238220), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- We gotta place a giant changelevel trigger here, the other one is dangling in the air and uses Input instead of touch.

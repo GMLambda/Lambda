@@ -96,7 +96,7 @@ function GM:CreateCheckpoint(pos, ang, dynamic)
     return cp
 end
 
-function GM:SetPlayerCheckpoint(checkpoint, gridData)
+function GM:SetPlayerCheckpoint(checkpoint, activator, gridData)
     local gameType = self:GetGameType()
     if gameType.UsingCheckpoints == false then
         return
@@ -114,6 +114,10 @@ function GM:SetPlayerCheckpoint(checkpoint, gridData)
     if IsValid(checkpoint) and checkpoint:GetClass() == "lambda_checkpoint" then
         checkpoint:SetActivated()
         self:ResetPlayerRespawnQueue()
+        if IsValid(activator) and activator:IsPlayer() then
+            self:AddHint("Checkpoint activated", 10, activator)
+        end
+        PrintMessage(HUD_PRINTTALK, "Checkpoint activated.")
     end
 
     return checkpoint
@@ -361,7 +365,7 @@ function GM:UpdateCheckoints()
         end
 
         local cp = self:CreateCheckpoint(bestPos, ang, true)
-        self:SetPlayerCheckpoint(cp, data)
+        self:SetPlayerCheckpoint(cp, selectedPlayer, data)
 
         --debugoverlay.Box(bestPos, CHECKPOINT_MINS, CHECKPOINT_MAXS, 5, Color( 255, 255, 255, 100 ))
     end

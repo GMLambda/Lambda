@@ -66,9 +66,9 @@ function MAPSCRIPT:PostInit()
             Vector(-1500, -1000, -300),
             Vector(100, 600, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(4270.903320, 9841.201172, -124.578499), Angle(0, 180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
     end

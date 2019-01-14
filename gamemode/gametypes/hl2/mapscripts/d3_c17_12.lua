@@ -76,8 +76,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 100)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-2476.636963, 6708.353516, 128.031250), Angle(0, 90, 0))
@@ -89,8 +89,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 100)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
     end

@@ -67,8 +67,8 @@ function MAPSCRIPT:PostInit()
             Vector(-130, -130, 0),
             Vector(130, 130, 100)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 1119.968750 -840.288269 -559.968750
@@ -80,8 +80,8 @@ function MAPSCRIPT:PostInit()
             Vector(-130, -130, 0),
             Vector(130, 130, 100)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- 1537.006226 -813.546021 80.031250
@@ -93,8 +93,8 @@ function MAPSCRIPT:PostInit()
             Vector(-130, -130, 0),
             Vector(130, 130, 100)
         )
-        checkpointTrigger3.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
 
@@ -107,8 +107,8 @@ function MAPSCRIPT:PostInit()
             Vector(-500, -500, 0),
             Vector(500, 500, 250)
         )
-        checkpointTrigger4.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4)
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
         -- 1650.219482 -89.667931 624.031250
@@ -120,8 +120,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 100)
         )
-        checkpointTrigger5.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint5)
+        checkpointTrigger5.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
 
 

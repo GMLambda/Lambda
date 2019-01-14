@@ -89,8 +89,8 @@ function MAPSCRIPT:PostInit()
             Vector(-200, -200, 0),
             Vector(200, 200, 100)
         )
-        checkpointTrigger1.OnTrigger = function(trigger)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- We skip the knockout scene because its not shown anyway.
@@ -117,10 +117,10 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("trigger_elevator_go_down", function(ent)
             ent:ResizeTriggerBox(Vector(-70, -70, -60), Vector(50, 70, 60))
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function(ent)
+            ent.OnTrigger = function(_, activator)
                 local checkpoint = GAMEMODE:CreateCheckpoint(Vector(-7740.829590, -3959.260010, 388.031250))
                 checkpoint:SetParent(tracktrain_elevator)
-                GAMEMODE:SetPlayerCheckpoint(checkpoint)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
 
                 -- No idea why this wouldnt be triggered already.
                 TriggerOutputs({

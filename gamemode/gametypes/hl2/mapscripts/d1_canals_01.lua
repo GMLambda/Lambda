@@ -81,8 +81,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, ent)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, ent)
         end
 
         -- Boxcar checkpoint
@@ -108,8 +108,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 180)
         )
-        checkpointTrigger3.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, ent)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, ent)
         end
 
         -- 544.810791 -3423.548584 322.719330

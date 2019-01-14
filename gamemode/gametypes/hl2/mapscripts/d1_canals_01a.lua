@@ -49,8 +49,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-3002.406494, 7870.711426, 12.031250), Angle(0, 90, 0))
@@ -61,8 +61,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger2.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(2104.908447, 5759.881348, -95.968750), Angle(0, 45, 0))
@@ -73,8 +73,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger3.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         local npcMaker1 = ents.Create("npc_maker")

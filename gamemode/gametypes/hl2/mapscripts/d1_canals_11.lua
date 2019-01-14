@@ -90,9 +90,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(6363.024902, 4874.115234, -967.214539), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         GAMEMODE:WaitForInput("global_newgame_spawner_airboat", "Unlock", function(ent)

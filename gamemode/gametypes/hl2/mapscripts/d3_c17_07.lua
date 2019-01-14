@@ -84,8 +84,8 @@ function MAPSCRIPT:PostInit()
             Vector(-500, -500, 0),
             Vector(500, 500, 150)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 4817.152344 1203.166138 0.031250
@@ -94,8 +94,8 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("lcs_pregate01_trigger", function(ent)
             ent:ResizeTriggerBox(Vector(-180, -100, -40), Vector(180, 400, 60))
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function(ent)
-                GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            ent.OnTrigger = function(_, activator)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
             end
         end)
 

@@ -62,9 +62,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(53.214970, -102.730621, -615.638123), Angle(0, -180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- -841.505310 -1408.689331 -382.968750
@@ -76,9 +76,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 180)
         )
-        checkpointTrigger2.OnTrigger = function()
+        checkpointTrigger2.OnTrigger = function(_, activator)
             --GAMEMODE:SetVehicleCheckpoint(Vector(53.214970, -102.730621, -615.638123), Angle(0, -180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- It looks odd when they spawn right infront of one.

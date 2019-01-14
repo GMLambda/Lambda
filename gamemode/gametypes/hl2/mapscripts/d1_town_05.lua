@@ -100,8 +100,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -300, 0),
             Vector(100, 300, 170)
         )
-        checkpointTrigger1.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- Make sure to substract on our renamed math_counter.
@@ -159,8 +159,8 @@ function MAPSCRIPT:PostInit()
             Vector(-25, -100, 0),
             Vector(25, 100, 170)
         )
-        checkpointTrigger2.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
             TriggerOutputs({
                 {"lambda_end_soldier_1_maker", "Enable", 0, ""},
                 {"lambda_end_soldier_2_maker", "Enable", 0, ""},
@@ -211,8 +211,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -25, 0),
             Vector(100, 25, 170)
         )
-        checkpointTrigger3.OnTrigger = function()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         -- Better changelevel trigger.
