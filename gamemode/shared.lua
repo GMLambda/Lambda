@@ -174,7 +174,7 @@ end
 function GM:OnReloaded()
 
     if CLIENT then
-        self:HUDInit()
+        self:HUDInit(true)
     end
 
     self:LoadGameTypes()
