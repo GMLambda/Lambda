@@ -69,7 +69,7 @@ function MAPSCRIPT:PostInit()
             Vector(-3400, -1050, -100),
             Vector(2200, 1750, 300)
         )
-        checkpointTrigger1.OnEndTouchAll = function(ent)
+        checkpointTrigger1.OnEndTouchAll = function(trigger)
             TriggerOutputs({
                 {"relationship_soldiers_vs_dog_like", "RevertRelationship", 0, ""},
                 {"pclip_gate1", "Enable", 0, ""},
@@ -81,7 +81,7 @@ function MAPSCRIPT:PostInit()
                 {"sound_dog_surprised_1", "PlaySound", 4.00, ""},
                 {"sound_dog_roar_1", "PlaySound", 6.00, ""},
             })
-            ent:Remove()
+            trigger:Remove()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
         end
 

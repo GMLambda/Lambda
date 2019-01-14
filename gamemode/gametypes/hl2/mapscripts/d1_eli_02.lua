@@ -130,9 +130,9 @@ function MAPSCRIPT:PostInit()
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("trigger_scrapyard_start")
-            trigger.OnTrigger = function(s)
+            trigger.OnTrigger = function(_, activator)
                 DbgPrint("Starting scrapeyard scene")
-                GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
                 checkpoint2:RemoveEffects(EF_NODRAW)
             end
 
@@ -155,9 +155,9 @@ function MAPSCRIPT:PostInit()
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("trigger_attack02")
-            trigger.OnTrigger = function(s)
+            trigger.OnTrigger = function(_, activator)
                 DbgPrint("Starting attack")
-                GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
             end
 
             ent:Remove()

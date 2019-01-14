@@ -129,8 +129,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 100)
         )
-        checkpointTrigger3.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         -- 4161.470215 -3967.863525 -543.968750
@@ -143,8 +143,8 @@ function MAPSCRIPT:PostInit()
             Vector(-180, -100, 0),
             Vector(180, 100, 100)
         )
-        checkpointTrigger5.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint5)
+        checkpointTrigger5.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
 
         -- Second defense, we manipulate the math_counter for the turrets and add an extra input value that fires once all players are there.

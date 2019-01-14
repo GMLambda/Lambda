@@ -76,8 +76,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 200)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 1577.605347 651.466064 -642.468750
@@ -87,8 +87,8 @@ function MAPSCRIPT:PostInit()
         end)
         ents.WaitForEntityByName("elevator_trigger_go_up_1", function(ent)
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function(ent)
-                GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            ent.OnTrigger = function(_, activator)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
             end
         end)
 
@@ -103,10 +103,10 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("int_door_close_inside_1", function(ent)
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function(ent)
+            ent.OnTrigger = function(_, activator)
                 DbgPrint("Firing resume hack")
                 resume_hack:Fire("Enable")
-                GAMEMODE:SetPlayerCheckpoint(checkpoint5)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
             end
         end)
 
@@ -120,8 +120,8 @@ function MAPSCRIPT:PostInit()
             Vector(0, -100, 0),
             Vector(10, 100, 100)
         )
-        checkpointTrigger3.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         -- 981.835876 -3084.621826 -239.968750
@@ -134,8 +134,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -10, 0),
             Vector(50, 10, 100)
         )
-        checkpointTrigger4.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4)
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
     end

@@ -76,8 +76,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 200)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 4805.734863 -293.060852 544.752808
@@ -89,8 +89,8 @@ function MAPSCRIPT:PostInit()
             Vector(-150, -150, 0),
             Vector(150, 150, 200)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- 4194.318848 3518.950195 371.710144
@@ -102,8 +102,8 @@ function MAPSCRIPT:PostInit()
             Vector(-1700, -150, -300),
             Vector(2400, 150, 600)
         )
-        checkpointTrigger3.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         ents.WaitForEntityByName("generator_button", function(ent)
@@ -120,8 +120,8 @@ function MAPSCRIPT:PostInit()
             Vector(-420, -220, -200),
             Vector(220, 420, 100)
         )
-        checkpointTrigger4.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4)
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
         local allowGuard = false
@@ -188,8 +188,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 100)
         )
-        checkpointTrigger5.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint5)
+        checkpointTrigger5.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
 
         -- Checkpoint
@@ -202,8 +202,8 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -50, 0),
             Vector(50, 50, 100)
         )
-        checkpointTrigger6.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint6)
+        checkpointTrigger6.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint6, activator)
         end
 
     end

@@ -68,8 +68,8 @@ function MAPSCRIPT:PostInit()
             Vector(-140, -140, 0),
             Vector(140, 140, 100)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- Add another logic relay that disables all turrets once the button is pressed.
@@ -96,8 +96,8 @@ function MAPSCRIPT:PostInit()
             Vector(-60, -60, 0),
             Vector(60, 60, 100)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
     end

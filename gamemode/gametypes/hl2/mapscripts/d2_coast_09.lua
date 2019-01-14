@@ -118,9 +118,9 @@ function MAPSCRIPT:PostInit()
             Vector(-300, -20, 0),
             Vector(300, 20, 200)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(-6321.518555, 4750.143066, 532.837036), Angle(0, 180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- 8663.506836 11871.029297 -191.968750
@@ -132,9 +132,9 @@ function MAPSCRIPT:PostInit()
             Vector(-50, -600, 0),
             Vector(50, 450, 200)
         )
-        checkpointTrigger3.OnTrigger = function()
+        checkpointTrigger3.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(8699.614258, 11645.158203, -192.527618), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
     end

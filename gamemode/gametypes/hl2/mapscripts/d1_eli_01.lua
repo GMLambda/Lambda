@@ -75,21 +75,21 @@ function MAPSCRIPT:PostInit()
         entryTrigger:SetupTrigger(Vector(-64.453362, 2733.531006, -1279.9687500), Angle(0,0,0), Vector(-80, -105, 0), Vector(80, 105, 90))
         entryTrigger:SetKeyValue("teamwait", "1")
         --entryTrigger:SetKeyValue("lockplayers", "1") -- Do we really want this?
-        entryTrigger.OnTrigger = function(self)
+        entryTrigger.OnTrigger = function(_, activator)
             --DbgPrint("All players inside trigger, closing door, swapping spawnpoint.")
             -- Everyone is inside, we can close the door.
             ents.WaitForEntityByName("logic_startScene", function(ent) ent:Fire("Trigger") end)
 
             -- Make sure players dont spawn outside the base
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(-66.911217, 2753.892822, -1279.968750), Angle(0, 0, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
         -- 454.184753 1670.932373 -1281.335693
         ents.WaitForEntityByName("elevator_trigger_go_up_1", function(ent)
             DbgPrint("Setting up elevator team wait")
             ent:SetKeyValue("teamwait", "1")
-            ent.OnTrigger = function(self)
+            ent.OnTrigger = function(_, activator)
 
                 DbgPrint("All players in elevator")
 
@@ -97,7 +97,7 @@ function MAPSCRIPT:PostInit()
                 local checkpoint = GAMEMODE:CreateCheckpoint(Vector(454.184753, 1670.932373, -1281.335693), Angle(0, 90, 0))
                 checkpoint:SetParent(elevator_lab)
 
-                GAMEMODE:SetPlayerCheckpoint(checkpoint)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
 
             end
         end)

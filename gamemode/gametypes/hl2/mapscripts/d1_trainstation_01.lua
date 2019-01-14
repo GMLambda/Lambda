@@ -160,9 +160,9 @@ function MAPSCRIPT:PostInit()
         local barney_room_trigger = ents.Create("trigger_once")
         barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0,0,0), Vector(-150, -130, -50), Vector(150, 150, 50))
         barney_room_trigger:SetKeyValue("teamwait", 1)
-        barney_room_trigger.OnTrigger = function(self)
+        barney_room_trigger.OnTrigger = function(_, activator)
 
-            GAMEMODE:SetPlayerCheckpoint({ Pos = Vector(-3549, -347, -31), Ang = Angle(0, 0, 0)})
+            GAMEMODE:SetPlayerCheckpoint({ Pos = Vector(-3549, -347, -31), Ang = Angle(0, 0, 0)}, activator)
 
             ents.WaitForEntityByName("security_intro_02", function(ent) ent:Fire("Start") end)
             ents.WaitForEntityByName("barney_room_blocker", function(ent) ent:Fire("Enable") end)

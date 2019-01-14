@@ -69,8 +69,8 @@ function MAPSCRIPT:PostInit()
             Vector(-160, -40, 0),
             Vector(60, 40, 100)
         )
-        checkpointTrigger2.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         ents.WaitForEntityByName("dropship_maker", function(ent)

@@ -65,9 +65,9 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 280)
         )
-        checkpointTrigger1.OnTrigger = function()
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(-4308.972656, -12341.547852, 706.201477), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
 
             TriggerOutputs({
                 {"house_secondwave", "ForceSpawn", 0.0, ""},
@@ -80,13 +80,13 @@ function MAPSCRIPT:PostInit()
         -- The game isnt over if someone falls down, we clear the outputs and just kill the player.
         for _,v in pairs(ents.FindByName("fall_trigger")) do
             v:ClearOutputs()
-            v.OnTrigger = function(self, ent)
-                if ent:IsVehicle() then
-                    local driver = ent:GetDriver()
+            v.OnTrigger = function(_, activator)
+                if activator:IsVehicle() then
+                    local driver = activator:GetDriver()
                     if IsValid(driver) and driver:Alive() then
                         driver:Kill()
                     end
-                    local passengerSeat = ent:GetNWEntity("PassengerSeat")
+                    local passengerSeat = activator:GetNWEntity("PassengerSeat")
                     if IsValid(passengerSeat) then
                         local passenger = passengerSeat:GetDriver()
                         if IsValid(passenger) and passenger:Alive() then
@@ -94,9 +94,9 @@ function MAPSCRIPT:PostInit()
                         end
                     end
                     -- If someone shoves the vehicle down it would be lost forever.
-                    ent:Remove()
-                elseif ent:IsPlayer() and ent:Alive() then
-                    ent:Kill()
+                    activator:Remove()
+                elseif activator:IsPlayer() and activator:Alive() then
+                    activator:Kill()
                 end
             end
         end
@@ -125,9 +125,9 @@ function MAPSCRIPT:PostInit()
             Vector(-300, -50, 0),
             Vector(300, 50, 280)
         )
-        checkpointTrigger2.OnTrigger = function()
+        checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetVehicleCheckpoint(Vector(-5233.240723, -3937.720459, 1105.934570), Angle(0, 55, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
 
             maker1:Fire("Enable")
         end

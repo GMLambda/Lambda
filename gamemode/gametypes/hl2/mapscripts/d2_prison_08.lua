@@ -71,8 +71,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -250, 0),
             Vector(100, 250, 200)
         )
-        checkpointTrigger1.OnTrigger = function(ent)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         -- -709.431885 820.863708 960.031250
@@ -98,13 +98,13 @@ function MAPSCRIPT:PostInit()
             Vector(500, 130, 250)
         )
         checkpointTrigger1:SetKeyValue("teamwait", "1")
-        checkpointTrigger1.OnTrigger = function(ent)
+        checkpointTrigger1.OnTrigger = function(_, activator)
             triggerPoint1 = true
             TriggerOutputs({
                 {"brush_bigdoor_ALYXClip_1", "Enable", 0, ""},
                 {"trigger_teleport01", "Enable", 0, ""},
             })
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         ents.WaitForEntityByName("trigger_teleport01", function(ent)
@@ -124,7 +124,7 @@ function MAPSCRIPT:PostInit()
             Vector(500, 180, 250)
         )
         checkpointTrigger2:SetKeyValue("StartDisabled", "1")
-        checkpointTrigger2.OnEndTouchAll = function(ent)
+        checkpointTrigger2.OnEndTouchAll = function(trigger, activator)
             TriggerOutputs({
                 {"combine_door_1", "SetAnimation", 0, "Close"},
                 {"logic_apply_relationships_1", "Trigger", 0, ""},
@@ -132,8 +132,8 @@ function MAPSCRIPT:PostInit()
                 {"prop_camerasx", "Kill", 0, ""},
                 {"combine_door_1", "SetAnimation", 0, "idle_closed"},
             })
-            ent:Remove()
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+            trigger:Remove()
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- Replace trigger with inverse one.

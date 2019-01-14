@@ -102,7 +102,7 @@ function MAPSCRIPT:PostInit()
         )
         checkpointTrigger1:SetKeyValue("teamwait", "1")
         checkpointTrigger1:SetKeyValue("disableendtouch", "1")
-        checkpointTrigger1.OnStartTouch = function(self, ent)
+        checkpointTrigger1.OnStartTouch = function(_, ent)
             if ent:IsPlayer() then
                 local car = ent:GetVehicle()
                 if IsValid(car) then
@@ -111,9 +111,9 @@ function MAPSCRIPT:PostInit()
             end
         end
 
-        checkpointTrigger1.OnTrigger = function(self)
+        checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetSpawnPlayerVehicles(false)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             TriggerOutputs({
                 {"garage_exit_trigger", "Enable", 0, ""},
                 {"greeter_conditions", "Disable", 0, ""},
@@ -134,8 +134,8 @@ function MAPSCRIPT:PostInit()
             Vector(-100, -100, 0),
             Vector(100, 100, 200)
         )
-        checkpointTrigger2.OnTrigger = function(self)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         local triggerCar = ents.FindByPos(Vector(4773, -228, 976), "trigger_once")
