@@ -25,21 +25,26 @@ end
 
 local hidehud = GetConVar("hidehud")
 
-function GM:HUDInit()
+function GM:HUDInit(reloaded)
 
-    if IsValid(self.HUDSuit) then
+    if reloaded == true and IsValid(self.HUDSuit) then
         self.HUDSuit:Remove()
     end
 
-    if IsValid(self.HUDRoundInfo) then
+    if reloaded == true and IsValid(self.HUDRoundInfo) then
         self.HUDRoundInfo:Remove()
     end
 
-    self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
-    self.HUDSuit = vgui.Create("HudSuit")
+    if not IsValid(self.HUDSuit) then
+        self.HUDSuit = vgui.Create("HudSuit")
+    end
+
+    if not IsValid(self.HUDRoundInfo) then
+        self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
+    end
 
     -- We call this due to resolution changes.
-    self:DeathNoticeHUDInit()
+    self:DeathNoticeHUDInit(reloaded)
 
 end
 
@@ -143,7 +148,7 @@ end
 
 function GM:SetRoundDisplayInfo(infoType, params)
     if not IsValid(self.HUDRoundInfo) then
-        return
+        self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
     end
     self.HUDRoundInfo:SetVisible(true)
     self.HUDRoundInfo:SetDisplayInfo(infoType, params)
