@@ -115,6 +115,11 @@ function MAPSCRIPT:PostInit()
             DbgPrint("All players left")
         end
 
+        GAMEMODE:WaitForInput("teleport_alyx_to_croom2", "BeginSequence", function()
+            checkpoint1:Reset()
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+        end)
+
         -- 1680.254639 -3440.008301 -679.968750
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(1680.254639, -3440.008301, -679.968750), Angle(0, -90, 0))
         local checkpointTrigger3 = ents.Create("trigger_once")
