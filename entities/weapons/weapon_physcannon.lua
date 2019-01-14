@@ -1264,12 +1264,6 @@ end
 function SWEP:Think()
 
     if SERVER then
-        self:NextThink(CurTime())
-    else
-        self:SetNextClientThink(CurTime())
-    end
-
-    if SERVER then
         if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
             self:SetMegaEnabled(true)
         else
