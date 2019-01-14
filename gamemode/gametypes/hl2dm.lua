@@ -27,11 +27,11 @@ function GAMETYPE:IsTeamOnly()
 end
 
 function GAMETYPE:GetFragLimit()
-    return self.Settings["dm_fraglimit"].value
+    return GAMEMODE:GetSetting("dm_fraglimit")
 end
 
 function GAMETYPE:GetTimeLimit()
-    return self.Settings["dm_timelimit"].value * 60
+    return GAMEMODE:GetSetting("dm_timelimit") * 60
 end
 
 function GAMETYPE:GetAllFrags()
@@ -158,31 +158,30 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("dm_fraglimit", {
         Category = "SERVER",
         NiceName = "#GM_DM_FRAGLIMIT",
+        Description = "Frag limit",
         Type = "int",
         Value = 50,
-        flags = bit.bor(0, FCVAR_REPLICATED),
-        maxv = 1000,
-        info = "Frag limit"
+        Flags = bit.bor(0, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 1000},
     })
 
     GAMEMODE:AddSetting("dm_timelimit", {
         Category = "SERVER",
         NiceName = "#GM_DM_TIMELIMIT",
+        Description = "Time limit",
         Type = "int",
         Value = 10,
-        flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        maxv = 30,
-        info = "Time limit"
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 30 },
     })
 
     GAMEMODE:AddSetting("dm_teamonly", {
         Category = "SERVER",
         NiceName = "#GM_DM_TEAMONLY",
+        Description = "Team based",
         Type = "bool",
         Value = 0,
-        flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        maxv = 1,
-        info = "Team based"
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
 end
