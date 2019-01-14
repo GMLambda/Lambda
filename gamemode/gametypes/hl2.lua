@@ -118,14 +118,14 @@ GAMETYPE.DifficultyData = {
         Skill = 1,
         NPCSpawningScale = 0.0,
         DamageScale = {
-            [DMG_SCALE_PVN] = 2,
-            [DMG_SCALE_NVP] = 0.5,
+            [DMG_SCALE_PVN] = 1.6,
+            [DMG_SCALE_NVP] = 0.7,
             [DMG_SCALE_PVP] = 1,
             [DMG_SCALE_NVN] = 1
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 2.5,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -135,7 +135,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupNPCDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 2.5,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -150,14 +150,14 @@ GAMETYPE.DifficultyData = {
         Skill = 1,
         NPCSpawningScale = 0.2,
         DamageScale = {
-            [DMG_SCALE_PVN] = 1.5,
-            [DMG_SCALE_NVP] = 0.7,
+            [DMG_SCALE_PVN] = 1.2,
+            [DMG_SCALE_NVP] = 0.8,
             [DMG_SCALE_PVP] = 1,
             [DMG_SCALE_NVN] = 1
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 3.4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -167,7 +167,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupNPCDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 3.4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -189,7 +189,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 2,
+            [HITGROUP_HEAD] = 4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -199,7 +199,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupNPCDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 2,
+            [HITGROUP_HEAD] = 4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -221,7 +221,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -231,7 +231,7 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupNPCDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
+            [HITGROUP_HEAD] = 4,
             [HITGROUP_CHEST] = 1,
             [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
@@ -253,9 +253,9 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupPlayerDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 2,
-            [HITGROUP_STOMACH] = 2,
+            [HITGROUP_HEAD] = 4,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
             [HITGROUP_RIGHTARM] = 1,
             [HITGROUP_LEFTLEG] = 1,
@@ -263,9 +263,9 @@ GAMETYPE.DifficultyData = {
         },
         HitgroupNPCDamageScale = {
             [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 2,
-            [HITGROUP_STOMACH] = 2,
+            [HITGROUP_HEAD] = 4,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
             [HITGROUP_LEFTARM] = 1,
             [HITGROUP_RIGHTARM] = 1,
             [HITGROUP_LEFTLEG] = 1,
@@ -273,35 +273,35 @@ GAMETYPE.DifficultyData = {
         }
     },
     [5] = {
-        Name = "Survivor",
+        Name = "Realism",
         Proficiency = WEAPON_PROFICIENCY_PERFECT,
         Skill = 3,
         NPCSpawningScale = 1,
         DamageScale = {
-            [DMG_SCALE_PVN] = 3,
-            [DMG_SCALE_NVP] = 3,
-            [DMG_SCALE_PVP] = 3,
+            [DMG_SCALE_PVN] = 1,
+            [DMG_SCALE_NVP] = 1,
+            [DMG_SCALE_PVP] = 1,
             [DMG_SCALE_NVN] = 1
         },
         HitgroupPlayerDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 3,
+            [HITGROUP_GENERIC] = 2,
+            [HITGROUP_HEAD] = 8,
+            [HITGROUP_CHEST] = 3.5,
             [HITGROUP_STOMACH] = 3,
-            [HITGROUP_LEFTARM] = 0.2,
-            [HITGROUP_RIGHTARM] = 0.2,
-            [HITGROUP_LEFTLEG] = 0.2,
-            [HITGROUP_RIGHTLEG] = 0.2
+            [HITGROUP_LEFTARM] = 0.8,
+            [HITGROUP_RIGHTARM] = 0.8,
+            [HITGROUP_LEFTLEG] = 0.8,
+            [HITGROUP_RIGHTLEG] = 0.8
         },
         HitgroupNPCDamageScale = {
-            [HITGROUP_GENERIC] = 1,
-            [HITGROUP_HEAD] = 3,
-            [HITGROUP_CHEST] = 3,
+            [HITGROUP_GENERIC] = 2,
+            [HITGROUP_HEAD] = 8,
+            [HITGROUP_CHEST] = 3.5,
             [HITGROUP_STOMACH] = 3,
-            [HITGROUP_LEFTARM] = 0.2,
-            [HITGROUP_RIGHTARM] = 0.2,
-            [HITGROUP_LEFTLEG] = 0.2,
-            [HITGROUP_RIGHTLEG] = 0.2
+            [HITGROUP_LEFTARM] = 0.8,
+            [HITGROUP_RIGHTARM] = 0.8,
+            [HITGROUP_LEFTLEG] = 0.8,
+            [HITGROUP_RIGHTLEG] = 0.8
         }
     }
 }
@@ -310,6 +310,9 @@ GAMETYPE.Settings = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
+    if timeout == -1 then
+        return timeout
+    end
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
 
