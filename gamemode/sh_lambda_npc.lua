@@ -63,7 +63,6 @@ if SERVER then
             if difficultyScale ~= nil then
                 DbgPrint("Scaling difficulty damage: " .. tostring(difficultyScale))
                 dmginfo:ScaleDamage(difficultyScale)
-                dmginfo:SetDamageForce(dmginfo:GetDamageForce() * (difficultyScale * 0.3))
             end
         end
 
