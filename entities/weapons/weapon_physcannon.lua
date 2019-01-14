@@ -1264,9 +1264,9 @@ end
 function SWEP:Think()
 
     if SERVER then
-        self:NextThink(0)
+        self:NextThink(CurTime())
     else
-        self:SetNextClientThink(0)
+        self:SetNextClientThink(CurTime())
     end
 
     if SERVER then

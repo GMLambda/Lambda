@@ -320,7 +320,7 @@ function ENT:PhysicsSimulate( phys, dt )
     local timeToArrive
 
     if CLIENT then
-        timeToArrive = FrameTime()
+        timeToArrive = engine.TickInterval() * 2
     else
         timeToArrive = self:GetTimeToArrive()
     end
