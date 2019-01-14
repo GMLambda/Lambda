@@ -88,9 +88,6 @@ function GM:GetCurrentDifficultyData()
     local difficulty = self:GetSetting("difficulty")
     local entries = self:GetDifficultyData()
     local entry = entries[difficulty]
-    if entry == nil then
-        error("Invalid difficulty selected")
-    end
     return entry
 end
 
@@ -98,8 +95,7 @@ function GM:GetDifficultyDamageScale(type)
 
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
-        return
+        return 1
     end
 
     return data.DamageScale[type]
@@ -110,8 +106,7 @@ function GM:GetDifficultyNPCHitgroupDamageScale(group)
 
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
-        return
+        return 1
     end
 
     return data.HitgroupNPCDamageScale[group]
@@ -122,8 +117,7 @@ function GM:GetDifficultyWeaponProficiency()
 
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
-        return
+        return WEAPON_PROFICIENCY_GOOD
     end
 
     return data.Proficiency
@@ -138,8 +132,8 @@ function GM:GetDifficultyPlayerHitgroupDamageScale(group)
 
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
-        return
+        --error("Invalid difficulty selected")
+        return 1.0
     end
 
     return data.HitgroupPlayerDamageScale[group]
@@ -150,8 +144,7 @@ end
 function GM:GetNPCSpawningScale()
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
-        return
+        return 0
     end
     return data.NPCSpawningScale
 end
@@ -168,7 +161,6 @@ function GM:AdjustDifficulty()
 
     local data = self:GetCurrentDifficultyData()
     if data == nil then
-        error("Invalid difficulty selected")
         return
     end
 
@@ -190,7 +182,6 @@ function GM:AdjustNPCDifficulty(npc, data)
     if data == nil then
         data = self:GetCurrentDifficultyData()
         if data == nil then
-            error("Invalid difficulty selected")
             return
         end
     end
