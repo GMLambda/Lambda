@@ -560,10 +560,6 @@ function SWEP:SecondaryAttack()
         return true
 
     else
-        if CLIENT then
-            return
-        end
-
         local res = self:FindObject()
 
         if res == OBJECT_FOUND then

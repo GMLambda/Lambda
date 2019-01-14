@@ -4,27 +4,23 @@ end
 
 local DbgPrint = GetLogging("motioncontroller")
 
-DEFINE_BASECLASS("lambda_entity")
+DEFINE_BASECLASS("base_entity")
 
-ENT.Base = "lambda_entity"
+ENT.Base = "base_entity"
 ENT.Type = "anim"
 
-function ENT:PreInitialize()
-
-    DbgPrint(self, "PreInitialize")
-
-    BaseClass.PreInitialize(self)
-
+function ENT:SetupDataTables()
+    self:NetworkVar("Vector", 0, "TargetPos")
+    self:NetworkVar("Angle", 0, "TargetAng")
+    self:NetworkVar("Float", 0, "TimeToArrive")
+    self:NetworkVar("Entity", 0, "TargetObject")
 end
 
 function ENT:Initialize()
 
     DbgPrint(self, "Initialize")
 
-    BaseClass.Initialize(self)
-
-    -- Reset to 0
-    self:SetTargetTransform()
+    self:SetTargetTransform(Vector(0, 0, 0), Angle(0, 0, 0))
 
     local shadowParams = {}
 
@@ -33,9 +29,9 @@ function ENT:Initialize()
     shadowParams.secondstoarrive = 0
     shadowParams.maxangular = 360 * 10
     shadowParams.maxangulardamp = shadowParams.maxangular
-    shadowParams.maxspeed = 3500
+    shadowParams.maxspeed = 4000
     shadowParams.maxspeeddamp = shadowParams.maxspeed * 2
-    shadowParams.dampfactor = 1.0
+    shadowParams.dampfactor = 0.8
     shadowParams.teleportdistance = 0
 
     self.ShadowParams = shadowParams
@@ -52,10 +48,10 @@ function ENT:Initialize()
 end
 
 function ENT:SetTargetTransform(pos, ang)
-    self:SetNW2Vector("TargetPos", pos or Vector(0, 0, 0))
-    self:SetNW2Angle("TargetAng", ang or Angle(0, 0, 0))
+    self:SetTargetPos(pos)
+    self:SetTargetAng(ang)
     if SERVER then
-        self:SetNW2Float("TimeToArrive", FrameTime())
+        self:SetTimeToArrive(FrameTime())
     end
 end
 
@@ -191,7 +187,7 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
     self.AttachedObject = obj
 
     if SERVER then
-        self:SetNW2Entity("AttachedObj", obj)
+        self:SetTargetObject(obj)
     end
 
 end
@@ -246,7 +242,8 @@ function ENT:DetachObject()
     self.AttachedObject = nil
 
     if SERVER then
-        self:SetNW2Entity("AttachedObj", nil)
+        --self:SetNW2Entity("AttachedObj", nil)
+        self:SetTargetObject(NULL)
     end
 
 end
@@ -284,28 +281,36 @@ function ENT:Think()
 
 end
 
+local abs = math.abs
+local PREDICTION_TOLERANCE = 3
+
+function ENT:ComputeNetworkError()
+    local serverEnt = self:GetTargetObject()
+    local targetPos = self:GetTargetPos()
+    local objectPos = serverEnt:GetPos()
+    local posDelta = objectPos - targetPos
+    local errorPos = ((abs(posDelta.x) / PREDICTION_TOLERANCE) + (abs(posDelta.y) / PREDICTION_TOLERANCE) + (abs(posDelta.z) / PREDICTION_TOLERANCE)) / 3
+    return errorPos
+end
+
 function ENT:ManagePredictedObject()
-
     if CLIENT then
-
         local ent = self.AttachedObject
-        local serverEnt = self:GetNW2Entity("AttachedObj")
+        local serverEnt = self:GetTargetObject()
         if ent == nil and IsValid(serverEnt) then
-            self:AttachObject(serverEnt)
+            -- We give the prediction a tolerance, so objects being detached wont instantly fly to us
+            -- while on the server they are still being detached.
+            if self:ComputeNetworkError() < 0.5 then
+                self:AttachObject(serverEnt)
+            end
         elseif ent ~= nil and not IsValid(serverEnt) then
             -- Make sure we detach the entity if the server did.
             self:DetachObject()
         end
-
     end
-
 end
 
 function ENT:PhysicsSimulate( phys, dt )
-
-    if CLIENT then
-        --DbgPrint(self, "PhysicsSimulate", phys, dt)
-    end
 
     if self.AttachedObject == nil then
         return
@@ -315,9 +320,9 @@ function ENT:PhysicsSimulate( phys, dt )
     local timeToArrive
 
     if CLIENT then
-        timeToArrive = engine.TickInterval() * 2
+        timeToArrive = FrameTime()
     else
-        timeToArrive = self:GetNW2Float("TimeToArrive")
+        timeToArrive = self:GetTimeToArrive()
     end
 
     if timeToArrive <= 0 then
@@ -325,8 +330,8 @@ function ENT:PhysicsSimulate( phys, dt )
     end
 
     shadowParams.dt = dt
-    shadowParams.pos = self:GetNW2Vector("TargetPos", Vector(0, 0, 0))
-    shadowParams.angle = self:GetNW2Angle("TargetAng", Angle(0, 0, 0))
+    shadowParams.pos = self:GetTargetPos()
+    shadowParams.angle = self:GetTargetAng()
     shadowParams.secondstoarrive = timeToArrive
 
     phys:ComputeShadowControl(shadowParams)
@@ -337,8 +342,7 @@ function ENT:PhysicsSimulate( phys, dt )
     end
 
     self.ErrorTime = self.ErrorTime + dt
-
-    self:SetNW2Float("TimeToArrive", timeToArrive)
+    self:SetTimeToArrive(timeToArrive)
 
     return Vector(0, 0, 0), Vector(0, 0, 0), SIM_LOCAL_ACCELERATION
 
