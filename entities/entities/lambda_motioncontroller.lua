@@ -283,6 +283,7 @@ end
 
 local abs = math.abs
 local PREDICTION_TOLERANCE = 3
+local PREDICTION_THRESHOLD = 1
 
 function ENT:ComputeNetworkError()
     local serverEnt = self:GetTargetObject()
@@ -300,7 +301,7 @@ function ENT:ManagePredictedObject()
         if ent == nil and IsValid(serverEnt) then
             -- We give the prediction a tolerance, so objects being detached wont instantly fly to us
             -- while on the server they are still being detached.
-            if self:ComputeNetworkError() < 0.5 then
+            if self:ComputeNetworkError() <= PREDICTION_THRESHOLD then
                 self:AttachObject(serverEnt)
             end
         elseif ent ~= nil and not IsValid(serverEnt) then
