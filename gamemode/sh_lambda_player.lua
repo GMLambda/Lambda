@@ -146,18 +146,32 @@ if SERVER then
             ply:SetDeaths(transitionData.Deaths)
         end
 
+        ply:SetTeam(TEAM_SPECTATOR)
         ply:SetName("!player") -- Some thing are triggered between PlayerInitialSpawn and PlayerSpawn
         if ply:IsBot() == false then
             ply:SetInactive(true)
         end
 
+        -- If game in progress player needs to wait.
+        local elapsed = self:RoundElapsedTime()
+        print("Round time elapsed:", elapsed)
+
+        -- Also we allow players to directly spawn if the round just started.
+        if self:IsRoundRunning() == true then
+            if self:WaitForNextCheckpoint(ply) == true and elapsed >= 30 then
+                ply.InitialSpawnHandled = false
+            else
+                ply.InitialSpawnHandled = true
+            end
+        else
+            ply.InitialSpawnHandled = true
+        end
+
         self:AssignPlayerAuthToken(ply)
         self:AddPlayerToRespawnQueue(ply)
 
-        BaseClass.PlayerInitialSpawn( self, ply )
-
     end
-
+    
     function GM:PlayerSelectSpawn(ply)
 
         DbgPrint("PlayerSelectSpawn")
@@ -198,6 +212,17 @@ if SERVER then
         ply.SelectedSpawnpoint = spawnpoint
         return spawnpoint
 
+    end
+
+    function GM:WaitForNextCheckpoint(ply)
+        local gameType = self:GetGameType()
+        if gameType.UsingCheckpoints == true then
+            local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
+            if respawnTime == -1 then
+                return true
+            end
+        end
+        return false
     end
 
     function GM:CanPlayerSpawn(ply)
@@ -444,8 +469,11 @@ if SERVER then
             return
         end
 
-        if self.TeamBased and ( ply:Team() == TEAM_SPECTATOR or ply:Team() == TEAM_UNASSIGNED ) then
-            self:PlayerSpawnAsSpectator( ply )
+        -- We need this to make sure players end up in the respawn queue.
+        if ply.InitialSpawnHandled == false then
+            DbgPrint("Initial spawn, using respawn queue")
+            ply.InitialSpawnHandled = true
+            ply:KillSilent()
             return
         end
 
@@ -788,7 +816,7 @@ if SERVER then
                 if forceWithMass >= 150000 or totalMass >= 10000 then
                     gibPlayer = true
                 end
-            elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 100 then
+            elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 2000 then
                 gibPlayer = true
             end
         end
@@ -840,7 +868,7 @@ if SERVER then
         local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
         ply.RespawnTime = ply.DeathTime + respawnTime
 
-        if respawnTime < 0 then
+        if self:WaitForNextCheckpoint(ply) then
             self:AddPlayerToRespawnQueue(ply)
         end
 
@@ -1018,7 +1046,6 @@ if SERVER then
             if scale ~= nil then
                 DbgPrint("Scaling difficulty damage: " .. tostring(scale))
                 dmginfo:ScaleDamage(scale)
-                dmginfo:SetDamageForce(dmginfo:GetDamageForce() * (scale * 0.3))
             end
         end
 
