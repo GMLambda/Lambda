@@ -112,6 +112,7 @@ function MAPSCRIPT:PostInit()
             MoveType = MOVETYPE_NONE,
         })
 
+
     end
 
 end
@@ -119,6 +120,69 @@ end
 function MAPSCRIPT:PostPlayerSpawn(ply)
 
     --DbgPrint("PostPlayerSpawn")
+
+end
+
+-- spillway_cop1
+
+function CreateDropship()
+    local landing = ents.Create("info_target")
+    landing:SetPos(Vector(8791.229492, 240.316772, -255.968750))
+    landing:SetName("lambda_landing_1")
+    landing:Spawn()
+
+    local track1 = ents.Create("path_track")
+    track1:SetPos(Vector(5090.260254, -4773.803223, 342.677246))
+    track1:SetName("lambda_track_1")
+    track1:SetKeyValue("target", "lambda_track_2")
+    track1:Spawn()
+    track1:Activate()
+
+    local track2 = ents.Create("path_track")
+    track2:SetPos(Vector(11300.325195, 1308.573486, 138.682419))
+    track2:SetName("lambda_track_2")
+    track2:SetKeyValue("target", "lambda_track_3")
+    track2:Spawn()
+    track2:Activate()
+
+    local track3 = ents.Create("path_track")
+    track3:SetPos(Vector(8555.336914, 269.825989, 25.706255))
+    track3:SetName("lambda_track_3")
+    --track3:SetKeyValue("target", "lambda_track_4")
+    track3:Spawn()
+    track3:Activate()
+
+    local track4 = ents.Create("path_track")
+    track4:SetPos(Vector(6976.248535, 1049.134155, 661.333191))
+    track4:SetName("lambda_track_4")
+    track4:SetKeyValue("target", "lambda_track_5")
+    track4:Spawn()
+    track4:Activate()
+
+    local track5 = ents.Create("path_track")
+    track5:SetPos(Vector(8382.391602, 579.510437, 183.660080))
+    track5:SetName("lambda_track_5")
+    --track5:SetKeyValue("target", "lambda_landing_1")
+    track5:Spawn()
+    track5:Activate()
+
+    local ship = ents.Create("npc_combinedropship")
+    ship:SetPos(Vector(1623.408936, -6077.656250, 491.766144))
+    ship:SetKeyValue("NPCTemplate", "spillway_cop1")
+    ship:SetKeyValue("NPCTemplate2", "spillway_cop1")
+    ship:SetKeyValue("NPCTemplate3", "spillway_cop1")
+    ship:SetKeyValue("NPCTemplate4", "spillway_cop1")
+    ship:SetKeyValue("NPCTemplate5", "spillway_cop1")
+    ship:SetKeyValue("NPCTemplate6", "spillway_cop1")
+    ship:SetKeyValue("LandTarget", "lambda_landing_1")
+    ship:SetKeyValue("InitialSpeed", "600")
+    ship:SetKeyValue("CrateType", "1")
+    ship:SetKeyValue("target", "lambda_track_1")
+    ship:SetKeyValue("spawnflags", "16")
+    ship:Spawn()
+    --ship:Fire("StartScripting")
+    ship:Fire("FlyToSpecificTrackViaPath", "lambda_track_1")
+    --ship:Fire("LandTakeCrate", "6")
 
 end
 
