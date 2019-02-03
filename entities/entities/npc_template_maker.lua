@@ -1,9 +1,5 @@
 local DbgPrint = GetLogging("NPCMaker")
 
-if SERVER then
-
-AddCSLuaFile()
-
 DEFINE_BASECLASS( "lambda_npcmaker" )
 
 ENT.Base = "lambda_npcmaker"
@@ -662,7 +658,5 @@ function TestPlayerTrace(ply)
     })
 
     PrintTable(hullTr)
-
-end
 
 end
