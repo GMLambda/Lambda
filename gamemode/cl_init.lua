@@ -421,3 +421,6 @@ function GM:PlayerBindPress(ply, bind, pressed)
         return true
     end
 end
+
+function GM:PlayerClassChanged( ply, newID )
+end

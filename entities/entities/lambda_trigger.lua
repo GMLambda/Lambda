@@ -9,14 +9,14 @@ local TRIGGER_MSG_SHOWWAIT = 1
 local TRIGGER_MSG_SETBLOCKED = 2
 local TRIGGER_MSG_REMOVED = 3
 
+ENT.Base = "lambda_entity"
+ENT.Type = "brush"
+
 if SERVER then
 
     AddCSLuaFile()
 
     util.AddNetworkString("LambdaTriggerUpdate")
-
-    ENT.Base = "lambda_entity"
-    ENT.Type = "brush"
 
     DEFINE_BASECLASS("lambda_entity")
 
