@@ -155,7 +155,7 @@ if SERVER then
 
         -- If game in progress player needs to wait.
         local elapsed = self:RoundElapsedTime()
-        print("Round time elapsed:", elapsed)
+        DbgPrint("Round time elapsed:", elapsed)
 
         -- Also we allow players to directly spawn if the round just started.
         if self:IsRoundRunning() == true then

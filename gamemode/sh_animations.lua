@@ -191,8 +191,6 @@ end
 Name: gamemode:UpdateAnimation()
 Desc: Animation updates (pose params etc) should be done here
 -----------------------------------------------------------]]
-local SHIT = CurTime()
-
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 
     velocity = GetPlayerVelocity(ply, velocity)
