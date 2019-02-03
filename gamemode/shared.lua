@@ -513,3 +513,38 @@ function GM:EntityKeyValue(ent, key, val)
     end
 
 end
+
+function GM:ApplyCorrectedDamage(dmginfo)
+ 
+    DbgPrint("ApplyCorrectedDamage")
+
+    local attacker = dmginfo:GetAttacker()
+
+    if IsValid(attacker) and (dmginfo:IsDamageType(DMG_BULLET) or dmginfo:IsDamageType(DMG_CLUB)) then
+
+        local weaponTable = nil
+        local wep = nil
+
+        if attacker:IsPlayer() then
+            weaponTable = self.PLAYER_WEAPON_DAMAGE
+            wep = attacker:GetActiveWeapon()
+        elseif attacker:IsNPC() then
+            weaponTable = self.NPC_WEAPON_DAMAGE
+            wep = attacker:GetActiveWeapon()
+        end
+
+        if weaponTable ~= nil and IsValid(wep) then
+            local class = wep:GetClass()
+            local dmgCVar = weaponTable[class]
+            if dmgCVar ~= nil then
+                local dmgAmount = dmgCVar:GetInt()
+                DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
+                dmginfo:SetDamage(dmgAmount)
+            end
+        end
+
+    end
+
+    return dmginfo
+
+end

@@ -2,6 +2,7 @@ if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaPlayerSettings")
     util.AddNetworkString("LambdaPlayerSettingsChanged")
+    util.AddNetworkString("LambdaPlayerDamage")
 end
 
 local DbgPrint = GetLogging("Player")
@@ -315,6 +316,26 @@ if SERVER then
 
     end
 
+    function GM:PlayerLoadoutRevive(ply)
+        local restoreData = ply.RevivalData
+        if restoreData == nil then
+            return
+        end
+
+        for cls, data in pairs(restoreData.Weapons) do
+            ply:Give(cls, true)
+            local wep = ply:GetWeapon(cls)
+            if IsValid(wep) then
+                wep:SetClip1(data.Clip1)
+                wep:SetClip2(data.Clip2)
+            end
+        end
+
+        for ammoId, data in pairs(restoreData.Ammo) do
+            ply:SetAmmo(data, ammoId)
+        end
+    end
+
     function GM:PlayerLoadout(ply)
 
         DbgPrint("PlayerLoadout: " .. tostring(ply))
@@ -455,7 +476,7 @@ if SERVER then
         ply:Spawn()
         ply.Reviving = false
 
-        ply:SetHealth(health)
+        ply:SetHealth(health or 30)
         ply:TeleportPlayer(pos, ang)
 
     end
@@ -476,6 +497,9 @@ if SERVER then
             ply:KillSilent()
             return
         end
+
+        -- Bloody fucking hell.
+        ply:SetSaveValue("m_bPreventWeaponPickup", false)
 
         -- Stop observer mode
         ply:UnSpectate()
@@ -499,18 +523,24 @@ if SERVER then
         -- Update vehicle checkpoints
         self:UpdateQueuedVehicleCheckpoints()
 
+        -- Alive at this point.
+        ply:SetTeam(LAMBDA_TEAM_ALIVE)
+
+        -- Either loadout or previous equipment.
+        ply:StripAmmo()
+        ply:StripWeapons()
+
         -- Lets remove whatever the player left on vehicles behind before he got killed.
         if ply.Reviving ~= true then
             self:RemovePlayerVehicles(ply)
             -- Should we really do this?
             ply.WeaponDuplication = {}
-            ply:StripAmmo()
-            ply:StripWeapons()
-            ply:SetTeam(LAMBDA_TEAM_ALIVE)
             ply:RemoveSuit()
 
             hook.Call( "PlayerLoadout", GAMEMODE, ply )
             hook.Call( "PlayerSetModel", GAMEMODE, ply )
+        elseif ply.Reviving == true then
+            hook.Call( "PlayerLoadoutRevive", GAMEMODE, ply )
         end
 
         ply:SetCustomCollisionCheck(true)
@@ -531,9 +561,6 @@ if SERVER then
             ply:SetInactive(true)
             ply:DisablePlayerCollide(true)
         end
-
-        -- Bloody fucking hell.
-        ply:SetSaveValue("m_bPreventWeaponPickup", false)
 
         ply:SetRunSpeed(self:GetSetting("sprintspeed")) -- TODO: Put this in a convar.
         ply:SetWalkSpeed(self:GetSetting("normspeed"))
@@ -708,6 +735,33 @@ if SERVER then
             end
         end
 
+        -- Save all the data for when players get revived they have their previous equip.
+        local restoreData = {}
+
+        restoreData.Weapons = {}
+        for _,v in pairs(ply:GetWeapons()) do
+            restoreData.Weapons[v:GetClass()] = {
+                Clip1 = v:Clip1(),
+                Clip2 = v:Clip2(),
+            }
+        end
+
+        restoreData.Ammo = {}
+        for _,v in pairs(ply:GetWeapons()) do
+            local primaryAmmo = v:GetPrimaryAmmoType()
+            if primaryAmmo ~= -1 then
+                local name = game.GetAmmoName(primaryAmmo)
+                restoreData.Ammo[name] = ply:GetAmmoCount(primaryAmmo)
+            end
+            local secondaryAmmo = v:GetSecondaryAmmoType()
+            if secondaryAmmo ~= -1 then
+                local name = game.GetAmmoName(secondaryAmmo)
+                restoreData.Ammo[name] = ply:GetAmmoCount(secondaryAmmo)
+            end
+        end
+
+        ply.RevivalData = restoreData
+
         ply.LastWeaponsDropped = {}
         for v,_ in pairs(weps) do
 
@@ -819,6 +873,11 @@ if SERVER then
             elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 2000 then
                 gibPlayer = true
             end
+        end
+
+        -- If we gib the player nothing is left.
+        if gibPlayer == true then
+            ply.RevivalData = nil
         end
 
         local ragdollMgr = ply:GetRagdollManager()
@@ -1010,58 +1069,6 @@ if SERVER then
         ply.LastPickupTime = curTime
 
         return true
-
-    end
-
-    function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
-
-        local DbgPrint = DbgPrintDmg
-
-        DbgPrint("ScalePlayerDamage", ply, hitgroup)
-
-        -- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
-        self:ApplyCorrectedDamage(dmginfo)
-
-        local attacker = dmginfo:GetAttacker()
-
-        if dmginfo:IsDamageType(DMG_BULLET) == true then
-            self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
-        end
-        
-        -- First scale hitgroups.
-        local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
-        DbgPrint("Hitgroup Scale", npc, scale)
-        dmginfo:ScaleDamage(scale)
-
-        -- Scale by difficulty.
-        local scaleType = 0
-        if attacker:IsPlayer() == true then
-            scaleType = DMG_SCALE_PVP
-        elseif attacker:IsNPC() == true then
-            scaleType = DMG_SCALE_NVP
-        end
-
-        if scaleType ~= 0 then
-            scale = self:GetDifficultyDamageScale(scaleType)
-            if scale ~= nil then
-                DbgPrint("Scaling difficulty damage: " .. tostring(scale))
-                dmginfo:ScaleDamage(scale)
-            end
-        end
-
-        if dmginfo:GetDamage() > 0 then
-            --DbgPrint("ScalePlayerDamage: " .. tostring(ply))
-            self:EmitPlayerHurt(dmginfo:GetDamage(), ply, hitgroup)
-        end
-
-        -- Reset water damage
-        if ply.IsDrowning ~= true then
-            ply.WaterDamage = 0
-        end
-
-        if ply:IsPositionLocked() == true then
-            dmginfo:ScaleDamage(0)
-        end
 
     end
 
@@ -1897,3 +1904,104 @@ end
 function GM:AllowPlayerTracking()
     return self:CallGameTypeFunc("AllowPlayerTracking")
 end
+
+local FLINCH_SEQUENCE = {
+    [HITGROUP_GENERIC] = { "flinch_head_01", "flinch_head_02" },
+    [HITGROUP_HEAD] = { "flinch_head_01", "flinch_head_02" },
+    [HITGROUP_STOMACH] = { "flinch_stomach_01", "flinch_stomach_02" },
+    [HITGROUP_LEFTARM] = { "flinch_shoulder_l" },
+    [HITGROUP_RIGHTARM] = { "flinch_shoulder_r" },
+}
+
+function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
+
+    local DbgPrint = DbgPrintDmg
+
+    DbgPrint("ScalePlayerDamage", ply, hitgroup)
+
+    -- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
+    self:ApplyCorrectedDamage(dmginfo)
+
+    local attacker = dmginfo:GetAttacker()
+
+    if SERVER then
+        if dmginfo:IsDamageType(DMG_BULLET) == true then
+            self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
+        end
+    end
+    
+    -- First scale hitgroups.
+    local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
+    DbgPrint("Hitgroup Scale", npc, scale)
+    dmginfo:ScaleDamage(scale)
+
+    -- Scale by difficulty.
+    local scaleType = 0
+    if attacker:IsPlayer() == true then
+        scaleType = DMG_SCALE_PVP
+    elseif attacker:IsNPC() == true then
+        scaleType = DMG_SCALE_NVP
+    end
+
+    if scaleType ~= 0 then
+        scale = self:GetDifficultyDamageScale(scaleType)
+        if scale ~= nil then
+            DbgPrint("Scaling difficulty damage: " .. tostring(scale))
+            dmginfo:ScaleDamage(scale)
+        end
+    end
+
+    if SERVER and dmginfo:GetDamage() > 0 then
+        --DbgPrint("ScalePlayerDamage: " .. tostring(ply))
+        self:EmitPlayerHurt(dmginfo:GetDamage(), ply, hitgroup)
+    end
+
+    -- Reset water damage
+    if ply.IsDrowning ~= true then
+        ply.WaterDamage = 0
+    end
+
+    if ply:IsPositionLocked() == true then
+        dmginfo:ScaleDamage(0)
+    end
+
+    if SERVER then
+        net.Start("LambdaPlayerDamage")
+        net.WriteEntity(attacker)
+        net.WriteEntity(ply)
+        net.WriteUInt(hitgroup, 10)
+        net.Broadcast()
+    end
+
+    if hitgroup == HITGROUP_HEAD then
+        ply:ViewPunch( Angle(-10, 0, 0) )
+    end
+
+end
+
+function GM:OnPlayerDamage(attacker, victim, hitgroup)
+
+    if attacker ~= LocalPlayer() then
+        victim:EmitSound("Flesh.BulletImpact")
+    end
+    
+    -- Play kickback.
+    local flinchSeqs = FLINCH_SEQUENCE[hitgroup]
+    if flinchSeqs ~= nil then
+        local randFlinch = table.Random(flinchSeqs)
+        local id = victim:LookupSequence(randFlinch)
+        if id ~= -1 then
+            local actId = victim:GetSequenceActivity(id)
+            victim:AnimSetGestureWeight( GESTURE_SLOT_FLINCH, 1 )
+            victim:AnimRestartGesture( GESTURE_SLOT_FLINCH, actId, true )
+        end
+    end
+
+end
+
+net.Receive("LambdaPlayerDamage", function(len)
+    local attacker = net.ReadEntity()
+    local victim = net.ReadEntity()
+    local hitgroup = net.ReadUInt(10)
+    GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup)
+end)

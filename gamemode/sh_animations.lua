@@ -4,9 +4,12 @@ end
 
 --local DbgPrint = GetLogging("Animation")
 local function GetPlayerVelocity(ply, velocity)
+    --[[
     if CLIENT and ply ~= LocalPlayer() then
         velocity = ply.LambdaPlayerVelocity or velocity
     end
+    ]]
+    
     return velocity
 end
 
@@ -188,6 +191,8 @@ end
 Name: gamemode:UpdateAnimation()
 Desc: Animation updates (pose params etc) should be done here
 -----------------------------------------------------------]]
+local SHIT = CurTime()
+
 function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
 
     velocity = GetPlayerVelocity(ply, velocity)
@@ -240,6 +245,7 @@ function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
         GAMEMODE:GrabEarAnimation(ply)
         GAMEMODE:MouthMoveAnimation(ply)
     end
+
 end
 
 --
