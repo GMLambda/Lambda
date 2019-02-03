@@ -2,6 +2,21 @@ if SERVER then
     AddCSLuaFile()
 end
 
+sound.Add({
+    name = "Flesh.BulletImpact",
+    channel = CHAN_WEAPON,
+    volume = 0.7,
+    level = SNDLVL_NORM,
+    pitch = 100,
+    sound = { 
+        "lambda/physics/flesh/flesh_impact_bullet1.wav",
+        "lambda/physics/flesh/flesh_impact_bullet2.wav",
+        "lambda/physics/flesh/flesh_impact_bullet3.wav",
+        "lambda/physics/flesh/flesh_impact_bullet4.wav",
+        "lambda/physics/flesh/flesh_impact_bullet5.wav",
+    },
+})
+
 function GM:SetSoundSuppressed(suppress)
     self.SuppressSound = suppress
 end
