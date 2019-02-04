@@ -1981,10 +1981,10 @@ end
 
 function GM:OnPlayerDamage(attacker, victim, hitgroup)
 
-    if attacker ~= LocalPlayer() then
+    if attacker ~= LocalPlayer() and hitgroup == HITGROUP_HEAD then
         victim:EmitSound("Flesh.BulletImpact")
     end
-    
+
     -- Play kickback.
     local flinchSeqs = FLINCH_SEQUENCE[hitgroup]
     if flinchSeqs ~= nil then
