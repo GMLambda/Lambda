@@ -361,6 +361,14 @@ function GM:ProcessPathTrackHack(ent)
     ent:SetKeyValue("OnPass", "lambda_path_tracker,OnPass,,0,-1")
 end
 
+function GM:ProcessAntlionCollision(ent)
+    -- Disable annoying collisions with antlions if allied.
+    if (game.GetGlobalState("antlion_allied") == GLOBAL_ON and
+        self:GetSetting("friendly_antlion_collision", true) == false) then
+        ent:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+    end
+end
+
 local ENTITY_PROCESSORS =
 {
     ["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
@@ -369,6 +377,7 @@ local ENTITY_PROCESSORS =
     ["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
     ["logic_choreographed_scene"] = { PostFrame = true, Fn = GM.ProcessLogicChoreographedScene },
     ["path_track"] = { PostFrame = true, Fn = GM.ProcessPathTrackHack },
+    ["npc_antlion"] = { PostFrame = true, Fn = GM.ProcessAntlionCollision },
 }
 
 function GM:OnEntityCreated(ent)

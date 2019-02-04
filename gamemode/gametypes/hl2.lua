@@ -525,6 +525,16 @@ function GAMETYPE:InitSettings()
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
+
+    GAMEMODE:AddSetting("friendly_antlion_collision", {
+        Category = "SERVER",
+        NiceName = "#GM_ANTLIONCOLLISION",
+        Description = "Friendly Antlion collision",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
 end
 
 function GAMETYPE:GetCampaignName(map)
