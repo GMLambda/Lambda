@@ -439,11 +439,11 @@ if SERVER then
         -- Switch to a better weapon.
         local weps = ply:GetWeapons()
         local highestDmg = 0
+        local highestAmmo = 0
         local bestWep = nil
 
         for k,v in pairs(weps) do
 
-            local ammo = ply:GetAmmoCount(v:GetPrimaryAmmoType())
             if bestWep == nil then
                 bestWep = v
             end
@@ -452,20 +452,25 @@ if SERVER then
                 break
             end
 
-            if ammo ~= 0 then
-                local dmgCVar = self.PLAYER_WEAPON_DAMAGE[v:GetClass()]
-                if dmgCVar ~= nil then
-                    local dmg = dmgCVar:GetFloat()
-                    if dmg > highestDmg then
+            local primaryId = v:GetPrimaryAmmoType()
+            if primaryId ~= -1 then
+                local clip1 = math.max(v:Clip1(), 0)
+                local ammo = ply:GetAmmoCount(primaryId) + clip1
+                if ammo ~= 0 then
+                    local dmg = game.GetAmmoNPCDamage( primaryId ) * ammo
+                    print(v, "Damage", dmg)
+                    if dmg > highestDmg and ammo > highestAmmo then
                         bestWep = v
+                        highestAmmo = ammo
                         highestDmg = dmg
                     end
                 end
             end
+
         end
 
         if bestWep ~= nil then
-            DbgPrint(bestWep)
+            print(bestWep)
             ply:SelectWeapon(bestWep:GetClass())
         end
 
