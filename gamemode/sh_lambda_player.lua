@@ -15,6 +15,10 @@ local SUIT_DEVICE_SPRINT = 2
 local SUIT_DEVICE_FLASHLIGHT = 3
 local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 
+-- We use this constant for kickback from the back.
+local HITGROUP_HEAD_BACK = 100
+local HITGROUP_BACK = 101
+
 if SERVER then
 
     function GM:IsPlayerEnemy(ply1, ply2)
@@ -1908,9 +1912,21 @@ end
 local FLINCH_SEQUENCE = {
     [HITGROUP_GENERIC] = { "flinch_head_01", "flinch_head_02" },
     [HITGROUP_HEAD] = { "flinch_head_01", "flinch_head_02" },
+    [HITGROUP_HEAD_BACK] = { "flinch_back_01" },
+    [HITGROUP_BACK] = { "flinch_back_01" },
+    [HITGROUP_CHEST] = { "flinch_01", "flinch_02" },
     [HITGROUP_STOMACH] = { "flinch_stomach_01", "flinch_stomach_02" },
     [HITGROUP_LEFTARM] = { "flinch_shoulder_l" },
     [HITGROUP_RIGHTARM] = { "flinch_shoulder_r" },
+}
+
+local FLESH_IMPACT_SOUNDS =
+{
+    "lambda/physics/flesh/flesh_impact_bullet1.wav",
+    "lambda/physics/flesh/flesh_impact_bullet2.wav",
+    "lambda/physics/flesh/flesh_impact_bullet3.wav",
+    "lambda/physics/flesh/flesh_impact_bullet4.wav",
+    "lambda/physics/flesh/flesh_impact_bullet5.wav",
 }
 
 function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
@@ -1924,12 +1940,10 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
 
     local attacker = dmginfo:GetAttacker()
 
-    if SERVER then
-        if dmginfo:IsDamageType(DMG_BULLET) == true then
-            self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
-        end
+    if SERVER and dmginfo:IsDamageType(DMG_BULLET) == true then
+        self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
     end
-    
+
     -- First scale hitgroups.
     local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
     DbgPrint("Hitgroup Scale", npc, scale)
@@ -1965,24 +1979,72 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         dmginfo:ScaleDamage(0)
     end
 
+    -- Determine if the bullet came from the back or front.
+    local eyePos = ply:EyePos()
+    local dmgDelta = (attacker:EyePos() - eyePos):GetNormalized()
+    local eyeAng = ply:EyeAngles()
+    eyeAng.x = 0
+
+    local eyeFwd = eyeAng:Forward()
+    local dot = eyeFwd:Dot(dmgDelta)
+    local isBackside = false
+    if dot < -0.4 then
+        isBackside = true
+    end
+
+    if isBackside == true then
+        if hitgroup == HITGROUP_HEAD then
+            hitgroup = HITGROUP_HEAD_BACK
+        elseif hitgroup == HITGROUP_CHEST or hitgroup == HITGROUP_STOMACH then
+            hitgroup = HITGROUP_BACK
+        end
+    end
+
     if SERVER then
+        local plys = player.GetAll()
+        table.RemoveByValue(plys, attacker)
+
         net.Start("LambdaPlayerDamage")
         net.WriteEntity(attacker)
         net.WriteEntity(ply)
         net.WriteUInt(hitgroup, 10)
-        net.Broadcast()
+        net.WriteVector(dmginfo:GetDamagePosition())
+        net.Send(plys)
+    else
+        -- Local player runs this shared, no need to network this.
+        if attacker == LocalPlayer() then
+            self:OnPlayerDamage(attacker, ply, hitgroup, dmginfo:GetDamagePosition())
+        end
     end
 
+    local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 2500, 0, 1)
+    local punchForce = 60 * dmgForceLen
+    local viewPunch = Angle(0, 0, 0)
     if hitgroup == HITGROUP_HEAD then
-        ply:ViewPunch( Angle(-10, 0, 0) )
+        viewPunch = viewPunch + Angle(-punchForce, 0, 0)
+    elseif hitgroup == HITGROUP_HEAD_BACK then
+        viewPunch = viewPunch + Angle(punchForce, 0, 0)
     end
+    viewPunch.x = math.Clamp(viewPunch.x, -60, 60)
+    ply:ViewPunch(viewPunch)
 
 end
 
-function GM:OnPlayerDamage(attacker, victim, hitgroup)
+function GM:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
 
-    if attacker ~= LocalPlayer() and hitgroup == HITGROUP_HEAD then
-        victim:EmitSound("Flesh.BulletImpact")
+    if attacker ~= LocalPlayer() then
+        local vol = 0.7
+        if hitgroup == HITGROUP_HEAD or hitgroup == HITGROUP_HEAD_BACK then
+            vol = 0.7
+        elseif hitgroup == HITGROUP_LEFTARM or hitgroup == HITGROUP_RIGHTARM then
+            vol = 0.25
+        elseif hitgroup == HITGROUP_STOMACH or hitgroup == HITGROUP_CHEST then
+            vol = 0.18
+        else
+            vol = 0.1
+        end
+        local snd = table.Random(FLESH_IMPACT_SOUNDS)
+        victim:EmitSound(snd, 75, 100, vol)
     end
 
     -- Play kickback.
@@ -1994,6 +2056,8 @@ function GM:OnPlayerDamage(attacker, victim, hitgroup)
             local actId = victim:GetSequenceActivity(id)
             victim:AnimSetGestureWeight( GESTURE_SLOT_FLINCH, 1 )
             victim:AnimRestartGesture( GESTURE_SLOT_FLINCH, actId, true )
+        else
+            print("No activity for: " .. randFlinch)
         end
     end
 
@@ -2003,5 +2067,6 @@ net.Receive("LambdaPlayerDamage", function(len)
     local attacker = net.ReadEntity()
     local victim = net.ReadEntity()
     local hitgroup = net.ReadUInt(10)
-    GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup)
+    local hitpos = net.ReadVector()
+    GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
 end)
