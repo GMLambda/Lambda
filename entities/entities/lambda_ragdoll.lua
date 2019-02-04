@@ -359,7 +359,9 @@ function ENT:CreateGibPart(boneName, pos, ang, posOffset, angOffset, mdl, dmgFor
     gib.LastDecal = 0
     gib.HitSomething = false
     gib:AddCallback("PhysicsCollide", function(e, data)
-        self:HandleGibsCollision(e, data)
+        if IsValid(self) then
+            self:HandleGibsCollision(e, data)
+        end
     end)
 
     -- Update effects
