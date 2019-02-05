@@ -1,6 +1,24 @@
 0.9.3
 - Improved: Allow gametype to auto start without players.
 - Improved: (F1) Player menu overhaul.
+- Improved: Checkpoints were rebalanced, encourage players to revive others.
+- Improved: Physcannon prediction has now a tolerance before being attached clientside.
+- Improved: Physcannon glow was reduced.
+- Improved: Kill feed overhaul, now considers screen resolution.
+- Improved: Replaced bullet impact sounds with more realistic ones.
+- Feature: Realism difficulty, for people who like a challenge.
+- Feature: Medkit was added to heal and revive players, received in d1_trainstation_05.
+- Feature: lambda_weapondropmode allows to specify what players drop on death.
+- Feature: Implemented env_zoom with multiplayer support.
+- Feature: Implemented point_viewcontrol with multiplayer support.
+- Feature: Player flinching animations that indicates the hit position of damage.
+- Fix: PLAYER:Give not working properly in some cases.
+- Fix: Physcannon not networking idle time causing stuttery momvement.
+- Fix: d1_town_02 lock door to prevent backtracking.
+- Fix: Physcannon missing sprites glow sprites on end caps.
+- Fix: Vehicle view not resetting roll.
+- Fix: Item respawn spam.
+- Fix: d2_prison_05 blocking players near map end.
 - Fix: NPC Maker not spawning NPCs in some cases.
 - Fix: d1_trainstation_01 queue sometimes blocking the player.
 - Fix: Make sure the door stays locked at d1_town_02.
@@ -10,6 +28,8 @@
 - Fix: Some delayed inputs firing after map reset.
 - Fix: d2_prison_05 blocking players near map end.
 - Fix: trigger displaying waiting info when requested not to.
+- Fix: Pending entity outputs not being cleared on map restart.
+- Fix: Round information HUDs missing when first connected.
 
 0.9.2:
 - Fix: logic_auto and trigger_auto firing too many events.
