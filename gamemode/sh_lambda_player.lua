@@ -458,7 +458,6 @@ if SERVER then
                 local ammo = ply:GetAmmoCount(primaryId) + clip1
                 if ammo ~= 0 then
                     local dmg = game.GetAmmoNPCDamage( primaryId ) * ammo
-                    print(v, "Damage", dmg)
                     if dmg > highestDmg and ammo > highestAmmo then
                         bestWep = v
                         highestAmmo = ammo
@@ -470,7 +469,6 @@ if SERVER then
         end
 
         if bestWep ~= nil then
-            print(bestWep)
             ply:SelectWeapon(bestWep:GetClass())
         end
 
@@ -2044,7 +2042,7 @@ function GM:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
         elseif hitgroup == HITGROUP_LEFTARM or hitgroup == HITGROUP_RIGHTARM then
             vol = 0.25
         elseif hitgroup == HITGROUP_STOMACH or hitgroup == HITGROUP_CHEST then
-            vol = 0.18
+            vol = 0.12
         else
             vol = 0.1
         end
@@ -2061,8 +2059,6 @@ function GM:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
             local actId = victim:GetSequenceActivity(id)
             victim:AnimSetGestureWeight( GESTURE_SLOT_FLINCH, 1 )
             victim:AnimRestartGesture( GESTURE_SLOT_FLINCH, actId, true )
-        else
-            print("No activity for: " .. randFlinch)
         end
     end
 
