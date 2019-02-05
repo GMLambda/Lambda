@@ -1,0 +1,9 @@
+"MonitorScreen"
+{
+	"$basetexture" "lambda/vehicle"
+	"$translucent" "1"
+	"$saturation" "0"
+	"$contrast" "1"
+	"$tint" "[1 1 1]"
+	"$ignorez" "1"
+}
