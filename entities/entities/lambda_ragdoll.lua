@@ -48,6 +48,35 @@ local BONE_PARTS =
     },
 }
 
+local ImpactSounds =
+{
+    Soft =
+    {
+        "physics/body/body_medium_impact_soft1.wav",
+        "physics/body/body_medium_impact_soft2.wav",
+        "physics/body/body_medium_impact_soft3.wav",
+        "physics/body/body_medium_impact_soft4.wav",
+        "physics/body/body_medium_impact_soft5.wav",
+        "physics/body/body_medium_impact_soft6.wav",
+        "physics/body/body_medium_impact_soft7.wav",
+    },
+    Hard =
+    {
+        "physics/body/body_medium_impact_hard1.wav",
+        "physics/body/body_medium_impact_hard2.wav",
+        "physics/body/body_medium_impact_hard3.wav",
+        "physics/body/body_medium_impact_hard4.wav",
+        "physics/body/body_medium_impact_hard5.wav",
+        "physics/body/body_medium_impact_hard6.wav",
+    },
+    Break =
+    {
+        "physics/body/body_medium_break2.wav",
+        "physics/body/body_medium_break3.wav",
+        "physics/body/body_medium_break4.wav",
+    },
+}
+
 local FLESH_MAT = Material("models/flesh")
 local MAX_SPEED_THRESHOLD = 300
 local MAX_GIBS = 100
@@ -108,6 +137,57 @@ function ENT:GibPlayer(dmgForce, gibPlayer, didExplode)
 
 end
 
+function ENT:HandleRagdollCollision(ragdoll, data)
+
+    if ragdoll:IsEffectActive(EF_NODRAW) then
+        -- Do nothing if we are invisible.
+        return
+    end
+
+    if CurTime() - ragdoll.LastRagdollImpact < 0.05 then
+        return
+    end
+
+    ragdoll.LastRagdollImpact = CurTime()
+
+    local sndTable = nil
+    if data.Speed >= 600 then
+        sndTable = ImpactSounds.Break
+    elseif data.Speed >= 300 then
+        sndTable = ImpactSounds.Hard
+    elseif data.Speed >= 100 then
+        sndTable = ImpactSounds.Soft
+    end
+
+    if sndTable then
+        local snd = table.Random(sndTable)
+        ragdoll:EmitSound(snd)
+    end
+
+    if data.Speed >= 130 then
+        local effectdata = EffectData()
+        effectdata:SetNormal(data.HitNormal)
+        effectdata:SetOrigin(data.HitPos)
+        effectdata:SetMagnitude(3)
+        effectdata:SetScale(10)
+        effectdata:SetFlags(3)
+        effectdata:SetColor(0)
+        util.Effect("bloodspray", effectdata, true, true)
+
+        effectdata = EffectData()
+        effectdata:SetNormal(data.HitNormal)
+        effectdata:SetOrigin(data.HitPos)
+        effectdata:SetMagnitude(data.Speed / 100)
+        effectdata:SetScale(10)
+        effectdata:SetFlags(3)
+        effectdata:SetColor(0)
+        util.Effect("BloodImpact", effectdata, true, true)
+
+        util.Decal("Blood", data.HitPos + data.HitNormal, data.HitPos - data.HitNormal)
+    end
+
+end
+
 function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
 
     DbgPrint(self, "CreateRagdoll", dmgForce, gibPlayer, didExplode)
@@ -147,6 +227,13 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
             return owner:GetPlayerColor()
         end
     end
+    ragdoll.LastRagdollImpact = 0
+    ragdoll:SetNWBool("IsReviving", false)
+    ragdoll:AddCallback("PhysicsCollide", function(e, data)
+        if IsValid(self) then
+            self:HandleRagdollCollision(e, data)
+        end
+    end)
 
     local vel = ent:GetVelocity()
 

@@ -147,23 +147,21 @@ end
 
 function SWEP:GetActorForReviving()
 
+    local ragdoll = nil
     local owner = self:GetOwner()
     local startPos = owner:GetShootPos()
     local endPos = startPos + (owner:GetAimVector() * TRACE_LEN)
-    local things = ents.FindAlongRay( startPos, endPos, Vector(-1, -1, -1), Vector(1, 1, 1) )
 
-    local ragdoll = nil
-    local minDist = 9999999
+    local tr = util.TraceLine({
+        start = startPos,
+        endpos = endPos,
+        filter = owner,
+        collisiongroup = COLLISION_GROUP_NONE,
+        mask = MASK_SHOT,
+    })
 
-    -- Because the ray doesn't stop we have to picked the closest.
-    for _,v in pairs(things) do
-        if v:IsRagdoll() and IsValid(v:GetOwner()) and v:GetOwner():IsPlayer() then
-            local dist = v:GetPos():Distance(startPos)
-            if dist < minDist then
-                ragdoll = v
-                minDist = dist
-            end
-        end
+    if IsValid(tr.Entity) and tr.Entity:IsRagdoll() then
+        ragdoll = tr.Entity
     end
 
     return ragdoll
@@ -245,6 +243,10 @@ function SWEP:CanReviveActor(actor)
 
     local owner = actor:GetOwner()
     if not IsValid(owner) then
+        return false
+    end
+
+    if actor:GetNWBool("IsReviving", false) == true then
         return false
     end
 
@@ -405,6 +407,17 @@ sound.Add({
 })
 
 function SWEP:ReleaseCharge()
+
+    local ragdoll = self:GetActorForReviving()
+    if not IsValid(ragdoll) or ragdoll:GetNWBool("IsReviving", false) == true then
+        self:SetNextPrimaryFire(CurTime() + 1)
+        self:SetNextSecondaryFire(CurTime() + 1)
+        self:StopCharging()
+        return
+    end
+
+    ragdoll:SetNWBool("IsReviving", true)
+
     self:ConsumeEnergy(self:GetChargeEnergy())
     self:StopCharging()
     self:EmitSound("lambda/defibrillator_release.wav")
@@ -414,11 +427,6 @@ function SWEP:ReleaseCharge()
 
     local owner = self:GetOwner()
     owner:SetAnimation(PLAYER_ATTACK1)
-
-    local ragdoll = self:GetActorForReviving()
-    if not IsValid(ragdoll) then
-        return
-    end
 
     local owner = ragdoll:GetOwner()
 
