@@ -282,7 +282,7 @@ function ENT:Think()
 end
 
 local abs = math.abs
-local PREDICTION_TOLERANCE = 3
+local PREDICTION_TOLERANCE = 33
 local PREDICTION_THRESHOLD = 1
 
 function ENT:ComputeNetworkError()
