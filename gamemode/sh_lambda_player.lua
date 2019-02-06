@@ -684,13 +684,15 @@ if SERVER then
 
         local ragdollMgr = ply:GetRagdollManager()
         if IsValid(ragdollMgr) == false then
-            local mgr = ents.Create("lambda_ragdoll")
+            local mgr = ents.Create("lambda_ragdollmanager")
+            mgr:SetPos(ply:GetPos())
             mgr:SetOwner(ply)
             mgr:SetParent(ply)
             mgr:Spawn()
             ply:SetRagdollManager(mgr)
         else
-            ragdollMgr:RemoveRagdoll()
+            -- If we are being revived then we also snatch the model instance.
+            ragdollMgr:RemoveRagdoll(ply.Reviving)
         end
 
         ply.IsCurrentlySpawning = false

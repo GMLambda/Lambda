@@ -105,6 +105,7 @@ end
 function ENT:SetupDataTables()
     self:NetworkVar("Entity", 0, "Ragdoll")
     self:NetworkVar("Int", 0, "GibCycle")
+    self:NetworkVar("Int", 1, "SnatchCycle")
     self:NetworkVar("Vector", 0, "DamageForce")
     self:NetworkVar("Bool", 0, "Exploded")
 end
@@ -118,6 +119,10 @@ function ENT:Initialize()
         self.GibParts = {}
         self.GibQueue = {}
         self.CurrentGibCycle = 0
+        self.CurrentSnatchCycle = 0
+    else
+        self:SetGibCycle(0)
+        self:SetSnatchCycle(0)
     end
 
     if SERVER then
@@ -253,14 +258,49 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
 
 end
 
-function ENT:RemoveRagdoll()
+function ENT:RemoveRagdoll(snatch)
 
     local ragdoll = self:GetRagdoll()
     if IsValid(ragdoll) then
-        ragdoll:Remove()
-        self:SetRagdoll(NULL)
+        if snatch == true then
+
+            -- Notify client side.
+            self:SetSnatchCycle(self:GetSnatchCycle() + 1)
+
+            -- Hide ragdoll for the time being.
+            ragdoll:AddEffects(EF_NODRAW)
+            ragdoll:SetSolid(SOLID_NONE)
+
+            -- Freeze physics, no need anymore.
+            local phys = ragdoll:GetPhysicsObject()
+            if IsValid(phys) then
+                phys:EnableMotion(false)
+            end
+
+            -- Give client a chance to take the model before its removed.
+            timer.Simple(2, function()
+                if IsValid(ragdoll) then
+                    ragdoll:Remove()
+                end
+                if IsValid(self) then
+                    self:SetRagdoll(NULL)
+                end
+            end)
+        else
+            ragdoll:Remove()
+            self:SetRagdoll(NULL)
+        end
     end
 
+end
+
+function ENT:SnatchRagdollModel()
+    local ragdoll = self:GetRagdoll()
+    if not IsValid(ragdoll) then
+        return
+    end
+    local ply = self:GetOwner()
+    ply:SnatchModelInstance(ragdoll)
 end
 
 function ENT:Think()
@@ -288,6 +328,12 @@ function ENT:Think()
         if self.CurrentGibCycle < gibCycle then
             self.CurrentGibCycle = gibCycle
             self:GibPlayerClient()
+        end
+
+        local snatchCycle = self:GetSnatchCycle()
+        if self.CurrentSnatchCycle < snatchCycle then
+            self.CurrentSnatchCycle = snatchCycle
+            self:SnatchRagdollModel()
         end
 
         self:UpdateGibs()
