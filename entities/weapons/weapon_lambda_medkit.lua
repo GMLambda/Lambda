@@ -51,7 +51,7 @@ game.AddAmmoType( {
     maxsplash = 0,
 } )
 
-local TRACE_LEN = 75
+local TRACE_LEN = 76
 
 local HEAL_AMOUNT = 10
 local REVIVE_AMOUNT = 50
@@ -64,6 +64,8 @@ local RECHARGE_AMOUNT = 5
 
 local HEAL_DELAY = 0.5
 
+local PLAYER_HULL_MINS = Vector(-16, -16, 0)
+local PLAYER_HULL_MAXS = Vector(16, 16, 72)
 --
 -- ConVars
 
@@ -232,7 +234,42 @@ function SWEP:FindGroundPosition(actor)
         offsetZ = offsetZ + 1
     end
 
-    local pos = startPos + Vector(0, 0, offsetZ)
+    local pos
+    if offsetZ == 8 then
+        -- DbgPrint("No ground found, using reviving player ground")
+        pos = wepOwner:GetPos()
+        -- Put him as far forward as we can go, begin at the end and work towards the player
+        local fwdOffset = TRACE_LEN
+        local fwdVector = wepOwner:GetAimVector()
+        while fwdOffset >= 0 do
+            local fwd = fwdVector * fwdOffset
+            local fwd1 = fwdVector * fwdOffset
+            startPos = pos + fwd
+            startPos.z = pos.z
+            local endPos = pos + fwd1
+            endPos.z = pos.z
+            tr = util.TraceHull({
+                start = startPos,
+                endpos = endPos,
+                mins = PLAYER_HULL_MINS,
+                maxs = PLAYER_HULL_MAXS,
+                filter = filter
+            })
+            if tr.Fraction == 1 then
+                --DbgPrint("Found suitable spawn position")
+                --debugoverlay.Box(tr.HitPos, PLAYER_HULL_MINS, PLAYER_HULL_MAXS, 5, Color( 0, 255, 0 ))
+                pos = tr.HitPos
+                break
+            end
+            --debugoverlay.Box(tr.HitPos, PLAYER_HULL_MINS, PLAYER_HULL_MAXS, 5, Color( 255, 0, 0 ))
+            fwdOffset = fwdOffset - 4
+        end
+        -- If we found a spot the loop breaks and pos is assigned to the empty space, otherwise
+        -- pos is the player pos at this point.
+    else
+        pos = startPos + Vector(0, 0, offsetZ)
+    end
+
     debugoverlay.Cross(pos,20,10, Color( 255, 0, 0 ),true)
 
     return pos
@@ -251,7 +288,7 @@ function SWEP:CanReviveActor(actor)
     end
 
     local startPos = self:FindGroundPosition(actor)
-    local offsetZ = 72 -- Only standing works.
+    local offsetZ = PLAYER_HULL_MAXS.z -- Only standing works.
 
     local tr = util.TraceLine({
         start = startPos,
