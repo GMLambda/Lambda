@@ -485,3 +485,15 @@ function ENTITY_META:CanTakeDamage()
     return true
 
 end
+
+function ENTITY_META:SetBlocksLOS( bBlocksLOS )
+    if bBlocksLOS == true then
+        self:RemoveEFlags( EFL_DONTBLOCKLOS )
+    else
+        self:AddEFlags( EFL_DONTBLOCKLOS )
+    end
+end
+
+function ENTITY_META:BlocksLOS( )
+    return self:IsEFlagSet(EFL_DONTBLOCKLOS) == false
+end

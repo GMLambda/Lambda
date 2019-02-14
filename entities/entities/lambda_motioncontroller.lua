@@ -163,6 +163,7 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
 
     self.SavedMass = {}
     self.SavedRotDamping = {}
+    self.SavedBlocksLOS = obj:BlocksLOS()
     self.ErrorTime = -1.0
     self.Error = 0
 
@@ -182,6 +183,8 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
     physObj:SetMass(1.0)
     physObj:EnableDrag(false)
     physObj:Wake()
+
+    obj:SetBlocksLOS(false)
 
     self:AddToMotionController(physObj)
     self.AttachedObject = obj
@@ -225,6 +228,7 @@ function ENT:DetachObject()
             phys:EnableDrag(true)
             phys:Wake()
 
+            obj:SetBlocksLOS(self.SavedBlocksLOS)
             self.SavedMass = {}
             self.SavedRotDamping = {}
 
