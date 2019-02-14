@@ -353,55 +353,9 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 
 end
 
-local SAVETABLE_BLACKLIST =
+local SAVETABLE_WHITELIST =
 {
-    ["m_vecCommandGoal"] = true,
-    ["basevelocity"] = true,
-    ["m_vecLean"] = true,
-    ["avelocity"] = true,
-    ["velocity"] = true,
-    ["m_vecOrigin"] = true,
-    ["m_angRotation"] = true,
-    ["m_angAbsRotation"] = true,
-    ["m_vecAbsOrigin"] = true,
-    ["m_vSavePosition"] = true,
-    ["m_hMoveEntity"] = true,
-    ["model"] = true,
-    ["modelindex"] = true,
-    ["m_iszModelName"] = true,
-    ["effects"] = true,
-    ["spawnflags"] = true,
-    ["m_MoveType"] = true,
-    ["hammerid"] = true,
-    ["m_hMovePeer"] = true,
-    ["m_hMoveChild"] = true, -- dead locks.
-    ["m_hMoveParent"] = true, -- dead locks.
-    ["m_pParent"] = true, -- dead locks.
-    ["m_MoveCollide"] = true,
-    ["globalname"] = true,
-    ["additionalequipment"] = true,
-    ["m_bConditionsGathered"] = true,
-    ["m_flReadinessLockedUntil"] = true,
-    ["waterlevel"] = true,
-    ["m_CollisionGroup"] = true,
-    ["m_nExactWaterLevel"] = true,
-    ["m_nWaterType"] = true,
-    ["m_rgflCoordinateFrame"] = true, -- Fucks up the airboat.
-    ["m_bSequenceFinished"] = true,
-    ["classname"] = true,
-    ["health"] = true,
-    ["sequence"] = true,
-    ["m_bClientSideAnimation"] = true,
-    ["renderfx"] = true,
-    ["rendermode"] = true,
-    ["m_iEFlags"] = true,
-    ["m_flNextAttack"] = true,
-    ["m_SleepFlags"] = true,
-    ["m_nWakeTick"] = true,
-    ["LightingOriginHack"] = true,
-    ["m_NPCState"] = true,
-    ["LightingOrigin"] = true,
-    ["rendercolor"] = true,
+    ["target"] = true,
 }
 
 function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
@@ -507,11 +461,6 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
     end
 
     for k,v in pairs(data.SaveTable) do
-
-        if SAVETABLE_BLACKLIST[k] == true then
-            data.SaveTable[k] = nil
-            continue
-        end
 
         if IsEntity(v) and IsValid(v) then
             data.SaveTable[k] = "CoopRef_" .. tostring(v:EntIndex())
@@ -1031,6 +980,7 @@ function GM:CreateTransitionObjects()
                 continue
             end
             v = tostring(v)
+            DbgPrint(ent, "KeyValue: ", k, v)
             -- Deal with specifics.
             if data.Type == ENT_TYPE_DOOR and table.HasValue(DOOR_KEYVALUES, k) then
                 ent:SetKeyValue(k, v)
@@ -1160,10 +1110,6 @@ function GM:CreateTransitionObjects()
 
         for k,v in pairs(data.SaveTable) do
 
-            if SAVETABLE_BLACKLIST[k] == true then
-                continue
-            end
-
             if isstring(v) and v:sub(1, 8) == "CoopRef_" then
                 local refId = tonumber(v:sub(9))
                 local refEnt = self.CreatedTransitionObjects[refId]
@@ -1171,16 +1117,10 @@ function GM:CreateTransitionObjects()
                     DbgPrint("Resolved reference: " .. k .. " -> " .. tostring(refEnt))
                     ent:SetSaveValue(k, refEnt)
                 end
-            elseif isvector(v) then
-                --local newVec = ent:LocalToWorld(v)
-                --ent:SetSaveValue(k, newVec)
-            elseif isangle(v) then
-                --local newAng = ent:LocalToWorldAngles(v)
-                --ent:SetSaveValue(k, newAng)
-            elseif istable(v) then 
-                ent:SetSaveValue(k, v)
             else
-                --ent:SetSaveValue(k,v)
+                if SAVETABLE_WHITELIST[k] == true then
+                    ent:SetSaveValue(k, v)
+                end
             end
         end
 
@@ -1205,7 +1145,6 @@ function GM:CreateTransitionObjects()
         end
         if data.GlobalName ~= nil and data.GlobalName ~= "" then
             ent:SetNWString("GlobalName", data.GlobalName)
-            --ent:SetKeyValue("globalname", data.GlobalName)
         end
 
         -- Correct phys positions.
