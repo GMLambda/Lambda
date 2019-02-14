@@ -1166,8 +1166,7 @@ function SWEP:UpdateElementPosition()
     local elemPos = self.ElementPosition:Interp(CurTime())
     if self:ShouldDrawUsingViewModel() == true then
         local owner = self:GetOwner()
-        if owner == nil then
-            --DbgPrint("No owner")
+        if not IsValid(owner) then
             return
         end
 
@@ -2129,6 +2128,10 @@ function SWEP:Startup()
     self:SendWeaponAnim(ACT_VM_DEPLOY)
     self:SetNextIdleTime(CurTime() + 0.1)
 
+    if CLIENT then
+        self:UpdateDrawUsingViewModel()
+    end
+
     if self:IsMegaPhysCannon() == true then
         self:OpenElements()
     else
@@ -2188,6 +2191,12 @@ function SWEP:FormatViewModelAttachment(pos, inverse)
 
 end
 
+function SWEP:OwnerChanged()
+    if CLIENT then
+        self:UpdateDrawUsingViewModel()
+    end
+end
+
 function SWEP:UpdateDrawUsingViewModel()
     if self.EffectsInvalidated == true then
         self:InvalidateEffects()
@@ -2202,6 +2211,9 @@ function SWEP:UpdateDrawUsingViewModel()
 end
 
 function SWEP:ShouldDrawUsingViewModel()
+    if not IsValid(self:GetOwner()) then
+        return false
+    end
     return self.DrawUsingViewModel
 end
 
@@ -2231,7 +2243,7 @@ function SWEP:DrawEffectType(id, data, owner, vm)
 
     local pos
     if self:ShouldDrawUsingViewModel() == true then
-        if owner ~= nil then
+        if IsValid(owner) then
             if vm == nil then
                 vm = owner:GetViewModel()
             end
@@ -2301,6 +2313,8 @@ function SWEP:DrawCoreBeams(owner, vm)
 
     if vm == nil and IsValid(owner) then
         vm = owner:GetViewModel()
+    elseif vm == nil then
+        vm = self
     end
 
     local curTime = CurTime()
