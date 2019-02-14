@@ -956,6 +956,14 @@ function SWEP:FindObject()
 
 end
 
+function SWEP:GetAttachedObject()
+    local controller = self:GetMotionController()
+    if controller:IsObjectAttached() == false then
+        return
+    end
+    return controller:GetAttachedObject()
+end
+
 function SWEP:UpdateObject()
 
     local owner = self.Owner
@@ -1390,21 +1398,21 @@ function SWEP:AttachObject(ent, tr)
         attachmentPoint = Vector(0, 0, -16)
     end
 
-    local motionController = self:GetMotionController()
-    motionController:AttachObject(ent, grabPos, useGrabPos)
-    self.ObjectAttached = true
-
     local phys = ent:GetPhysicsObject()
     if not IsValid(phys) then
         DbgPrint("Physics invalid!")
         return
     end
 
-    phys:AddGameFlag(FVPHYSICS_PLAYER_HELD)
-
     if SERVER then
         owner:SimulateGravGunPickup(ent, false)
     end
+
+    local motionController = self:GetMotionController()
+    motionController:AttachObject(ent, grabPos, useGrabPos)
+    self.ObjectAttached = true
+
+    phys:AddGameFlag(FVPHYSICS_PLAYER_HELD)
 
     --if SERVER then
     if not IsValid(ent:GetOwner()) then
@@ -2291,7 +2299,7 @@ end
 
 function SWEP:DrawCoreBeams(owner, vm)
 
-    if vm == nil then
+    if vm == nil and IsValid(owner) then
         vm = owner:GetViewModel()
     end
 
