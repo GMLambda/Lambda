@@ -23,6 +23,7 @@ function ENT:OnPass(data, activator, caller)
     local nextTarget = caller:GetInternalVariable("target")
     DbgPrint(self, "Passed : " .. tostring(activator), caller, nextTarget)
     activator:SetSaveValue("target", nextTarget)
+    activator:SetKeyValue("target", nextTarget)
 end
 
 function ENT:UpdateTransmitState()
