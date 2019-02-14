@@ -153,7 +153,7 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 end
 
 function GAMETYPE:InitSettings()
-    self.Base.InitSettings(self)
+    self.Base:InitSettings()
 
     GAMEMODE:AddSetting("dm_fraglimit", {
         Category = "SERVER",
