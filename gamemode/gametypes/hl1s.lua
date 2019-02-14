@@ -123,13 +123,19 @@ GAMETYPE.ImportantPlayerNPCClasses =
 
 function GAMETYPE:GetPlayerRespawnTime()
 
-    local timeout = math.Clamp(lambda_max_respawn_timeout:GetInt(), -1, 255)
+    local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
+    if timeout == -1 then
+        return timeout
+    end
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
+
     if total <= 0 then
         total = 1
     end
+
     local timeoutAmount = math.Round(alive / total * timeout)
+
     return timeoutAmount
 
 end
@@ -322,8 +328,39 @@ function GAMETYPE:LoadLocalisation(lang, gmodLang)
 end
 
 function GAMETYPE:AllowPlayerTracking()
-    self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
-    return self.TrackerOption:GetBool()
+    return GAMEMODE:GetSetting("player_tracker")
+end
+
+function GAMETYPE:InitSettings()
+    self.Base:InitSettings()
+
+    GAMEMODE:AddSetting("dynamic_checkpoints", {
+        Category = "SERVER",
+        NiceName = "#GM_DYNCHECKPOINT",
+        Description = "Dynamic checkpoints",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("allow_npcdmg", {
+        Category = "SERVER",
+        NiceName = "#GM_NPCDMG",
+        Description = "Friendly NPC damage",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("player_tracker", {
+        Category = "SERVER",
+        NiceName = "#GM_PLYTRACK",
+        Description = "Player tracking",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
 end
 
 hook.Add("LambdaLoadGameTypes", "HL1SGameType", function(gametypes)

@@ -491,13 +491,11 @@ function GAMETYPE:LoadLocalisation(lang, gmodLang)
 end
 
 function GAMETYPE:AllowPlayerTracking()
-    self.TrackerOption = self.TrackerOption or GetConVar("lambda_player_tracker")
-
-    return self.TrackerOption:GetBool()
+    return GAMEMODE:GetSetting("player_tracker")
 end
 
 function GAMETYPE:InitSettings()
-    self.Base.InitSettings(self)
+    self.Base:InitSettings()
 
     GAMEMODE:AddSetting("dynamic_checkpoints", {
         Category = "SERVER",
