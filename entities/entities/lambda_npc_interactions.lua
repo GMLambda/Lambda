@@ -15,6 +15,15 @@ end
 
 local COND_SEE_PLAYER = 32
 
+function ENT:LinkNPC(npc)
+    self:SetPos(npc:GetPos())
+    self:SetOwner(npc)
+    self:SetParent(npc)
+    npc:CallOnRemove("LambdaNPCInteractor", function()
+        self:Remove()
+    end)
+end
+
 function ENT:SearchForInteractTargets()
     local owner = self:GetOwner()
     if not IsValid(owner) then
@@ -32,6 +41,7 @@ function ENT:SearchForInteractTargets()
     end
 
     if #visible == 0 then
+        owner:ClearCondition(COND_SEE_PLAYER)
         return
     else
         owner:SetCondition(COND_SEE_PLAYER)
@@ -44,10 +54,10 @@ function ENT:SearchForInteractTargets()
         end
         local heldObject = wep:GetAttachedObject()
         if IsValid(heldObject) then
-            print("Set hack target")
             owner:SetSaveValue("m_hHackTarget", heldObject)
         end
     end
+
 end
 
 function ENT:Think()

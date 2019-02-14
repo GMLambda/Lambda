@@ -95,6 +95,12 @@ if SERVER then
             self.MapScript:OnRegisterNPC(npc)
         end
 
+        if npc:GetClass() == "npc_alyx" then
+            local interactor = ents.Create("lambda_npc_interactions")
+            interactor:LinkNPC(npc)
+            interactor:Spawn()
+        end
+
     end
 
     function GM:EmitNPCHurt(amount, npc, hitgroup)
