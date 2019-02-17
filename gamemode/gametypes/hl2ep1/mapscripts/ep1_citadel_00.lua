@@ -28,6 +28,21 @@ MAPSCRIPT.EntityFilterByName =
 {
 }
 
+MAPSCRIPT.Scenes = {
+	"lcs_ep1_intro_01",
+	"lcs_ep1_intro_02",
+	"lcs_ep1_intro_03",
+	"lcs_ep1_intro_03b",
+	"lcs_ep1_intro_04b",
+	"lcs_ep1_intro_05",
+	"lcs_ep1_intro_07",
+	"lcs_ep1_intro_06",
+	"lcs_ep1_intro_04",
+	"lcs_ep1_intro_08",
+	"lcs_al_vanride_end02",
+	"lcs_al_vanride_end01"
+}
+
 function MAPSCRIPT:Init()
 
     DbgPrint("MapScript EP1")
@@ -111,6 +126,14 @@ function MAPSCRIPT:PostInit()
 
         self.Van = nil
 
+
+        -- Prevent scenes to stop when somebody dies
+        for _, scenes in pairs(self.Scenes) do
+        	ents.WaitForEntityByName(scenes, function(ent)
+        		ent:SetKeyValue("onplayerdeath", "0")
+        	end)
+        end
+
         ents.WaitForEntityByName("counter_alyx_van", function(ent)
             -- Increase from 3 to 4 so we can have our trigger have the final say.
             ent:SetKeyValue("max", "4")
@@ -156,6 +179,32 @@ function MAPSCRIPT:PostInit()
             TriggerOutputs({
                 {"counter_alyx_van", "Add", 0.0, "1"},
             })
+        end
+
+        -- -6709.447266 5710.125000 -102.160347 cp1
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6709.447266, 5710.125000, -102.160347), Angle(0, 45, 0))
+        local checkpointTrigger1 = ents.Create("trigger_once")
+        checkpointTrigger1:SetupTrigger(
+            Vector(-6709.447266, 5710.125000, -102.160347),
+            Angle(0, 0, 0),
+            Vector(-100, -250, 0),
+            Vector(100, 250, 100)
+        )
+        checkpointTrigger1.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+        end
+
+        -- 4649.159180 3903.150635 -6343.968750
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(4649.159180, 3903.150635, -6343.968750), Angle(0, 45, 0))
+        local checkpointTrigger2 = ents.Create("trigger_once")
+        checkpointTrigger2:SetupTrigger(
+            Vector(4649.159180, 3903.150635, -6343.968750),
+            Angle(0, 0, 0),
+            Vector(-100, -250, 0),
+            Vector(100, 250, 100)
+        )
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
     end
