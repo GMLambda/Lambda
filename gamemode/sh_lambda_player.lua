@@ -2022,17 +2022,34 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         end
     end
 
-    local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 2500, 0, 1)
-    local punchForce = 60 * dmgForceLen
+    local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
+    local punchForce = (dmgForceLen * 10)
     local viewPunch = Angle(0, 0, 0)
     if hitgroup == HITGROUP_HEAD then
         viewPunch = viewPunch + Angle(-punchForce, 0, 0)
     elseif hitgroup == HITGROUP_HEAD_BACK then
         viewPunch = viewPunch + Angle(punchForce, 0, 0)
     end
-    viewPunch.x = math.Clamp(viewPunch.x, -60, 60)
-    ply:ViewPunch(viewPunch)
 
+    self:PlayerApplyViewPunch(ply, viewPunch)
+end
+
+local VIEWPUNCH_DECAY_TIME = 1.0
+
+function GM:PlayerApplyViewPunch(ply, viewPunch)
+    local alpha = 1.0
+    if ply.NextViewPunchTime ~= nil then
+        local alpha = ply.NextViewPunchTime - CurTime()
+        if alpha < 0 then
+            alpha = 0
+        end
+        alpha = 1.0 - (alpha / VIEWPUNCH_DECAY_TIME)
+        alpha = alpha
+    end
+    viewPunch.x = math.Clamp(viewPunch.x, -60, 60)
+    ply:ViewPunch(viewPunch * alpha)
+    -- Prevent player view drifting way too far with fast impacts.
+    ply.NextViewPunchTime = CurTime() + VIEWPUNCH_DECAY_TIME
 end
 
 function GM:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
