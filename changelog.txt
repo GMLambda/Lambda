@@ -1,4 +1,10 @@
 0.9.3
+- Feature: Realism difficulty, for people who like a challenge.
+- Feature: Medkit was added to heal and revive players, received in d1_trainstation_05.
+- Feature: lambda_weapondropmode allows to specify what players drop on death.
+- Feature: Implemented env_zoom with multiplayer support.
+- Feature: Implemented point_viewcontrol with multiplayer support.
+- Feature: Player flinching animations that indicates the hit position of damage.
 - Improved: Allow gametype to auto start without players.
 - Improved: (F1) Player menu overhaul.
 - Improved: Checkpoints were rebalanced, encourage players to revive others.
@@ -6,12 +12,7 @@
 - Improved: Physcannon glow was reduced.
 - Improved: Kill feed overhaul, now considers screen resolution.
 - Improved: Replaced bullet impact sounds with more realistic ones.
-- Feature: Realism difficulty, for people who like a challenge.
-- Feature: Medkit was added to heal and revive players, received in d1_trainstation_05.
-- Feature: lambda_weapondropmode allows to specify what players drop on death.
-- Feature: Implemented env_zoom with multiplayer support.
-- Feature: Implemented point_viewcontrol with multiplayer support.
-- Feature: Player flinching animations that indicates the hit position of damage.
+- Improved: Proxy animation models for episodic support, currently incomplete.
 - Fix: PLAYER:Give not working properly in some cases.
 - Fix: Physcannon not networking idle time causing stuttery momvement.
 - Fix: d1_town_02 lock door to prevent backtracking.
@@ -21,12 +22,9 @@
 - Fix: d2_prison_05 blocking players near map end.
 - Fix: NPC Maker not spawning NPCs in some cases.
 - Fix: d1_trainstation_01 queue sometimes blocking the player.
-- Fix: Make sure the door stays locked at d1_town_02.
 - Fix: Don't render player blockades in Skybox rendering pass.
 - Fix: Gravity Gun not resetting beam properly on FP/TP view change.
-- Fix: Item respawn spam.
 - Fix: Some delayed inputs firing after map reset.
-- Fix: d2_prison_05 blocking players near map end.
 - Fix: trigger displaying waiting info when requested not to.
 - Fix: Pending entity outputs not being cleared on map restart.
 - Fix: Round information HUDs missing when first connected.
