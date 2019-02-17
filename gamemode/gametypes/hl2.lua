@@ -464,30 +464,6 @@ local function GetFileContent(filepath, gamepath)
 end
 
 function GAMETYPE:LoadLocalisation(lang, gmodLang)
-    -- Well looks like this is a pitty with GLua, UCS2-BOM encoded file.
-    --[[
-    local data = GetFileContent("resource/hl2_" .. lang .. ".txt", "hl2")
-    print("Len", string.len(data))
-    -- Ugh.
-    local newData = ""
-    for i = 1, string.len(data) do
-        local b = string.sub(data, i, i)
-        if b == string.char(0xFF) or b == string.char(0xFE) then
-            continue
-        end
-        b = string.sub(b, 1, 1)
-        if string.byte(b) == 0 then
-            continue
-        end
-        print(i, b, string.byte(b))
-        newData = newData .. b
-        --if(i > 10) then break end
-    end
-    print(newData)
-    --PrintTable(data)
-    --PrintTable(newData)
-    --PrintTable(util.KeyValuesToTable( newData ))
-    ]]
 end
 
 function GAMETYPE:AllowPlayerTracking()
@@ -496,6 +472,25 @@ end
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()
+
+    local difficulties = {}
+
+    for k, v in pairs(self.DifficultyData or {}) do
+        difficulties[k] = v.Name
+    end
+
+    GAMEMODE:AddSetting("difficulty", {
+        Category = "SERVER",
+        NiceName = "#GM_DIFFICULTY",
+        Description = "Difficulty",
+        Type = "int",
+        Default = 2,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = difficulties,
+        },
+    })
 
     GAMEMODE:AddSetting("dynamic_checkpoints", {
         Category = "SERVER",

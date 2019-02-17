@@ -121,12 +121,6 @@ function GAMETYPE:IsPlayerEnemy(ply1, ply2)
 end
 
 function GAMETYPE:InitSettings()
-    local difficulties = {}
-
-    for k, v in pairs(self.DifficultyData or {}) do
-        difficulties[k] = v.Name
-    end
-
     --SERVER
     GAMEMODE:AddSetting("walkspeed", {
         Category = "SERVER",
@@ -218,7 +212,7 @@ function GAMETYPE:InitSettings()
         NiceName = "#GM_RESPAWNTIME",
         Description = "Respawn time",
         Type = "int",
-        Default = 20,
+        Default = -1,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
         Clamp = { Min = -1, Max = 600 },
     })
@@ -270,19 +264,6 @@ function GAMETYPE:InitSettings()
         Default = false,
         Flags = bit.bor(0, FCVAR_REPLICATED),
         maxv = 1,
-    })
-
-    GAMEMODE:AddSetting("difficulty", {
-        Category = "SERVER",
-        NiceName = "#GM_DIFFICULTY",
-        Description = "Difficulty",
-        Type = "int",
-        Default = 2,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Extra = {
-            Type = "combo",
-            Choices = difficulties,
-        },
     })
 
     GAMEMODE:AddSetting("weapondropmode", {
