@@ -215,7 +215,7 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
         return self:GibPlayer(dmgForce, gibPlayer, didExplode)
     end
 
-    ragdoll = ents.Create("prop_ragdoll")
+    local ragdoll = ents.Create("prop_ragdoll")
     ragdoll:SetModel(mdl)
     ragdoll:SetPos(ent:GetPos())
     ragdoll:SetAngles(ent:GetAngles())
