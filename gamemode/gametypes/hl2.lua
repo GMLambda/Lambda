@@ -497,7 +497,7 @@ function GAMETYPE:InitSettings()
         NiceName = "#GM_DYNCHECKPOINT",
         Description = "Dynamic checkpoints",
         Type = "bool",
-        Default = true,
+        Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
