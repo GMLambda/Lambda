@@ -27,6 +27,7 @@ MAPSCRIPT.EntityFilterByClass =
 
 MAPSCRIPT.EntityFilterByName =
 {
+    ["global_newgame_template_base_items"] = true,
 }
 
 function MAPSCRIPT:Init()
