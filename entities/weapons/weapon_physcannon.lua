@@ -1233,6 +1233,22 @@ function SWEP:CheckForTarget()
 
 end
 
+function SWEP:EmitLight(pos, brightness, color)
+    local dlight = DynamicLight( self:EntIndex() )
+    if dlight then
+        dlight.pos = pos
+        dlight.r = color.r
+        dlight.g = color.g
+        dlight.b = color.b
+        dlight.brightness = brightness
+        dlight.decay = 0
+        dlight.size = 64
+        dlight.minlight = 0.1
+        dlight.nomodel = false
+        dlight.dietime = CurTime() + 2
+    end
+end
+
 function SWEP:UpdateGlow()
 
     if physcannon_glow:GetBool() == false then
@@ -1259,22 +1275,16 @@ function SWEP:UpdateGlow()
     end
 
     local color = self:GetWeaponColor()
+    color.r = color.r * 255
+    color.g = color.g * 255
+    color.b = color.b * 255
+
     local brightness = 0.5
     if self:IsMegaPhysCannon() == true then
         brightness = 1
     end
 
-    local dlight = DynamicLight( entIndex )
-    if ( dlight ) then
-        dlight.pos = entPos
-        dlight.r = color.r * 128
-        dlight.g = color.g * 128
-        dlight.b = color.b * 128
-        dlight.brightness = brightness * 0.5
-        dlight.Decay = 0
-        dlight.Size = GLOW_RADIUS * 0.5
-        dlight.DieTime = curTime + (GLOW_UPDATE_DT * 2)
-    end
+    self:EmitLight(entPos, brightness * 0.5, color)
 
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 
@@ -2409,25 +2419,16 @@ function SWEP:DrawCoreBeams(owner, vm)
     if beamDrawn == true and physcannon_glow:GetBool() == true and curTime >= self.NextBeamGlow then
 
         local color = self:GetWeaponColor()
-        local mul = 255
+        color.r = color.r * 255
+        color.g = color.g * 255
+        color.b = color.b * 255
 
         local brightness = 0.5
         if self:IsMegaPhysCannon() == true then
             brightness = 1
         end
 
-        local dlight = DynamicLight( self:EntIndex() )
-        if dlight then
-            dlight.pos = corePos
-            dlight.r = color.r * mul
-            dlight.g = color.g * mul
-            dlight.b = color.b * mul
-            dlight.brightness = brightness
-            dlight.Decay = 0
-            dlight.Size = GLOW_RADIUS
-            dlight.DieTime = curTime + (GLOW_UPDATE_DT * 2)
-        end
-
+        self:EmitLight(corePos, brightness, color)
         self.NextBeamGlow = curTime + GLOW_UPDATE_DT
     end
 
@@ -2794,25 +2795,16 @@ function SWEP:UpdateEffects()
                 end
 
                 local color = self:GetWeaponColor()
-                local mul = 255
+                color.r = color.r * 255
+                color.g = color.g * 255
+                color.b = color.b * 255
 
                 local brightness = 0.5
                 if self:IsMegaPhysCannon() == true then
                     brightness = 1
                 end
 
-                local dlight = DynamicLight( self:EntIndex() )
-                if dlight then
-                    dlight.pos = attachmentData.Pos
-                    dlight.r = color.r * mul
-                    dlight.g = color.g * mul
-                    dlight.b = color.b * mul
-                    dlight.brightness = brightness
-                    dlight.Decay = 0
-                    dlight.Size = GLOW_RADIUS
-                    dlight.DieTime = CurTime() + beamdata.Lifetime
-                end
-
+                self:EmitLight(attachmentData.Pos, brightness, color)
                 self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
             end
 
