@@ -228,7 +228,9 @@ if SERVER then
                     ply:SetNWEntity("LambdaOwnedVehicle", nil)
                 end
             end
-
+        else
+            -- Make sure players won't collide if they exit strangely.
+            ply:DisablePlayerCollide(true)
         end
 
         if ply:Alive() and vehicle:GetNWBool("IsPassengerSeat", false) == true then
