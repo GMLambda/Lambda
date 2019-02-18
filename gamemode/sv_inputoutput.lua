@@ -93,4 +93,11 @@ function GM:AcceptInput(ent, input, activator, caller, value)
         output(name)
     end
 
+    -- HACKHACK: We handle this here since its a Portal 2 specific feature.
+    if input == "DisableDraw" then
+        ent:SetNoDraw(true)
+    elseif input == "EnableDraw" then
+        ent:SetNoDraw(false)
+    end
+
 end
