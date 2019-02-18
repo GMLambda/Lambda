@@ -9,11 +9,12 @@ local DbgPrint = GetLogging("ViewControl")
 local SF_CAMERA_PLAYER_POSITION = 1
 --local SF_CAMERA_PLAYER_TARGET = 2
 local SF_CAMERA_PLAYER_TAKECONTROL = 4
---local SF_CAMERA_PLAYER_INFINITE_WAIT = 8
+local SF_CAMERA_PLAYER_INFINITE_WAIT = 8
 local SF_CAMERA_PLAYER_SNAP_TO = 16
 local SF_CAMERA_PLAYER_NOT_SOLID = 32
 local SF_CAMERA_PLAYER_INTERRUPT = 64
 local SF_CAMERA_PLAYER_MULTIPLAYER_ALL = 128
+local SF_CAMERA_PLAYER_NODRAW = 256
 
 ENT.Base = "lambda_entity"
 ENT.Type = "anim"
@@ -33,26 +34,27 @@ function ENT:PreInitialize()
 
     self:SetupNWVar("Disabled", "bool", { Default = true, KeyValue = "StartDisabled" })
 
-    self.ActivePlayers = {}
-
-    self.GlobalState = ""
-    self.Acceleration = 0
-    self.Deceleration = 0
-    self.Wait = 10
-    self.Speed = 0
-    self.MoveTo = ""
-    self.Target = ""
+    self.ActivePlayers = self.ActivePlayers or {}
+    self.GlobalState = self.GlobalState or ""
+    self.Acceleration = self.Acceleration or 0
+    self.Deceleration = self.Deceleration or 0
+    self.Wait = self.Wait or 0
+    self.Speed = self.Speed or 0
+    self.MoveTo = self.MoveTo or ""
+    self.TargetName = self.TargetName or ""
     self.TargetAttachment = ""
     self.InitialSpeed = 0
 
     self.MoveDir = Vector()
     self.MoveDistance = 0
     self.StopTime = 0
+
 end
 
 function ENT:KeyValue(key, val)
 
     BaseClass.KeyValue(self, key, val)
+    DbgPrint(self, key, val)
 
     if key:iequals("globalstate") then
         self.GlobalState = val
@@ -67,11 +69,16 @@ function ENT:KeyValue(key, val)
     elseif key:iequals("moveto") then
         self.MoveTo = val
     elseif key:iequals("target") then
-        self.Target = val
+        self.TargetName = val
     elseif key:iequals("targetattachment") then
         self.TargetAttachment = val
     end
 
+end
+
+function ENT:AcceptInput(name, activator, caller, data)
+    DbgPrint(self, name, activator, caller, data)
+    return BaseClass.AcceptInput(self, name, activator, caller, data)
 end
 
 function ENT:Initialize()
@@ -84,13 +91,15 @@ function ENT:Initialize()
     self:SetRenderMode(RENDERMODE_TRANSTEXTURE)
     self:SetColor(Color(0, 0, 0, 0))
 
+    self.InitialPos = self:GetPos()
+    self.InitialAng = self:GetAngles()
+
     if self.Acceleration == 0 then
         self.Acceleration = 500
     end
     if self.Deceleration == 0 then
         self.Deceleration = 500
     end
-
 end
 
 function ENT:OnRemove()
@@ -147,12 +156,6 @@ function ENT:MaintainPlayers()
         end
     end
 
-    -- If there are no more players we can disable this.
-    if #self.ActivePlayers == 0 then
-        self:Disable()
-        return false
-    end
-
     return true
 
 end
@@ -167,11 +170,10 @@ function ENT:FollowTarget()
     end
 
     -- Not sure what this is about
-    --[[
-    if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false then
-        -- TODO: Not wait forever?
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false and CurTime() > self.ReturnTime then
+        self:Disable()
+        return
     end
-    ]]
 
     local diffAng
 
@@ -245,17 +247,7 @@ end
 
 function ENT:Move()
 
-    -- Don't move if we have no players yet.
-    if #self.ActivePlayers == 0 then
-        return
-    end
-
-    if not IsValid(self.TargetPath) then
-        -- Not on a path, don't move.
-        return
-    end
-
-    do
+    if IsValid(self.TargetPath) then
         local currentPos = self:GetPos()
 
         if self.TargetPath:HasSpawnFlags(2 --[[ SF_PATHCORNER_TELEPORT ]]) == true then
@@ -341,6 +333,7 @@ function ENT:AddPlayerToControl(ply)
         restoreData.ActiveWeapon = activeWeapon
         restoreData.ViewEntity = viewEntity
         restoreData.Frozen = ply:IsFrozen()
+        restoreData.NoDraw = ply:GetNoDraw()
     end
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_NOT_SOLID) == true then
@@ -349,6 +342,10 @@ function ENT:AddPlayerToControl(ply)
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_TAKECONTROL) == true then
         ply:Freeze(true)
+    end
+
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_NODRAW) == true then
+        ply:SetNoDraw(true)
     end
 
     if IsValid(activeWeapon) then
@@ -372,6 +369,7 @@ function ENT:RestorePlayer(ply, restoreData)
     ply:SetViewEntity(restoreData.ViewEntity)
     ply:SetSolidFlags(restoreData.SolidFlags)
     ply:Freeze(restoreData.Frozen)
+    ply:SetNoDraw(restoreData.NoDraw)
 
     if IsValid(restoreData.ActiveWeapon) then
         restoreData.ActiveWeapon:RemoveEffects(EF_NODRAW)
@@ -389,6 +387,10 @@ function ENT:RemovePlayerFromControl(ply)
         self:RestorePlayer(ply, restoreData)
 
         table.remove(self.ActivePlayers, k)
+
+        if #self.ActivePlayers == 0 then
+            self:Disable()
+        end
         return true
 
     end
@@ -402,7 +404,7 @@ function ENT:EnableControl(ply)
 
     local plys = {}
 
-    if ply == nil and self:HasSpawnFlags(SF_CAMERA_PLAYER_MULTIPLAYER_ALL) == true then
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_MULTIPLAYER_ALL) == true then
         plys = player.GetAll()
     elseif IsValid(ply) then
         plys = { ply }
@@ -413,20 +415,25 @@ function ENT:EnableControl(ply)
         return
     end
 
+    -- HACHACK: Because point_viewcontrol is not affected by game.CleanUpMap we have to always restore it.
+    self:SetPos(self.InitialPos)
+    self:SetAngles(self.InitialAng)
+
     self.ReturnTime = CurTime() + self.Wait
     self.Speed = self.InitialSpeed
     self.TargetSpeed = self.InitialSpeed
 
-    local targetEntityName = self.Target
+    local targetEntityName = self.TargetName
     self.TargetEntity = ents.FindFirstByName(targetEntityName)
     if not IsValid(self.TargetEntity) then
-        DbgPrint(self, "Failed to find target entity", targetEntityName)
+        DbgPrint(self, self:GetName(), "Failed to find target entity: \"" .. tostring(targetEntityName) .. "\"")
     end
+
     self.AttachmentIndex = 0
     self.TargetSpeed = 1
     self.Speed = self.InitialSpeed
     -- NOTE: Check out why we have to set snap to target to 1 to get the right effects.
-    self.SnapToTarget = true --self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
+    self.SnapToTarget = self:HasSpawnFlags( SF_CAMERA_PLAYER_SNAP_TO )
 
     if IsValid(self.TargetEntity) then
         if self.TargetAttachment ~= "" then
@@ -460,9 +467,6 @@ function ENT:EnableControl(ply)
         self.MoveDir:Normalize()
         self.MoveDistance = targetPathPos:Distance(localPos)
         self.StopTime = CurTime() + (targetPath:GetInternalVariable("wait") or 0)
-
-    else
-        self.MoveDistance = 0
     end
 
     for _, v in pairs(plys) do
@@ -506,6 +510,7 @@ function ENT:Enable(data, activator, caller)
 
     -- Avoid doing this.
     if self:GetNWVar("Disabled") == false then
+        DbgPrint(self, "Not disabled trying to re-enable?")
         return
     end
 
@@ -541,8 +546,8 @@ function ENT:Disable()
         return
     end
 
-    self:SetNWVar("Disabled", true)
     self:DisableControl()
+    self:SetNWVar("Disabled", true)
 
     return true
 end
