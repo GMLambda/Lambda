@@ -103,6 +103,8 @@ function GM:SetPlayerCheckpoint(checkpoint, activator, gridData)
     end
     if istable(checkpoint) then
         checkpoint = self:CreatePlayerCheckpoint(checkpoint)
+    elseif isvector(checkpoint) then
+        checkpoint = self:CreatePlayerCheckpoint({ Pos = checkpoint })
     end
     DbgPrint("Assigned new checkpoint to: " .. tostring(checkpoint))
     self.CurrentCheckpoint = checkpoint
