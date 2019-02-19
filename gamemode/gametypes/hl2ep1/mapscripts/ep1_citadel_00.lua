@@ -3,7 +3,6 @@ AddCSLuaFile()
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 
-MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
     Weapons =
@@ -106,6 +105,7 @@ local function CreateVanSeat(van, data, seats)
     seat:SetName("VanSeat")
 
     seat:Fire("AddOutput", "PlayerOn !self,Lock,,0.0")
+    seat:Fire("AddOutput", "PlayerOn van_seat_ounter,Add,1,0.0,-1")
 
     return seat
 
@@ -126,6 +126,26 @@ function MAPSCRIPT:PostInit()
 
         self.Van = nil
 
+        -- Freeze player also.
+        ents.WaitForEntityByName("viewcontrol_black", function(ent)
+            ent:SetKeyValue("spawnflags", "396")
+        end)
+
+        ents.WaitForEntityByName("point_viewcontrol_01", function(ent)
+            ent:SetKeyValue("spawnflags", "412")
+        end)
+
+        ents.WaitForEntityByName("viewcontrol_final", function(ent)
+            ent:SetKeyValue("spawnflags", "398")
+        end)
+
+        ents.WaitForEntityByName("pvc_intro_start", function(ent)
+            ent:SetKeyValue("spawnflags", "412")
+        end)
+
+        ents.WaitForEntityByName("pvc_intro", function(ent)
+            ent:SetKeyValue("spawnflags", "412")
+        end)
 
         -- Prevent scenes to stop when somebody dies
         for _, scenes in pairs(self.Scenes) do
@@ -134,14 +154,94 @@ function MAPSCRIPT:PostInit()
         	end)
         end
 
+        -- Let alyx hug everyone.
+        ents.WaitForEntityByName("vehicle_blackout", function(ent)
+
+            for i = 1, 64 do
+                local vehicle = ents.Create("prop_vehicle_choreo_generic")
+                vehicle:SetKeyValue("vehiclescript", "scripts/vehicles/choreo_vehicle_ep1_dogintro.txt")
+                vehicle:SetKeyValue("VehicleLocked", "1")
+                vehicle:SetName("vehicle_blackout_" .. tostring(i))
+                vehicle:SetModel(ent:GetModel())
+                vehicle:SetPos(ent:GetPos())
+                vehicle:SetAngles(ent:GetAngles())
+                vehicle:SetParent(ent)
+                vehicle:Fire("AddOutput", "PlayerOff ghostanim_DogIntro,Kill,,0.0,-1")
+                vehicle:Fire("AddOutput", "PlayerOff !self,Kill,,1.0,-1")
+                vehicle:Fire("AddOutput", "PlayerOn !activator,DisableDraw,,0.0,-1")
+                vehicle:Fire("AddOutput", "PlayerOff !activator,EnableDraw,,0.0,-1")
+                vehicle:Spawn()
+            end
+
+        end)
+
+        -- Let everyone exit.
+        local exitTP = ents.Create("point_teleport")
+        exitTP:SetPos(Vector(-9017.534180, 5761.911133, -142.968750))
+        exitTP:SetAngles(Angle(0, 50, 0))
+        exitTP:SetKeyValue("target", "!players")
+        exitTP:SetName("vehicle_blackoutexit_tp")
+        exitTP:Spawn()
+
+        ents.WaitForEntityByName("ss_DogIntro", function(ent)
+            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,Unlock,,0.0,-1")
+            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,ExitVehicle,,0.01,-1")
+            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackoutexit_tp,Teleport,,0.05,-1")
+            ent:Fire("AddOutput", "OnScriptEvent01 maker_template_gravgun,SetParent,!player,0.1,-1")
+        end)
+
+        GAMEMODE:WaitForInput("vehicle_blackout", "EnterVehicle", function(ent)
+            local i = 1
+            for k,v in pairs(player.GetAll()) do
+                if v:Alive() == false then
+                   continue
+                end
+                local vehicle = ents.FindFirstByName("vehicle_blackout_" .. tostring(i))
+                v:EnterVehicle(vehicle)
+                i = i + 1
+            end
+            return false -- Suppress this.
+        end)
+
+        -- Make sure no player is left behind.
+        for _,v in pairs(ents.FindByPos(Vector(-7920, 5444, 84), "trigger_once")) do
+            v:Remove()
+        end
+
+        local triggerDogEscape = ents.Create("trigger_multiple")
+        triggerDogEscape:SetupTrigger(
+            Vector(-8560.031250, 5826.152832, -63.710419),
+            Angle(0, 0, 0),
+            Vector(-600, -350, -100),
+            Vector(800, 400, 500)
+        )
+        triggerDogEscape:Fire("AddOutput", "OnEndTouchAll ss_dog_gunship_down,BeginSequence,,0.0,-1")
+        triggerDogEscape:Fire("AddOutput", "OnEndTouchAll pclip_gunship_2,Enable,,0.0,-1")
+
         ents.WaitForEntityByName("counter_alyx_van", function(ent)
             -- Increase from 3 to 4 so we can have our trigger have the final say.
             ent:SetKeyValue("max", "4")
         end)
 
+        -- Let the vehicle fall once everyone is out of there.
+        ents.WaitForEntityByName("counter_vanride_end01_resume", function(ent)
+            -- Increase by one.
+            ent:SetKeyValue("max", "3")
+        end)
+
+        local fallTrigger = ents.Create("trigger_multiple")
+        fallTrigger:SetupTrigger(
+            Vector(4799.591309, 4057.289551, -6326.972656),
+            Angle(0, 0, 0),
+            Vector(-130, -50, -30),
+            Vector(70, 50, 80)
+        )
+        fallTrigger:Fire("AddOutput", "OnEndTouchAll counter_vanride_end01_resume,Add,1,0.0,-1")
+
         -- Unlock van seats after the sequence not only the van.
         ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
-            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.0,-1")
+            -- Unlock after.
+            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.01,-1")
         end)
 
         ents.WaitForEntityByName("Van", function(ent)
@@ -181,30 +281,46 @@ function MAPSCRIPT:PostInit()
             })
         end
 
-        -- -6709.447266 5710.125000 -102.160347 cp1
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6709.447266, 5710.125000, -102.160347), Angle(0, 45, 0))
+        -- Let players leave once the sequence is done.
+        ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
+            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.0,-1")
+        end)
+
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
-            Vector(-6709.447266, 5710.125000, -102.160347),
+            Vector(-8988.072266, 5828.276855, -142.968750),
             Angle(0, 0, 0),
-            Vector(-100, -250, 0),
-            Vector(100, 250, 100)
+            Vector(-200, -200, 0),
+            Vector(200, 200, 100)
         )
         checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+            --GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+        end
+
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-7916.693359, 5424.519531, -95.968750), Angle(0, 0, 0))
+        local checkpointTrigger2 = ents.Create("trigger_once")
+        checkpointTrigger2:SetupTrigger(
+            Vector(-7916.693359, 5424.519531, -95.968750),
+            Angle(0, 0, 0),
+            Vector(-150, -50, 0),
+            Vector(200, 50, 100)
+        )
+        checkpointTrigger2.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         -- 4649.159180 3903.150635 -6343.968750
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(4649.159180, 3903.150635, -6343.968750), Angle(0, 45, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(4649.159180, 3903.150635, -6343.968750), Angle(0, 45, 0))
+        local checkpointTrigger3 = ents.Create("trigger_once")
+        checkpointTrigger3:SetupTrigger(
             Vector(4649.159180, 3903.150635, -6343.968750),
             Angle(0, 0, 0),
             Vector(-100, -250, 0),
             Vector(100, 250, 100)
         )
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
     end
