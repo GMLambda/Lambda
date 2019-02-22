@@ -41,6 +41,10 @@ function MAPSCRIPT:PostInit()
         alyxStopFollow:Fire("AddOutput", "OnTrigger follow_alyx,Deactivate,,0.0,-1")
         alyxStopFollow:Fire("AddOutput", "OnTrigger lambda_start_rollertraining,Enable,,0.0,-1")
 
+        ents.WaitForEntityByName("counter_rollerdoor_close", function(ent)
+            ent:SetKeyValue("max", "3")
+        end)
+
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(
             Vector(-4727.891113, 7711.114258, 2520.031250),
@@ -116,15 +120,6 @@ function MAPSCRIPT:PostInit()
         for _,stripTrigger in pairs(ents.FindByPos(Vector(-2658, 1377, 2576.86), "trigger_once")) do
             print("Removing trigger:" .. tostring(stripTrigger))
             stripTrigger:Remove()
-        end
-
-        -- Workaround: https://github.com/Facepunch/garrysmod-issues/issues/3759
-        for _,v in pairs(ents.FindByClass("trigger_vphysics_motion")) do
-            if v:GetInternalVariable("m_bDisabled") == true then
-                -- This will disable the collisions, must be enabled first because of the bug.
-                v:Fire("Enable")
-                v:Fire("Disable")
-            end
         end
 
         -- We have to take away all physcannons except one.
