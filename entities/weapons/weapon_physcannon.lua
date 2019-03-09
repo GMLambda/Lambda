@@ -966,6 +966,8 @@ end
 
 function SWEP:UpdateObject()
 
+    self:UpdateDrawUsingViewModel()
+    
     local owner = self.Owner
 
     if not IsValid(owner) then
