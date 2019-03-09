@@ -157,6 +157,10 @@ function GM:AdjustDifficulty()
     end
 
     local difficulty = self:GetDifficulty()
+    if difficulty == nil then
+        return
+    end
+
     DbgPrint("Difficulty Adjustment: " .. difficulty)
 
     local data = self:GetCurrentDifficultyData()
