@@ -966,8 +966,6 @@ end
 
 function SWEP:UpdateObject()
 
-    self:UpdateDrawUsingViewModel()
-    
     local owner = self.Owner
 
     if not IsValid(owner) then
@@ -2108,6 +2106,7 @@ function SWEP:DrawWorldModel()
 end
 
 function SWEP:DrawWorldModelTranslucent()
+    self:UpdateDrawUsingViewModel()
     self:DrawModel()
     self:DrawEffects()
 end
@@ -2820,6 +2819,7 @@ function SWEP:UpdateEffects()
 end
 
 function SWEP:ViewModelDrawn(vm)
+    self:UpdateDrawUsingViewModel()
     self:UpdateEffects()
     self:UpdateGlow()
     self:DrawEffects(vm)
