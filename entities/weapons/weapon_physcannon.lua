@@ -2332,6 +2332,9 @@ function SWEP:DrawCoreBeams(owner, vm)
     local maxEndCap = PHYSCANNON_ENDCAP3
     if self:ShouldDrawUsingViewModel() == true then
         if owner ~= nil then
+            if IsValid(vm) == false then
+                vm = owner:GetViewModel()
+            end
             local attachmentData = vm:GetAttachment(1)
             if attachmentData == nil then
                 return
