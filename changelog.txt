@@ -1,3 +1,6 @@
+0.9.4
+- Feature: Add 'LambdaInitializeMapList(maplist)' hook, allows addons to add/remove maps from the list.
+
 0.9.3
 - Feature: Realism difficulty, for people who like a challenge.
 - Feature: Medkit was added to heal and revive players, received in d1_trainstation_05.
