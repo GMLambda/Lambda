@@ -16,6 +16,40 @@ GAMETYPE.MapList = {"dm_lockdown", "dm_overwatch", "dm_steamlab", "dm_underpass"
 GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
+GAMETYPE.DifficultyData = {
+    [0] = {
+        Name = "Default",
+        Proficiency = WEAPON_PROFICIENCY_GOOD,
+        Skill = 1,
+        NPCSpawningScale = 0.0,
+        DamageScale = {
+            [DMG_SCALE_PVN] = 1,
+            [DMG_SCALE_NVP] = 1,
+            [DMG_SCALE_PVP] = 1.75,
+            [DMG_SCALE_NVN] = 1
+        },
+        HitgroupPlayerDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 2.75,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        },
+        HitgroupNPCDamageScale = {
+            [HITGROUP_GENERIC] = 1,
+            [HITGROUP_HEAD] = 1,
+            [HITGROUP_CHEST] = 1,
+            [HITGROUP_STOMACH] = 1,
+            [HITGROUP_LEFTARM] = 1,
+            [HITGROUP_RIGHTARM] = 1,
+            [HITGROUP_LEFTLEG] = 1,
+            [HITGROUP_RIGHTLEG] = 1
+        }
+    },
+}
 
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = 2
@@ -154,6 +188,24 @@ end
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()
+
+    local difficulties = {}
+    for k, v in pairs(self.DifficultyData or {}) do
+        difficulties[k] = v.Name
+    end
+
+    GAMEMODE:AddSetting("difficulty", {
+        Category = "SERVER",
+        NiceName = "#GM_DIFFICULTY",
+        Description = "Difficulty",
+        Type = "int",
+        Default = 0,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = difficulties,
+        },
+    })
 
     GAMEMODE:AddSetting("dm_fraglimit", {
         Category = "SERVER",
