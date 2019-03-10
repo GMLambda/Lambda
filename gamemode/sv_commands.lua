@@ -29,15 +29,15 @@ concommand.Add("lambda_restart", RestartLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD
 
 local function PreviousLevel(ply, cmd, args)
     if whoisrunning(ply) == false then return end
-    local prevmap = table.KeyFromValue(GAMEMODE:GetGameTypeData("MapList"), game.GetMap())
-    game.ConsoleCommand("changelevel " .. GAMEMODE:GetGameTypeData("MapList")[prevmap - 1] .. "\n")
+    local prevmap = GAMEMODE:GetPreviousMap()("MapList")
+    game.ConsoleCommand("changelevel " .. prevmap .. "\n")
 end
 concommand.Add("lambda_prevmap", PreviousLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
 
 local function NextLevel(ply, cmd, args)
     if whoisrunning(ply) == false then return end
-    local nextmap = table.KeyFromValue(GAMEMODE:GetGameTypeData("MapList"), game.GetMap())
-    game.ConsoleCommand("changelevel " .. GAMEMODE:GetGameTypeData("MapList")[nextmap + 1] .. "\n")
+    local nextmap = GAMEMODE:GetNextMap()
+    game.ConsoleCommand("changelevel " .. nextmap .. "\n")
 end
 concommand.Add("lambda_nextmap", NextLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
 

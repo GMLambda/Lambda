@@ -55,7 +55,7 @@ end
 
 function PANEL:Extend(vote)
 
-	local mapList = GAMEMODE:GetGameTypeData("MapList") or {}
+	local mapList = GAMEMODE:GetMapList() or {}
 	self.Selected = vote
 	if vote == "lambda_votemap" then
 		for _, v in pairs(mapList) do

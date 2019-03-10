@@ -142,6 +142,9 @@ function GM:SetGameType(gametype, isFallback)
         end
     end
 
+    self.GameType = gametypeData
+    self:InitializeMapList()
+
     if gametypeData.LoadCurrentMapScript ~= nil then
         gametypeData:LoadCurrentMapScript()
     end
@@ -177,7 +180,6 @@ function GM:SetGameType(gametype, isFallback)
         gametypeData:LoadLocalisation(lang, gmodLang)
     end
 
-    self.GameType = gametypeData
     self:ResetMapScript()
 
 end
@@ -185,6 +187,7 @@ end
 function GM:ReloadGameType()
 
     if self.GameType ~= nil then
+        self:InitializeMapList()
         self:ResetMapScript()
     end
 
