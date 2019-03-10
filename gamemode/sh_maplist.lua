@@ -4,9 +4,23 @@ end
 
 local DbgPrint = GetLogging("MapList")
 
+function GM:InitializeMapList()
+    self.MapList = table.Copy(self:GetGameTypeData("MapList") or {})
+    hook.Call("LambdaInitializeMapList", GAMEMODE, self.MapList)
+end
+
+function GM:GetMapList()
+    if self.MapList == nil then
+        error("InitializeMapList not called")
+        return {}
+    end
+    -- Returns copy to prevent modifications.
+    return table.Copy(self.MapList)
+end
+
 function GM:GetNextMap()
 
-    local mapList = self:GetGameTypeData("MapList")
+    local mapList = self.MapList
 
     local current = self:GetCurrentMapIndex()
     if current + 1 > #mapList then
@@ -22,7 +36,7 @@ function GM:GetPreviousMap()
         return self.PreviousMap
     end
 
-    local mapList = self:GetGameTypeData("MapList")
+    local mapList = self.MapList
 
     local current = self:GetCurrentMapIndex()
     if current - 1 < 0 then
@@ -43,7 +57,7 @@ end
 
 function GM:GetMapIndex(prevMap, currentMap)
 
-    local mapList = self:GetGameTypeData("MapList")
+    local mapList = self.MapList
 
     DbgPrint("Getting Map Index, Prev: " .. tostring(prevMap) .. ", Cur: " .. currentMap)
     local foundPrev = false
