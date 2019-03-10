@@ -23,8 +23,11 @@ function PANEL:Init()
 				self:Extend(k)
 			else
 				RunConsoleCommand(k)
+				if IsValid(self.RootPanel) then
+					self.RootPanel:Close()
+				end
 			end
-	end
+		end
 		y = y + btnH + 5
 	end
 
@@ -47,6 +50,9 @@ function PANEL:Init()
 			self.Extended[self.Selected](z)
 		else
 			self.Extended[self.Selected](w)
+		end
+		if IsValid(self.RootPanel) then
+			self.RootPanel:Close()
 		end
 		self:Hide()
 	end
