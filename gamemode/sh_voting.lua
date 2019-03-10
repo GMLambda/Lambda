@@ -152,12 +152,12 @@ if SERVER then
             timeout = false
         end
 
-        if timeout == true then
-            failed = true
-        else
+        local numVoters = 0
+        do
             local choices = {}
             for k,v in pairs(vote.results) do
                 choices[v] = (choices[v] or 0) + 1
+                numVoters = numVoters + 1
             end
             local maxChoices = 0
             local bestChoice = 0
@@ -172,6 +172,14 @@ if SERVER then
                 winningOption = math.random(1, #vote.options)
             else
                 winningOption = bestChoice
+            end
+        end
+
+        if timeout == true then
+            -- At least 2/3 of the players must vote.
+            local p = numVoters / player.GetCount()
+            if p < 0.66 then
+                failed = true
             end
         end
 
