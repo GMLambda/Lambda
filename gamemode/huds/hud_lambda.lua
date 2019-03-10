@@ -13,6 +13,7 @@ function PANEL:Init()
 	self:SetTitle("Settings - " .. GAMEMODE:GetGameTypeData("Name"))
 
 	self.Sheet = self:Add("DPropertySheet")
+	self.Sheet.RootPanel = self
 	self.Sheet:Dock(LEFT)
 	self.Sheet:SetSize(W - 10, H)
 	self.TabPanels = {}
@@ -27,6 +28,7 @@ function PANEL:Init()
 		local pnl_name = "Lambda" .. v[1] .. "Panel"
 		local pnl_icon = "lambda/icons/" .. v[2] .. ".png"
 		self.TabPanels[k] = self.Sheet:Add(pnl_name)
+		self.TabPanels[k].RootPanel = self
 		self.Sheet:AddSheet(v[1],self.TabPanels[k],pnl_icon)
 	end
 end
