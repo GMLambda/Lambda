@@ -1,6 +1,7 @@
 0.9.4
 - Feature: Add 'LambdaInitializeMapList(maplist)' hook, allows addons to add/remove maps from the list.
 - Fix: Vote system did not consider amount of voters, 2/3 is required to be a valid vote.
+- Fix: Gravity gun throwing errors in some cases.
 
 0.9.3
 - Feature: Realism difficulty, for people who like a challenge.
