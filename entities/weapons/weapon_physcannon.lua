@@ -221,7 +221,7 @@ function SWEP:Initialize()
     self.ElementDebounce = CurTime()
     self.CheckSuppressTime = CurTime()
     self.DebounceSecondary = false
-    self:SetWeaponHoldType(self.HoldType)
+    self:SetHoldType(self.HoldType)
     self.ElementPosition = InterpValue(0.0, 0.0, 0)
     self.LastElementDestination = 0
 
@@ -1241,11 +1241,11 @@ function SWEP:EmitLight(pos, brightness, color)
         dlight.g = color.g
         dlight.b = color.b
         dlight.brightness = brightness
-        dlight.decay = 0
+        dlight.decay = 1
         dlight.size = 64
         dlight.minlight = 0.1
         dlight.nomodel = false
-        dlight.dietime = CurTime() + 2
+        dlight.dietime = CurTime() + 0.1
     end
 end
 
@@ -2783,7 +2783,7 @@ function SWEP:UpdateEffects()
         local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
         local beamdata = self.BeamParameters[i]
 
-        if self.CurrentEffect != EFFECT_HOLDING and self:IsObjectAttached() == false and math.random(0, 400) == 0 then
+        if self.CurrentEffect ~= EFFECT_HOLDING and self:IsObjectAttached() ~= true and math.random(0, 400) == 0 then
 
             self:EmitSound( "Weapon_MegaPhysCannon.ChargeZap" );
 
