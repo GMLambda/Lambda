@@ -261,7 +261,7 @@ function SWEP:WeaponSound(snd)
 
     if CLIENT then
         ent = self:GetOwner()
-        if IsValid(ent) == false then
+        if IsValid(ent) ~= true then
             ent = self
         end
     else
@@ -301,7 +301,7 @@ end
 function SWEP:IsObjectAttached()
 
     local controller = self:GetMotionController()
-    if IsValid(controller) == false then
+    if IsValid(controller) ~= true then
         return false
     end
     if controller.IsObjectAttached == nil then
@@ -318,7 +318,7 @@ function SWEP:OnRemove()
     self:DetachObject()
     if SERVER then
         local motionController = self:GetMotionController()
-        if IsValid(motionController) then
+        if IsValid(motionController) == true then
             motionController:Remove()
         end
     end
@@ -389,7 +389,7 @@ function SWEP:PrimaryAttack()
     DbgPrint(self, "PrimaryAttack")
 
     local owner = self.Owner
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return
     end
 
@@ -435,11 +435,11 @@ function SWEP:PrimaryAttack()
     local valid = true
     local ent = tr.Entity
 
-    if tr.Fraction == 1 or not IsValid(ent) or ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
+    if tr.Fraction == 1 or IsValid(ent) ~= true or ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
         valid = false
     elseif ent:GetMoveType() ~= MOVETYPE_VPHYSICS then
-        if ent:CanTakeDamage() == false then 
-            valid = false 
+        if ent:CanTakeDamage() == false then
+            valid = false
         end
     end
 
@@ -451,7 +451,7 @@ function SWEP:PrimaryAttack()
             filter = owner,
         })
         ent = tr.Entity
-        if tr.Fraction == 1 or not IsValid(ent) or ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
+        if tr.Fraction == 1 or IsValid(ent) ~= true or ent:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then
             -- Nothing valid.
             return self:DryFire()
         end
@@ -479,7 +479,7 @@ function SWEP:PrimaryAttack()
 
             local ragdoll = ent:CreateServerRagdoll(dmgInfo, COLLISION_GROUP_INTERACTIVE_DEBRIS)
             local phys = ragdoll:GetPhysicsObject()
-            if IsValid(phys) then
+            if IsValid(phys) == true then
                 phys:AddGameFlag(FVPHYSICS_NO_SELF_COLLISIONS)
             end
             ragdoll:SetCollisionBounds(ent:OBBMins(), ent:OBBMaxs())
@@ -526,7 +526,7 @@ end
 function SWEP:CanSecondaryAttack()
 
     local owner = self.Owner
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         DbgPrint("Invalid owner")
         return false
     end
@@ -613,7 +613,7 @@ function SWEP:FindObjectInCone(start, fwd, coneSize)
     local nearest
 
     for _,v in pairs(ents.FindInBox(mins, maxs)) do
-        if not IsValid(v:GetPhysicsObject()) then
+        if IsValid(v:GetPhysicsObject()) ~= true then
             continue
         end
         local los = v:WorldSpaceCenter() - start
@@ -653,7 +653,7 @@ function SWEP:FindObjectInConeMega(start, fwd, coneSize, ballCone, onlyCombineBa
     local nearest
 
     for _,v in pairs(ents.FindInBox(mins, maxs)) do
-        if not IsValid(v:GetPhysicsObject()) then
+        if IsValid(v:GetPhysicsObject()) ~= true then
             continue
         end
 
@@ -709,7 +709,7 @@ local ALLOWED_PICKUP_CLASS =
 
 function SWEP:CanPickupObject(ent)
 
-    if not IsValid(ent) then
+    if IsValid(ent) ~= true then
         return false
     end
 
@@ -738,7 +738,7 @@ function SWEP:CanPickupObject(ent)
     end
 
     local owner = self:GetOwner()
-    if IsValid(owner) and owner:GetGroundEntity() == ent then
+    if IsValid(owner) == true and owner:GetGroundEntity() == ent then
         return false
     end
 
@@ -780,7 +780,7 @@ function SWEP:CanPickupObject(ent)
 
             for i = 0, physCount - 1 do
                 local subphys = ent:GetPhysicsObjectNum(i)
-                if not IsValid(subphys) then
+                if IsValid(subphys) ~= true then
                     continue
                 end
                 if subphys:IsMoveable() == false then
@@ -847,7 +847,7 @@ function SWEP:FindObjectTrace(owner)
         filter = owner
     })
 
-    if tr.Fraction == 1 or not IsValid(tr.Entity) or tr.HitWorld == true then
+    if tr.Fraction == 1 or IsValid(tr.Entity) ~= true or tr.HitWorld == true then
         tr = util.TraceHull({
             start = start,
             endpos = endPos,
@@ -872,21 +872,21 @@ end
 function SWEP:FindObject()
 
     local owner = self.Owner
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return
     end
 
     local tr = self:FindObjectTrace(owner)
 
     local ent
-    if IsValid(tr.Entity) then
+    if IsValid(tr.Entity) == true then
         ent = tr.Entity:GetRootMoveParent()
     end
 
     local attach = false
     local pull = false
 
-    if tr.Fraction ~= 1.0 and IsValid(tr.Entity) and tr.HitWorld == false then
+    if tr.Fraction ~= 1.0 and IsValid(tr.Entity) == true and tr.HitWorld == false then
         if tr.Fraction <= 0.25 then
             attach = true
         elseif tr.Fraction > 0.25 then
@@ -907,7 +907,7 @@ function SWEP:FindObject()
         coneEnt = self:FindObjectInConeMega(start, fwd, physcannon_cone:GetFloat(), physcannon_ball_cone:GetFloat(), attach or pull)
     end
 
-    if IsValid(coneEnt) then
+    if IsValid(coneEnt) == true then
         ent = coneEnt
 
         if ent:WorldSpaceCenter():DistToSqr(start) <= (testLength * testLength) then
@@ -939,7 +939,7 @@ function SWEP:FindObject()
     end
 
     local phys = ent:GetPhysicsObject()
-    if not IsValid(phys) then
+    if IsValid(phys) ~= true then
         return OBJECT_NOT_FOUND
     end
 
@@ -968,7 +968,7 @@ function SWEP:UpdateObject()
 
     local owner = self.Owner
 
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return false
     end
 
@@ -1166,7 +1166,7 @@ function SWEP:UpdateElementPosition()
     local elemPos = self.ElementPosition:Interp(CurTime())
     if self:ShouldDrawUsingViewModel() == true then
         local owner = self:GetOwner()
-        if not IsValid(owner) then
+        if IsValid(owner) ~= true then
             return
         end
 
@@ -1215,7 +1215,7 @@ function SWEP:CheckForTarget()
 
     local tr = self:FindObjectTrace(owner)
 
-    if tr.Fraction ~= 1.0 and IsValid(tr.Entity) then
+    if tr.Fraction ~= 1.0 and IsValid(tr.Entity) == true then
 
         local dist = (tr.StartPos - tr.HitPos):Length()
         if dist <= self:TraceLength() and self:CanPickupObject(tr.Entity) then
@@ -1305,7 +1305,7 @@ function SWEP:Think()
     if CLIENT then
         -- Only predict for local player.
         local ply = LocalPlayer()
-        if IsValid(ply) and ply:GetObserverMode() == OBS_MODE_NONE and ply == self:GetOwner() then
+        if IsValid(ply) == true and ply:GetObserverMode() == OBS_MODE_NONE and ply == self:GetOwner() then
             controller:ManagePredictedObject()
         end
 
@@ -1329,7 +1329,7 @@ function SWEP:Think()
     end
 
     local owner = self:GetOwner()
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return true
     end
 
@@ -1358,7 +1358,7 @@ function SWEP:AttachObject(ent, tr)
     DbgPrint(self, "AttachObject", ent)
 
     local owner = self.Owner
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return
     end
 
@@ -1382,7 +1382,7 @@ function SWEP:AttachObject(ent, tr)
 
         local ragdoll = ent:CreateServerRagdoll(dmgInfo, COLLISION_GROUP_INTERACTIVE_DEBRIS)
         local phys = ragdoll:GetPhysicsObject()
-        if IsValid(phys) then
+        if IsValid(phys) == true then
             phys:AddGameFlag(FVPHYSICS_NO_SELF_COLLISIONS)
         end
         ragdoll:SetCollisionBounds(ent:OBBMins(), ent:OBBMaxs())
@@ -1408,7 +1408,7 @@ function SWEP:AttachObject(ent, tr)
     end
 
     local phys = ent:GetPhysicsObject()
-    if not IsValid(phys) then
+    if IsValid(phys) ~= true then
         DbgPrint("Physics invalid!")
         return
     end
@@ -1424,7 +1424,7 @@ function SWEP:AttachObject(ent, tr)
     phys:AddGameFlag(FVPHYSICS_PLAYER_HELD)
 
     --if SERVER then
-    if not IsValid(ent:GetOwner()) then
+    if IsValid(ent:GetOwner()) ~= true then
         ent:SetOwner(owner)
         self.ResetOwner = true
     end
@@ -1497,7 +1497,7 @@ function SWEP:DetachObject(launched)
     end
 
     local controller = self:GetMotionController()
-    if not IsValid(controller) then
+    if IsValid(controller) ~= true then
         DbgPrint(self, "No valid controller")
         return
     end
@@ -1508,13 +1508,13 @@ function SWEP:DetachObject(launched)
     end
 
     local ent = controller:GetAttachedObject()
-    if not IsValid(ent) then
+    if IsValid(ent) ~= true then
         DbgPrint(self, "Invalid attached object")
         return
     end
 
     local phys = ent:GetPhysicsObject()
-    if not IsValid(phys) then
+    if IsValid(phys) ~= true then
         DbgPrint("No physics object")
         return
     end
@@ -1525,7 +1525,7 @@ function SWEP:DetachObject(launched)
         ent:SetOwner(nil)
     end
 
-    if SERVER and IsValid(owner) then
+    if SERVER and IsValid(owner) == true then
         owner:SimulateGravGunDrop(ent, launched)
     end
 
@@ -1539,7 +1539,7 @@ function SWEP:DetachObject(launched)
     self:DoEffect(EFFECT_READY)
     self:SetNextIdleTime(CurTime() + 0.2)
 
-    if launched ~= true and ent:GetClass() == "prop_combine_ball" and IsValid(phys) then
+    if launched ~= true and ent:GetClass() == "prop_combine_ball" and IsValid(phys) == true then
         -- If we just release it then it will be simply stuck mid air.
         phys:Wake()
         phys:SetVelocity( (owner:GetAimVector() + (VectorRand() * 0.8)) * 4000)
@@ -1563,7 +1563,7 @@ end
 function SWEP:PrimaryFireEffect()
 
     local owner = self.Owner
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         return
     end
 
@@ -1628,7 +1628,7 @@ function SWEP:ApplyVelocityBasedForce(ent, fwd)
     end
 
     local phys = ent:GetPhysicsObject()
-    if not IsValid(phys) then
+    if IsValid(phys) ~= true then
         return
     end
 
@@ -1646,7 +1646,7 @@ function SWEP:ApplyVelocityBasedForce(ent, fwd)
     if ent:IsRagdoll() then
         for i = 0, ent:GetPhysicsObjectCount() - 1 do
             local phys2 = ent:GetPhysicsObjectNum(i)
-            if not IsValid(phys2) then
+            if IsValid(phys2) ~= true then
                 continue -- Yes this can actually happen
             end
             phys2:AddVelocity(vVel)
@@ -1692,7 +1692,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
         owner:SimulateGravGunPickup(ent, true)
 
         local phys = ent:GetPhysicsObjectNum(0)
-        if not IsValid(phys) then
+        if IsValid(phys) ~= true then
             return
          end
 
@@ -2226,7 +2226,7 @@ function SWEP:UpdateDrawUsingViewModel()
 end
 
 function SWEP:ShouldDrawUsingViewModel()
-    if not IsValid(self:GetOwner()) then
+    if IsValid(self:GetOwner()) ~= true then
         return false
     end
     return self.DrawUsingViewModel
@@ -2258,7 +2258,7 @@ function SWEP:DrawEffectType(id, data, owner, vm)
 
     local pos
     if self:ShouldDrawUsingViewModel() == true then
-        if IsValid(owner) then
+        if IsValid(owner) == true then
             if vm == nil then
                 vm = owner:GetViewModel()
             end
@@ -2326,7 +2326,7 @@ end
 
 function SWEP:DrawCoreBeams(owner, vm)
 
-    if vm == nil and IsValid(owner) then
+    if vm == nil and IsValid(owner) == true then
         vm = owner:GetViewModel()
     elseif vm == nil then
         vm = self
@@ -2702,7 +2702,7 @@ function SWEP:GetWeaponColor()
     local owner = self:GetOwner()
     local wepColor = Vector(1, 1, 1)
 
-    if IsValid(owner) then
+    if IsValid(owner) == true then
         wepColor = owner:GetWeaponColor()
     else
         local f = .3
@@ -2731,7 +2731,7 @@ function SWEP:UpdateEffects()
     end
 
     local wepColor = self:GetWeaponColor()
-    if not IsValid(owner) then
+    if IsValid(owner) ~= true then
         -- Manually change it we are right before a draw call.
         MAT_WORLDMDL:SetVector("$selfillumtint", wepColor)
     end
