@@ -354,7 +354,10 @@ function ENT:PhysicsSimulate( phys, dt )
 end
 
 function ENT:IsObjectAttached()
-    return IsValid(self.AttachedObject)
+    if IsValid(self.AttachedObject) == true then
+        return true
+    end
+    return false
 end
 
 function ENT:GetAttachedObject()
