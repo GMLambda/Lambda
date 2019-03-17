@@ -241,8 +241,6 @@ function SWEP:Initialize()
 
     if CLIENT then
         self:UpdateDrawUsingViewModel()
-        self:StartEffects()
-        self:UpdateEffects()
     end
 
     self:DoEffect(EFFECT_CLOSED)
@@ -250,6 +248,12 @@ function SWEP:Initialize()
     self:SetElementDestination(0)
 
     self:SetSkin(1)
+
+    if CLIENT then
+        hook.Add("Think", self, function(s)
+            self:UpdateEffects()
+        end)
+    end
 
 end
 
@@ -1233,25 +1237,69 @@ function SWEP:CheckForTarget()
 
 end
 
-function SWEP:EmitLight(pos, brightness, color)
-    local dlight = DynamicLight( self:EntIndex() )
-    if dlight then
-        dlight.pos = pos
-        dlight.r = color.r
-        dlight.g = color.g
-        dlight.b = color.b
-        dlight.brightness = brightness
-        dlight.decay = 1
-        dlight.size = 64
-        dlight.minlight = 0.1
-        dlight.nomodel = false
-        dlight.dietime = CurTime() + 0.1
+function SWEP:EmitLight(glowMode, pos, brightness, color)
+
+
+    if glowMode == 1 then
+
+        local pt = self.ProjectedTexture
+        if pt == nil then
+            pt = ProjectedTexture()
+            pt:SetOrthographic(true, 300, 300, 300, 300 )
+            pt:SetTexture( "effects/flashlight/soft" )
+            pt:SetFarZ(250)
+            pt:SetHorizontalFOV(1)
+            pt:SetVerticalFOV(1)
+            pt:SetNearZ(1)
+            pt:SetQuadraticAttenuation(0.1)
+            pt:SetLinearAttenuation(0.1)
+            pt:SetConstantAttenuation(0.1)
+            self.ProjectedTexture = pt
+        end
+        local owner = self:GetOwner()
+        if IsValid(owner) then
+            pt:SetAngles(owner:GetAimVector():Angle())
+        else
+            pt:SetAngles(self:GetAngles())
+        end
+        pt:SetBrightness(brightness)
+        pt:SetColor(color)
+        pt:SetPos(pos)
+        pt:Update()
+
+    elseif glowMode == 2 then
+
+        local dlight = DynamicLight( self:EntIndex() )
+        if dlight then
+            dlight.pos = pos
+            dlight.r = color.r
+            dlight.g = color.g
+            dlight.b = color.b
+            dlight.brightness = brightness
+            dlight.decay = 1
+            dlight.size = 64
+            dlight.minlight = 0.1
+            dlight.nomodel = false
+            dlight.dietime = CurTime() + 0.1
+        end
+
     end
+
 end
 
 function SWEP:UpdateGlow()
 
-    if physcannon_glow:GetBool() == false then
+    local glowMode = physcannon_glow:GetInt()
+
+    -- If disabled and previously enabled remove projected texture.
+    if glowMode == 0 or glowMode == 2 then
+        if self.ProjectedTexture ~= nil then
+            self.ProjectedTexture:Remove()
+            self.ProjectedTexture = nil
+        end
+    end
+
+    if glowMode == 0 then
         return
     end
 
@@ -1274,17 +1322,15 @@ function SWEP:UpdateGlow()
         entPos = attachment.Pos
     end
 
-    local color = self:GetWeaponColor()
-    color.r = color.r * 255
-    color.g = color.g * 255
-    color.b = color.b * 255
+    local wepColor = self:GetWeaponColor()
+    local color = Color(wepColor.r * 255, wepColor.g * 255, wepColor.b * 255)
 
     local brightness = 0.5
     if self:IsMegaPhysCannon() == true then
         brightness = 1
     end
 
-    self:EmitLight(entPos, brightness * 0.5, color)
+    self:EmitLight(glowMode, entPos, brightness * 0.5, color)
 
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 
@@ -2094,10 +2140,6 @@ function SWEP:DrawWorldModel()
     end
 
     self:UpdateElementPosition()
-    self:StartEffects()
-    self:UpdateEffects()
-    self:UpdateGlow()
-
     self:DrawModel()
 end
 
@@ -2693,6 +2735,11 @@ function SWEP:StopEffects(stopSound)
             snd:ChangeVolume(0, 1.0)
             snd:ChangePitch(50, 1.0)
         end
+    else
+        if self.ProjectedTexture ~= nil then
+            self.ProjectedTexture:Remove()
+            self.ProjectedTexture = nil
+        end
     end
 
 end
@@ -2721,7 +2768,17 @@ end
 
 function SWEP:UpdateEffects()
 
+    local owner = self:GetOwner()
+    if owner ~= NULL and IsValid(owner) and owner:GetActiveWeapon() ~= self then
+        if self.ProjectedTexture ~= nil then
+            self.ProjectedTexture:Remove()
+            self.ProjectedTexture = nil
+        end
+        return
+    end
+
     self:StartEffects()
+    self:UpdateGlow()
 
     local owner = self:GetOwner()
 
@@ -2824,8 +2881,6 @@ end
 
 function SWEP:ViewModelDrawn(vm)
     self:UpdateDrawUsingViewModel()
-    self:UpdateEffects()
-    self:UpdateGlow()
     self:DrawEffects(vm)
 end
 
