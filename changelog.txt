@@ -1,4 +1,5 @@
 0.9.5
+- Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
 - Fix: Physcannon not dropping attached object when weapon dropped.
 
 0.9.4
