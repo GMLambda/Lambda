@@ -1482,10 +1482,6 @@ function SWEP:DetachObject(launched)
     --assert(false)
 
     local owner = self:GetOwner()
-    if owner == nil or owner == NULL then
-        DbgPrint("No owner")
-        return
-    end
 
     DbgPrint(self, "DetachObject")
 
@@ -1529,7 +1525,7 @@ function SWEP:DetachObject(launched)
         ent:SetOwner(nil)
     end
 
-    if SERVER then
+    if SERVER and IsValid(owner) then
         owner:SimulateGravGunDrop(ent, launched)
     end
 
@@ -2202,7 +2198,15 @@ function SWEP:FormatViewModelAttachment(pos, inverse)
 
 end
 
+function SWEP:OnDrop()
+    self:DetachObject()
+    if CLIENT then
+        self:UpdateDrawUsingViewModel()
+    end
+end
+
 function SWEP:OwnerChanged()
+    self:DetachObject()
     if CLIENT then
         self:UpdateDrawUsingViewModel()
     end
