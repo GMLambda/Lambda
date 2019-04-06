@@ -577,8 +577,6 @@ function ENT:OnTakeDamage( dmginfo )
         local pos = self:GetPos()
         util.Decal("YellowBlood", pos + Vector(0, 0, 8), pos - Vector(0, 0, 24), { self, attacker, inflictor } )
 
-        GAMEMODE:OnNPCKilled(self, attacker, inflictor)
-
         self:Remove()
     end
 
