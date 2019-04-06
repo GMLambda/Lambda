@@ -94,7 +94,9 @@ function ENT:Initialize()
 end
 
 function ENT:OnRemove()
-    self:Disable()
+    if SERVER then
+        self:Disable()
+    end
 end
 
 function ENT:Think()
