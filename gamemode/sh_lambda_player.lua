@@ -1416,6 +1416,10 @@ function GM:SetupMove(ply, mv, cmd)
         isSprinting = ply:GetSprinting()
     end
 
+    if bit.band(mv:GetButtons(), IN_JUMP) ~= 0 and bit.band(mv:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() then
+        ply.Jumping = true
+    end
+
     if mv:KeyDown(IN_DUCK) and ply:IsOnGround() and isSprinting == true then
 
         self:PlayerEndSprinting(ply, mv)
@@ -1509,6 +1513,34 @@ function GM:FinishMove(ply, mv)
             return modifiedPlayer
         end
 
+    end
+
+    if self:GetSetting("abh") == true then
+
+        if ply.Jumping then
+            local forward = ply:EyeAngles()
+            forward.p = 0
+            forward = forward:Forward()
+
+            local speedBoostPerc = ((not ply:Crouching()) and 0.5) or 0.1
+            local speedAddition = math.abs(mv:GetForwardSpeed() * speedBoostPerc)
+            local maxSpeed = mv:GetMaxSpeed() * (1 + speedBoostPerc)
+            local newSpeed = speedAddition + mv:GetVelocity():Length2D()
+
+            if newSpeed > maxSpeed then
+                speedAddition = speedAddition - (newSpeed - maxSpeed)
+            end
+
+            if mv:GetForwardSpeed() < 0 then
+                speedAddition = -speedAddition
+            end
+
+            mv:SetVelocity(forward * speedAddition + mv:GetVelocity())
+        
+        end
+        
+        ply.Jumping = nil
+        
     end
 
 end
