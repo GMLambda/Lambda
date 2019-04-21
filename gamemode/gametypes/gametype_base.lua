@@ -279,6 +279,15 @@ function GAMETYPE:InitSettings()
         },
     })
 
+        GAMEMODE:AddSetting("abh", {
+        Category = "SERVER",
+        NiceName = "#GM_ABH",
+        Description = "Accelerated Back Hopping",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
 end
 
 function GAMETYPE:GetScoreboardInfo()
