@@ -279,7 +279,7 @@ function GAMETYPE:InitSettings()
         },
     })
 
-        GAMEMODE:AddSetting("abh", {
+    GAMEMODE:AddSetting("abh", {
         Category = "SERVER",
         NiceName = "#GM_ABH",
         Description = "Accelerated Back Hopping",
