@@ -371,9 +371,9 @@ function PLAYER_META:GetButtons()
 end
 
 function PLAYER_META:GetIsJumping()
-    return self:GetNW2Bool("IsJumping", false)
+    return self:GetNW2Bool("LambdaIsJumping", false)
 end
 
 function PLAYER_META:SetIsJumping(val)
-    self:SetNW2Bool("IsJumping", val)
+    self:SetNW2Bool("LambdaIsJumping", val)
 end
