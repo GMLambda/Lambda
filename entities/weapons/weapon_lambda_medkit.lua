@@ -312,7 +312,7 @@ function SWEP:ConsumeEnergy(amount)
 end
 
 function SWEP:DryFire()
-    if CLIENT and IsFirstTimePredicted() == true then
+    if (CLIENT and IsFirstTimePredicted() == true) or game.SinglePlayer() == true then
         self:EmitSound("items/medshotno1.wav")
     end
 end
@@ -580,7 +580,9 @@ end
 
 function SWEP:Holster(ent)
     DbgPrint(self, "Holster")
-    self:SendWeaponAnim(ACT_VM_HOLSTER)
+    if IsFirstTimePredicted() then
+        self:SendWeaponAnim(ACT_VM_HOLSTER)
+    end
     return true
 end
 
