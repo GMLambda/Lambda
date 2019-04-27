@@ -1519,8 +1519,7 @@ function GM:FinishMove(ply, mv)
 
         if ply:GetIsJumping() then
             local forward = ply:EyeAngles()
-            forward.y = math.Round(forward.y)
-            forward.r = math.Round(forward.r)
+            forward.y, forward.r = math.Round(forward.y), math.Round(forward.r) -- Prediction is better if math.Round is used on angles
             forward.p = 0
             forward = forward:Forward()
 
