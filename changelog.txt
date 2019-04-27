@@ -1,7 +1,8 @@
 0.9.6
+- Feature: Accelerated backhopping
 - Improved: Removed Cockroaches from kill feed, players will no longer get points for killing them.
 - Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
-- Feature: Accelerated backhopping
+- Fix: Medkit not properly working in singleplayer.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
