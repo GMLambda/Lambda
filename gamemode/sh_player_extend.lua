@@ -369,3 +369,11 @@ function PLAYER_META:GetButtons()
     end
     return 0
 end
+
+function PLAYER_META:GetIsJumping()
+    return self:GetNW2Bool("IsJumping", false)
+end
+
+function PLAYER_META:SetIsJumping(val)
+    self:SetNW2Bool("IsJumping", val)
+end

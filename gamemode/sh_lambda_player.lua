@@ -1417,7 +1417,7 @@ function GM:SetupMove(ply, mv, cmd)
     end
 
     if bit.band(mv:GetButtons(), IN_JUMP) ~= 0 and bit.band(mv:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() then
-        ply:SetNW2Bool("Jumping", true)
+        ply:SetIsJumping(true)
     end
 
     if mv:KeyDown(IN_DUCK) and ply:IsOnGround() and isSprinting == true then
@@ -1517,7 +1517,7 @@ function GM:FinishMove(ply, mv)
 
     if self:GetSetting("abh") == true then
 
-        if ply:GetNW2Bool("Jumping") then
+        if ply:GetIsJumping() then
             local forward = ply:EyeAngles()
             forward.y = math.Round(forward.y)
             forward.r = math.Round(forward.r)
@@ -1540,7 +1540,7 @@ function GM:FinishMove(ply, mv)
             mv:SetVelocity(forward * speedAddition + mv:GetVelocity())
         end
         
-        ply:SetNW2Bool("Jumping", false)
+        ply:SetIsJumping(false)
         
     end
 
