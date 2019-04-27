@@ -1519,6 +1519,8 @@ function GM:FinishMove(ply, mv)
 
         if ply:GetNW2Bool("Jumping") then
             local forward = ply:EyeAngles()
+            forward.y = math.Round(forward.y)
+            forward.r = math.Round(forward.r)
             forward.p = 0
             forward = forward:Forward()
 
