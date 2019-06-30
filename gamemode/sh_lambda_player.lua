@@ -434,43 +434,53 @@ if SERVER then
 
     end
 
-    function GM:SelectBestWeapon(ply)
+    function GM:GetNextBestWeapon(ply)
 
-        -- Switch to a better weapon.
-        local weps = ply:GetWeapons()
-        local highestDmg = 0
-        local highestAmmo = 0
+        local currentWeight = -1
+        local bestWeight = -1
+        local bestDamage = 0
         local bestWep = nil
 
-        for k,v in pairs(weps) do
+        local currentWep = ply:GetActiveWeapon()
+        if IsValid(currentWep) then
+            if currentWep:AllowsAutoSwitchFrom() == false or currentWep:CanHolster() == false then
+                return nil
+            end
+            currentWeight = currentWep:GetWeight()
+        end
 
-            if bestWep == nil then
-                bestWep = v
+        for _,wep in pairs(ply:GetWeapons()) do
+            if IsValid(currentWep) and wep:AllowsAutoSwitchTo() == false then
+                continue
             end
 
-            if v:GetClass() == "weapon_physcannon" and v:IsMegaPhysCannon() then
-                break
-            end
-
-            local primaryId = v:GetPrimaryAmmoType()
-            if primaryId ~= -1 then
-                local clip1 = math.max(v:Clip1(), 0)
-                local ammo = ply:GetAmmoCount(primaryId) + clip1
-                if ammo ~= 0 then
-                    local dmg = game.GetAmmoNPCDamage( primaryId ) * ammo
-                    if dmg > highestDmg and ammo > highestAmmo then
-                        bestWep = v
-                        highestAmmo = ammo
-                        highestDmg = dmg
-                    end
+            local weight = wep:GetWeight()
+            if weight > -1 and weight == currentWeight and wep ~= currentWep then
+                if wep:HasAmmo() == true then
+                    -- TODO: Check if we can switch to
+                    return wep
+                end
+            elseif weight > bestWeight and wep ~= currentWep then
+                if wep:HasAmmo() == true then
+                    bestWeight = weight
+                    bestWep = wep
                 end
             end
-
         end
 
-        if bestWep ~= nil then
-            ply:SelectWeapon(bestWep:GetClass())
+        return bestWep
+
+    end
+
+    function GM:SelectBestWeapon(ply)
+
+        local betterWep = self:GetNextBestWeapon(ply)
+        if IsValid(betterWep) then
+            ply:SelectWeapon(betterWep:GetClass())
+            return
         end
+
+        ply:SwitchToDefaultWeapon()
 
     end
 

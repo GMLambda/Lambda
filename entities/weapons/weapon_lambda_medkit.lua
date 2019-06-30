@@ -22,9 +22,9 @@ SWEP.Secondary.Automatic = true
 SWEP.Secondary.Ammo = "none"
 
 SWEP.HoldType = "slam"
-SWEP.Weight = 5
+SWEP.Weight = -1
 SWEP.AutoSwitchTo = false
-SWEP.AutoSwitchFrom = false
+SWEP.AutoSwitchFrom = true
 SWEP.UseHands = true
 SWEP.ViewModel = "models/weapons/c_medkit.mdl"
 SWEP.WorldModel = "models/weapons/w_medkit.mdl"
