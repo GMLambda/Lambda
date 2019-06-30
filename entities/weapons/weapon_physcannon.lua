@@ -28,7 +28,7 @@ SWEP.Secondary.Automatic = true
 SWEP.Secondary.Ammo = "none"
 
 SWEP.HoldType = "physgun"
-SWEP.Weight = 5
+SWEP.Weight = 10
 SWEP.AutoSwitchTo = false
 SWEP.AutoSwitchFrom = false
 SWEP.UseHands = true
