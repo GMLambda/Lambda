@@ -173,7 +173,8 @@ function GM:EntityTakeDamage(target, dmginfo)
         end
 
         local dmg = dmginfo:GetDamage()
-        if dmg > 0 then
+        if dmg > 0 and VERSION < 190628 then
+            -- TODO: Drop this once dev branch hits main.
             self:EmitNPCHurt(dmg, target, HITGROUP_GENERIC)
         end
 
