@@ -1767,12 +1767,11 @@ function GM:PlayerTick(ply, mv)
         end
 
         -- Remove those useless "weapons"
-        if ply:HasWeapon("weapon_frag") and ply:GetAmmoCount("Grenade") == 0 then
-            ply:StripWeapon("weapon_frag")
-        end
-
-        if ply:HasWeapon("weapon_slam") and ply:GetAmmoCount("slam") == 0 then
-            ply:StripWeapon("weapon_frag")
+        if VERSION < 190628 then
+            -- TODO: Drop this once dev branch hits main
+            if ply:HasWeapon("weapon_frag") and ply:GetAmmoCount("Grenade") == 0 then
+                ply:StripWeapon("weapon_frag")
+            end
         end
     end
 
