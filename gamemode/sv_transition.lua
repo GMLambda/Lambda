@@ -171,6 +171,9 @@ local TRANSITION_BLACKLIST =
     ["logic_auto"] = true,
     ["_firesmoke"] = true,
     ["env_fire"] = true,
+    ["lambda_vehicle_tracker"] = true,
+    ["lambda_player_tracker"] = true,
+    ["npc_heli_avoidsphere"] = true,
 }
 
 local TRANSITION_ENFORCED_NPC =
@@ -194,13 +197,9 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
         return false
     end
 
-    if bit.band(caps, FCAP_DONT_SAVE) ~= 0 then
-        --if g_debug_transitions:GetBool() == true then
-            DbgPrint("Ignoring object for transition (FCAP_DONT_SAVE): " .. tostring(obj))
-        --end
-        if obj:IsVehicle() == false then
-            return false
-        end
+    if bit.band(caps, FCAP_DONT_SAVE) ~= 0 and obj:IsVehicle() == false then
+        DbgPrint("Ignoring object for transition (FCAP_DONT_SAVE): " .. tostring(obj))
+        return false
     end
 
     if bit.band(caps, FCAP_ACROSS_TRANSITION) ~= 0 then
@@ -1122,7 +1121,7 @@ function GM:CreateTransitionObjects()
                 local refId = tonumber(v:sub(9))
                 local refEnt = self.CreatedTransitionObjects[refId]
                 if IsValid(refEnt) and refEnt ~= ent and ent:IsNPC() == false then
-                    DbgPrint("Resolved reference: " .. k .. " -> " .. tostring(refEnt))
+                    DbgPrint("Resolved reference for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(refEnt))
                     ent:SetSaveValue(k, refEnt)
                 end
             else
