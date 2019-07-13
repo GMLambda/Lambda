@@ -163,6 +163,9 @@ function GM:CheckStuckScenes()
 end
 
 function GM:OnGamemodeLoaded()
+
+    DbgPrint("GM:OnGamemodeLoaded")
+
     self.ServerStartupTime = GetSyncedTimestamp()
 
     self:LoadGameTypes()
@@ -173,6 +176,8 @@ function GM:OnGamemodeLoaded()
 end
 
 function GM:OnReloaded()
+
+    DbgPrint("GM:OnReloaded")
 
     if CLIENT then
         self:HUDInit(true)
