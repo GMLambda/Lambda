@@ -31,21 +31,31 @@ local FIELD_DESERIALIZE =
     ["EyeAng"] = DESERIALIZE_ANGLES,
 }
 
-local DEFAULT_TRANSITION_DATA = util.TableToJSON({ Objects = {}, Players = {}, GlobalStates = {} })
+local DEFAULT_TRANSITION_DATA = { Objects = {}, Players = {}, GlobalStates = {} }
 
 function GM:InitializeTransitionData()
 
-    -- I know this is not ideal but lets be honest, I have so much more important work left :3
+    local transitionData = DEFAULT_TRANSITION_DATA
 
     if self.IsChangeLevel == true then
-        local transitionData = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "TransitionData", DEFAULT_TRANSITION_DATA)
-        self.TransitionData = util.JSONToTable(transitionData)
-
+        DbgPrint("Loading TransitionData ...")
+        local encodedTransitionData = util.GetPData("Lambda" .. lambda_instance_id:GetString(), "TransitionData", nil)
+        if encodedTransitionData ~= nil then
+            transitionData = util.JSONToTable(encodedTransitionData)
+        end
+        if transitionData.Map ~= self:GetCurrentMap() then
+            transitionData = DEFAULT_TRANSITION_DATA
+        end
     else
-        self.TransitionData = util.JSONToTable(DEFAULT_TRANSITION_DATA)
+        DbgPrint("No changelevel, using default TransitionData")
     end
 
-    DbgPrint("TransitionData containts " .. tostring(table.Count(self.TransitionData)) .. " objects")
+    self.TransitionData = transitionData
+
+    DbgPrint("TransitionData containts ")
+    DbgPrint("  Player objects: " .. tostring(table.Count(self.TransitionData.Players or {})))
+    DbgPrint("  World objects: " .. tostring(table.Count(self.TransitionData.Objects or {})))
+    DbgPrint("  Global states: " .. tostring(table.Count(self.TransitionData.GlobalStates or {})))
 
     --PrintTable(self.TransitionData)
     util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
@@ -110,6 +120,7 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
     local transitionData = {
         Objects = objectTable,
         Players = playerTable,
+        Map = map,
     }
 
     hook.Run("SaveTransitionData", transitionData)
@@ -139,29 +150,27 @@ end
 function GM:SaveTransitionData(data)
 
     self:SaveTransitionDifficulty(data)
-    --self:SaveGlobalStates(data)
 
 end
 
 local TRANSITION_BLACKLIST =
 {
-    --["env_sprite"] = true, -- Crashes in combination with TestPVS
-    --["trigger_once"] = true,
-    --["trigger_multiple"] = true,
-    --["info_landmark"] = true,
     ["keyframe_rope"] = true,
     ["info_landmark"] = true,
     ["env_sprite"] = true,
     ["env_lightglow"] = true,
     ["env_soundscape"] = true,
     ["lambda_checkpoint"] = true,
-    --["path_track"] = true,
-    --["point_camera"] = true,
     ["move_rope"] = true,
     ["trigger_transition"] = true,
     ["game_ragdoll_manager"] = true,
-    --["aiscripted_schedule"] = true,
     ["env_fog_controller"] = true,
+    ["npc_template_maker"] = true,
+    ["trigger_transition"] = true,
+    ["npc_maker"] = true,
+    ["logic_auto"] = true,
+    ["_firesmoke"] = true,
+    ["env_fire"] = true,
 }
 
 local TRANSITION_ENFORCED_NPC =
@@ -755,7 +764,6 @@ end
 function GM:LoadTransitionData(data)
 
     self:LoadTransitionDifficulty(data)
-    --self:LoadGlobalStates(data)
 
 end
 

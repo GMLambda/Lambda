@@ -23,13 +23,16 @@ if SERVER then
                 local userId = tonumber(data["UserID"])
                 local playerData = self.Players[userId] or {}
 
+                local timeout = self:GetSetting("connect_timeout")
                 playerData.ConnectTime = GetSyncedTimestamp()
-                playerData.TimeoutTime = GetSyncedTimestamp() + self:GetSetting("connect_timeout")
+                playerData.TimeoutTime = GetSyncedTimestamp() + timeout
                 playerData.Nick = data["Nick"]
                 playerData.SteamID = data["SteamID"]
                 playerData.UserID = userId
                 playerData.Connecting = true
                 playerData.Bot = false -- Cant be done.
+
+                DbgPrint("Connect timeout for " .. tostring(playerData.Nick) .. ": " .. timeout)
 
                 self.Players[userId] = playerData
                 self.Connecting[userId] = playerData
@@ -46,14 +49,41 @@ if SERVER then
 
     end
 
+    local function isValidSteamID(steamId)
+        if steamId == "STEAM_ID_PENDING" then
+            return false
+        elseif steamId == "BOT" or steamId == "NULL" then
+            return false
+        elseif steamId == "STEAM_0:0:0" then
+            return false
+        end
+        return true
+    end
+    
     function GM:HandlePlayerConnect(steamid, nick, entIndex, bot, userid)
 
         DbgPrint("HandlePlayerConnect", steamid, nick, entIndex, userid)
 
-        local playerData = self.Players[userid]
+        local getPlayerData = function()
+            if isValidSteamID(steamid) then
+                for _,v in pairs(self.Players) do
+                    if v.SteamID == steamid then
+                        return v
+                    end
+                end
+            end
+            return self.Players[userid]
+        end
+        
+        local playerData = getPlayerData()
         if playerData ~= nil then
             playerData.Connecting = bot == false
             playerData.Bot = bot
+            if playerData.UserID ~= userid then
+                -- UserID changed over session, remove old one.
+                self.Connecting[playerData.UserID] = nil
+                playerData.UserID = userid
+            end
         else
             playerData = {}
             playerData.ConnectTime = GetSyncedTimestamp()
@@ -62,6 +92,7 @@ if SERVER then
             playerData.UserID = userid
             playerData.Bot = bot
             playerData.Connecting = bot == false
+            DbgPrint("Waiting for new player to fully connect: " .. nick)
         end
 
         playerData.TimeoutTime = GetSyncedTimestamp() + self:GetSetting("connect_timeout")
