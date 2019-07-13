@@ -22,10 +22,10 @@ local function GetValueIntClampMinMax(s)
     return math.Clamp(s.CVar:GetInt(), s.Clamp.Min, s.Clamp.Max)
 end
 local function GetValueIntClampMin(s)
-    return math.min(s.CVar:GetInt(), s.Clamp.Min)
+    return math.max(s.CVar:GetInt(), s.Clamp.Min)
 end
 local function GetValueIntClampMax(s)
-    return math.max(s.CVar:GetInt(), s.Clamp.Max)
+    return math.min(s.CVar:GetInt(), s.Clamp.Max)
 end
 local function GetValueInt(s)
     return s.CVar:GetInt()
@@ -34,10 +34,10 @@ local function GetValueFloatClampMinMax(s)
     return math.Clamp(s.CVar:GetFloat(), s.Clamp.Min, s.Clamp.Max)
 end
 local function GetValueFloatClampMin(s)
-    return math.min(s.CVar:GetFloat(), s.Clamp.Min)
+    return math.max(s.CVar:GetFloat(), s.Clamp.Min)
 end
 local function GetValueFloatClampMax(s)
-    return math.max(s.CVar:GetFloat(), s.Clamp.Max)
+    return math.min(s.CVar:GetFloat(), s.Clamp.Max)
 end
 local function GetValueFloat(s)
     return s.CVar:GetFloat()
@@ -50,6 +50,8 @@ local function GetValueString(s)
 end
 
 function GM:AddSetting(id, option, fn)
+
+    DbgPrint("GM:AddSetting(", id, option, fn, ")")
 
     local function GetCVarValue(cvar)
         if ConVarExists(cvar) then
@@ -81,6 +83,7 @@ function GM:AddSetting(id, option, fn)
     if storedVal ~= nil then
         defaultValue = storedVal
     end
+    DbgPrint("Default value for " .. id .. ": " .. tostring(defaultValue))
 
     if option.Type == "int" or option.Type == "float" then
         defaultValue = tonumber(defaultValue)
@@ -97,7 +100,10 @@ function GM:AddSetting(id, option, fn)
     setting.Description = option.Description
     setting.Type = option.Type
     setting.Flags = option.flags
-    setting.CVar = CreateConVar(actualName, tostring(defaultValue), flags, option.info)
+    setting.CVar = GetConVar(actualName)
+    if setting.CVar == nil then
+        setting.CVar = CreateConVar(actualName, tostring(defaultValue), flags, option.info)
+    end
     if option.Extra ~= nil then
         setting.Extra = table.Copy(option.Extra)
     end

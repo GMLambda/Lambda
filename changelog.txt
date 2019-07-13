@@ -4,6 +4,7 @@
 - Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
 - Fix: Medkit not properly working in singleplayer.
 - Fix: Selection of best weapon on depleted ammo and player spawn.
+- Fix: Settings not correctly clamped.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
