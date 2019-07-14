@@ -1,6 +1,7 @@
 0.9.6
 - Feature: Accelerated backhopping
 - Improved: Removed Cockroaches from kill feed, players will no longer get points for killing them.
+- Improved: Keep track of physcannon color when dropped.
 - Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
 - Fix: Medkit not properly working in singleplayer.
 - Fix: Selection of best weapon on depleted ammo and player spawn.
