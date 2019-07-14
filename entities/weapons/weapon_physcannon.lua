@@ -1239,7 +1239,6 @@ end
 
 function SWEP:EmitLight(glowMode, pos, brightness, color)
 
-
     if glowMode == 1 then
 
         local pt = self.ProjectedTexture
@@ -1314,11 +1313,17 @@ function SWEP:UpdateGlow()
     if self:ShouldDrawUsingViewModel() == true then
         local vm = LocalPlayer():GetViewModel()
         local attachment = vm:GetAttachment(1)
+        if attachment == nil then
+            return
+        end
         entIndex = vm:EntIndex()
         entPos = attachment.Pos - (LocalPlayer():GetAimVector() * 35)
     else
         entIndex = self:EntIndex()
         local attachment = self:GetAttachment(1)
+        if attachment == nil then
+            return
+        end
         entPos = attachment.Pos
     end
 
@@ -2269,6 +2274,9 @@ end
 
 function SWEP:ShouldDrawUsingViewModel()
     if IsValid(self:GetOwner()) ~= true then
+        return false
+    end
+    if self:GetOwner():Alive() == false then
         return false
     end
     return self.DrawUsingViewModel
