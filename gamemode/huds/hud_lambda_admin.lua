@@ -12,6 +12,9 @@ function PANEL:Init()
 
 	for k, v in pairs(availableSettings) do
 		if v.Type == "int" or v.Type == "float" and v.Category == "SERVER" then
+			if v.Extra ~= nil and v.Extra.Type ~= nil and v.Extra.Type == "combo" then
+				continue
+			end
 			self:AddIntOption(x, y, k, v)
 			y = y + 25
 			n = n + 1
