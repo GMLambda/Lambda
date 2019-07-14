@@ -172,12 +172,6 @@ function GM:EntityTakeDamage(target, dmginfo)
             return true
         end
 
-        local dmg = dmginfo:GetDamage()
-        if dmg > 0 and VERSION < 190628 then
-            -- TODO: Drop this once dev branch hits main.
-            self:EmitNPCHurt(dmg, target, HITGROUP_GENERIC)
-        end
-
     elseif target:IsPlayer() then
 
         if target:IsPositionLocked() or target:IsInactive() == true then
