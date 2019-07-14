@@ -787,11 +787,6 @@ if SERVER then
             local ammoType1 = v:GetPrimaryAmmoType()
             local ammoType2 = v:GetSecondaryAmmoType()
 
-            -- Only drop relevant stuff, except the crowbar.
-            if ammoType1 == -1 and ammoType2 == -1 and v:GetClass() ~= "weapon_crowbar" then
-                continue
-            end
-
             local dropAmmo = false
             local ammo1 = -1
             local ammo2 = -1
@@ -828,7 +823,6 @@ if SERVER then
                 drop:Spawn()
                 drop.DroppedByPlayer = ply
                 drop.UniqueEntityId = v.UniqueEntityId
-
                 if drop:GetClass() == "weapon_crowbar" then
                     -- Damage players if it gets thrown their way and they already have a crowbar
                     drop:SetSolidFlags(FSOLID_CUSTOMBOXTEST)
@@ -836,6 +830,11 @@ if SERVER then
                 end
 
                 table.insert(ply.LastWeaponsDropped, drop)
+            end
+
+            if drop:GetClass() == "weapon_physcannon" then
+                local color = ply:GetWeaponColor()
+                drop:SetLastWeaponColor(color)
             end
 
             -- Remove the weapon the player holds.

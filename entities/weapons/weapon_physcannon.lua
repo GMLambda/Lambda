@@ -182,7 +182,7 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Entity", 0, "MotionController")
     self:NetworkVar("Vector", 0, "TargetOffset")
     self:NetworkVar("Angle", 0, "TargetAngle")
-
+    self:NetworkVar("Vector", 10, "LastWeaponColor")
 end
 
 function SWEP:Initialize()
@@ -202,7 +202,7 @@ function SWEP:Initialize()
     self.GlowSprites = {}
     self.BeamSprites = {}
 
-    self.ElementOpen = nil
+    self:SetElementOpen(false)
     self.OldOpen = false
     self.UpdateName = true
     self:SetNextIdleTime(CurTime())
@@ -249,11 +249,9 @@ function SWEP:Initialize()
 
     self:SetSkin(1)
 
-    if CLIENT then
-        hook.Add("Think", self, function(s)
-            self:UpdateEffects()
-        end)
-    end
+    hook.Add("Think", self, function(s)
+        self:ThinkHook()
+    end)
 
 end
 
@@ -1023,24 +1021,20 @@ end
 function SWEP:OpenElements()
 
     --DbgPrint(self, "OpenElements")
-
-    local owner = self:GetOwner()
-    if owner == nil then
-        return
-    end
-
-    self:SetElementDestination(1)
-
-    if self.ElementOpen == true then
+    if self:GetElementDestination() == 1.0 then
         return
     end
 
     if SERVER then
         SuppressHostEvents(NULL)
     end
-    self:WeaponSound("Weapon_PhysCannon.OpenClaws")
 
-    self.ElementOpen = true
+    if self:GetElementDestination() == 0 then
+        self:WeaponSound("Weapon_PhysCannon.OpenClaws")
+    end
+
+    self:SetElementDestination(1)
+    self:SetElementOpen(true)
 
     if self:IsMegaPhysCannon() == true then
         self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1053,11 +1047,7 @@ end
 function SWEP:OpenElementsHalf()
 
     --DbgPrint(self, "OpenElements")
-
-    self:SetElementDestination(0.5)
-
-    local owner = self:GetOwner()
-    if self.ElementOpen == true or owner == nil then
+    if self:GetElementDestination() == 0.5 then
         return
     end
 
@@ -1065,9 +1055,12 @@ function SWEP:OpenElementsHalf()
         SuppressHostEvents(NULL)
     end
 
-    self:WeaponSound("Weapon_PhysCannon.OpenClaws")
+    if self:GetElementDestination() == 0 then
+        self:WeaponSound("Weapon_PhysCannon.OpenClaws")
+    end
 
-    self.ElementOpen = true
+    self:SetElementDestination(0.5)
+    self:SetElementOpen(true)
 
     if self:IsMegaPhysCannon() == true then
         self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1081,12 +1074,7 @@ function SWEP:CloseElements()
 
     --DbgPrint(self, "CloseElements")
 
-    local owner = self:GetOwner()
-    if owner == nil then
-        return
-    end
-
-    if self.ElementOpen ~= true then
+    if self:GetElementDestination() == 0.0 then
         return
     end
 
@@ -1095,7 +1083,9 @@ function SWEP:CloseElements()
         return
     end
 
-    self:SetElementDestination(0)
+    if SERVER then
+        SuppressHostEvents(NULL)
+    end
 
     local snd = self:GetMotorSound()
     if snd ~= nil and snd ~= NULL then
@@ -1103,12 +1093,9 @@ function SWEP:CloseElements()
         snd:ChangePitch(50, 1.0)
     end
 
-    if SERVER then
-        SuppressHostEvents(NULL)
-    end
-
+    self:SetElementDestination(0)
     self:WeaponSound("Weapon_PhysCannon.CloseClaws")
-    self.ElementOpen = false
+    self:SetElementOpen(false)
 
     if self:IsMegaPhysCannon() == true then
         self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1133,7 +1120,7 @@ function SWEP:WeaponIdle()
     local controller = self:GetMotionController()
 
     if self:IsMegaPhysCannon() == true then
-        self:SetElementDestination(1)
+        self:OpenElements()
     end
 
     if self:GetNextIdleTime() == -1 then
@@ -1224,7 +1211,7 @@ function SWEP:CheckForTarget()
         local dist = (tr.StartPos - tr.HitPos):Length()
         if dist <= self:TraceLength() and self:CanPickupObject(tr.Entity) then
             self.ChangeState = ELEMENT_STATE_NONE
-            self:OpenElements()
+            self:OpenElementsHalf()
             return
         end
 
@@ -1341,7 +1328,7 @@ function SWEP:UpdateGlow()
 
 end
 
-function SWEP:Think()
+function SWEP:ThinkHook()
 
     if SERVER then
         if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
@@ -1349,7 +1336,13 @@ function SWEP:Think()
         else
             self:SetMegaEnabled(false)
         end
+    else
+        self:UpdateEffects()
     end
+
+end
+
+function SWEP:Think()
 
     local controller = self:GetMotionController()
 
@@ -1390,9 +1383,13 @@ function SWEP:Think()
 
         if self.ElementDebounce < CurTime() and self.ChangeState ~= ELEMENT_STATE_NONE then
             if self.ChangeState == ELEMENT_STATE_OPEN then
-                self:OpenElements()
+                if SERVER then
+                    self:OpenElements()
+                end
             elseif self.ChangeState == ELEMENT_STATE_CLOSED then
-                self:CloseElements()
+                if SERVER then
+                    self:CloseElements()
+                end
             end
             self.ChangeState = ELEMENT_STATE_NONE
         end
@@ -2144,6 +2141,9 @@ function SWEP:DrawWorldModel()
         self:DoEffect(effectState)
     end
 
+    local wepColor = self:GetWeaponColor()
+    MAT_WORLDMDL:SetVector("$selfillumtint", wepColor)
+
     self:UpdateElementPosition()
     self:DrawModel()
 end
@@ -2200,9 +2200,12 @@ function SWEP:Startup()
     self:DoEffect(EFFECT_READY)
 end
 
-function SWEP:Equip()
+function SWEP:Equip(newOwner)
     DbgPrint("Equip")
     self:Startup()
+    if IsValid(newOwner) and newOwner:IsPlayer() == true then
+        self:SetLastWeaponColor(newOwner:GetWeaponColor())
+    end
 end
 
 function SWEP:Deploy()
@@ -2753,22 +2756,13 @@ function SWEP:StopEffects(stopSound)
 end
 
 function SWEP:GetWeaponColor()
-
     local owner = self:GetOwner()
     local wepColor = Vector(1, 1, 1)
 
-    if IsValid(owner) == true then
+    if IsValid(owner) == true and owner:IsPlayer() == true then
         wepColor = owner:GetWeaponColor()
     else
-        local f = .3
-        local i = math.sin(CurTime()) * 32
-        local r = math.sin(f * i + 0 * math.pi / 3) * 127 + 128
-        local g = math.sin(f * i + 2 * math.pi / 3) * 127 + 128
-        local b = math.sin(f * i + 4 * math.pi / 3) * 127 + 128
-
-        wepColor.x = r / 255
-        wepColor.y = g / 255
-        wepColor.z = b / 255
+        wepColor = self:GetLastWeaponColor()
     end
 
     return wepColor
@@ -2777,7 +2771,9 @@ end
 function SWEP:UpdateEffects()
 
     local owner = self:GetOwner()
-    if owner ~= NULL and IsValid(owner) and owner:GetActiveWeapon() ~= self then
+    local usingViewModel = self:ShouldDrawUsingViewModel()
+
+    if IsValid(owner) and owner:GetActiveWeapon() ~= self then
         if self.ProjectedTexture ~= nil then
             self.ProjectedTexture:Remove()
             self.ProjectedTexture = nil
@@ -2796,10 +2792,6 @@ function SWEP:UpdateEffects()
     end
 
     local wepColor = self:GetWeaponColor()
-    if IsValid(owner) ~= true then
-        -- Manually change it we are right before a draw call.
-        MAT_WORLDMDL:SetVector("$selfillumtint", wepColor)
-    end
 
     local r = wepColor.x * colorMax
     local g = wepColor.y * colorMax
