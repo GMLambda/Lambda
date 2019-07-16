@@ -1317,6 +1317,10 @@ end
 
 function SWEP:UpdateGlow()
 
+    if self:IsEffectActive(EF_NODRAW) == true then
+        return
+    end
+
     local glowMode = physcannon_glow:GetInt()
 
     -- If disabled and previously enabled remove projected texture.
@@ -2314,6 +2318,9 @@ function SWEP:UpdateDrawUsingViewModel()
 end
 
 function SWEP:ShouldDrawUsingViewModel()
+    if not IsValid(self:GetOwner()) then
+        return false
+    end
     return self.DrawUsingViewModel
 end
 
