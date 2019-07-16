@@ -2,6 +2,7 @@
 - Feature: Accelerated backhopping
 - Improved: Removed Cockroaches from kill feed, players will no longer get points for killing them.
 - Improved: Keep track of physcannon color when dropped.
+- Improved: d3_breen_01: Place all players in the same pod to not skip the scene.
 - Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
 - Fix: Medkit not properly working in singleplayer.
 - Fix: Selection of best weapon on depleted ammo and player spawn.
@@ -9,7 +10,8 @@
 - Fix: Potential crash after changelevel.
 - Fix: Physcannon throwing errors when players die.
 - Fix: Settings showing up twice.
-- Fix: Default weapons not being removed on d3_citadel_05.
+- Fix: d3_citadel_05: Default weapons not being removed.
+- Fix: d3_citadel_05: Keep the pod cycle active after the player left the area.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
