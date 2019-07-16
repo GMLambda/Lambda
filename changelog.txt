@@ -9,6 +9,7 @@
 - Fix: Potential crash after changelevel.
 - Fix: Physcannon throwing errors when players die.
 - Fix: Settings showing up twice.
+- Fix: Default weapons not being removed on d3_citadel_05.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
