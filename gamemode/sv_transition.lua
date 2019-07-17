@@ -366,6 +366,14 @@ local SAVETABLE_WHITELIST =
     ["target"] = true,
 }
 
+local SAVETABLE_BLACKLIST =
+{
+    ["m_hMoveChild"] = true,
+    ["m_pParent"] = true,
+    ["m_hMoveParent"] = true,
+    ["m_hMovePeer"] = true,
+}
+
 function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
 
     DbgPrint("GM:SerializeEntityData(" .. tostring(landmarkEnt) .. ", " .. tostring(ent) .. ")")
@@ -469,6 +477,11 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
     end
 
     for k,v in pairs(data.SaveTable) do
+
+        if SAVETABLE_BLACKLIST[k] == true then
+            data.SaveTable[k] = nil
+            continue
+        end
 
         if IsEntity(v) and IsValid(v) then
             data.SaveTable[k] = "CoopRef_" .. tostring(v:EntIndex())
