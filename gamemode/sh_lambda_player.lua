@@ -606,20 +606,14 @@ if SERVER then
                     local vehicle = self:FindEntityByTransitionReference(transitionData.Vehicle)
                     if IsValid(vehicle) then
                         DbgPrint("Putting player " .. tostring(ply) .. " back in vehicle: " .. tostring(vehicle))
-
                         -- Sometimes does crazy things to the view angles, this only helps to a certain amount.
                         local eyeAng = vehicle:WorldToLocalAngles(transitionData.EyeAng)
 
-                        -- NOTE: Workaround as they seem to not get any weapons if we enter the vehicle this frame.
-                        -- FIXME: I noticed that delaying it until the next frame won't always work, we use a fixed delay now.
-                        util.RunDelayed(function()
-                            if IsValid(ply) and IsValid(vehicle) then
-                                vehicle:SetVehicleEntryAnim(false)
-                                vehicle.ResetVehicleEntryAnim = true
-                                ply:EnterVehicle(vehicle)
-                                ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
-                            end
-                        end, CurTime() + 0.2)
+                        vehicle:SetVehicleEntryAnim(false)
+                        vehicle.ResetVehicleEntryAnim = true
+                        ply:EnterVehicle(vehicle)
+                        ply:SetEyeAngles(eyeAng) -- We call it again because the vehicle sets it to how you entered.
+
                         useSpawnpoint = false
                     else
                         DbgPrint("Unable to find player " .. tostring(ply) .. " vehicle: " .. tostring(transitionData.Vehicle))
