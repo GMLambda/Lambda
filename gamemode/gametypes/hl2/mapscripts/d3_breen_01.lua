@@ -141,12 +141,15 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
 
     if self.SpawnInPod == true then
         
-        for _,v in pairs(self.Pods) do
-            if IsValid(v:GetDriver()) == false then
-                ply:EnterVehicle(v)
-                break
+        util.RunDelayed(function(),
+            for _,v in pairs(self.Pods) do
+                if IsValid(v:GetDriver()) == false then
+                    ply:ExitVehicle()
+                    ply:EnterVehicle(v)
+                    break
+                end
             end
-        end
+        end, CurTime() + 0.1)
 
     end
 
