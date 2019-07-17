@@ -142,6 +142,10 @@ if SERVER then
             end
         end
 
+        if self:HasWeapon(e:GetClass()) == false then
+            error("Unable to give weapon " .. tostring(e) .. " to player " .. tostring(self))
+        end
+
         return e
     end
 

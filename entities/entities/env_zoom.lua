@@ -104,12 +104,14 @@ function ENT:UnZoomPlayer(ply, data, isExchange)
 
     DbgPrint(self, "Restoring player " .. tostring(ply), data.FOV, data.FOVOwner)
 
-    if isExchange ~= true then
-        ply:ClearZoomOwner()
+    if IsValid(ply) then
+        if isExchange ~= true then
+            ply:ClearZoomOwner()
+        end
+        ply:SetFOV(0, 0)
+        ply:SetFOVOwner(data.FOVOwner)
     end
-    ply:SetFOV(0, 0)
-    ply:SetFOVOwner(data.FOVOwner)
-
+    
     return data
 
 end
