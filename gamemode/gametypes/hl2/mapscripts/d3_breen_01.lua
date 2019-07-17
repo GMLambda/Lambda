@@ -149,7 +149,7 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
                     break
                 end
             end
-        end, CurTime() + 0.1)
+        end, CurTime() + 1)
 
     end
 
