@@ -62,7 +62,7 @@ function GM:InitializeTransitionData()
 
 end
 
-function GM:TransitionToLevel(map, landmark, playersInTrigger)
+function GM:TransitionToLevel(activator, map, landmark, playersInTrigger)
 
     -- 1. Lets collect all entities with the landmark name we have to seperate them by landmark and trigger
     local transitionTriggers = {}
@@ -92,7 +92,7 @@ function GM:TransitionToLevel(map, landmark, playersInTrigger)
     if not IsValid(landmarkEnt) then
         DbgPrint("Unable to find landmark! - " .. tostring(landmark))
     else
-        self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+        self:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
 
         -- In case players didnt make it, we erase their position from the data.
         for k,v in pairs(playerTable) do
@@ -608,13 +608,11 @@ function GM:InTransitionVolume(volumes, obj)
 
 end
 
-function GM:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
-
-    DbgPrint("GM:TransitionNearbyObjects")
+function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
 
     local objects = {}
 
-    DbgPrint("Collecting players")
+    DbgPrint("Collecting player references...")
 
     for _,v in pairs(player.GetAll()) do
         if v:Alive() == false then
@@ -625,6 +623,8 @@ function GM:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable
             table.insert(objects, v:GetVehicle())
         end
     end
+
+    DbgPrint("Collecting objects...")
 
     local checkVolumes = table.Count(transitionTriggers) > 0
 
@@ -655,10 +655,45 @@ function GM:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable
         table.insert(objects, v)
     end
 
-    self:TransitionObjects(landmarkEnt, objects, objectTable, playerTable, playersInTrigger)
+    return objects
 
 end
 
+
+function GM:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+
+    DbgPrint("GM:TransitionNearbyObjects")
+
+    -- Create initial list.
+    local initialObjectList = self:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+
+    -- Notify entities about their current state.
+    for _,v in pairs(ents.GetAll()) do
+        local caps = v:ObjectCaps()
+        if bit.band(caps, FCAP_NOTIFY_ON_TRANSITION) == 0 then
+            continue
+        end
+
+        if table.HasValue(initialObjectList, v) == false then
+            v:Input("OutsideTransition", activator, activator, nil)
+            DbgPrint("Notifying " .. tostring(v) .. " outside of transitioning")
+        else
+            v:Input("InsideTransition", activator, activator, nil)
+            DbgPrint("Notifying " .. tostring(v) .. " inside of transitioning")
+        end
+    end
+
+    -- Create list again because entities may have teleported.
+    local newObjectList = self:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+
+    local objectsDelta = #newObjectList - #initialObjectList
+    DbgPrint("New transition list delta: " .. tostring(objectsDelta))
+
+    self:TransitionObjects(landmarkEnt, newObjectList, objectTable, playerTable, playersInTrigger)
+
+end
+
+-- UNUSED
 function GM:TransitionObjectsByVolumes(landmarkEnt, transitionTriggers, objectTable, playerTable)
 
     for _,trigger in pairs(transitionTriggers) do
@@ -684,6 +719,7 @@ function GM:TransitionObjectsByVolumes(landmarkEnt, transitionTriggers, objectTa
 
 end
 
+-- UNUSED
 function GM:TransitionObjectsByLandmark(landmarkEnt, objectTable, playerTable)
 
     DbgPrint("GM:TransitionObjectsByLandmark")

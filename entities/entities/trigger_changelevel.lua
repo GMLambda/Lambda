@@ -36,14 +36,6 @@ function ENT:Initialize()
     BaseClass.Initialize(self)
     BaseClass.SetWaitTime(self, -1) -- Remove once triggered.
 
-    --[[
-    if self:HasSpawnFlags(SF_CHANGELEVEL_NOTOUCH) == true then
-        DbgPrint(self, "Disabling because of SF_CHANGELEVEL_NOTOUCH")
-        self:Disable()
-        self.DisableTouch = true
-    end
-    ]]
-
 end
 
 function ENT:KeyValue( key, val )
@@ -82,7 +74,7 @@ end
 function ENT:OnTrigger()
 
     DbgPrint("CHANGELEVEL")
-    GAMEMODE:ChangeLevel(string.lower(self.TargetMap), self.Landmark, self:GetTouchingObjects())
+    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, self:GetTouchingObjects())
 
 end
 

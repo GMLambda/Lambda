@@ -126,7 +126,7 @@ function GM:EnablePreviousMap()
 
 end
 
-function GM:PreChangelevel(map, landmark, playersInTrigger)
+function GM:PreChangelevel(activator, map, landmark, playersInTrigger)
 
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", self:GetCurrentMap())
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", map)
@@ -140,11 +140,11 @@ function GM:PreChangelevel(map, landmark, playersInTrigger)
 
     hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark)
 
-    self:TransitionToLevel(map, landmark, playersInTrigger or {})
+    self:TransitionToLevel(activator, map, landmark, playersInTrigger or {})
 
 end
 
-function GM:ChangeLevel(map, landmark, playersInTrigger)
+function GM:ChangeLevel(activator, map, landmark, playersInTrigger)
 
     if playersInTrigger == nil then
         playersInTrigger = {}
@@ -159,7 +159,7 @@ function GM:ChangeLevel(map, landmark, playersInTrigger)
 
     DbgPrint("Changing to level: " .. map)
 
-    self:PreChangelevel(map, landmark, playersInTrigger)
+    self:PreChangelevel(activator, map, landmark, playersInTrigger)
 
     local nextMap = map
     if g_debug_transitions:GetBool() ~= true then
@@ -178,11 +178,11 @@ function GM:ChangeToNextLevel()
         if v.TargetMap == nextMap then
 
             local landmark = v.Landmark
-            return self:ChangeLevel(nextMap, landmark, {})
+            return self:ChangeLevel(nil, nextMap, landmark, {})
 
         end
     end
 
-    return self:ChangeLevel(nextMap, nil, {})
+    return self:ChangeLevel(nil, nextMap, nil, {})
 
 end
