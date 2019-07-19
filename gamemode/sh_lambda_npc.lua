@@ -214,9 +214,25 @@ if SERVER then
 
     end
 
+    local IGNORED_NPC_DEATH_BY_CLASS =
+    {
+        ["npc_bullseye"] = true,
+        ["bullseye_strider_focus"] = true,
+        ["npc_furniture"] = true,
+        ["npc_enemyfinder"] = true,
+        ["npc_spotlight"] = true,
+    }
+
     function GM:RegisterNPCDeath(npc, attacker, inflictor)
 
         DbgPrint("RegisterNPCDeath", npc, attacker, inflictor)
+
+        local class = npc:GetClass()
+        if IGNORED_NPC_DEATH_BY_CLASS[class] == true then
+            -- Ignore specific things that the player isnt supposed to see.
+            return
+        end
+
         self:SendDeathNotice(npc, attacker, inflictor, npc:GetLastDamageType())
 
     end
