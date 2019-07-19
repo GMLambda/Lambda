@@ -239,6 +239,15 @@ function GM:LambdaPreChangelevel(data)
 end
 
 function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
+    
+    if IsValid(attacker) and attacker:IsVehicle() == true then
+        local driver = attacker:GetDriver()
+        if IsValid(driver) and dmgType == 0 then
+            inflictor = attacker
+            attacker = driver
+            dmgType = DMG_CRUSH
+        end
+    end
 
     local function GetEntityData(e)
         local data = {}
@@ -247,7 +256,7 @@ function GM:SendDeathNotice(victim, attacker, inflictor, dmgType)
         data.name = e:GetName()
         data.isNPC = e:IsNPC()
         data.isPlayer = e:IsPlayer()
-        if e.Team ~= nil then 
+        if e.Team ~= nil then
             data.team = e:Team()
         end
         return data
