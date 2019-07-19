@@ -149,7 +149,7 @@ if SERVER then
     end
 
     function GM:OnNPCKilled(npc, attacker, inflictor)
-        
+
         local ply
         if IsValid(attacker) and attacker:IsPlayer() then
             ply = attacker
