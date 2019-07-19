@@ -27,7 +27,7 @@ end
 function GM:StartMapVote(issuer, map)
     local function OnChangeLevelVoteResult(vote, success, timeout, option)
         if success == true and option == 1 then -- Yes
-            GAMEMODE:ChangeLevel(map, nil, {})
+            GAMEMODE:ChangeLevel(nil, map, nil, {})
         end
     end
     if string.lower(map) == string.lower(game.GetMap()) then
