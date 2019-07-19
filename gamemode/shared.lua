@@ -500,6 +500,10 @@ function GM:EntityKeyValue(ent, key, val)
     ent.LambdaKeyValues = ent.LambdaKeyValues or {}
 
     local entClass = ent:GetClass()
+    if entClass == "env_sprite" and key == "GlowProxySize" and tonumber(val) > 64 then
+        -- Fix console spam about maximum glow size, maximum value is 64.
+        return 64
+    end
     if key == "message" and entClass == "env_message" and ent:GetName() ~= "LambdaGameOver" then
         return ""
     elseif key == "globalstate" and val == "friendly_encounter" and entClass == "env_global" then
