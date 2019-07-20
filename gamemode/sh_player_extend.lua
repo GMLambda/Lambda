@@ -21,6 +21,8 @@ if SERVER then
         data.pos = pos or Vector(0, 0, 0)
         self.TeleportQueue = self.TeleportQueue or {}
         table.insert(self.TeleportQueue, data)
+        -- Make sure players won't get stuck in each other.
+        self:DisablePlayerCollide(true)
     end
 
     function PLAYER_META:DisablePlayerCollide(state, temporarily)
