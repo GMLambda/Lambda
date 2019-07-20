@@ -19,6 +19,7 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.InputFilters =
 {
+    ["pod"] = { "EnterVehicleImmediate" }
 }
 
 MAPSCRIPT.EntityFilterByClass =
@@ -111,6 +112,15 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("pod", function(ent)
 
+            local podParent = ent:GetParent()
+            local parentAttachment = ent:GetParentAttachment()
+            DbgPrint("Pod parent: " .. tostring(podParent))
+            local pos = ent:GetPos()
+            local ang = ent:GetAngles()
+            local mdl = ent:GetModel()
+
+            table.insert(self.Pods, ent)
+
             -- Insert the ones we transitioned.
             for _,v in pairs(ents.FindByName("lambda_pod_*")) do
                 DbgPrint("Merging pod " .. tostring(v) .. " with " .. tostring(ent))
@@ -127,23 +137,35 @@ function MAPSCRIPT:PostInit()
             for i = 1, game.MaxPlayers() do
                 
                 local pod = ents.Create(ent:GetClass())
-                pod:SetPos(ent:GetPos())
-                pod:SetAngles(ent:GetAngles())
-                pod:SetParent(ent)
-                pod:SetModel(ent:GetModel())
+                pod:SetNotSolid(true)
+                pod:SetPos(pos)
+                pod:SetAngles(ang)
+                pod:SetModel(mdl)
+                pod:SetAngles(ang)
                 pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_podTooLoud.txt")
-                pod:SetNoDraw(true)
                 pod:DrawShadow(false)
+                pod:SetNoDraw(true)
+                pod:SetName("pod")
+                pod:SetParent(podParent, parentAttachment)
+                pod:SetMoveType(MOVETYPE_NONE)
                 pod:Spawn()
                 pod:Activate()
-                pod:SetName("pod")
 
                 table.insert(self.Pods, pod)
             end
 
-            -- Insert main one.
-            table.insert(self.Pods, ent)
+        end)
 
+        ents.WaitForEntityByName("blackout_viewcontroller", function(ent)
+            ent:SetKeyValue("spawnflags", "188")
+        end)
+
+        ents.WaitForEntityByName("view_gman_end_1", function(ent)
+            ent:SetKeyValue("spawnflags", "188")
+        end)
+
+        ents.WaitForEntityByName("viewcontrol_lamarr", function(ent)
+            ent:SetKeyValue("spawnflags", "140")
         end)
 
         ents.RemoveByClass("npc_combine_s", Vector(-2298.000000, 334.000000, 576.031250))
@@ -153,18 +175,21 @@ end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
 
+    if self.AllowPhyscannon == true then
+        ply:Give("weapon_physcannon")
+    end
+
     if self.SpawnInPod == true and IsValid(ply:GetVehicle()) == false then
-        DbgPrint("Player has no vehicle, setting into empty pod...")
+
+        DbgPrint("Player " .. tostring(ply) .. " has no vehicle, setting into empty pod...")
         for _,v in pairs(self.Pods) do
             if IsValid(v:GetDriver()) == false then
+                DbgPrint("Putting player into vehicle " .. tostring(v))
                 ply:EnterVehicle(v)
                 break
             end
         end
-    end
 
-    if self.AllowPhyscannon == true then
-        ply:Give("weapon_physcannon")
     end
 
 end
