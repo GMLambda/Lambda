@@ -12,6 +12,7 @@ include("huds/hud_crosshair.lua")
 include("huds/hud_vote.lua")
 include("huds/hud_deathnotice.lua")
 include("huds/hud_scoreboard.lua")
+include("huds/hud_credits.lua")
 
 --local DbgPrint = GetLogging("HUD")
 

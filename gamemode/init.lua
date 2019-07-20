@@ -23,6 +23,7 @@ AddCSLuaFile("huds/hud_crosshair.lua")
 AddCSLuaFile("huds/hud_vote.lua")
 AddCSLuaFile("huds/hud_deathnotice.lua")
 AddCSLuaFile("huds/hud_scoreboard.lua")
+AddCSLuaFile("huds/hud_credits.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
