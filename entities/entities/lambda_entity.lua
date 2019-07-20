@@ -195,8 +195,8 @@ function ENT:SetupNWVar(key, dtType, data)
         self.DTListener[key] = dtVar
     end
 
-    if data.Default ~= nil then
-        self:SetNWVar(key, data.Default)
+    if SERVER and data.Default ~= nil then
+        self:SetNWVar(key, data.Default, true)
     end
 
 end
@@ -210,15 +210,10 @@ function ENT:GetNWVar(key, fallback)
         DbgError("DTVar not setup, no fallback specified")
         return
     end
-    --[[
-    if self.DataTableSetup ~= true then
-        return dtVar.LastVal or dtVar.Default
-    end
-    ]]
-    return dtVar.Get(self, dtVar.Key, dtVar.Index, nil)
+    return dtVar.Get(self, dtVar.Key, dtVar.Index, fallback)
 end
 
-function ENT:SetNWVar(key, val)
+function ENT:SetNWVar(key, val, forceNotify)
     if self.DTVarTable == nil then
         return
     end
@@ -227,11 +222,10 @@ function ENT:SetNWVar(key, val)
         DbgError("DTVar not setup: " .. key)
         return
     end
-    --[[
-    if self.DataTableSetup == true then
-        dtVar.Set(self, dtVar.Key, dtVar.Index, val)
+    local cur = dtVar.Get(self, dtVar.Key, dtVar.Index, nil)
+    if cur == val and forceNotify ~= true then
+        return
     end
-    ]]
     dtVar.Set(self, dtVar.Key, dtVar.Index, val) -- Refactored, remove this comment if working
     self:DTVarNotify(dtVar, val)
 end
