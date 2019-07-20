@@ -643,11 +643,6 @@ if SERVER then
 
             end
 
-            if useSpawnpoint == true and IsValid(ply.SelectedSpawnpoint) then
-                ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
-                ply.SelectedSpawnpoint = nil
-            end
-
             DbgPrint("Selecting best weapon for " .. tostring(ply))
             if ply.ScheduledActiveWeapon ~= nil then
                 ply:SelectWeapon(ply.ScheduledActiveWeapon)
@@ -663,11 +658,15 @@ if SERVER then
                 end
             end
 
-            util.RunNextFrame(function()
-                if self.MapScript.PostPlayerSpawn ~= nil then
-                    self.MapScript:PostPlayerSpawn(ply)
-                end
-            end)
+            if self.MapScript.PostPlayerSpawn ~= nil then
+                self.MapScript:PostPlayerSpawn(ply)
+            end
+
+            -- In case the map script decides to put us in a vehicle lets not do this.
+            if useSpawnpoint == true and IsValid(ply:GetVehicle()) == false and IsValid(ply.SelectedSpawnpoint) then
+                ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
+                ply.SelectedSpawnpoint = nil
+            end
 
             ply.TransitionData = nil -- Make sure we erase it because this only happens on a new round.
         end
@@ -1494,6 +1493,7 @@ function GM:FinishMove(ply, mv)
             ply:SetEyeAngles(data.ang)
             table.remove(ply.TeleportQueue, 1)
             modifiedPlayer = true
+            DbgPrint("Teleported player: " .. tostring(ply) .. " to " .. tostring(data.pos))
         end
 
         if (mv:GetButtons() ~= 0 or ply:IsBot()) and ply:GetLifeTime() > 0.1 and ply:IsInactive() == true then
@@ -1757,14 +1757,6 @@ function GM:PlayerTick(ply, mv)
         self:PlayerCheckDrowning(ply)
         if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then
             ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
-        end
-
-        -- Remove those useless "weapons"
-        if VERSION < 190628 then
-            -- TODO: Drop this once dev branch hits main
-            if ply:HasWeapon("weapon_frag") and ply:GetAmmoCount("Grenade") == 0 then
-                ply:StripWeapon("weapon_frag")
-            end
         end
     end
 
