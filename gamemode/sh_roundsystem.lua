@@ -130,7 +130,7 @@ if SERVER then
 
     end
 
-    function GM:RestartRound()
+    function GM:RestartRound(reason)
 
         DbgPrint("Requested restart")
 
@@ -155,8 +155,11 @@ if SERVER then
 
         if restartTime > 0 then
 
-            if IsValid(self.LambdaFailureMessage) then
-                self.LambdaFailureMessage:Fire("ShowMessage")
+            if reason ~= nil then
+                reason = self.FailureMessages[reason]
+                if IsValid(reason) then
+                    reason:Fire("ShowMessage")
+                end
             end
 
             -- FIXME: This only works on listen server, we should setup a new message
@@ -248,7 +251,7 @@ if SERVER then
 
         if self:CallGameTypeFunc("ShouldRestartRound", elapsed) == true then
             DbgPrint("All players are dead, restart required")
-            self:RestartRound()
+            self:RestartRound("GAMEOVER_STUCK")
             self:RegisterRoundLost()
         elseif self:CallGameTypeFunc("ShouldEndRound", elapsed) == true then 
             DbgPrint("Round end")
@@ -389,6 +392,11 @@ function GM:PreCleanupMap()
             end
         end
 
+        -- FIX: Stop screen shaking, they are not cleaned up.
+        for _,v in pairs(ents.FindByClass("env_shake")) do
+            v:Input("StopShake")
+        end
+
         -- Cleanup the input/output system.
         self:SetRoundState(STATE_RESTARTING)
 
@@ -436,7 +444,7 @@ function GM:PostCleanupMap()
             end
         end
     end
-    
+
 end
 
 function GM:IsRoundRestarting()
@@ -460,6 +468,76 @@ function GM:GetMapLoadType()
         return "transition"
     end
     return game.MapLoadType()
+
+end
+
+function GM:SetupRoundRelevantObjects()
+
+    local function CreateEnvMessage(msg)
+
+        -- Remove duplicate ones
+        for _,v in pairs(ents.FindByClass("env_message")) do
+            local keyvalues = v:GetKeyValues()
+            local message = ""
+            if keyvalues ~= nil and keyvalues["message"] ~= nil and msg == keyvalues["message"] then
+                print("Removing duplicate env_message : " .. msg)
+                v:Remove()
+            end
+        end
+
+        -- Take control over env_message with GAMEOVER_ALLY
+        local envMsg = ents.Create("env_message")
+        envMsg:SetKeyValue("spawnflags", "2")
+        envMsg:SetKeyValue("targetname", "LambdaMessage_" .. msg)
+        envMsg:SetKeyValue("message", msg)
+        envMsg:Spawn()
+
+        return envMsg
+    end
+
+    for _,v in pairs(self.FailureMessages or {}) do
+        if IsValid(v) then
+            v:Remove()
+        end
+    end
+
+    self.FailureMessages = {}
+    self.FailureMessages["GAMEOVER_ALLY"] = CreateEnvMessage("GAMEOVER_ALLY")
+    self.FailureMessages["GAMEOVER_TIMER"] = CreateEnvMessage("GAMEOVER_TIMER")
+    self.FailureMessages["GAMEOVER_OBJECT"] = CreateEnvMessage("GAMEOVER_OBJECT")
+    self.FailureMessages["GAMEOVER_STUCK"] = CreateEnvMessage("GAMEOVER_STUCK")
+
+    local roachManager = ents.Create("lambda_cockroach_manager")
+    roachManager:Spawn()
+    self.LambdaRoachManager = roachManager
+
+    local mapData = game.GetMapData()
+    if mapData ~= nil and mapData.Entities ~= nil then
+        local worldData = mapData.Entities[1]
+        if worldData ~= nil and worldData["chaptertitle"] ~= nil then
+
+            local chapterText = worldData["chaptertitle"]
+            local dupe = false
+            -- Lets not do it if it already exists in env_message.
+            for _,v in pairs(ents.FindByClass("env_message")) do
+                local keyvalues = v:GetKeyValues()
+                if keyvalues ~= nil and keyvalues["message"] ~= nil and keyvalues["message"]:iequals(chapterText) then
+                    dupe = true
+                    break
+                end
+            end
+            -- Garry's Mod never shows the chapter title, but it is identical to env_message.
+            if dupe == false then
+                local chapterMessage = ents.Create("env_message")
+                chapterMessage:SetKeyValue("spawnflags", "2")
+                chapterMessage:SetKeyValue("message", worldData["chaptertitle"])
+                chapterMessage:Spawn()
+                self.LambdaChapterMessage = chapterMessage
+            else
+                DbgPrint("env_message with chapter already exists")
+            end
+        end
+    end
 
 end
 
@@ -501,44 +579,7 @@ function GM:OnNewGame()
         -- Notify clients.
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
 
-        local failureMessage = ents.Create("env_message")
-        failureMessage:SetKeyValue("spawnflags", "2")
-        failureMessage:SetKeyValue("targetname", "LambdaGameOver")
-        failureMessage:SetKeyValue("message", "GAMEOVER_ALLY")
-        failureMessage:Spawn()
-        self.LambdaFailureMessage = failureMessage
-
-        local roachManager = ents.Create("lambda_cockroach_manager")
-        roachManager:Spawn()
-        self.LambdaRoachManager = roachManager
-
-        local mapData = game.GetMapData()
-        if mapData ~= nil and mapData.Entities ~= nil then
-            local worldData = mapData.Entities[1]
-            if worldData ~= nil and worldData["chaptertitle"] ~= nil then
-
-                local chapterText = worldData["chaptertitle"]
-                local dupe = false
-                -- Lets not do it if it already exists in env_message.
-                for _,v in pairs(ents.FindByClass("env_message")) do
-                    local keyvalues = v:GetKeyValues()
-                    if keyvalues ~= nil and keyvalues["message"] ~= nil and keyvalues["message"]:iequals(chapterText) then
-                        dupe = true
-                        break
-                    end
-                end
-                -- Garry's Mod never shows the chapter title, but it is identical to env_message.
-                if dupe == false then
-                    local chapterMessage = ents.Create("env_message")
-                    chapterMessage:SetKeyValue("spawnflags", "2")
-                    chapterMessage:SetKeyValue("message", worldData["chaptertitle"])
-                    chapterMessage:Spawn()
-                    self.LambdaChapterMessage = chapterMessage
-                else
-                    DbgPrint("env_message with chapter already exists")
-                end
-            end
-        end
+        self:SetupRoundRelevantObjects()
 
         util.RunNextFrame(function()
             GAMEMODE:PostRoundSetup()

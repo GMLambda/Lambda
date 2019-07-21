@@ -142,7 +142,7 @@ if SERVER then
         end
 
         if missionFailure == true then
-            self:RestartRound()
+            self:RestartRound("GAMEOVER_ALLY")
             self:RegisterRoundLost()
         end
 
