@@ -392,7 +392,12 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
                 mask = MASK_NPCSOLID,
             })
 
-            if tr.Fraction == 1 then
+            if tr.Fraction == 1 or tr.HitWorld ~= true then
+                continue
+            end
+
+            local height = math.abs(testPos.z - tr.HitPos.z)
+            if height > 128 then
                 continue
             end
 
