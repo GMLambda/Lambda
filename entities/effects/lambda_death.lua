@@ -39,7 +39,7 @@ function EFFECT:Think( )
 	end
 
 	self.Alpha = self.Alpha - speed * 0.08
-	self.Dist = math.sin(CurTime() * 5) * 5
+	self.Dist = math.sin(self:EntIndex() + (CurTime() * 5)) * 5
 
 	if (self.Alpha < 0 ) then return false end
 

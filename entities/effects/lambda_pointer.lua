@@ -35,7 +35,7 @@ function EFFECT:Think( )
 	local speed = FrameTime()
 
 	self.Alpha = self.Alpha - speed * 0.16
-	self.Dist = math.sin(CurTime() * 5) * 5
+	self.Dist = math.sin(self:EntIndex() + (CurTime() * 5)) * 5
 
 	if (self.Alpha < 0 ) then return false end
 
