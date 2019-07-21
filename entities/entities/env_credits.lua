@@ -5,9 +5,6 @@ end
 --local DbgPrint = print
 local DbgPrint = GetLogging("EnvCredits")
 
--- Spawnflags
-local ENV_ZOOM_OVERRIDE = 1
-
 ENT.Base = "lambda_entity"
 ENT.Type = "anim"
 
@@ -116,18 +113,33 @@ function ENT:GetCreditsLength(creditsType)
         return 0
     end
 
+    local creditsLength = 0
+
     if creditsType == CREDITS_TYPE_INTRO then
         local section = GetCreditsSection(self.Credits, creditsType)
-        local totalEntries = #section
-        local segmentTime = (self.Params["fadeintime"] or 0.0) + (self.Params["fadeouttime"] or 0.0) + (self.Params["fadeholdtime"] or 0.0) + (self.Params["nextfadetime"] or 0.0) + (self.Params["pausebetweenwaves"] or 0.0)
-        local entriesPerSegment = 3
-        local totalTime = (totalEntries / entriesPerSegment) * segmentTime
-        print(totalTime)
+        local i = 0
+        local creditsSize = #section
+        local fadeInTime = self.Params["fadeintime"] or 1.0
+        local fadeOutTime = self.Params["fadeouttime"] or 1.0
+        local fadeHoldTime = self.Params["fadeholdtime"] or 1.0
+        local nextFadeTime = self.Params["nextfadetime"] or 1.0
+        local pauseBetweenWaves = self.Params["pausebetweenwaves"] or 1.0
+        local entryLength = fadeInTime + fadeOutTime + fadeHoldTime
+        while i < creditsSize do
+            local len = 3
+            if i + len > creditsSize then
+                len = creditsSize - i
+            end
+            creditsLength = creditsLength + (len * nextFadeTime) + pauseBetweenWaves
+            i = i + len
+        end
+        creditsLength = creditsLength + entryLength
+
     elseif creditsType == CREDITS_TYPE_OUTRO then
-        return self.Params["scrolltime"] or 158
+        creditsLength = self.Params["scrolltime"] or 158
     end
 
-    return 0
+    return creditsLength
 
 end
 
@@ -150,7 +162,7 @@ function ENT:CreditsTypeChanged(key, oldVal, newVal)
         local startTime = self:GetNWVar("CreditsStartTime")
         local finishTime = self:GetNWVar("CreditsFinishTime")
         if newVal ~= CREDITS_TYPE_NONE then
-            self.Panel = vgui.Create("HudCredits")
+            self.Panel = vgui.Create("HudCredits", GetHUDPanel())
             self.Panel:ShowCredits(self.Credits, self.Params, newVal, startTime, finishTime)
         end
     end
@@ -185,7 +197,7 @@ function ENT:Think()
 end
 
 function ENT:AcceptInput(fn, data, activator, caller)
-    DbgPrint(self, fn, data, activator, caller)
+    DbgPrint(self, "AcceptInput", fn, data, activator, caller)
     BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
 
@@ -210,6 +222,7 @@ function ENT:RollOutroCredits()
 end
 
 function ENT:StopCredits()
+    DbgPrint("StopCredits")
     local prevType = self:GetNWVar("CreditsType")
     self:SetNWVar("CreditsStartTime", 0)
     self:SetNWVar("CreditsFinishTime", 0)
@@ -221,7 +234,8 @@ end
 
 function ENT:KeyValue(key, val)
 
-    BaseClass.KeyValue(self, key, val)
+    DbgPrint(self, "KeyValue", key, val)
+    return BaseClass.KeyValue(self, key, val)
 
 end
 
