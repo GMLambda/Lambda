@@ -504,9 +504,7 @@ function GM:EntityKeyValue(ent, key, val)
         -- Fix console spam about maximum glow size, maximum value is 64.
         return 64
     end
-    if key == "message" and entClass == "env_message" and ent:GetName() ~= "LambdaGameOver" then
-        return ""
-    elseif key == "globalstate" and val == "friendly_encounter" and entClass == "env_global" then
+    if key == "globalstate" and val == "friendly_encounter" and entClass == "env_global" then
         -- HACKHACK: This solves an issue that causes prediction errors because clients arent aware of global states.
         return ""
     elseif key == "control_volume" and (entClass == "func_tank" or entClass == "func_tankairboatgun") then
