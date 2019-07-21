@@ -85,7 +85,7 @@ function ENT:PreInitialize()
 
     DbgPrint(self, "PreInitialize")
 
-    self.OutputTable = self.OutputTable or {}
+    self.OutputsTable = self.OutputsTable or {}
     self.InputsTable = self.InputsTable or {}
     self.KeyValueTable = self.KeyValueTable or {}
     self.IsPreInitialized = true
@@ -254,8 +254,8 @@ end
     end
 
     function ENT:SetupOutput(name)
-        self.OutputTable = self.OutputTable or {}
-        self.OutputTable[name] = self.OutputTable[name] or {}
+        self.OutputsTable = self.OutputsTable or {}
+        self.OutputsTable[name] = self.OutputsTable[name] or {}
         --DbgPrint(self, "Setup output: " .. name)
     end
 
@@ -271,9 +271,14 @@ end
             self:PreInitialize()
         end
 
-        if self.OutputTable[name] ~= nil then
-            self.OutputTable[name] = self.OutputTable[name] or {}
-            table.insert(self.OutputTable[name], { val, 0 })
+        if self.OutputsTable[name] ~= nil then
+            local params = string.Explode(",", string.Trim(val), false)
+            local target = params[1]
+            local input = params[2]
+            local param = params[3]
+            local delay = params[4]
+            local times = params[5]
+            self:AddOutput(name, target, input, param, delay, times)
         else
             self.KeyValueTable = self.KeyValueTable or {}
             self.KeyValueTable[name] = val
@@ -300,23 +305,23 @@ end
     end
 
     function ENT:CloneOutputs(ent)
-        if ent.OutputTable ~= nil then
-            self.OutputTable = table.Copy(ent.OutputTable)
+        if ent.OutputsTable ~= nil then
+            self.OutputsTable = table.Copy(ent.OutputsTable)
         end
     end
 
     function ENT:GetOutputsTable()
-        return self.OutputTable
+        return self.OutputsTable
     end
 
     function ENT:SetOutputsTable(outputs)
-        self.OutputTable = outputs
+        self.OutputsTable = outputs
     end
 
     function ENT:FireOutputs(name, param, activator, caller)
         local caller = caller or self
         local activator = activator or self
-        local outputs = self.OutputTable[name] or {}
+        local outputs = self.OutputsTable[name] or {}
         util.EnqueueOutput(function()
             DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
             util.TriggerOutputs(outputs, activator, caller, param, self)
@@ -335,19 +340,16 @@ end
 
         local outputData = target .. "," .. input .. "," .. param .. "," .. delay .. "," .. times
 
-        if self.OutputTable[output] ~= nil then
-            self.OutputTable[output] = self.OutputTable[output] or {}
-            table.insert(self.OutputTable[output], { outputData, 0 })
-        end
+        self.OutputsTable[output] = self.OutputsTable[output] or {}
+        table.insert(self.OutputsTable[output], { outputData, 0 })
 
-        DbgPrint("Registered output")
-
+        DbgPrint(self, "Registered output", output)
         return true
 
     end
 
     function ENT:ClearOutputs()
-        self.OutputTable = {}
+        self.OutputsTable = {}
     end
 
     function ENT:AcceptInput(name, activator, caller, data)
@@ -366,21 +368,10 @@ end
             self:Remove()
             return
         elseif name:iequals("AddOutput") then
-
-            local outputname
-            local params
-
-            outputname, params = string.match(data, "(%w+)(.+)")
-            params = string.Explode(",", string.Trim(params), false)
-            --PrintTable(params)
-
-            local target = params[1]
-            local input = params[2]
-            local param = params[3]
-            local delay = params[4]
-            local times = params[5]
-
-            return self:AddOutput(outputname, target, input, param, delay, times)
+            local outputname = string.match(data, "(%w+)(.+)")
+            -- We do not add the output, just ensure it exists in the table
+            self.OutputsTable[outputname] = self.OutputsTable[outputname] or {}
+            return true
         end
 
         if self.InputsTable ~= nil then
@@ -399,7 +390,6 @@ end
         end
 
         return BaseClass.AcceptInput(name, activator, caller, data)
-
     end
 
     function ENT:PropagateActivator(e)
