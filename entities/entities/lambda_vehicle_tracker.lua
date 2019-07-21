@@ -59,14 +59,8 @@ if SERVER then
 elseif CLIENT then
 
     local pixVis = util.GetPixelVisibleHandle()
-    local font = "DermaLarge"
-    local pad = 2
-    local health_w = 100
-    local health_h = 5
-    local aux_w = 100
-    local aux_h = 5
 
-   surface.CreateFont( "LAMBDA_1_VEHICLE",
+    surface.CreateFont( "LAMBDA_1_VEHICLE",
     {
         font = "Arial",
         size = 66,
@@ -143,7 +137,7 @@ elseif CLIENT then
 
         render.SuppressEngineLighting(true)
 
-        local offset = Vector(0, 0, 100 + (math.sin(CurTime() * 5) * 10))
+        local offset = Vector(0, 0, 100 + (math.sin(self:EntIndex() + (CurTime() * 5)) * 10))
         local pos = vehicle:GetPos() + offset
         local ang = EyeAngles()
         local ang = (pos - EyePos()):Angle()
