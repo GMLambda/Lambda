@@ -55,11 +55,6 @@ function MAPSCRIPT:PostInit()
             --ent:SetKeyValue("dmg", "0") -- Don`t hurt the player
         end)
 
-        local medkit = ents.Create("weapon_lambda_medkit")
-        medkit:SetPos(Vector(-6442.010742, -1297.776855, 50.989807))
-        medkit:SetAngles(Angle(0, -148.108, 0))
-        medkit:Spawn()
-
         local mapscript = self
 
         -- We gotta give all players the suit, some might be not so willing to take it and thats bad.
@@ -74,7 +69,6 @@ function MAPSCRIPT:PostInit()
 
                 local loadout = GAMEMODE:GetMapScript().DefaultLoadout
                 loadout.HEV = true
-                table.insert(loadout.Weapons, "weapon_lambda_medkit")
             end
         end)
 
