@@ -32,6 +32,12 @@ MAPSCRIPT.EntityFilterByName =
 {
     ["sprite_breen_blast_1"] = true, -- Visible thru walls.
     ["citadel_template_combinewall_start1"] = true,
+    ["blackout"] = true,
+    ["logic_fade_view"] = true,
+    ["teleport_breen_blast_1"] = true,
+    ["trigger_gameover_toplevelfallmessage"] = true,
+    ["trigger_gameover_toplevelfallhurt"] = true,
+    ["relay_riftcleanup"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
@@ -156,6 +162,18 @@ function MAPSCRIPT:PostInit()
 
         end)
 
+        local podExitTeleport = ents.Create("point_teleport")
+        podExitTeleport:SetKeyValue("target", "!players")
+        podExitTeleport:SetName("lambda_pod_teleport")
+        podExitTeleport:SetPos(Vector(-1875, 887, 627))
+        podExitTeleport:SetAngles(Angle(0, 265, 0))
+        podExitTeleport:Spawn()
+
+        ents.WaitForEntityByName("logic_breenblast_2", function(ent)
+            ent:Fire("AddOutput", "OnTrigger blackout_viewcontroller,Disable,,0.0,-1")
+            ent:Fire("AddOutput", "OnTrigger lambda_pod_teleport,Teleport,,1.25,-1")
+        end)
+
         ents.WaitForEntityByName("blackout_viewcontroller", function(ent)
             ent:SetKeyValue("spawnflags", "188")
         end)
@@ -168,7 +186,28 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("spawnflags", "140")
         end)
 
+        ents.WaitForEntityByName("relay_breenwins", function(ent)
+            ent:Fire("AddOutput", "OnTrigger fade_breen_wins,RestartRound,GAMEOVER_TIMER,5.50,-1")
+        end)
+
+        ents.WaitForEntityByName("message_breenwins", function(ent)
+            ent:SetKeyValue("spawnflags", "2") -- All players
+        end)
+
         ents.RemoveByClass("npc_combine_s", Vector(-2298.000000, 334.000000, 576.031250))
+
+        local changeLevel = ents.Create("trigger_changelevel")
+        changeLevel:SetKeyValue("map", "d1_trainstation_01")
+        changeLevel:SetKeyValue("StartDisabled", "1")
+        changeLevel:SetKeyValue("spawnflags", tostring(SF_CHANGELEVEL_RESTART))
+        changeLevel:SetName("lambda_changelevel")
+        changeLevel:SetPos(Vector(0, 0, 0))
+        changeLevel:Spawn()
+
+        ents.WaitForEntityByName("credits", function(ent)
+            ent:Fire("AddOutput", "OnCreditsDone lambda_changelevel,ChangeLevel,,10,-1")
+        end)
+
     end
 
 end
