@@ -1,17 +1,25 @@
 0.9.6
 - Feature: Accelerated backhopping
+- Feature: env_credits multiplayer support.
 - Improved: Removed Cockroaches from kill feed, players will no longer get points for killing them.
 - Improved: Keep track of physcannon color when dropped.
 - Improved: d3_breen_01: Place all players in the same pod to not skip the scene.
+- Improved: Transitioning from d3_citadel_05 to d3_breen_01
+- Improved: Better round restart info.
+- Fix: Potential crash after changelevel.
+- Fix: point_viewcontrol not behaving like original.
+- Fix: Some entity outputs being fired twice.
 - Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
+- Fix: d3_breen_01: Platforms would stop moving if player reached top.
 - Fix: Medkit not properly working in singleplayer.
 - Fix: Selection of best weapon on depleted ammo and player spawn.
 - Fix: Settings not correctly clamped.
-- Fix: Potential crash after changelevel.
 - Fix: Physcannon throwing errors when players die.
 - Fix: Settings showing up twice.
+- Fix: Vehicles getting displayed in kill feed instead of player.
 - Fix: d3_citadel_05: Default weapons not being removed.
 - Fix: d3_citadel_05: Keep the pod cycle active after the player left the area.
+- Fix: Networked variables being overwritten by client ignoring server value.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
