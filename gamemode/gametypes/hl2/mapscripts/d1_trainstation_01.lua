@@ -34,6 +34,8 @@ MAPSCRIPT.GlobalStates =
 {
     ["gordon_precriminal"] = GLOBAL_ON,
     ["gordon_invulnerable"] = GLOBAL_ON,
+    ["super_phys_gun"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF,
 }
 
 function MAPSCRIPT:Init()
