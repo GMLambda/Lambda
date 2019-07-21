@@ -6,7 +6,7 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = { "weapon_lambda_medkit" },
+    Weapons = {},
     Ammo = {},
     Armor = 30,
     HEV = true,
@@ -125,7 +125,10 @@ function MAPSCRIPT:PostInit()
         inputEnt:SetName("lambda_crowbar")
         inputEnt.AcceptInput = function(s, input, caller, activator, param)
             if input == "AddCrowbar" then
-                table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_crowbar")
+                local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+                loadout.HEV = true
+                table.insert(loadout.Weapons, "weapon_crowbar")
+                table.insert(loadout.Weapons, "weapon_lambda_medkit")
                 s:Remove()
             end
         end
@@ -134,6 +137,35 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("lcs_crowbar_intro", function(ent)
             ent:Fire("AddOutput", "OnCompletion lambda_crowbar,AddCrowbar,,0.0,-1")
         end)
+
+        local headcrabMaker = ents.Create("npc_maker")
+        headcrabMaker:SetPos(Vector(-9627.166992, -3429.462891, 340.428101))
+        headcrabMaker:SetAngles(Angle(0, 100, 0))
+        headcrabMaker:SetKeyValue("NPCType", "npc_headcrab")
+        headcrabMaker:SetKeyValue("StartDisabled", "1")
+        headcrabMaker:SetName("lambda_headcrab_maker")
+        headcrabMaker:Spawn()
+
+        local crate = ents.Create("prop_physics")
+        crate:SetPos(Vector(-9627.166992, -3429.462891, 340.428101))
+        crate:SetAngles(Angle(0, 100, 0))
+        crate:SetModel("models/props_junk/wood_crate002a.mdl")
+        crate:Spawn()
+        crate:SetHealth(100)
+        local physObj = crate:GetPhysicsObject()
+        if IsValid(physObj) then
+            physObj:SetMass(500)
+        end
+        crate:CallOnRemove("Broke", function()
+            headcrabMaker:SetPos(crate:GetPos())
+            headcrabMaker:SetAngles(crate:GetAngles())
+            headcrabMaker:Fire("Spawn")
+        end)
+
+        local medkit = ents.Create("weapon_lambda_medkit")
+        medkit:SetPos(Vector(-9653.991211, -3418.812256, 362.399658))
+        medkit:SetAngles(Angle(0, -148.108, 0))
+        medkit:Spawn()
 
     end
 

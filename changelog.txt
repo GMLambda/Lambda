@@ -6,6 +6,7 @@
 - Improved: d3_breen_01: Place all players in the same pod to not skip the scene.
 - Improved: Transitioning from d3_citadel_05 to d3_breen_01
 - Improved: Better round restart info.
+- Improved: Players get the medkit now at d1_trainstation_06 instead of d1_trainstation_05.
 - Fix: Potential crash after changelevel.
 - Fix: point_viewcontrol not behaving like original.
 - Fix: Some entity outputs being fired twice.
