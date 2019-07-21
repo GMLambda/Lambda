@@ -44,6 +44,7 @@ function ENT:PreInitialize()
     self.TargetName = self.TargetName or ""
     self.TargetAttachment = ""
     self.InitialSpeed = 0
+    self.TargetActive = false
 
     self.MoveDir = Vector()
     self.MoveDistance = 0
@@ -54,7 +55,7 @@ end
 function ENT:KeyValue(key, val)
 
     BaseClass.KeyValue(self, key, val)
-    DbgPrint(self, key, val)
+    DbgPrint(self, "KeyValue", key, val)
 
     if key:iequals("globalstate") then
         self.GlobalState = val
@@ -123,8 +124,9 @@ function ENT:Think()
         return
     end
 
-    self:Move()
-    self:FollowTarget()
+    if self.TargetActive == true then
+        self:FollowTarget()
+    end
 
     self:NextThink(CurTime())
     return true
@@ -163,15 +165,23 @@ end
 function ENT:FollowTarget()
 
     local target = self.TargetEntity
+    local isTargetValid = IsValid(target)
 
-    if not IsValid(target) then
-        self:Disable()
-        return
+    -- If the flag is set it has to be disabled explicitly.
+    if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false then
+        if CurTime() > self.ReturnTime then
+            DbgPrint(self, "Reached return time, disabling")
+            self:Disable()
+            return
+        elseif isTargetValid == false then
+            DbgPrint(self, "Target not valid, disabling")
+            self:Disable()
+        end
     end
 
-    -- Not sure what this is about
-    if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false and CurTime() > self.ReturnTime then
-        self:Disable()
+    if isTargetValid == false then
+        -- If infinite hold time is set we simply return.
+        self.TargetActive = false
         return
     end
 
@@ -235,6 +245,8 @@ function ENT:FollowTarget()
         end
     end
 
+    self:Move()
+
 end
 
 local function GetNextTarget(ent)
@@ -247,57 +259,58 @@ end
 
 function ENT:Move()
 
-    if IsValid(self.TargetPath) then
-        local currentPos = self:GetPos()
-
-        if self.TargetPath:HasSpawnFlags(2 --[[ SF_PATHCORNER_TELEPORT ]]) == true then
-            self:SetPos(self.TargetPath:GetPos())
-            self.MoveDistance = -1
-        else
-            self.MoveDistance = self.MoveDistance - currentPos:Distance(self.LastPos)
-        end
-
-        if self.MoveDistance <= 0 then
-
-            self.TargetPath:Input("InPass", self, self)
-            DbgPrint(self, "Reached pass", self.TargetPath)
-
-            local nextPath = GetNextTarget(self.TargetPath)
-            if not IsValid(nextPath) then
-                self:SetAbsVelocity(vec3_origin)
-                self.TargetPath = nil
-            else
-
-                local pathSpeed = (nextPath:GetInternalVariable("speed") or 0)
-                if pathSpeed > 0 then
-                    self.TargetSpeed = pathSpeed
-                end
-
-                local targetPathPos = nextPath:GetLocalPos()
-                local localPos = self:GetLocalPos()
-
-                self.MoveDir = targetPathPos - localPos
-                self.MoveDir:Normalize()
-                self.MoveDistance = targetPathPos:Distance(localPos)
-                self.StopTime = CurTime() + (nextPath:GetInternalVariable("wait") or 0)
-
-                self.TargetPath = nextPath
-            end
-        end
-
-        if self.StopTime > CurTime() then
-            self.Speed = math.Approach(0, self.Speed, self.Deceleration * FrameTime())
-        else
-            self.Speed = math.Approach(self.TargetSpeed, self.Speed, self.Acceleration * FrameTime())
-        end
-
-        local frac = 2.0 * FrameTime()
-        local velocity = ((self.MoveDir * self.Speed) * frac) + (self:GetAbsVelocity() * (1.0 - frac))
-
-        self:SetAbsVelocity(velocity)
-        self.LastPos = self:GetPos()
-
+    if not IsValid(self.TargetPath) then
+        return
     end
+
+    local currentPos = self:GetPos()
+
+    if self.TargetPath:HasSpawnFlags(2 --[[ SF_PATHCORNER_TELEPORT ]]) == true then
+        self:SetPos(self.TargetPath:GetPos())
+        self.MoveDistance = -1
+    else
+        self.MoveDistance = self.MoveDistance - currentPos:Distance(self.LastPos)
+    end
+
+    if self.MoveDistance <= 0 then
+
+        self.TargetPath:Input("InPass", self, self)
+        DbgPrint(self, "Reached pass", self.TargetPath)
+
+        local nextPath = GetNextTarget(self.TargetPath)
+        if not IsValid(nextPath) then
+            self:SetAbsVelocity(vec3_origin)
+            self.TargetPath = nil
+        else
+
+            local pathSpeed = (nextPath:GetInternalVariable("speed") or 0)
+            if pathSpeed > 0 then
+                self.TargetSpeed = pathSpeed
+            end
+
+            local targetPathPos = nextPath:GetLocalPos()
+            local localPos = self:GetLocalPos()
+
+            self.MoveDir = targetPathPos - localPos
+            self.MoveDir:Normalize()
+            self.MoveDistance = targetPathPos:Distance(localPos)
+            self.StopTime = CurTime() + (nextPath:GetInternalVariable("wait") or 0)
+
+            self.TargetPath = nextPath
+        end
+    end
+
+    if self.StopTime > CurTime() then
+        self.Speed = math.Approach(0, self.Speed, self.Deceleration * FrameTime())
+    else
+        self.Speed = math.Approach(self.TargetSpeed, self.Speed, self.Acceleration * FrameTime())
+    end
+
+    local frac = 2.0 * FrameTime()
+    local velocity = ((self.MoveDir * self.Speed) * frac) + (self:GetAbsVelocity() * (1.0 - frac))
+
+    self:SetAbsVelocity(velocity)
+    self.LastPos = self:GetPos()
 
 end
 
@@ -326,7 +339,7 @@ function ENT:AddPlayerToControl(ply)
         DbgPrint(self, "Removing player from previous viewcontrol")
 
         restoreData = viewEntity:GetPlayerRestoreData(ply)
-        viewEntity:RemovePlayerFromControl(ply)
+        viewEntity:RemovePlayerFromControl(ply, true)
     else
         -- Initial entry.
         restoreData.SolidFlags = ply:GetSolidFlags()
@@ -341,6 +354,7 @@ function ENT:AddPlayerToControl(ply)
     end
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_TAKECONTROL) == true then
+        DbgPrint("Freezing player: " .. tostring(ply))
         ply:Freeze(true)
     end
 
@@ -368,7 +382,10 @@ function ENT:RestorePlayer(ply, restoreData)
 
     ply:SetViewEntity(restoreData.ViewEntity)
     ply:SetSolidFlags(restoreData.SolidFlags)
-    ply:Freeze(restoreData.Frozen)
+    if restoreData.Frozen == false and ply:IsFrozen() == true then
+        DbgPrint("Restoring freeze player: " .. tostring(ply))
+        ply:Freeze(restoreData.Frozen)
+    end
     ply:SetNoDraw(restoreData.NoDraw)
 
     if IsValid(restoreData.ActiveWeapon) then
@@ -377,22 +394,25 @@ function ENT:RestorePlayer(ply, restoreData)
 
 end
 
-function ENT:RemovePlayerFromControl(ply)
+function ENT:RemovePlayerFromControl(ply, switching)
 
-    for k,restoreData in pairs(self.ActivePlayers) do
+    for k, restoreData in pairs(self.ActivePlayers) do
         if restoreData.Player ~= ply then
             continue
         end
 
-        self:RestorePlayer(ply, restoreData)
+        if switching ~= true then
+            self:RestorePlayer(ply, restoreData)
+        end
 
-        table.remove(self.ActivePlayers, k)
+        self.ActivePlayers[k] = nil
 
-        if #self.ActivePlayers == 0 then
+        if table.Count(self.ActivePlayers) == 0 then
+            DbgPrint(self, "All players removed, disabling")
             self:Disable()
         end
-        return true
 
+        return true
     end
 
     DbgPrint(self, "Failed to restore player " .. tostring(ply))
@@ -416,8 +436,8 @@ function ENT:EnableControl(ply)
     end
 
     -- HACHACK: Because point_viewcontrol is not affected by game.CleanUpMap we have to always restore it.
-    self:SetPos(self.InitialPos)
-    self:SetAngles(self.InitialAng)
+    --self:SetPos(self.InitialPos)
+    --self:SetAngles(self.InitialAng)
 
     self.ReturnTime = CurTime() + self.Wait
     self.Speed = self.InitialSpeed
@@ -427,6 +447,8 @@ function ENT:EnableControl(ply)
     self.TargetEntity = ents.FindFirstByName(targetEntityName)
     if not IsValid(self.TargetEntity) then
         DbgPrint(self, self:GetName(), "Failed to find target entity: \"" .. tostring(targetEntityName) .. "\"")
+    else
+        self.TargetActive = true
     end
 
     self.AttachmentIndex = 0
@@ -497,8 +519,10 @@ function ENT:DisableControl()
     for k, restoreData in pairs(self.ActivePlayers) do
         self:RestorePlayer(restoreData.Player, restoreData)
     end
+
     self.ActivePlayers = {}
     self.ReturnTime = CurTime()
+    self.TargetActive = false
 
     self:FireOutputs("OnEndFollow", self, self)
     self:SetAbsVelocity(Vector(0, 0, 0))
