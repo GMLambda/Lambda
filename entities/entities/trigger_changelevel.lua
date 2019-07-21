@@ -1,4 +1,4 @@
-local DbgPrint = GetLogging("Trigger")
+local DbgPrint = GetLogging("Level")
 
 if SERVER then
 
@@ -9,12 +9,13 @@ DEFINE_BASECLASS( "lambda_trigger" )
 
 SF_CHANGELEVEL_NOTOUCH = 0x0002
 SF_CHANGELEVEL_CHAPTER = 0x0004
+SF_CHANGELEVEL_RESTART = 0x0008
 
 function ENT:PreInitialize()
 
     BaseClass.PreInitialize(self)
 
-    self:SetInputFunction("ChangeLevel", self.OnTrigger)
+    self:SetInputFunction("ChangeLevel", self.InputChangeLevel)
 
     self.TargetMap = ""
     self.Landmark = ""
@@ -72,10 +73,19 @@ function ENT:StartTouch(ent)
 end
 
 function ENT:OnTrigger()
+    DbgPrint(self, "OnTrigger")
+    self:DoChangeLevel()
+end
 
-    DbgPrint("CHANGELEVEL")
-    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, self:GetTouchingObjects())
+function ENT:InputChangeLevel()
+    DbgPrint(self, "InputChangeLevel")
+    self:DoChangeLevel()
+end
 
+function ENT:DoChangeLevel()
+    DbgPrint(self, "DoChangeLevel")
+    local restart = self:HasSpawnFlags(SF_CHANGELEVEL_RESTART)
+    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, self:GetTouchingObjects(), restart)
 end
 
 end

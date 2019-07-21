@@ -126,29 +126,33 @@ function GM:EnablePreviousMap()
 
 end
 
-function GM:PreChangelevel(activator, map, landmark, playersInTrigger)
+function GM:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
+
+    DbgPrint("GM:PreChangelevel", activator, map, landmark, playersInTrigger, restart)
 
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", self:GetCurrentMap())
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", map)
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Landmark", landmark)
-    util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Changelevel", "1")
+    util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Changelevel", restart and "0" or "1")
 
     -- Serialize user infos.
     if self.MapScript ~= nil and self.MapScript.PreChangelevel then
         self.MapScript:PreChangelevel(map, landmark)
     end
 
-    hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark)
+    hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark, restart)
 
-    self:TransitionToLevel(activator, map, landmark, playersInTrigger or {})
+    self:TransitionToLevel(activator, map, landmark, playersInTrigger, restart)
 
 end
 
-function GM:ChangeLevel(activator, map, landmark, playersInTrigger)
+function GM:ChangeLevel(activator, map, landmark, playersInTrigger, restart)
 
     if playersInTrigger == nil then
         playersInTrigger = {}
     end
+
+    DbgPrint("GM:ChangeLevel", activator, map, landmark, playersInTrigger, restart)
 
     if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
         DbgError("Called ChangeLevel twice!")
@@ -159,7 +163,7 @@ function GM:ChangeLevel(activator, map, landmark, playersInTrigger)
 
     DbgPrint("Changing to level: " .. map)
 
-    self:PreChangelevel(activator, map, landmark, playersInTrigger)
+    self:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
 
     local nextMap = map
     if g_debug_transitions:GetBool() ~= true then
@@ -171,6 +175,8 @@ function GM:ChangeLevel(activator, map, landmark, playersInTrigger)
 end
 
 function GM:ChangeToNextLevel()
+
+    DbgPrint("GM:ChangeToNextLevel")
 
     local nextMap = self:GetNextMap()
 
