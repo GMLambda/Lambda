@@ -62,7 +62,7 @@ function GM:InitializeTransitionData()
 
 end
 
-function GM:TransitionToLevel(activator, map, landmark, playersInTrigger)
+function GM:TransitionToLevel(activator, map, landmark, playersInTrigger, restart)
 
     -- 1. Lets collect all entities with the landmark name we have to seperate them by landmark and trigger
     local transitionTriggers = {}
@@ -102,7 +102,7 @@ function GM:TransitionToLevel(activator, map, landmark, playersInTrigger)
                 DbgError("Invalid player detected, this should not happen")
             end
 
-            if table.HasValue(playersInTrigger, ply) == false then
+            if restart == true or table.HasValue(playersInTrigger, ply) == false then
                 DbgPrint("Removing player: " .. tostring(ply) .. " from transitioning, not in changelevel trigger")
                 --playerTable[k] = nil
                 playerTable[k].Include = false -- NOTE: Changed this to carry stats and other information.
@@ -111,6 +111,10 @@ function GM:TransitionToLevel(activator, map, landmark, playersInTrigger)
         end
     end
 
+    if restart == true then
+        objectTable = {}
+    end
+    
     DbgPrint("Transitioning #" .. tostring(table.Count(objectTable)) .. " objects")
     --PrintTable(objectTable)
 
