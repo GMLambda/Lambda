@@ -70,7 +70,7 @@ function ENT:LoadCreditsFile(filePath, gamePath)
 
     local credits = util.KeyValuesToTablePreserveOrder(fileData, false, true)
     if credits == nil then
-        error("Unable to parse credits file")
+        print(self, "Unable to parse credits file")
         return false
     end
 
@@ -90,9 +90,9 @@ function ENT:LoadCreditsFile(filePath, gamePath)
 
 end
 
-function ENT:CreditsFileChanged(key, oldVal, newVal)
+function ENT:ReloadCreditsFile(f)
 
-    local splitUp = string.Split(newVal, ":")
+    local splitUp = string.Split(f, ":")
     local gamePath = "MOD"
     local filePath
     if #splitUp > 1 then
@@ -103,7 +103,13 @@ function ENT:CreditsFileChanged(key, oldVal, newVal)
     end
 
     DbgPrint("Credits file changed: " .. tostring(newVal))
-    self:LoadCreditsFile(filePath, gamePath)
+    return self:LoadCreditsFile(filePath, gamePath)
+
+end
+
+function ENT:CreditsFileChanged(key, oldVal, newVal)
+
+    return self:ReloadCreditsFile(newVal)
 
 end
 
@@ -146,6 +152,11 @@ end
 function ENT:CreditsTypeChanged(key, oldVal, newVal)
 
     DbgPrint(self, "CreditsTypeChanged: " .. key .. ", " .. tostring(oldVal) .. "," .. newVal)
+
+    if self.Credits == nil and self:ReloadCreditsFile(self:GetNWVar("CreditsFile")) == false then
+        return
+    end
+
     if newVal == CREDITS_TYPE_NONE then
         self.Section = nil
     else
