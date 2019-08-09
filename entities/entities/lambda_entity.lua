@@ -266,6 +266,8 @@ end
 
     function ENT:KeyValue(name, val)
 
+        DbgPrint(self, "KeyValue", name, val)
+
         if self.IsPreInitialized ~= true and self.PreInitialize ~= nil then
             self.IsPreInitialized = true
             self:PreInitialize()
@@ -322,6 +324,9 @@ end
         local caller = caller or self
         local activator = activator or self
         local outputs = self.OutputsTable[name] or {}
+        if #outputs == 0 then
+            return
+        end
         util.EnqueueOutput(function()
             DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
             util.TriggerOutputs(outputs, activator, caller, param, self)
@@ -343,7 +348,7 @@ end
         self.OutputsTable[output] = self.OutputsTable[output] or {}
         table.insert(self.OutputsTable[output], { outputData, 0 })
 
-        DbgPrint(self, "Registered output", output)
+        DbgPrint(self, "Registered output: ", output, outputData)
         return true
 
     end
@@ -355,6 +360,8 @@ end
     function ENT:AcceptInput(name, activator, caller, data)
 
         -- Scripted entities dont set this for some reason.
+        DbgPrint(self, "AcceptInput", name, activator, caller, data)
+
         self.LambdaLastActivator = activator
 
         if GAMEMODE ~= nil and GAMEMODE.AcceptInput ~= nil and GAMEMODE:AcceptInput(self, name, activator, caller, data) == true then
@@ -371,7 +378,7 @@ end
             local outputname = string.match(data, "(%w+)(.+)")
             -- We do not add the output, just ensure it exists in the table
             self.OutputsTable[outputname] = self.OutputsTable[outputname] or {}
-            return true
+            return
         end
 
         if self.InputsTable ~= nil then
