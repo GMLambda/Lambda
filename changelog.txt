@@ -1,5 +1,6 @@
 0.9.7
 - Fix: env_credits throwing errors if credits file is missing.
+- Fix: entities not registering outputs via AcceptInput
 
 0.9.6
 - Feature: Accelerated backhopping
