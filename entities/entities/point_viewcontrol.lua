@@ -185,7 +185,7 @@ function ENT:FollowTarget()
         return
     end
 
-    local diffAng
+    local diffAng = Angle(0, 0, 0)
 
     if self.AttachmentIndex ~= nil and self.AttachmentIndex ~= 0 then
         local attachment = target:GetAttachment(self.AttachmentIndex)
