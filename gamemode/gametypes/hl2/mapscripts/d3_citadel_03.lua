@@ -8,6 +8,7 @@ MAPSCRIPT.DefaultLoadout =
 {
     Weapons =
     {
+        "weapon_lambda_hands",
         "weapon_physcannon",
     },
     Ammo =

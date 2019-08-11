@@ -6,7 +6,9 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = {
+        "weapon_lambda_hands",
+    },
     Ammo = {},
     Armor = 30,
     HEV = false,
@@ -16,10 +18,17 @@ MAPSCRIPT.InputFilters =
 {
 }
 
+MAPSCRIPT.EntityFilterByClass =
+{
+    ["env_global"] = true,
+}
+
 MAPSCRIPT.GlobalStates =
 {
-    ["gordon_precriminal"] = GLOBAL_ON,
-    ["gordon_invulnerable"] = GLOBAL_ON,
+    ["gordon_precriminal"] = GLOBAL_OFF,
+    ["gordon_invulnerable"] = GLOBAL_OFF,
+    ["super_phys_gun"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF,
 }
 
 function MAPSCRIPT:Init()
@@ -40,6 +49,12 @@ function MAPSCRIPT:PostInit()
             "npc/combine_soldier/vo/target.wav",
             "npc/combine_soldier/vo/visualonexogens.wav",
         }
+
+        -- Don't drop weapons.
+        for _,v in pairs(ents.FindByClass("npc_metropolice")) do
+            local flags = bit.bor(v:GetSpawnFlags(), 8192)
+            v:SetKeyValue("spawnflags", tostring(flags))
+        end
 
         ents.WaitForEntityByName("cupcop_can", function(ent)
             cupcop_can = ent

@@ -8,6 +8,7 @@ MAPSCRIPT.DefaultLoadout =
 {
     Weapons =
     {
+        "weapon_lambda_hands",
         "weapon_lambda_medkit",
         "weapon_crowbar",
     },

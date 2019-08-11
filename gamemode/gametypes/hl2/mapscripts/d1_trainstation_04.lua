@@ -6,7 +6,9 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = {
+        "weapon_lambda_hands",
+    },
     Ammo = {},
     Armor = 30,
     HEV = false,
@@ -20,7 +22,7 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
+    ["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -33,6 +35,14 @@ MAPSCRIPT.EntityFilterByName =
     --["npc_knockout_cop_upstairs"] = true, -- If players are still up they would see them spawn.
 }
 
+MAPSCRIPT.GlobalStates =
+{
+    ["gordon_precriminal"] = GLOBAL_OFF,
+    ["gordon_invulnerable"] = GLOBAL_OFF,
+    ["super_phys_gun"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF,
+}
+
 function MAPSCRIPT:Init()
 end
 
@@ -41,6 +51,12 @@ function MAPSCRIPT:PostInit()
     DbgPrint("PostInit")
 
     if SERVER then
+
+        -- Don't drop weapons.
+        for _,v in pairs(ents.FindByClass("npc_metropolice")) do
+            local flags = bit.bor(v:GetSpawnFlags(), 8192)
+            v:SetKeyValue("spawnflags", tostring(flags))
+        end
 
         -- If the changelevel fires before he closed it, the position would be off.
         ents.WaitForEntityByName("citizen_DoorBracer", function(ent)

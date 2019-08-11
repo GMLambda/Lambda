@@ -6,7 +6,9 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = {
+        "weapon_lambda_hands",
+    },
     Ammo = {},
     Armor = 30,
     HEV = true,
@@ -21,14 +23,17 @@ MAPSCRIPT.InputFilters =
     ["rappeller_cop_2_maker_2"] = { "Spawn" },
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-    --["env_global"] = true,
-}
-
 MAPSCRIPT.EntityFilterByName =
 {
     ["player_spawn_items"] = true,
+}
+
+MAPSCRIPT.GlobalStates =
+{
+    ["gordon_precriminal"] = GLOBAL_OFF,
+    ["gordon_invulnerable"] = GLOBAL_OFF,
+    ["super_phys_gun"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF,
 }
 
 function MAPSCRIPT:Init()

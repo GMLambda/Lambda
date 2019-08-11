@@ -6,7 +6,9 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = {
+        "weapon_lambda_hands",
+    },
     Ammo = {},
     Armor = 30,
     HEV = false,
@@ -15,6 +17,11 @@ MAPSCRIPT.DefaultLoadout =
 MAPSCRIPT.InputFilters =
 {
     --["relay_rush_downstairscops"] = { "Trigger" },
+}
+
+MAPSCRIPT.EntityFilterByClass =
+{
+    ["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByClass =
@@ -30,8 +37,10 @@ MAPSCRIPT.EntityFilterByName =
 
 MAPSCRIPT.GlobalStates =
 {
-    ["gordon_precriminal"] = GLOBAL_ON,
-    ["gordon_invulnerable"] = GLOBAL_ON,
+    ["gordon_precriminal"] = GLOBAL_OFF,
+    ["gordon_invulnerable"] = GLOBAL_OFF,
+    ["super_phys_gun"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF,
 }
 
 function MAPSCRIPT:Init()
@@ -41,6 +50,12 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
         
+        -- Don't drop weapons.
+        for _,v in pairs(ents.FindByClass("npc_metropolice")) do
+            local flags = bit.bor(v:GetSpawnFlags(), 8192)
+            v:SetKeyValue("spawnflags", tostring(flags))
+        end
+
         -- FIX: The cop would stand there annoying players that have not yet passed through.
         GAMEMODE:WaitForInput("brush_breakin_blockplayer1", "Kill", function()
             ents.WaitForEntityByName("npc_breakincop3", function(ent) ent:SetName("lambda_npc_breakincop3") DbgPrint("Changed name") end)

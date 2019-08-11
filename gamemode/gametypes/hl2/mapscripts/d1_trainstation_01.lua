@@ -6,7 +6,9 @@ local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 MAPSCRIPT.DefaultLoadout =
 {
-    Weapons = {},
+    Weapons = {
+        "weapon_lambda_hands",
+    },
     Ammo = {},
     Armor = 30,
     HEV = false,
@@ -115,7 +117,7 @@ function MAPSCRIPT:PostInit()
 
         -- Fix point_viewcontrol, affect all players.
         for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
-            v:SetKeyValue("spawnflags", "128") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
+            v:SetKeyValue("spawnflags", "132") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
         end
 
         -- Make the cop go outside the hallway so other players can still pass by.
