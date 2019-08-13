@@ -43,6 +43,14 @@ MAPSCRIPT.GlobalStates =
     ["antlion_allied"] = GLOBAL_OFF,
 }
 
+MAPSCRIPT.EntityRelationships =
+{
+    { Class1 = "npc_metropolice", Class2 = "player", Relation = D_NU, Rank = 99 },
+    { Class1 = "npc_cscanner", Class2 = "player", Relation = D_NU, Rank = 99 },
+    { Class1 = "npc_metropolice", Class2 = "npc_citizen", Relation = D_LI, Rank = 99 },
+    { Class1 = "npc_strider", Class2 = "npc_citizen", Relation = D_LI, Rank = 99 },
+}
+
 function MAPSCRIPT:Init()
 end
 
@@ -68,15 +76,15 @@ function MAPSCRIPT:PostInit()
 
         local lcs_cit_RaidAnticipation
         ents.WaitForEntityByName("lcs_cit_RaidAnticipation", function(ent)
-            ent:Fire("AddOutput", "OnCompletion !self,Start")
-            ent:SetKeyValue("busyactor", "0")
-            lcs_cit_RaidAnticipation = ent
+            --ent:Fire("AddOutput", "OnCompletion !self,Start")
+            --ent:SetKeyValue("busyactor", "0")
+            --lcs_cit_RaidAnticipation = ent
         end)
 
         GAMEMODE:WaitForInput("trigger_rush_start", "Enable", function()
-            DbgPrint("Preventing police rush")
-            lcs_cit_RaidAnticipation:Fire("Start")
-            return true
+            --DbgPrint("Preventing police rush")
+            --lcs_cit_RaidAnticipation:Fire("Start")
+            --return true
         end)
 
         ents.WaitForEntityByName("attic_door_close_relay", function(ent)
@@ -152,10 +160,13 @@ function MAPSCRIPT:PostInit()
 
 end
 
-function MAPSCRIPT:PostPlayerSpawn(ply)
-
-    --DbgPrint("PostPlayerSpawn")
-
+function MAPSCRIPT:RegisterNPC(npc)
+    local cls = npc:GetClass()
+    -- Don't drop weapons for metropolice.
+    if cls == "npc_metropolice" then
+        local flags = bit.bor(npc:GetSpawnFlags(), 8192)
+        npc:SetKeyValue("spawnflags", tostring(flags))
+    end
 end
 
 return MAPSCRIPT

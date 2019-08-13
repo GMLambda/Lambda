@@ -37,6 +37,7 @@ function GM:InitializeRoundSystem()
 
     self:SetRoundState(STATE_IDLE)
     self:SetRoundStartTime(GetSyncedTimestamp())
+    self:InitializeRelationships()
 
     self.WaitingForRoundStart = self:ShouldWaitForPlayers()
     self.RoundStartTimeout = GetSyncedTimestamp() + self:GetSetting("connect_timeout")
@@ -652,6 +653,64 @@ function GM:PostRoundSetup()
 
 end
 
+function GM:InitializeRelationships()
+
+    local function CreateRelationship(class1, class2, relation, rank)
+        local ai_control = ents.Create("ai_relationship")
+        ai_control:SetKeyValue("target",  class1)
+        ai_control:SetKeyValue("subject", class2)
+        ai_control:SetKeyValue("StartActive", "1")
+        ai_control:SetKeyValue("spawnflags", "0")
+        ai_control:SetKeyValue("Reciprocal", "1")
+        ai_control:SetKeyValue("rank", tostring(rank))
+        ai_control:SetKeyValue("disposition", tostring(relation))
+        ai_control:Spawn()
+        ai_control:Activate()
+        print("Created Relationship:", class1, class2, relation, rank)
+        return ai_control
+    end
+
+    local mapScript = self:GetMapScript()
+    for _,v in pairs(mapScript.EntityRelationships or {}) do
+        CreateRelationship(v.Class1, v.Class2, v.Relation, v.Rank)
+    end
+
+end
+
+function GM:ResetPlayerRelationships(ply)
+
+    local playerRelevant = {}
+
+    local mapScript = self:GetMapScript()
+    for _,v in pairs(mapScript.EntityRelationships or {}) do
+        if v.Class1 == "player" or v.Class2 == "player" then
+            table.insert(playerRelevant, v)
+        end
+    end
+
+    for _,v in pairs(playerRelevant) do
+        local entList
+        if v.Class1 == "player" then
+            entList = ents.FindByClass(v.Class2)
+        else
+            entList = ents.FindByClass(v.Class1)
+        end
+        for _,ent in pairs(entList) do
+            ent:AddEntityRelationship(ply, v.Relation, v.Rank)
+            print("Reset relationship with: " .. tostring(ply) .. " -> " .. tostring(ent))
+        end
+    end
+
+    for _,v in pairs(ply.RelationshipRestore or {}) do
+        local ent = v.Entity
+        if IsValid(ent) then
+            ent:AddEntityRelationship(ply, v.Disposition, 99)
+        end
+    end
+    ply.RelationshipRestore = {}
+
+end
+
 function GM:StartRound(cleaned, force)
 
     -- Initialize map script.
@@ -668,6 +727,7 @@ function GM:StartRound(cleaned, force)
 
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
+        self:InitializeRelationships()
         self:ResetMetrics()
 
         game.SetTimeScale(1)

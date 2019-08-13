@@ -16,10 +16,16 @@ MAPSCRIPT.DefaultLoadout =
 
 MAPSCRIPT.EntityFilterByClass =
 {
+    ["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
+}
+
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+    ["barneyroom_door_cop_1"] = true,
 }
 
 MAPSCRIPT.InputFilters =
@@ -35,9 +41,18 @@ MAPSCRIPT.InputFilters =
 MAPSCRIPT.GlobalStates =
 {
     ["gordon_precriminal"] = GLOBAL_ON,
-    ["gordon_invulnerable"] = GLOBAL_ON,
+    ["gordon_invulnerable"] = GLOBAL_OFF,
     ["super_phys_gun"] = GLOBAL_OFF,
     ["antlion_allied"] = GLOBAL_OFF,
+}
+
+MAPSCRIPT.EntityRelationships =
+{
+    { Class1 = "npc_metropolice", Class2 = "player", Relation = D_NU, Rank = 99 },
+    { Class1 = "npc_cscanner", Class2 = "player", Relation = D_NU, Rank = 99 },
+    { Class1 = "npc_metropolice", Class2 = "npc_citizen", Relation = D_LI, Rank = 99 },
+    { Class1 = "npc_strider", Class2 = "npc_metropolice", Relation = D_LI, Rank = 99 },
+    { Class1 = "npc_strider", Class2 = "npc_citizen", Relation = D_LI, Rank = 99 },
 }
 
 function MAPSCRIPT:Init()
@@ -182,6 +197,15 @@ function MAPSCRIPT:PostInit()
         
     end
 
+end
+
+function MAPSCRIPT:RegisterNPC(npc)
+    local cls = npc:GetClass()
+    -- Don't drop weapons for metropolice.
+    if cls == "npc_metropolice" then
+        local flags = bit.bor(npc:GetSpawnFlags(), 8192)
+        npc:SetKeyValue("spawnflags", tostring(flags))
+    end
 end
 
 return MAPSCRIPT

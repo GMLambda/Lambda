@@ -662,6 +662,8 @@ if SERVER then
                 self.MapScript:PostPlayerSpawn(ply)
             end
 
+            self:ResetPlayerRelationships(ply)
+
             -- In case the map script decides to put us in a vehicle lets not do this.
             if useSpawnpoint == true and IsValid(ply:GetVehicle()) == false and IsValid(ply.SelectedSpawnpoint) then
                 ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())

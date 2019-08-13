@@ -165,12 +165,35 @@ function GM:EntityTakeDamage(target, dmginfo)
         local restrictedNPCClasses = self:GetGameTypeData("ImportantPlayerNPCClasses") or {}
         local npcName = target:GetName()
         local isRestricted = restrictedNPCNames[npcName] == true or restrictedNPCClasses[targetClass] == true
-        local attackerIsPlayer = ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()))
+        local attackerIsPlayer = false
+        local ply = nil
+        if IsValid(attacker) and attacker:IsPlayer() then
+            attackerIsPlayer = true
+            ply = attacker
+        elseif IsValid(inflictor) and inflictor:IsPlayer() then
+            attackerIsPlayer = true
+            ply = inflictor
+        end
+
         -- Check if player is attacking friendlies.
         if attackerIsPlayer == true and isRestricted == true and self:GetSetting("allow_npcdmg") == false then
             DbgPrint("Filtering damage on restricted NPC")
             dmginfo:ScaleDamage(0)
             return true
+        end
+
+        if isRestricted == false and attackerIsPlayer == true and target:Disposition(ply) ~= D_HT then
+            local cls = target:GetClass()
+            if IsFriendEntityName(cls) then
+                table.insert(ply.RelationshipRestore, { Entity = target, Disposition = target:Disposition(ply) })
+                target:AddEntityRelationship(ply, D_HT, 99)
+            else
+                local classEnts = ents.FindByClass(cls)
+                for _,v in pairs(classEnts) do
+                    v:AddEntityRelationship(ply, D_HT, 99)
+                    v:Fire("UpdateEnemyMemory")
+                end
+            end
         end
 
     elseif target:IsPlayer() then

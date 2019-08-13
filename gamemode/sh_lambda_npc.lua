@@ -101,6 +101,11 @@ if SERVER then
             interactor:Spawn()
         end
 
+        local mapscript = self:GetMapScript()
+        if mapscript.RegisterNPC ~= nil then
+            mapscript:RegisterNPC(npc)
+        end
+
     end
 
     local function DissolveEntity(ent)
