@@ -24,7 +24,7 @@ SWEP.Secondary.Ammo = "none"
 SWEP.HoldType = "normal"
 SWEP.Weight = -1
 SWEP.AutoSwitchTo = false
-SWEP.AutoSwitchFrom = true
+SWEP.AutoSwitchFrom = false
 SWEP.UseHands = true
 SWEP.ViewModel = "models/weapons/c_arms.mdl"
 SWEP.WorldModel = "models/weapons/c_arms.mdl"
@@ -63,13 +63,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:Think()
-    --self.Seq = 0
 end
 
 function SWEP:OnRemove()
     DbgPrint(self, "OnRemove")
 end
-
 
 function SWEP:DryFire()
 end
@@ -122,6 +120,12 @@ function SWEP:DoImpactEffect(tr, dmgInfo)
     elseif tr.MatType == MAT_GRASS then
         impactEffect = nil
         impactSnd = "Dirt.Impact"
+    elseif tr.MatType == MAT_GRATE then
+        impactEffect = nil
+        impactSnd = "ChainLink.ImpactSoft"
+    elseif tr.MatType == MAT_VENT then
+        impactEffect = nil
+        impactSnd = "MetalVent.ImpactHard"
     end
 
     if impactEffect ~= nil then
