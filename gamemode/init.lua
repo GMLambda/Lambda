@@ -136,6 +136,26 @@ local function GetDamageTypeText(dmginfo)
     return text .. " : " .. dmginfo:GetDamageType()
 end
 
+function GM:ResetDamageAccumulator(ply)
+    ply.DamageAccumulator = {}
+end
+
+function GM:SetAggressiveRelationship(attacker, npc, cls)
+    attacker.RelationshipRestore = attacker.RelationshipRestore or {}
+    table.insert(attacker.RelationshipRestore, { Entity = npc, Disposition = npc:Disposition(attacker) })
+    npc:AddEntityRelationship(attacker, D_HT, 99)
+    npc:UpdateEnemyMemory(attacker, attacker:GetPos())
+    if cls == "npc_citizen" then
+        local gender = npc:GetGender()
+        local rand = string.format("%02d", math.random(1, 2))
+        if gender == "male" then
+            npc:EmitSound("vo/npc/male01/wetrustedyou" .. rand .. ".wav")
+        elseif gender == "female" then
+            npc:EmitSound("vo/npc/female01/wetrustedyou" .. rand .. ".wav")
+        end
+    end
+end
+
 function GM:EntityTakeDamage(target, dmginfo)
 
     local DbgPrint = DbgPrintDmg
@@ -182,18 +202,27 @@ function GM:EntityTakeDamage(target, dmginfo)
             return true
         end
 
-        if isRestricted == false and attackerIsPlayer == true and target:Disposition(ply) ~= D_HT then
+        if isRestricted == false and target:Disposition(attacker) ~= D_HT then
+
+            attacker.DamageAccumulator = attacker.DamageAccumulator or {}
+
             local cls = target:GetClass()
+            local currentDmgAmount = attacker.DamageAccumulator[target] or 0
             if IsFriendEntityName(cls) then
-                table.insert(ply.RelationshipRestore, { Entity = target, Disposition = target:Disposition(ply) })
-                target:AddEntityRelationship(ply, D_HT, 99)
+                -- Have to be half of the HP of citizens
+                if currentDmgAmount >= (target:GetMaxHealth() / 2) then
+                    self:SetAggressiveRelationship(attacker, target, cls)
+                else
+                    currentDmgAmount = currentDmgAmount + dmginfo:GetDamage()
+                    attacker.DamageAccumulator[target] = currentDmgAmount
+                end
             else
                 local classEnts = ents.FindByClass(cls)
                 for _,v in pairs(classEnts) do
-                    v:AddEntityRelationship(ply, D_HT, 99)
-                    v:Fire("UpdateEnemyMemory")
+                    self:SetAggressiveRelationship(attacker, v, cls)
                 end
             end
+
         end
 
     elseif target:IsPlayer() then

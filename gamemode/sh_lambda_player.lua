@@ -663,6 +663,7 @@ if SERVER then
             end
 
             self:ResetPlayerRelationships(ply)
+            self:ResetDamageAccumulator(ply)
 
             -- In case the map script decides to put us in a vehicle lets not do this.
             if useSpawnpoint == true and IsValid(ply:GetVehicle()) == false and IsValid(ply.SelectedSpawnpoint) then
