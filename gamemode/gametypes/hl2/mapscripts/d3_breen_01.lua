@@ -62,6 +62,9 @@ function MAPSCRIPT:PostInit()
             self.SpawnInPod = false
             local cp = GAMEMODE:CreateCheckpoint(Vector(-2173.593018, 847.748901, 576.031250), Angle(0, -45, 0))
             GAMEMODE:SetPlayerCheckpoint(cp, nil)
+            for _,v in pairs(player.GetAll()) do
+                v:Give("weapon_lambda_hands")
+            end
         end)
 
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1965.112183, 24.634741, 578.822021), Angle(0, -90, 0))

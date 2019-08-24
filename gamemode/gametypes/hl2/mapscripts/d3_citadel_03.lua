@@ -94,6 +94,7 @@ function MAPSCRIPT:PostInit()
             -- I don't understand how this works in HL2, simply Disabling it wont call StopTouch and reset the value.
             for k,v in pairs(player.GetAll()) do
                 v:SetSaveValue("m_bPreventWeaponPickup", false)
+                v:Give("weapon_lambda_hands")
             end
         end)
 
