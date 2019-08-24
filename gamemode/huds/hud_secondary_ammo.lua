@@ -47,6 +47,11 @@ function PANEL:Think()
         return
     end
 
+    local observing = ply:GetObserverTarget()
+    if IsValid(observing) and observing:IsPlayer() == true then
+        ply = observing
+    end
+    
     local wep = ply:GetActiveWeapon()
     if not IsValid(wep) then
         return

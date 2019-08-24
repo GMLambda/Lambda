@@ -56,6 +56,11 @@ function PANEL:Think()
         return
     end
 
+    local observing = ply:GetObserverTarget()
+    if IsValid(observing) and observing:IsPlayer() == true then
+        ply = observing
+    end
+
     for _,v in pairs(self.Animations) do
         if v:Active() then
             v:Run()

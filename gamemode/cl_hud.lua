@@ -56,6 +56,11 @@ function GM:HUDTick()
         return
     end
 
+    local observing = ply:GetObserverTarget()
+    if IsValid(observing) and observing:IsPlayer() == true then
+        ply = observing
+    end
+
     -- FIXME: Show the hud only when in color customization.
     local hideHud = false
 
@@ -87,6 +92,11 @@ function GM:HUDShouldDraw( hudName )
     local ply = LocalPlayer()
     if not IsValid(ply) then
         return false
+    end
+
+    local observing = ply:GetObserverTarget()
+    if IsValid(observing) and observing:IsPlayer() == true then
+        ply = observing
     end
 
     if hidehud:GetBool() == true then
