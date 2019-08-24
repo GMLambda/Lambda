@@ -69,9 +69,6 @@ function SWEP:OnRemove()
     DbgPrint(self, "OnRemove")
 end
 
-function SWEP:DryFire()
-end
-
 function SWEP:ChangeSequence(seq)
     local owner = self:GetOwner()
     if not IsValid(owner) then
@@ -182,14 +179,19 @@ function SWEP:SwingAttack()
             
             if SERVER then
                 local dmgInfo = DamageInfo()
-                dmgInfo:SetDamage(10)
-                dmgInfo:SetDamageType(DMG_CLUB)
+                dmgInfo:SetDamage(5)
+                dmgInfo:SetMaxDamage(5)
+                dmgInfo:SetDamageType(DMG_DIRECT)
                 dmgInfo:SetAttacker(owner)
-                dmgInfo:SetInflictor(self)
-                dmgInfo:SetDamageForce(dir * 4000)
+                dmgInfo:SetInflictor(owner)
+                dmgInfo:SetDamageForce(dir * 1500)
                 dmgInfo:SetDamagePosition(tr2.HitPos)
-
-                ent:TakeDamageInfo(dmgInfo)
+                if ent:Health() - dmgInfo:GetDamage() <= 0 then
+                    -- Only this call will ever create gibs/break crates properly.
+                    ent:DispatchTraceAttack(dmgInfo, tr2)
+                else
+                    ent:TakeDamageInfo(dmgInfo)
+                end
             end
 
         end
@@ -317,11 +319,9 @@ function SWEP:Reload()
 end
 
 function SWEP:DrawWorldModel()
-    --self:DrawModel()
 end
 
 function SWEP:DrawWorldModelTranslucent()
-    --self:DrawModel()
 end
 
 function SWEP:Ammo1()
@@ -330,4 +330,8 @@ end
 
 function SWEP:Ammo2()
     return 0
+end
+
+function SWEP:ShouldDropOnDie()
+    return false
 end
