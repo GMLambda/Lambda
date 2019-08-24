@@ -1969,9 +1969,11 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
     end
 
     -- First scale hitgroups.
-    local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
-    DbgPrint("Hitgroup Scale", npc, scale)
-    dmginfo:ScaleDamage(scale)
+    if dmginfo:IsDamageType(DMG_DIRECT) == false then
+        local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
+        DbgPrint("Hitgroup Scale", npc, scale)
+        dmginfo:ScaleDamage(scale)
+    end
 
     -- Scale by difficulty.
     local scaleType = 0
@@ -1982,7 +1984,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
     end
 
     if scaleType ~= 0 then
-        scale = self:GetDifficultyDamageScale(scaleType)
+        local scale = self:GetDifficultyDamageScale(scaleType)
         if scale ~= nil then
             DbgPrint("Scaling difficulty damage: " .. tostring(scale))
             dmginfo:ScaleDamage(scale)

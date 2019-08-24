@@ -47,10 +47,12 @@ if SERVER then
         end
 
         -- First scale hitgroups.
-        local hitgroupScale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
-        DbgPrint("Hitgroup Scale", npc, hitgroupScale)
-        dmginfo:ScaleDamage(hitgroupScale)
-
+        if dmginfo:IsDamageType(DMG_DIRECT) == false then
+            local hitgroupScale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
+            DbgPrint("Hitgroup Scale", npc, hitgroupScale)
+            dmginfo:ScaleDamage(hitgroupScale)
+        end
+        
         -- Scale by difficulty.
         local scaleType = 0
         if attacker:IsPlayer() == true then
