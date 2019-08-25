@@ -109,9 +109,8 @@ if SERVER then
 
         local SF_NORESPAWN = 0x40000000
         e:AddSpawnFlags(SF_NORESPAWN)
-
-        e:Spawn()
         e.CreatedForPlayer = self
+        e:Spawn()
 
         local resetAmmo = false
         local primaryAmmo = -1
