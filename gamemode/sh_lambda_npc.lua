@@ -93,19 +93,15 @@ if SERVER then
             npc:SetSkin(1)
         end
 
-        if self.MapScript.OnRegisterNPC ~= nil then
-            self.MapScript:OnRegisterNPC(npc)
+        local mapscript = self:GetMapScript()
+        if mapscript.OnRegisterNPC ~= nil then
+            mapscript:OnRegisterNPC(npc)
         end
 
         if npc:GetClass() == "npc_alyx" then
             local interactor = ents.Create("lambda_npc_interactions")
             interactor:LinkNPC(npc)
             interactor:Spawn()
-        end
-
-        local mapscript = self:GetMapScript()
-        if mapscript.RegisterNPC ~= nil then
-            mapscript:RegisterNPC(npc)
         end
 
     end
