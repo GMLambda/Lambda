@@ -196,10 +196,4 @@ function MAPSCRIPT:PostInit()
 
 end
 
-function MAPSCRIPT:PostPlayerSpawn(ply)
-
-    --DbgPrint("PostPlayerSpawn")
-
-end
-
 return MAPSCRIPT

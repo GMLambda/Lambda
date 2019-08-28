@@ -160,13 +160,4 @@ function MAPSCRIPT:PostInit()
 
 end
 
-function MAPSCRIPT:RegisterNPC(npc)
-    local cls = npc:GetClass()
-    -- Don't drop weapons for metropolice.
-    if cls == "npc_metropolice" then
-        local flags = bit.bor(npc:GetSpawnFlags(), 8192)
-        npc:SetKeyValue("spawnflags", tostring(flags))
-    end
-end
-
 return MAPSCRIPT
