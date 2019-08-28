@@ -290,9 +290,15 @@ if SERVER then
 
         local mdls = self:GetAvailablePlayerModels()
         local selection = mdls[playermdl]
-        if selection == nil then
-            DbgPrint("Player " .. tostring(ply) .. " tried to select unknown model: " .. playermdl)
-            selection = mdls["male05"]
+        if selection == nil or ply:IsBot() then
+            if ply:IsBot() == false then
+                DbgPrint("Player " .. tostring(ply) .. " tried to select unknown model: " .. playermdl)
+            end
+            local modelList = {}
+            for k,_ in pairs(mdls) do
+                table.insert(modelList, k)
+            end
+            selection = mdls[modelList[ply:EntIndex() % #modelList]]
         end
 
         local mdl = selection
