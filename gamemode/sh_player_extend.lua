@@ -3,6 +3,9 @@ AddCSLuaFile()
 local DbgPrint = GetLogging("PlayerExt")
 local PLAYER_META = FindMetaTable("Player")
 
+-- Ensure autoreload will not screw this up.
+_PLAYER_META_GIVE = _PLAYER_META_GIVE or PLAYER_META.Give
+
 VIEWLOCK_NONE = 0
 VIEWLOCK_ANGLE = 1
 VIEWLOCK_NPC = 2
@@ -105,13 +108,13 @@ if SERVER then
             return nil
         end
 
-        e:SetPos(self:EyePos())
+        -- Slightly offset the pos, in some cases using EyePos() doesn't work if players stand in each other.
+        e:SetPos(self:EyePos() + Vector(0, 0, 20))
 
         local SF_NORESPAWN = 0x40000000
         e:AddSpawnFlags(SF_NORESPAWN)
-
-        e:Spawn()
         e.CreatedForPlayer = self
+        e:Spawn()
 
         local resetAmmo = false
         local primaryAmmo = -1
@@ -145,7 +148,17 @@ if SERVER then
         end
 
         if self:HasWeapon(e:GetClass()) == false then
-            error("Unable to give weapon " .. tostring(e) .. " to player " .. tostring(self))
+            -- FALLBACK: In some rare cases this isnt working, use the original give.
+            e:Remove()
+
+            self.InsideGive = true
+            e = _PLAYER_META_GIVE(self, class, noAmmo)
+            e.CreatedForPlayer = self
+            self.InsideGive = nil
+
+            if self:HasWeapon(class) == false then
+                error("Unable to give weapon " .. tostring(e) .. " (Owner: " .. tostring(e:GetOwner()) .. ") to player " .. tostring(self))
+            end
         end
 
         return e
