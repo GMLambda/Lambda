@@ -43,12 +43,13 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-    --["pclip_gate1"] = true,
+    ["global_newgame_template_base_items"] = true,
+    ["global_newgame_template_local_items"] = true,
+    ["global_newgame_template_ammo"] = true,
 }
 
 function MAPSCRIPT:Init()
