@@ -2,6 +2,7 @@
 - Fix: env_credits throwing errors if credits file is missing.
 - Fix: entities not registering outputs via AcceptInput
 - Fix: point_viewcontrol having uninitialized angle.
+- Fix: d3_c17_02 having default player loadout.
 
 0.9.6
 - Feature: Accelerated backhopping
