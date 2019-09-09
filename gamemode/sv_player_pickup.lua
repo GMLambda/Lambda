@@ -219,6 +219,12 @@ end
 
 function GM:PlayerCanPickupWeapon(ply, wep)
 
+    if ply.InsideGive == true then
+        -- Workaround for PLAYER_META:Give fallback
+        DbgPrintPickup(ply, "Simple pickup, using PLAYER:Give")
+        return true
+    end
+
     if wep.DroppedByPlayer ~= nil then
         DbgPrintPickup(ply, "Simple pickup, dropped by other player")
         return true

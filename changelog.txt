@@ -3,6 +3,7 @@
 - Fix: entities not registering outputs via AcceptInput
 - Fix: point_viewcontrol having uninitialized angle.
 - Fix: d3_c17_02 having default player loadout.
+- Fix: PLAYER_META:Give not working in rare cases.
 
 0.9.6
 - Feature: Accelerated backhopping
