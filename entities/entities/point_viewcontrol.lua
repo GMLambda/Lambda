@@ -185,7 +185,7 @@ function ENT:FollowTarget()
         return
     end
 
-    local diffAng
+    local diffAng = self:GetAngles()
 
     if self.AttachmentIndex ~= nil and self.AttachmentIndex ~= 0 then
         local attachment = target:GetAttachment(self.AttachmentIndex)
@@ -197,8 +197,6 @@ function ENT:FollowTarget()
         if IsValid(target) then
             local diff = target:GetPos() - self:GetPos()
             diffAng = diff:Angle()
-        else
-            diffAng = self:GetAngles()
         end
     end
 
