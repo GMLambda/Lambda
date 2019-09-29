@@ -26,6 +26,7 @@ local host_timescale = GetConVar("host_timescale")
 function GM:EntityEmitSound(data)
 
     local modifyPitch = true
+    local modified
 
     if data.SoundName == "lambda/roundover.mp3" then
         modifyPitch = false
@@ -36,12 +37,15 @@ function GM:EntityEmitSound(data)
 
         if game.GetTimeScale() ~= 1 then
             p = p * (game.GetTimeScale() * 1.5)
+            modified = true
         elseif host_timescale:GetFloat() ~= 1 then
             p = p * (host_timescale:GetFloat() * 1.5)
+            modified = true
         end
 
         p = math.Clamp(p, 0, 255)
         data.Pitch = p
+
     end
 
     local ent = data.Entity
@@ -50,6 +54,6 @@ function GM:EntityEmitSound(data)
         return false
     end
 
-    return true
+    return modified
 
 end
