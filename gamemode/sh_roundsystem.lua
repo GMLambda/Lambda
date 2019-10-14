@@ -322,7 +322,7 @@ if SERVER then
         timer.Simple(5, function()
             self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, { mustComplete = true }, mapOptions, {}, function(vote, failed, timeout, winningOption)
                 local picked = mapOptions[winningOption]
-                self:ChangeLevel(picked)
+                self:ChangeLevel(nil, picked, nil, {})
             end)
         end)
 
