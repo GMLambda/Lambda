@@ -1277,9 +1277,11 @@ local SUIT_CHARGE_RATE = 12.5
 local SUIT_CHARGE_DELAY = 1.5
 local SUIT_ENERGY_CHARGE_RATE = 12.5
 
-function GM:PlayerAllowSprinting(ply, inSprint)
+local function PlayerHasSuitEnergy(ply)
+    return ply:GetLambdaSuitPower() > 0
+end
 
-    inSprint = inSprint or false
+local function PlayerAllowSprinting(ply)
 
     if ply:IsSuitEquipped() == false then
         return false
@@ -1297,16 +1299,12 @@ function GM:PlayerAllowSprinting(ply, inSprint)
         return false
     end
 
-    if ply:GetLambdaSuitPower() <= 0 then
-        return false
-    end
-
     return true
 
 end
 
 local function CanPlaySound(ply)
-    if not CLIENT then
+    if not CLIENT and game.MaxPlayers() > 1 then
         return false
     end
     if IsFirstTimePredicted() then
@@ -1432,12 +1430,13 @@ function GM:SetupMove(ply, mv, cmd)
     if mv:KeyDown(IN_SPEED) == true then
 
         --DbgPrint("Is Sprinting: " .. tostring(isSprinting))
-        local canSprint = self:PlayerAllowSprinting(ply)
+        local canSprint = PlayerAllowSprinting(ply)
+        local hasEnergy = PlayerHasSuitEnergy(ply)
         local sprintState = ply:GetLambdaStateSprinting()
 
-        if canSprint == true and isSprinting == false and sprintState == false then
+        if canSprint == true and isSprinting == false and sprintState == false and hasEnergy == true then
             self:PlayerStartSprinting(ply, mv)
-        elseif sprintState == false then
+        elseif sprintState == false and hasEnergy == false then
             self:PlayerRejectSprinting(ply, mv)
         end
 
