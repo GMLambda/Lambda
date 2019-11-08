@@ -566,11 +566,10 @@ if SERVER then
             self.MapScript:PrePlayerSpawn(ply)
         end
 
-        ply:SetSuitPower(100)
-        ply:SetSuitEnergy(100)
+        ply:SetLambdaSuitPower(100)
         ply:SetGeigerRange(1000)
-        ply:SetStateSprinting(false)
-        ply:SetSprinting(false)
+        ply:SetLambdaStateSprinting(false)
+        ply:SetLambdaSprinting(false)
         ply:SetDuckSpeed(0.4)
         ply:SetUnDuckSpeed(0.2)
 
@@ -581,6 +580,7 @@ if SERVER then
 
         ply:SetRunSpeed(self:GetSetting("sprintspeed")) -- TODO: Put this in a convar.
         ply:SetWalkSpeed(self:GetSetting("normspeed"))
+        ply:SetMaxSpeed(self:GetSetting("normspeed"))
 
         if ply:IsBot() then
             local r = 0.3 + (math.sin(ply:EntIndex()) * 0.7)
@@ -1297,7 +1297,7 @@ function GM:PlayerAllowSprinting(ply, inSprint)
         return false
     end
 
-    if ply:GetSuitPower() <= 0 then
+    if ply:GetLambdaSuitPower() <= 0 then
         return false
     end
 
@@ -1305,37 +1305,36 @@ function GM:PlayerAllowSprinting(ply, inSprint)
 
 end
 
+local function CanPlaySound(ply)
+    if not CLIENT then
+        return false
+    end
+    if IsFirstTimePredicted() then
+        return true
+    end
+    return false
+end
+
+function GM:PlayerRejectSprinting(ply, mv)
+    if CanPlaySound(ply) then
+        ply:EmitSound("HL2Player.SprintNoPower")
+    end
+end
+
 function GM:PlayerStartSprinting(ply, mv)
 
     --DbgPrint("PlayerStartSprinting: " .. tostring(ply))
-
     ply:AddSuitDevice(SUIT_DEVICE_SPRINT)
-
-    local playSprintSnd = false
-
-    if game.MaxPlayers() > 1 then
-        if CLIENT and IsFirstTimePredicted() then
-            playSprintSnd = true
-        end
-    else
-        playSprintSnd = true
-    end
-
-    if playSprintSnd then
-        local suitPower = ply:GetSuitPower()
-        if suitPower <= 0 then
-            ply:EmitSound("HL2Player.SprintNoPower")
-            return false
-        else
-            ply:EmitSound("HL2Player.SprintStart")
-        end
-    end
-
     ply:SetRunSpeed(self:GetSetting("sprintspeed")) -- TODO: Put this in a convar.
     ply:SetWalkSpeed(self:GetSetting("normspeed"))
-    ply:SetSprinting(true)
+    ply:SetMaxSpeed(self:GetSetting("sprintspeed"))
+    ply:SetLambdaSprinting(true)
 
-    --DbgPrint("Sprint State: " .. tostring(ply:GetSprinting()))
+    local suitPower = ply:GetLambdaSuitPower()
+    if CanPlaySound(ply) and suitPower > 0 then
+        ply:EmitSound("HL2Player.SprintStart")
+    end
+    --DbgPrint("Sprint State: " .. tostring(ply:GetLambdaSprinting()))
 
 end
 
@@ -1346,7 +1345,8 @@ function GM:PlayerEndSprinting(ply, mv)
     ply:RemoveSuitDevice(SUIT_DEVICE_SPRINT)
     ply:SetRunSpeed(self:GetSetting("normspeed")) -- TODO: Put this in a convar.
     ply:SetWalkSpeed(self:GetSetting("normspeed"))
-    ply:SetSprinting(false)
+    ply:SetMaxSpeed(self:GetSetting("normspeed"))
+    ply:SetLambdaSprinting(false)
 
 end
 
@@ -1414,8 +1414,8 @@ function GM:SetupMove(ply, mv, cmd)
     end
 
     local isSprinting = false
-    if ply.GetSprinting ~= nil then
-        isSprinting = ply:GetSprinting()
+    if ply.GetLambdaSprinting ~= nil then
+        isSprinting = ply:GetLambdaSprinting()
     end
 
     if bit.band(mv:GetButtons(), IN_JUMP) ~= 0 and bit.band(mv:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() then
@@ -1425,21 +1425,23 @@ function GM:SetupMove(ply, mv, cmd)
     if mv:KeyDown(IN_DUCK) and ply:IsOnGround() and isSprinting == true then
 
         self:PlayerEndSprinting(ply, mv)
-        ply:SetStateSprinting(false)
+        ply:SetLambdaStateSprinting(false)
 
     end
 
     if mv:KeyDown(IN_SPEED) == true then
 
         --DbgPrint("Is Sprinting: " .. tostring(isSprinting))
+        local canSprint = self:PlayerAllowSprinting(ply)
+        local sprintState = ply:GetLambdaStateSprinting()
 
-        if self:PlayerAllowSprinting(ply) == true and
-            isSprinting == false and
-            ply:GetStateSprinting() == false and
-            self:PlayerStartSprinting(ply, mv) ~= false
-        then
-            ply:SetStateSprinting(true)
+        if canSprint == true and isSprinting == false and sprintState == false then
+            self:PlayerStartSprinting(ply, mv)
+        elseif sprintState == false then
+            self:PlayerRejectSprinting(ply, mv)
         end
+
+        ply:SetLambdaStateSprinting(true)
 
     else
 
@@ -1448,7 +1450,7 @@ function GM:SetupMove(ply, mv, cmd)
             self:PlayerEndSprinting(ply, mv, cmd)
         end
 
-        ply:SetStateSprinting(false)
+        ply:SetLambdaStateSprinting(false)
 
     end
 
@@ -1541,16 +1543,16 @@ function GM:FinishMove(ply, mv)
 
             mv:SetVelocity(forward * speedAddition + mv:GetVelocity())
         end
-        
+
         ply:SetIsJumping(false)
-        
+
     end
 
 end
 
 function GM:DrainSuit(ply, amount)
 
-    local current = ply:GetSuitPower()
+    local current = ply:GetLambdaSuitPower()
     local res = true
 
     if ply:GetMoveType() == MOVETYPE_NOCLIP then
@@ -1569,7 +1571,7 @@ function GM:DrainSuit(ply, amount)
         res = false
     end
 
-    ply:SetSuitPower(current)
+    ply:SetLambdaSuitPower(current)
 
     return res
 
@@ -1577,12 +1579,12 @@ end
 
 function GM:ChargeSuitPower(ply, amount)
 
-    local current = ply:GetSuitPower() + amount
+    local current = ply:GetLambdaSuitPower() + amount
     if current > 100.0 then
         current = 100.0
     end
 
-    ply:SetSuitPower(current)
+    ply:SetLambdaSuitPower(current)
     ply:RemoveSuitDevice(SUIT_DEVICE_BREATHER)
     ply:RemoveSuitDevice(SUIT_DEVICE_SPRINT)
 
@@ -1590,7 +1592,7 @@ end
 
 function GM:ShouldChargeSuitPower(ply)
 
-    local sprinting = ply:GetSprinting()
+    local sprinting = ply:GetLambdaSprinting()
     local inWater = ply:WaterLevel() >= 3
     local flashlightOn = ply:FlashlightIsOn()
     local powerDrain = sprinting or inWater --[[ or flashlightOn ]]
@@ -1599,7 +1601,7 @@ function GM:ShouldChargeSuitPower(ply)
         return false -- Something is draning power.
     end
 
-    local power = ply:GetSuitPower()
+    local power = ply:GetLambdaSuitPower()
     if power >= 100.0 then
         return false -- Full
     end
@@ -1634,7 +1636,7 @@ function GM:UpdateSuit(ply, mv)
 
         local powerLoad = 0
 
-        if ply:GetSprinting() then
+        if ply:GetLambdaSprinting() then
             local pos = ply:GetAbsVelocity()
             if math.abs(pos.x) > 0 or math.abs(pos.y) > 0 then
                 powerLoad = powerLoad + SUIT_SPRINT_DRAIN
@@ -1652,7 +1654,7 @@ function GM:UpdateSuit(ply, mv)
             ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
             if self:DrainSuit(ply, powerLoad * frameTime) == false then
                 ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
-                if ply:GetSprinting() == true then
+                if ply:GetLambdaSprinting() == true then
                     self:PlayerEndSprinting(ply, mv)
                 end
             end
@@ -1710,7 +1712,7 @@ function GM:PlayerCheckDrowning(ply)
 
         ply.NextChokeTime = ply.NextChokeTime or curTime + CHOKE_TIME
 
-        if ply:GetSuitPower() == 0 and curTime > ply.NextChokeTime then
+        if ply:GetLambdaSuitPower() == 0 and curTime > ply.NextChokeTime then
 
             if ply.IsDrowning ~= true then
                 ply.IsDrowning = true

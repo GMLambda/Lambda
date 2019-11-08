@@ -298,33 +298,28 @@ function PLAYER_META:SetInactive(state)
     self:SetNWBool("Inactive", state)
 end
 
-function PLAYER_META:SetSuitPower(val)
-    self:SetNW2Float("SuitPower", val)
-end
-function PLAYER_META:GetSuitPower()
-    return self:GetNW2Float("SuitPower", 0.0)
+function PLAYER_META:SetLambdaSuitPower(val)
+    self:SetNW2Float("LambdaSuitPower", val)
 end
 
-function PLAYER_META:SetSuitEnergy(val)
-    self:SetNW2Float("SuitEnergy", val)
-end
-function PLAYER_META:GetSuitEnergy()
-    return self:GetNW2Float("SuitEnergy", 0.0)
+function PLAYER_META:GetLambdaSuitPower()
+    return self:GetNW2Float("LambdaSuitPower", 0.0)
 end
 
-function PLAYER_META:SetSprinting(val)
-    self:SetNW2Bool("Sprinting", val)
-end
-function PLAYER_META:GetSprinting()
-    return self:GetNW2Bool("Sprinting", false)
+function PLAYER_META:SetLambdaSprinting(val)
+    self:SetNW2Bool("LambdaSprinting", val)
 end
 
-function PLAYER_META:SetStateSprinting(val)
-    self:SetNW2Bool("StateSprinting", val)
+function PLAYER_META:GetLambdaSprinting()
+    return self:GetNW2Bool("LambdaSprinting", false)
 end
 
-function PLAYER_META:GetStateSprinting()
-    return self:GetNW2Bool("StateSprinting", false)
+function PLAYER_META:SetLambdaStateSprinting(val)
+    self:SetNW2Bool("LambdaStateSprinting", val)
+end
+
+function PLAYER_META:GetLambdaStateSprinting()
+    return self:GetNW2Bool("LambdaStateSprinting", false)
 end
 
 function PLAYER_META:IsSprinting()
