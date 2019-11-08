@@ -180,7 +180,7 @@ if CLIENT then
         end
 
         if ply:GetNWBool("LambdaHEVSuit", false) == true then
-            local aux = ply:GetSuitPower()
+            local aux = ply:GetLambdaSuitPower()
             local p = aux / 100
 
             surface.SetDrawColor(0, 0, 0, 100 * alphaScale)

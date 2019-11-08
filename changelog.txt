@@ -1,5 +1,6 @@
 0.9.8
 - Fix: Soundscrapes playing indefinitely
+- Fix: Sprint not working correctly with newer Garry's Mod version (dev)
 
 0.9.7
 - Fix: env_credits throwing errors if credits file is missing.

@@ -142,7 +142,7 @@ function PANEL:Paint(width, height)
 		draw.RoundedBox( 8, 0, 0, width, height, col )
 	end
 
-	local suitPower = ply:GetSuitPower()
+	local suitPower = ply:GetLambdaSuitPower()
 	if suitPower ~= self.LastPower and suitPower == 100.0 then
 		--DbgPrint("Fade out")
 		self:FadeOut(5)

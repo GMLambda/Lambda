@@ -182,10 +182,10 @@ sk_max_grenade = GetConVar("sk_max_grenade")
 sk_max_rpg_round = GetConVar("sk_max_rpg_round")
 -- For compatibility reasons we need those ConVars.
 sk_max_slam = CreateConVar("sk_max_slam", "3", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-sk_plr_dmg_crowbar = CreateConVar("sk_plr_dmg_crowbar", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-sk_npc_dmg_crowbar = CreateConVar("sk_npc_dmg_crowbar", 5, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-sk_plr_dmg_stunstick = CreateConVar("sk_plr_dmg_stunstick", 10, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
-sk_npc_dmg_stunstick = CreateConVar("sk_npc_dmg_stunstick", 40, "", bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_plr_dmg_crowbar = CreateConVar("sk_plr_dmg_crowbar", 10, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_npc_dmg_crowbar = CreateConVar("sk_npc_dmg_crowbar", 5, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_plr_dmg_stunstick = CreateConVar("sk_plr_dmg_stunstick", 10, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
+sk_npc_dmg_stunstick = CreateConVar("sk_npc_dmg_stunstick", 40, bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "")
 
 GM.MAX_AMMO_DEF =
 {
