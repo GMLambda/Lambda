@@ -323,12 +323,12 @@ function PLAYER_META:GetLambdaStateSprinting()
 end
 
 function PLAYER_META:IsSprinting()
-    return self:GetSprinting()
+    return self:GetLambdaSprinting()
 end
 
 -- Override the non-functional one.
 function PLAYER_META:StopSprinting()
-    self:SetSprinting(false)
+    self:SetLambdaSprinting(false)
 end
 
 function PLAYER_META:BodyDirection2D()
