@@ -1,6 +1,9 @@
+0.9.9
+- Fix: Sprint not working correctly with newer Garry's Mod version (dev).
+- Fix: Sound not playing when sprinting is denied.
+
 0.9.8
 - Fix: Soundscrapes playing indefinitely
-- Fix: Sprint not working correctly with newer Garry's Mod version (dev)
 
 0.9.7
 - Fix: env_credits throwing errors if credits file is missing.
