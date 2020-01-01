@@ -69,7 +69,7 @@ end
 
 function GM:GetDifficultyData()
     local gameType = self:GetGameType()
-    return self:GetGameTypeData("DifficultyData")
+    return gameType:GetDifficultyData()
 end
 
 function GM:GetDifficultyText(d)

@@ -6,7 +6,7 @@ GM.Name = "Lambda"
 GM.Author = "N/A"
 GM.Email = "N/A"
 GM.Website = "https://github.com/ZehMatt/Lambda"
-GM.Version = "0.9.1 Beta"
+GM.Version = "0.9.9 Beta"
 
 DEFINE_BASECLASS( "gamemode_base" )
 
