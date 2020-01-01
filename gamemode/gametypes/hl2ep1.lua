@@ -49,11 +49,11 @@ GAMETYPE.CampaignNames = {
 }
 
 function GAMETYPE:InitSettings()
-    self.Base:InitSettings()
+    self.Base.InitSettings(self)
 end
 
 function GAMETYPE:LoadCurrentMapScript()
-    self.Base.LoadMapScript(self, "hl2ep1", game.GetMap():lower())
+    self.Base.LoadMapScript(self, "lambda/gamemode/gametypes/hl2ep1", game.GetMap():lower())
 end
 
 function GAMETYPE:GetPlayerLoadout()

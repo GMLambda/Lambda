@@ -14,7 +14,6 @@ GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
-GAMETYPE.DifficultyData = {}
 
 function GAMETYPE:GetData(name)
     local base = self
@@ -91,7 +90,7 @@ function GAMETYPE:GetPlayerLoadout()
 end
 
 function GAMETYPE:LoadMapScript(path, name)
-    local MAPSCRIPT_FILE = "lambda/gamemode/gametypes/" .. path .. "/mapscripts/" .. name .. ".lua"
+    local MAPSCRIPT_FILE = path .. "/mapscripts/" .. name .. ".lua"
     self.MapScript = nil
 
     if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
@@ -103,7 +102,7 @@ function GAMETYPE:LoadMapScript(path, name)
             self.MapScript = {}
         end
     else
-        DbgPrint("No mapscript available.")
+        print("No map script was loaded for: " .. name)
         self.MapScript = {}
     end
 end
@@ -118,6 +117,203 @@ end
 
 function GAMETYPE:IsPlayerEnemy(ply1, ply2)
     return false
+end
+
+function GAMETYPE:GetDifficultyData()
+    return {
+        [0] = {
+            Name = "Very Easy",
+            Proficiency = WEAPON_PROFICIENCY_POOR,
+            Skill = 1,
+            NPCSpawningScale = 0.0,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1.6,
+                [DMG_SCALE_NVP] = 0.7,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 2.5,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 2.5,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            }
+        },
+        [1] = {
+            Name = "Easy",
+            Proficiency = WEAPON_PROFICIENCY_AVERAGE,
+            Skill = 1,
+            NPCSpawningScale = 0.2,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1.2,
+                [DMG_SCALE_NVP] = 0.8,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 3.4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 3.4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            }
+        },
+        [2] = {
+            Name = "Normal",
+            Proficiency = WEAPON_PROFICIENCY_GOOD,
+            Skill = 2,
+            NPCSpawningScale = 0.3,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1,
+                [DMG_SCALE_NVP] = 1,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            }
+        },
+        [3] = {
+            Name = "Hard",
+            Proficiency = WEAPON_PROFICIENCY_VERY_GOOD,
+            Skill = 2,
+            NPCSpawningScale = 0.7,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1,
+                [DMG_SCALE_NVP] = 1,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            }
+        },
+        [4] = {
+            Name = "Very Hard",
+            Proficiency = WEAPON_PROFICIENCY_PERFECT,
+            Skill = 3,
+            NPCSpawningScale = 1,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1,
+                [DMG_SCALE_NVP] = 1,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 1,
+                [HITGROUP_HEAD] = 4,
+                [HITGROUP_CHEST] = 1,
+                [HITGROUP_STOMACH] = 1,
+                [HITGROUP_LEFTARM] = 1,
+                [HITGROUP_RIGHTARM] = 1,
+                [HITGROUP_LEFTLEG] = 1,
+                [HITGROUP_RIGHTLEG] = 1
+            }
+        },
+        [5] = {
+            Name = "Realism",
+            Proficiency = WEAPON_PROFICIENCY_PERFECT,
+            Skill = 3,
+            NPCSpawningScale = 1,
+            DamageScale = {
+                [DMG_SCALE_PVN] = 1,
+                [DMG_SCALE_NVP] = 1,
+                [DMG_SCALE_PVP] = 1,
+                [DMG_SCALE_NVN] = 1
+            },
+            HitgroupPlayerDamageScale = {
+                [HITGROUP_GENERIC] = 2,
+                [HITGROUP_HEAD] = 8,
+                [HITGROUP_CHEST] = 3.5,
+                [HITGROUP_STOMACH] = 3,
+                [HITGROUP_LEFTARM] = 0.8,
+                [HITGROUP_RIGHTARM] = 0.8,
+                [HITGROUP_LEFTLEG] = 0.8,
+                [HITGROUP_RIGHTLEG] = 0.8
+            },
+            HitgroupNPCDamageScale = {
+                [HITGROUP_GENERIC] = 2,
+                [HITGROUP_HEAD] = 8,
+                [HITGROUP_CHEST] = 3.5,
+                [HITGROUP_STOMACH] = 3,
+                [HITGROUP_LEFTARM] = 0.8,
+                [HITGROUP_RIGHTARM] = 0.8,
+                [HITGROUP_LEFTLEG] = 0.8,
+                [HITGROUP_RIGHTLEG] = 0.8
+            }
+        }
+    }
 end
 
 function GAMETYPE:InitSettings()
@@ -286,6 +482,24 @@ function GAMETYPE:InitSettings()
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    local difficulties = {}
+    for k, v in pairs(self:GetDifficultyData()) do
+        difficulties[k] = v.Name
+    end
+
+    GAMEMODE:AddSetting("difficulty", {
+        Category = "SERVER",
+        NiceName = "#GM_DIFFICULTY",
+        Description = "Difficulty",
+        Type = "int",
+        Default = 0,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = difficulties,
+        },
     })
 
 end
