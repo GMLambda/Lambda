@@ -1,3 +1,6 @@
+0.9.10
+- Improved: Ability to register game types via addons.
+
 0.9.9
 - Fix: Sprint not working correctly with newer Garry's Mod version (dev).
 - Fix: Sound not playing when sprinting is denied.
