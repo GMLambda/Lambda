@@ -825,7 +825,7 @@ if SERVER then
                 table.insert(ply.LastWeaponsDropped, drop)
             end
 
-            if drop:GetClass() == "weapon_physcannon" then
+            if drop ~= nil and drop:GetClass() == "weapon_physcannon" then
                 local color = ply:GetWeaponColor()
                 drop:SetLastWeaponColor(color)
             end
