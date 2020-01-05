@@ -825,7 +825,7 @@ if SERVER then
                 table.insert(ply.LastWeaponsDropped, drop)
             end
 
-            if drop:GetClass() == "weapon_physcannon" then
+            if drop ~= nil and drop:GetClass() == "weapon_physcannon" then
                 local color = ply:GetWeaponColor()
                 drop:SetLastWeaponColor(color)
             end
@@ -1759,6 +1759,7 @@ function GM:PlayerTick(ply, mv)
         if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then
             ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
         end
+        ply:SetNWVector("LambdaVelocity", ply:GetVelocity())
     end
 
 end
@@ -1787,20 +1788,6 @@ function GM:PlayerUpdateSettings(ply)
 end
 
 function GM:PlayerThink(ply)
-
-    if SERVER then
-        local vel = ply:GetVelocity()
-        if ply.LambdaPlayerVelocity ~= vel then
-            ply:SetNWVector("LambdaPlayerVelocity", vel)
-            ply.LambdaPlayerVelocity = vel
-        end
-    else
-        -- Interpolate velocity on client from server.
-        -- Normally the client takes last position and calculates velocity based on distance traveled.
-        -- This causes the player to always walk on moving objects.
-        local vel = ply:GetNWVector("LambdaPlayerVelocity", ply:GetVelocity())
-        ply.LambdaPlayerVelocity = LerpVector(FrameTime() * 30, ply.LambdaPlayerVelocity or Vector(0, 0, 0), vel)
-    end
 
     if SERVER then
         -- Make sure we reset the view lock if we are in release mode.
