@@ -131,8 +131,15 @@ local physcannon_mega_pullforce = CreateConVar("physcannon_mega_pullforce", "800
 local physcannon_ball_cone = CreateConVar("physcannon_ball_cone", "0.997", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 
 local physcannon_glow
+local physcannon_glow_mode
+
 if CLIENT then
     physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE) );
+    physcannon_glow_mode = physcannon_glow:GetInt()
+    cvars.AddChangeCallback( "physcannon_glow", function( convar_name, value_old, value_new )
+        print("GLOW CHANGE")
+        physcannon_glow_mode = value_new
+    end )
 end
 
 -- ConVar physcannon_maxmass( "physcannon_maxmass", "250" );
@@ -254,6 +261,7 @@ function SWEP:Initialize()
         self.TargetElementLen = 0
         self.DrawUsingViewModel = false
         self.EffectsSetup = false
+        self.CurrentWeaponColor = Color(0, 0, 0, 0)
     end
 
     self.ChangeState = ELEMENT_STATE_NONE
@@ -286,8 +294,10 @@ function SWEP:Initialize()
     self:DoEffect(EFFECT_CLOSED)
     self:CloseElements()
     self:SetElementDestination(0)
-
     self:SetSkin(1)
+    if SERVER then
+        self:SetLastWeaponColor(VectorRand(0.0, 1.0))
+    end
 
     local ThinkHook = self.ThinkHook
     hook.Add("Think", self, function(s)
@@ -1321,7 +1331,7 @@ function SWEP:UpdateGlow()
         return
     end
 
-    local glowMode = physcannon_glow:GetInt()
+    local glowMode = physcannon_glow_mode
 
     -- If disabled and previously enabled remove projected texture.
     if (glowMode == 0 or glowMode == 2) and self.ProjectedTexture ~= nil then
@@ -1334,7 +1344,7 @@ function SWEP:UpdateGlow()
     end
 
     local curTime = CurTime()
-    if self.NextGlowUpdate ~= nil and curTime < self.NextGlowUpdate then
+    if curTime < self.NextGlowUpdate then
         return
     end
 
@@ -1360,14 +1370,17 @@ function SWEP:UpdateGlow()
     end
 
     local wepColor = self:GetWeaponColor()
-    local color = Color(wepColor.r * 255, wepColor.g * 255, wepColor.b * 255)
+    local currentColor = self.CurrentWeaponColor
+    currentColor.r = wepColor.r * 255
+    currentColor.g = wepColor.g * 255
+    currentColor.b = wepColor.b * 255
 
     local brightness = 0.5
     if self:IsMegaPhysCannon() == true then
         brightness = 1
     end
 
-    self:EmitLight(glowMode, entPos, brightness * 0.5, color)
+    self:EmitLight(glowMode, entPos, brightness * 0.5, currentColor)
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 
 end
@@ -2371,14 +2384,9 @@ function SWEP:DrawEffectType(id, data, owner, vm)
     end
 
     render.SetMaterial(data.Mat)
-    
-    local colorScale = 0.7
-    if self:IsMegaPhysCannon() then
-        colorScale = 1
-    end
 
     local color = data.Col
-    color = Color(color.r * colorScale, color.g * colorScale, color.b * colorScale, alpha)
+    color.a = alpha
 
     local scale = data.Scale:Interp(curTime)
     render.DrawSprite(pos, scale, scale, color)
@@ -2825,8 +2833,16 @@ function SWEP:UpdateEffects()
         data.Alpha:SetAbsolute( util.RandomFloat(200, 255) )
     end
 
+    local colorScale = 0.7
+    if self:IsMegaPhysCannon() then
+        colorScale = 1
+    end
+
     for i,data in pairs(effectParameters) do
-        data.Col = Color(r, g, b)
+        local color = data.Col
+        color.r = r * colorScale
+        color.g = g * colorScale
+        color.b = b * colorScale
     end
 
     if CLIENT and (isMegaPhysCannon == true or self.CurrentEffect == EFFECT_PULLING) then
