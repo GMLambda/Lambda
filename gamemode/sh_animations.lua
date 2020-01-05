@@ -3,13 +3,21 @@ if SERVER then
 end
 
 --local DbgPrint = GetLogging("Animation")
+local engineTick = engine.TickInterval()
+
 local function GetPlayerVelocity(ply, velocity)
-    --[[
     if CLIENT and ply ~= LocalPlayer() then
-        velocity = ply.LambdaPlayerVelocity or velocity
+        velocity = ply:GetNWVector("LambdaVelocity", velocity)
+
+        ply.InterpolatedVelocity = ply.InterpolatedVelocity or Vector(0, 0, 0)
+        if velocity:Distance(ply.InterpolatedVelocity) > 10 then
+            ply.InterpolatedVelocity = velocity
+        else
+            ply.InterpolatedVelocity = LerpVector(engineTick * 2.0, ply.InterpolatedVelocity, velocity)
+        end
+
+        return ply.InterpolatedVelocity
     end
-    ]]
-    
     return velocity
 end
 
@@ -196,12 +204,7 @@ function GM:UpdateAnimation(ply, velocity, maxseqgroundspeed)
     velocity = GetPlayerVelocity(ply, velocity)
 
     local len = velocity:Length()
-    local movement = 1.0
-
-    if (len > 0.2) then
-        movement = len / maxseqgroundspeed
-    end
-
+    local movement = len / maxseqgroundspeed
     local rate = math.min(movement, 2)
 
     -- if we're under water we want to constantly be swimming..
