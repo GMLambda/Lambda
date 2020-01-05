@@ -1,3 +1,11 @@
+0.9.11
+- Fixed: Lua error on death when dropped weapon can not be spawned.
+- Fixed: Player shouting out enemies in pre-criminal state.
+- Fixed: Settings camera menu will follow the player now.
+- Improved: Gravity Gun on ground now has random colors instead of black.
+- Improved: Minor performance optimizations for the gravity gun.
+- Improved: Walking animations on moving platforms.
+
 0.9.10
 - Improved: Ability to register game types via addons.
 
