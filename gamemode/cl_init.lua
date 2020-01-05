@@ -317,17 +317,20 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
             self.StartViewAng = ang
         end
 
+        local targetPos = ply:EyePos()
+        local plyAng = ply:GetAngles()
+        plyAng.p = 0
+
+        local fwd = plyAng:Forward() + (-plyAng:Right() * 0.3)
+        targetPos = targetPos + (fwd * 150)
+
+        local targetAng = (pos - targetPos):Angle()
         if p < 1 then
-            local targetPos = ply:EyePos()
-            local plyAng = ply:GetAngles()
-            plyAng.p = 0
-            local fwd = plyAng:Forward() + (-plyAng:Right() * 0.3)
-            targetPos = targetPos + (fwd * 150)
-
-            local targetAng = (pos - targetPos):Angle()
-
             self.CurrentViewPos = LerpVector(p, self.StartViewPos, targetPos)
             self.CurrentViewAng = LerpAngle(p, self.StartViewAng, targetAng)
+        else
+            self.CurrentViewPos = targetPos
+            self.CurrentViewAng = targetAng
         end
 
         view.origin = self.CurrentViewPos
@@ -361,6 +364,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
         return view
 
     else
+
 
         self.StartViewPos = pos
         self.StartViewAng = ang
