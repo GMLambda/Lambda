@@ -323,9 +323,9 @@ function GM:OnPlayerKilledEnemy(ply, npc)
 
 end
 
-function GM:HandleNPCContact(viewer, npc)
+function GM:HandleNPCContact(viewer, npc, isCriminal)
 
-    if viewer.FriendlyInSight == false then
+    if viewer.FriendlyInSight == false or isCriminal == false then
         return
     end
 
@@ -351,7 +351,7 @@ function GM:HandleNPCContact(viewer, npc)
 
 end
 
-function GM:HandlePlayerContact(viewer, ply)
+function GM:HandlePlayerContact(viewer, ply, isCriminal)
 
     local alive = ply:Alive()
     local acknowledgeDeath = false
@@ -371,7 +371,7 @@ function GM:HandlePlayerContact(viewer, ply)
 
 end
 
-function GM:HandleWeaponContact(viewer, wep)
+function GM:HandleWeaponContact(viewer, wep, isCriminal)
 end
 
 function GM:HandleGrenadeContact(viewer, nate)
@@ -449,6 +449,7 @@ function GM:UpdatePlayerSpeech(ply)
     local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 250))
     local actions = {}
 
+    local isCriminal = game.GetGlobalState("gordon_precriminal") ~= GLOBAL_ON
     for k,v in pairs(nearbyEnts) do
 
         if v == ply then
@@ -465,7 +466,7 @@ function GM:UpdatePlayerSpeech(ply)
 
         if isVisible == true then
             if v:IsNPC() then
-                if IsFriendEntityName(class) == false then
+                if IsFriendEntityName(class) == false and isCriminal == true then
                     ply.EnemyInSight = isVisible
                     ply.EnemyNearby = true
                 end
@@ -493,11 +494,11 @@ function GM:UpdatePlayerSpeech(ply)
                 table.insert(actions, function() handler(self, ply, v) end)
             else
                 if v:IsNPC() then
-                    table.insert(actions, function() self:HandleNPCContact(ply, v) end)
+                    table.insert(actions, function() self:HandleNPCContact(ply, v, isCriminal) end)
                 elseif v:IsPlayer() then
-                    table.insert(actions, function() self:HandlePlayerContact(ply, v) end)
+                    table.insert(actions, function() self:HandlePlayerContact(ply, v, isCriminal) end)
                 elseif v:IsWeapon() then
-                    table.insert(actions, function() self:HandleWeaponContact(ply, v) end)
+                    table.insert(actions, function() self:HandleWeaponContact(ply, v, isCriminal) end)
                 end
             end
         end
