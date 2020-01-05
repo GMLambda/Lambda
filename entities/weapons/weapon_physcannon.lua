@@ -137,7 +137,6 @@ if CLIENT then
     physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE) );
     physcannon_glow_mode = physcannon_glow:GetInt()
     cvars.AddChangeCallback( "physcannon_glow", function( convar_name, value_old, value_new )
-        print("GLOW CHANGE")
         physcannon_glow_mode = value_new
     end )
 end
