@@ -1903,7 +1903,10 @@ function GM:OnPlayerAmmoDepleted(ply, wep)
 
     if SERVER then
         util.RunDelayed(function()
-            self:SelectBestWeapon(ply)
+            -- Only switch if we are still holding the empty weapon.
+            if ply:GetActiveWeapon() == wep then
+                self:SelectBestWeapon(ply)
+            end
         end, CurTime() + 1.5)
     end
 

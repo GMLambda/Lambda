@@ -1,3 +1,6 @@
+0.9.12
+- Fixed: Only auto switch to weapons when still holding the empty gun.
+
 0.9.11
 - Fixed: Lua error on death when dropped weapon can not be spawned.
 - Fixed: Player shouting out enemies in pre-criminal state.
