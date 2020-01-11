@@ -230,9 +230,10 @@ function GM:Initialize()
     DbgPrint("GM:Initialize")
     DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
 
+    self:InitializeDifficulty()
     self:InitializePlayerList()
     self:InitializeRoundSystem()
-
+    
     if SERVER then
         self:ResetSceneCheck()
         self:ResetPlayerRespawnQueue()
@@ -241,7 +242,6 @@ function GM:Initialize()
         self:InitializeWeaponTracking()
         self:InitializeGlobalStates()
         self:InitializePlayerModels()
-        self:InitializeDifficulty()
         if self.InitializeSkybox then
             self:InitializeSkybox()
         end

@@ -268,7 +268,7 @@ end
 
 function GAMETYPE:InitSettings()
     
-    self.Base.InitSettings(self)
+    self.Base:InitSettings()
 
     GAMEMODE:AddSetting("dynamic_checkpoints", {
         Category = "SERVER",

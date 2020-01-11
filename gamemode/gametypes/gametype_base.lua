@@ -484,24 +484,6 @@ function GAMETYPE:InitSettings()
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
-    local difficulties = {}
-    for k, v in pairs(self:GetDifficultyData()) do
-        difficulties[k] = v.Name
-    end
-
-    GAMEMODE:AddSetting("difficulty", {
-        Category = "SERVER",
-        NiceName = "#GM_DIFFICULTY",
-        Description = "Difficulty",
-        Type = "int",
-        Default = 0,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Extra = {
-            Type = "combo",
-            Choices = difficulties,
-        },
-    })
-
 end
 
 function GAMETYPE:GetScoreboardInfo()

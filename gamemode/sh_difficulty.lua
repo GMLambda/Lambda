@@ -47,6 +47,30 @@ function GM:InitializeDifficulty()
     self.RoundsLost = 1
     self.RoundsWon = 1
 
+    self:InitDifficultySettings()
+
+end
+
+function GM:InitDifficultySettings()
+
+    local difficulties = {}
+    for k, v in pairs(self:GetDifficultyData()) do
+        difficulties[k] = v.Name
+    end
+
+    self:AddSetting("difficulty", {
+        Category = "SERVER",
+        NiceName = "#GM_DIFFICULTY",
+        Description = "Difficulty",
+        Type = "int",
+        Default = 0,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Extra = {
+            Type = "combo",
+            Choices = difficulties,
+        },
+    })
+
 end
 
 function GM:SaveTransitionDifficulty(data)
@@ -68,8 +92,7 @@ function GM:GetDifficulty()
 end
 
 function GM:GetDifficultyData()
-    local gameType = self:GetGameType()
-    return gameType:GetDifficultyData()
+    return self:CallGameTypeFunc("GetDifficultyData")
 end
 
 function GM:GetDifficultyText(d)
