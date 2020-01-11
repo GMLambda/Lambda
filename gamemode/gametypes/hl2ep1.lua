@@ -49,7 +49,7 @@ GAMETYPE.CampaignNames = {
 }
 
 function GAMETYPE:InitSettings()
-    self.Base.InitSettings(self)
+    self.Base:InitSettings()
 end
 
 function GAMETYPE:LoadCurrentMapScript()
