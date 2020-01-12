@@ -225,6 +225,7 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
         ragdoll:SetBodygroup(v.id, ent:GetBodygroup(v.id))
     end
     ragdoll:SetOwner(self:GetOwner())
+    ragdoll:SetName("player_ragdoll")
     ragdoll:Spawn()
     ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
     ragdoll.GetPlayerColor = function(s)

@@ -73,11 +73,18 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
-        local multipleTrigger = ents.FindByPos(Vector(5545.25, 4642.47, -6606))
+        ents.WaitForEntityByName("kill_phys_objects_trigger", function(ent)
+            local filter = ents.Create("filter_activator_name")
+            filter:SetKeyValue("targetname", "player_ragdoll_filter")
+            filter:SetKeyValue("Negated", "1")
+            filter:SetKeyValue("filtername", "player_ragdoll")
+            filter:Spawn()
+            ent:SetKeyValue("filtername", "player_ragdoll_filter")
+        end)
+
+        local multipleTrigger = ents.FindByPos(Vector(5545.25, 4642.47, -6606), "trigger_multiple")
         for k, v in pairs(multipleTrigger) do
-            if v:GetClass() == "trigger_multiple" then
                 v:Remove()
-            end
         end
 
         local changelevelTrigger = ents.Create("trigger_once")
