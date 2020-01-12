@@ -855,7 +855,7 @@ if SERVER then
         local gibPlayer = false
         local didExplode = false
         local dmgForce = dmgInfo:GetDamageForce() * 0.1
-
+        local vel2D = ply:GetVelocity():Length2D()
         if enableGore == true then
             local damageForceLen = dmgForce:Length2D()
             --print(damageForceLen, dmg)
@@ -881,7 +881,7 @@ if SERVER then
                 if forceWithMass >= 150000 or totalMass >= 10000 then
                     gibPlayer = true
                 end
-            elseif dmgInfo:GetDamage() >= 100 and damageForceLen >= 2000 then
+            elseif dmgInfo:IsDamageType(DMG_FALL) and vel2D >= 600 then
                 gibPlayer = true
             end
         end
