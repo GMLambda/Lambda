@@ -157,7 +157,7 @@ function MAPSCRIPT:PostInit()
         -- Let alyx hug everyone.
         ents.WaitForEntityByName("vehicle_blackout", function(ent)
 
-            for i = 1, 64 do
+            for i = 1, game.MaxPlayers() do
                 local vehicle = ents.Create("prop_vehicle_choreo_generic")
                 vehicle:SetKeyValue("vehiclescript", "scripts/vehicles/choreo_vehicle_ep1_dogintro.txt")
                 vehicle:SetKeyValue("VehicleLocked", "1")
@@ -190,16 +190,30 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnScriptEvent01 maker_template_gravgun,SetParent,!player,0.1,-1")
         end)
 
+        local function GetNextVehicle()
+            local vehicles = ents.FindByName("vehicle_blackout_*")
+            for _,v in pairs(vehicles) do
+                local driver = v:GetInternalVariable("m_hPlayer")
+                if IsValid(driver) == false then
+                    return v
+                end
+            end
+        end
+
+
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
+
         GAMEMODE:WaitForInput("vehicle_blackout", "EnterVehicle", function(ent)
-            local i = 1
             for k,v in pairs(player.GetAll()) do
                 if v:Alive() == false then
                    continue
                 end
-                local vehicle = ents.FindFirstByName("vehicle_blackout_" .. tostring(i))
-                v:EnterVehicle(vehicle)
-                i = i + 1
+                local vehicle = GetNextVehicle()
+                if IsValid(vehicle) then
+                    v:EnterVehicle(vehicle)
+                end
             end
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
             return false -- Suppress this.
         end)
 
@@ -279,23 +293,6 @@ function MAPSCRIPT:PostInit()
             TriggerOutputs({
                 {"counter_alyx_van", "Add", 0.0, "1"},
             })
-        end
-
-        -- Let players leave once the sequence is done.
-        ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
-            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.0,-1")
-        end)
-
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(-8988.072266, 5828.276855, -142.968750),
-            Angle(0, 0, 0),
-            Vector(-200, -200, 0),
-            Vector(200, 200, 100)
-        )
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            --GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-7916.693359, 5424.519531, -95.968750), Angle(0, 0, 0))
