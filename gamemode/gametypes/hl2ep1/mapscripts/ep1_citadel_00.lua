@@ -11,6 +11,7 @@ MAPSCRIPT.DefaultLoadout =
     Ammo =
     {
     },
+    Health = 47,
     Armor = 0,
     HEV = true,
 }
@@ -215,6 +216,12 @@ function MAPSCRIPT:PostInit()
             end
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
             return false -- Suppress this.
+        end)
+
+        -- Give gravity gun by default once picked up
+        GAMEMODE:WaitForInput("maker_template_gravgun", "ForceSpawn", function(ent)
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_physcannon")
         end)
 
         -- Make sure no player is left behind.
