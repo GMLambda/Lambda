@@ -82,6 +82,18 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-4892, 1488, 2471), Angle(0, 0, 0))
+        local checkpointTrigger3 = ents.Create("trigger_once")
+        checkpointTrigger3:SetupTrigger(
+            Vector(-4856, 1491.14, 2494.08),
+            Angle(0, 0, 0),
+            Vector(-174, -140, -60),
+            Vector(174, 140, 60)
+        )
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
+        end
+
         GAMEMODE:WaitForInput("logic_weapon_strip_physcannon_end1", "Trigger", function(ent)
             for k, v in pairs(ents.FindByClass("weapon_physcannon")) do
                 v:Supercharge()
