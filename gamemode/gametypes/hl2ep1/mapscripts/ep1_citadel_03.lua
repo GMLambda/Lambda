@@ -72,19 +72,19 @@ function MAPSCRIPT:PostInit()
             ent:Remove()
         end)
 
-        local monitorScreenTrigger = ents.Create("trigger_once")
-        monitorScreenTrigger:SetupTrigger(
+        local monitorSceneTrigger = ents.Create("trigger_once")
+        monitorSceneTrigger:SetupTrigger(
             Vector(1196, 11708, 5247.96),
             Angle(0, 0, 0),
             Vector(-204, -188, -512),
             Vector(204, 188, 512)
         )
-        monitorScreenTrigger:SetName("trigger_startmonitor_scene_1")
-        monitorScreenTrigger:SetKeyValue("StartDisabled", "1")
-        monitorScreenTrigger:SetKeyValue("teamwait", "1")
-        monitorScreenTrigger:Fire("AddOutput", "OnTrigger trigger_door_comb_close,Enable,0.0,-1")
-        monitorScreenTrigger:Fire("AddOutput", "OnTrigger lcs_core_control_scene,Start,0.0,1")
-        monitorScreenTrigger.OnTrigger = function(_, activator)
+        monitorSceneTrigger:SetName("trigger_startmonitor_scene_1")
+        monitorSceneTrigger:SetKeyValue("StartDisabled", "1")
+        monitorSceneTrigger:SetKeyValue("teamwait", "1")
+        monitorSceneTrigger:Fire("AddOutput", "OnTrigger trigger_door_comb_close,Enable,0.0,-1")
+        monitorSceneTrigger:Fire("AddOutput", "OnTrigger lcs_core_control_scene,Start,0.0,1")
+        monitorSceneTrigger.OnTrigger = function(_, activator)
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1224, 11835, 5317))
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
@@ -132,16 +132,78 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(1947, 10766, 4997))
-        checkpoint2Trigger = ents.Create("trigger_once")
-        checkpoint2Trigger:SetupTrigger(
-            Vector(1947, 10766, 4997),
+        local multipleTrigger2 = ents.FindByPos(Vector(1876.97, 10580.9, 5532), "trigger_multiple")
+        for k, v in pairs(multipleTrigger2) do
+            v:Remove()
+        end
+
+        local tracktrain_elevator
+        ents.WaitForEntityByName("Train_lift_TP", function(ent)
+            tracktrain_elevator = ent
+        end)
+
+        local liftTrigger2 = ents.Create("trigger_once")
+        liftTrigger2:SetupTrigger(
+            Vector(1857.5, 10507.5, 4988),
             Angle(0, 0, 0),
-            Vector(-40, -20, 0),
-            Vector(40, 20, 50)            
+            Vector(-100, -110, -25),
+            Vector(100, 110, 25)
+        )
+        liftTrigger2:SetKeyValue("teamwait", "1")
+        liftTrigger2:Fire("AddOutput", "OnTrigger Train_lift_TP,StartForward,0.0,-1")
+        liftTrigger2:Fire("AddOutput", "OnTrigger enemyfinder_core_breakerroom_2b,Wake,3.0,1")
+        liftTrigger2.OnTrigger = function(_, activator)
+            local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1857.5, 10507.5, 4988))
+            checkpoint:SetParent(tracktrain_elevator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
+        end
+
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(1098, 12810, 5318), Angle(0, 0, 0))
+        local checkpoint2Trigger = ents.Create("trigger_once")
+        checkpoint2Trigger:SetupTrigger(
+            Vector(1376, 12816, 5364),
+            Angle(0, 0, 0),
+            Vector(-80, -80, -80),
+            Vector(80, 80, 80)
         )
         checkpoint2Trigger.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+        end
+
+        local mossman
+        ents.WaitForEntityByName("Mossman2", function(ent) 
+            mossman = ent
+        end)
+
+        GAMEMODE:WaitForInput("lcs_mossman_scene", "OnCompletion", function(ent)
+            if IsValid(mossman) then
+                mossman.ImportantNPC = false
+            end
+        end)
+
+        local elevator_exit
+        ents.WaitForEntityByName("Train_lift_coreexit", function(ent)
+            elevator_exit = ent        
+        end)
+
+        local multipleTrigger3 = ents.FindByPos(Vector(1152, 13654, 5312), "trigger_multiple")
+        for k, v in pairs(multipleTrigger3) do
+            v:Remove()
+        end
+
+        local liftTrigger3 = ents.Create("trigger_once")
+        liftTrigger3:SetupTrigger(
+            Vector(1152, 13654, 5312),
+            Angle(0, 0, 0),
+            Vector(-60, -96, -32),
+            Vector(60, 96, 32)
+        )
+        liftTrigger3:SetKeyValue("teamwait", "1")
+        liftTrigger3:Fire("AddOutput", "OnTrigger relay_powerdown_sequence,Trigger,0.0,-1")
+        liftTrigger3.OnTrigger = function(_, activator)
+            local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1152, 13632, 5285))
+            checkpoint:SetParent(elevator_exit)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
     end
