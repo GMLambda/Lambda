@@ -18,6 +18,11 @@ MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = 
 {
     ["global_newgame_template_base_items"] = true,
+    ["trigger_fall"] = true,
+    ["trigger_fall_2"] = true,
+    ["trigger_startmonitor_scene_1"] = true,
+    ["Trigger_lift"] = true,
+    ["core_airlock_close"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
@@ -33,15 +38,6 @@ function MAPSCRIPT:PostInit()
         for k, v in pairs(multipleTrigger) do
             v:Remove()
         end
-
-        ents.WaitForEntityByName("trigger_fall", function(ent)
-            ent:Remove()
-        end)
-
-        ents.WaitForEntityByName("trigger_fall_2", function(ent)
-            ent:Remove()
-        end)
-
 
         local hurtTrigger = ents.Create("trigger_hurt")
         hurtTrigger:SetupTrigger(
@@ -68,10 +64,6 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
-        ents.WaitForEntityByName("trigger_startmonitor_scene_1", function(ent) 
-            ent:Remove()
-        end)
-
         local monitorSceneTrigger = ents.Create("trigger_once")
         monitorSceneTrigger:SetupTrigger(
             Vector(1196, 11708, 5247.96),
@@ -88,10 +80,6 @@ function MAPSCRIPT:PostInit()
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1224, 11835, 5317))
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
-
-        ents.WaitForEntityByName("Trigger_lift", function(ent)
-            ent:Remove()
-        end)
 
         local elevator
         ents.WaitForEntityByName("lift_airlock", function(ent)
@@ -115,10 +103,6 @@ function MAPSCRIPT:PostInit()
             checkpoint:SetParent(elevator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
-
-        ents.WaitForEntityByName("core_airlock_close", function(ent)
-            ent:Remove()
-        end)
 
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3792, 11592, 4741))
         checkpoint1Trigger = ents.Create("trigger_once")
@@ -145,9 +129,9 @@ function MAPSCRIPT:PostInit()
         local liftTrigger2 = ents.Create("trigger_once")
         liftTrigger2:SetupTrigger(
             Vector(1857.5, 10507.5, 4988),
-            Angle(0, 0, 0),
-            Vector(-100, -110, -25),
-            Vector(100, 110, 25)
+            Angle(0, 30, 0),
+            Vector(-90, -100, -25),
+            Vector(90, 100, 25)
         )
         liftTrigger2:SetKeyValue("teamwait", "1")
         liftTrigger2:Fire("AddOutput", "OnTrigger Train_lift_TP,StartForward,0.0,-1")
@@ -170,15 +154,8 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
-        local mossman
         ents.WaitForEntityByName("Mossman2", function(ent) 
-            mossman = ent
-        end)
-
-        GAMEMODE:WaitForInput("lcs_mossman_scene", "OnCompletion", function(ent)
-            if IsValid(mossman) then
-                mossman.ImportantNPC = false
-            end
+            ent.ImportantNPC = false
         end)
 
         local elevator_exit
