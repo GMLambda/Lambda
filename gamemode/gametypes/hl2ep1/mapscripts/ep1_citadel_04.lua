@@ -49,10 +49,18 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3400, 11723, 3616), Angle(0, 0, 0))
         ents.WaitForEntityByName("trigger_player_closedoor", function(ent) 
             ent:SetKeyValue("teamwait", "1")
+            ent.OnTrigger = function(_, activator)
+                GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+            end
         end)
 
+        ents.WaitForEntityByName("trigger_stalkercar_inside", function(ent)
+            ent:SetKeyValue("teamwait", "1")
+        end)
+        
     end
     
 end
