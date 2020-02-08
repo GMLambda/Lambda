@@ -60,6 +60,39 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("trigger_stalkercar_inside", function(ent)
             ent:SetKeyValue("teamwait", "1")
         end)
+
+        local multipleTrigger2 = ents.FindByPos(Vector(4208, 7968, 3528), "trigger_multiple")
+        for k, v in pairs(multipleTrigger2) do
+            v:Remove()
+        end
+
+        local enablePull = ents.Create("trigger_once")
+        enablePull:SetupTrigger(
+            Vector(4208, 7968, 3528),
+            Angle(0, 0, 0),
+            Vector(-116, -80, -92),
+            Vector(116, 80, 92)
+        )
+        enablePull:Fire("AddOutput", "OnTrigger stalkerPod_Physanim,EnablePhyscannonPickup,0.0,-1")
+
+        -- Missing PhysCannonAnimate outputs in Garry's Mod
+        -- We have to redo the whole pulling logic to work properly
+        ents.WaitForEntityByName("stalkerPod_Physanim", function(ent)
+            ent:Fire("AddOutput", "OnPhysGunPickup spark_pod_lift_1,SparkOnce,0.0,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup ss_alyx_stalkertrain_postPod,BeginSequence,0.0,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup sound_pod_lift_1,PlaySound,0.2,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup spark_pod_lift_1,SparkOnce,0.2,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_stalkertrain_pulling,Start,0.2,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup ss_alyx_stalkertrain_prePod,BeginSequence,0.2,-1")           
+            ent:Fire("AddOutput", "OnPhysGunPickup ss_alyx_stalkertrain_pullPod,BeginSequence,0.3,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup timer_nagtrapped_01,Kill,0.4,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_nagtrapped_01,Cancel,0.4,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_nagtrapped_02,Cancel,0.4,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_nagtrapped_03,Cancel,0.4,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_nagtrapped_04,Cancel,0.4,-1")
+            ent:Fire("AddOutput", "OnPhysGunPickup relay_hatch_shakebreak_1,Trigger,0.4,-1") 
+            ent:Fire("AddOutput", "OnPhysGunPickup lcs_al_stalkertrain_03,Start,0.9,-1")
+        end)
         
     end
     
