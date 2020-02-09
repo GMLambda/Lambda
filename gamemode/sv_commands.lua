@@ -29,7 +29,7 @@ concommand.Add("lambda_restart", RestartLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD
 
 local function PreviousLevel(ply, cmd, args)
     if whoisrunning(ply) == false then return end
-    local prevmap = GAMEMODE:GetPreviousMap()("MapList")
+    local prevmap = GAMEMODE:GetPreviousMap()
     game.ConsoleCommand("changelevel " .. prevmap .. "\n")
 end
 concommand.Add("lambda_prevmap", PreviousLevel, nil, nil, bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE, FCVAR_SERVER_CAN_EXECUTE))
