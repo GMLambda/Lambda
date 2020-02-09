@@ -296,6 +296,11 @@ end
 
 function PLAYER_META:SetInactive(state)
     self:SetNWBool("Inactive", state)
+    if state == true then
+        self:AddFlags(FL_NOTARGET)
+    else
+        self:RemoveFlags(FL_NOTARGET)
+    end
 end
 
 function PLAYER_META:SetLambdaSuitPower(val)
