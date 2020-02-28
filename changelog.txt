@@ -1,6 +1,8 @@
 0.9.12
 - Fixed: Only auto switch to weapons when still holding the empty gun.
 - Fixed: HL2:EP1/HL2:DM game types not working correctly [Regression]
+- Fixed: Killed NPCs ragdolls would have different pose when killed with gravity gun.
+- Improved: Gravity gun functions now closer to the original and interpolates at clients frame time.
 
 0.9.11
 - Fixed: Lua error on death when dropped weapon can not be spawned.
