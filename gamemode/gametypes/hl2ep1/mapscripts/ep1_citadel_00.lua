@@ -250,19 +250,23 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("max", "3")
         end)
 
-        local fallTrigger = ents.Create("trigger_multiple")
+        local fallTrigger = ents.Create("trigger_once")
         fallTrigger:SetupTrigger(
             Vector(4799.591309, 4057.289551, -6326.972656),
             Angle(0, 0, 0),
-            Vector(-130, -50, -30),
-            Vector(70, 50, 80)
+            Vector(-1350, -1940, -70),
+            Vector(670, 440, 220)
         )
-        fallTrigger:Fire("AddOutput", "OnEndTouchAll counter_vanride_end01_resume,Add,1,0.0,-1")
+        fallTrigger:SetKeyValue("spawnflags", "513")
+        fallTrigger:SetKeyValue("teamwait", "1")
+        fallTrigger:SetKeyValue("showwait", "0")
+        fallTrigger:Fire("AddOutput", "OnTrigger counter_vanride_end01_resume,Add,1,0.0,-1")
+        fallTrigger:SetName("lambda_falltrigger")
 
         -- Unlock van seats after the sequence not only the van.
-        ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
+        ents.WaitForEntityByName("relay_vanride_endcrash_1", function(ent)
             -- Unlock after.
-            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.01,-1")
+            ent:Fire("AddOutput", "OnTrigger VanSeat,Unlock,,0.01,-1")
         end)
 
         ents.WaitForEntityByName("Van", function(ent)
@@ -296,7 +300,7 @@ function MAPSCRIPT:PostInit()
         carTrigger:SetKeyValue("spawnflags", tostring(SF_TRIGGER_ALLOW_CLIENTS + SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES))
         carTrigger:SetKeyValue("teamwait", "1")
         carTrigger.OnTrigger = function(trigger)
-            DbgPrint("All players on board")
+            self.PlacePlayerInVan = true
             TriggerOutputs({
                 {"counter_alyx_van", "Add", 0.0, "1"},
             })
@@ -324,6 +328,7 @@ function MAPSCRIPT:PostInit()
             Vector(100, 250, 100)
         )
         checkpointTrigger3.OnTrigger = function(_, activator)
+            self.PlacePlayerInVan = false
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
@@ -351,6 +356,15 @@ function MAPSCRIPT:FindUseEntity(ply, engineEnt)
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
+
+    if self.PlacePlayerInVan == true then
+        for _,v in pairs(ents.FindByName("VanSeat")) do
+            if not IsValid(v:GetDriver()) then
+                ply:EnterVehicle(v)
+                break
+            end
+        end
+    end
 
 end
 
