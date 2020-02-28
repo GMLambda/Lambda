@@ -459,7 +459,7 @@ end
 
 function ENTITY_META:CopyAnimationDataFrom(other)
 
-    self:SetModel(other:GetModel())
+    self:SetModel(other:GetModel() or "")
     self:SetCycle(other:GetCycle())
     self:RemoveEffects(self:GetEffects()) -- Clear, no set available.
     self:AddEffects(other:GetEffects())
