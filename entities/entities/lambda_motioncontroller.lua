@@ -176,7 +176,9 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
     self.SavedBlocksLOS = obj:BlocksLOS()
 
     local totalCount = obj:GetPhysicsObjectCount()
-    local carryMass = REDUCED_CARRY_MASS / totalCount
+    local factor = totalCount / 7.5
+    if factor < 1.0 then factor = 1.0 end
+    local carryMass = REDUCED_CARRY_MASS / factor
     local totalWeight = 0
     for i = 0, totalCount - 1 do
         local phys2 = obj:GetPhysicsObjectNum(i)
