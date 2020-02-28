@@ -1482,7 +1482,7 @@ function SWEP:AttachObject(ent, tr)
         dmgInfo:SetDamage(1)
         dmgInfo:SetDamageType(DMG_GENERIC)
 
-        local ragdoll = ent:CreateServerRagdoll(dmgInfo, COLLISION_GROUP_INTERACTIVE_DEBRIS)
+        local ragdoll = ent:CreateServerRagdoll(dmgInfo)
         local phys = ragdoll:GetPhysicsObject()
         if IsValid(phys) == true then
             phys:AddGameFlag(FVPHYSICS_NO_SELF_COLLISIONS)

@@ -310,7 +310,7 @@ function ENT:ComputeNetworkError()
 end
 
 function ENT:ManagePredictedObject()
-    if CLIENT then
+    if CLIENT and game.SinglePlayer() == false then
         local ent = self.AttachedObject
         local serverEnt = self:GetTargetObject()
         if ent == nil and IsValid(serverEnt) then
@@ -360,7 +360,7 @@ local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
             if not IsValid(other) then
                 continue
             end
-            if not other:IsMoveable() then
+            if not other:IsMoveable() or other:GetMass() >= minMass then
                 local normal = v.Normal
                 angVel = normal * angVel:Dot(normal)
                 local proj = vel:Dot(normal)
