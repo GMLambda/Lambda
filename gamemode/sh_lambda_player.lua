@@ -883,6 +883,7 @@ if SERVER then
                 end
             elseif dmgInfo:IsDamageType(DMG_FALL) and vel2D >= 600 then
                 gibPlayer = true
+                dmgForce = ply:GetVelocity()
             end
         end
 

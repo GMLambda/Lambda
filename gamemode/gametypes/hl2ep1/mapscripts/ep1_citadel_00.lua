@@ -11,6 +11,7 @@ MAPSCRIPT.DefaultLoadout =
     Ammo =
     {
     },
+    Health = 47,
     Armor = 0,
     HEV = true,
 }
@@ -157,7 +158,7 @@ function MAPSCRIPT:PostInit()
         -- Let alyx hug everyone.
         ents.WaitForEntityByName("vehicle_blackout", function(ent)
 
-            for i = 1, 64 do
+            for i = 1, game.MaxPlayers() do
                 local vehicle = ents.Create("prop_vehicle_choreo_generic")
                 vehicle:SetKeyValue("vehiclescript", "scripts/vehicles/choreo_vehicle_ep1_dogintro.txt")
                 vehicle:SetKeyValue("VehicleLocked", "1")
@@ -190,17 +191,37 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnScriptEvent01 maker_template_gravgun,SetParent,!player,0.1,-1")
         end)
 
+        local function GetNextVehicle()
+            local vehicles = ents.FindByName("vehicle_blackout_*")
+            for _,v in pairs(vehicles) do
+                local driver = v:GetInternalVariable("m_hPlayer")
+                if IsValid(driver) == false then
+                    return v
+                end
+            end
+        end
+
+
+        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
+
         GAMEMODE:WaitForInput("vehicle_blackout", "EnterVehicle", function(ent)
-            local i = 1
             for k,v in pairs(player.GetAll()) do
                 if v:Alive() == false then
                    continue
                 end
-                local vehicle = ents.FindFirstByName("vehicle_blackout_" .. tostring(i))
-                v:EnterVehicle(vehicle)
-                i = i + 1
+                local vehicle = GetNextVehicle()
+                if IsValid(vehicle) then
+                    v:EnterVehicle(vehicle)
+                end
             end
+            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
             return false -- Suppress this.
+        end)
+
+        -- Give gravity gun by default once picked up
+        GAMEMODE:WaitForInput("maker_template_gravgun", "ForceSpawn", function(ent)
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_physcannon")
         end)
 
         -- Make sure no player is left behind.
@@ -229,19 +250,23 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("max", "3")
         end)
 
-        local fallTrigger = ents.Create("trigger_multiple")
+        local fallTrigger = ents.Create("trigger_once")
         fallTrigger:SetupTrigger(
             Vector(4799.591309, 4057.289551, -6326.972656),
             Angle(0, 0, 0),
-            Vector(-130, -50, -30),
-            Vector(70, 50, 80)
+            Vector(-1350, -1940, -70),
+            Vector(670, 440, 220)
         )
-        fallTrigger:Fire("AddOutput", "OnEndTouchAll counter_vanride_end01_resume,Add,1,0.0,-1")
+        fallTrigger:SetKeyValue("spawnflags", "513")
+        fallTrigger:SetKeyValue("teamwait", "1")
+        fallTrigger:SetKeyValue("showwait", "0")
+        fallTrigger:Fire("AddOutput", "OnTrigger counter_vanride_end01_resume,Add,1,0.0,-1")
+        fallTrigger:SetName("lambda_falltrigger")
 
         -- Unlock van seats after the sequence not only the van.
-        ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
+        ents.WaitForEntityByName("relay_vanride_endcrash_1", function(ent)
             -- Unlock after.
-            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.01,-1")
+            ent:Fire("AddOutput", "OnTrigger VanSeat,Unlock,,0.01,-1")
         end)
 
         ents.WaitForEntityByName("Van", function(ent)
@@ -275,27 +300,10 @@ function MAPSCRIPT:PostInit()
         carTrigger:SetKeyValue("spawnflags", tostring(SF_TRIGGER_ALLOW_CLIENTS + SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES))
         carTrigger:SetKeyValue("teamwait", "1")
         carTrigger.OnTrigger = function(trigger)
-            DbgPrint("All players on board")
+            self.PlacePlayerInVan = true
             TriggerOutputs({
                 {"counter_alyx_van", "Add", 0.0, "1"},
             })
-        end
-
-        -- Let players leave once the sequence is done.
-        ents.WaitForEntityByName("SS_Van_ThrowGate", function(ent)
-            ent:Fire("AddOutput", "OnEndSequence VanSeat,Unlock,,0.0,-1")
-        end)
-
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(-8988.072266, 5828.276855, -142.968750),
-            Angle(0, 0, 0),
-            Vector(-200, -200, 0),
-            Vector(200, 200, 100)
-        )
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            --GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-7916.693359, 5424.519531, -95.968750), Angle(0, 0, 0))
@@ -320,6 +328,7 @@ function MAPSCRIPT:PostInit()
             Vector(100, 250, 100)
         )
         checkpointTrigger3.OnTrigger = function(_, activator)
+            self.PlacePlayerInVan = false
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
@@ -347,6 +356,15 @@ function MAPSCRIPT:FindUseEntity(ply, engineEnt)
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
+
+    if self.PlacePlayerInVan == true then
+        for _,v in pairs(ents.FindByName("VanSeat")) do
+            if not IsValid(v:GetDriver()) then
+                ply:EnterVehicle(v)
+                break
+            end
+        end
+    end
 
 end
 

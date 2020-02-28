@@ -121,6 +121,11 @@ if SERVER then
             self.RoundState = STATE_IDLE -- Wait for players.
         end
 
+        -- Reset map once players are arround.
+        if player.GetCount() == 0 then
+            self.RequiresRoundRestart = true
+        end
+
     end
 
     function GM:IncludePlayerInRound(ply)
@@ -435,16 +440,6 @@ function GM:PostCleanupMap()
         self:StartRound(true)
     end)
 
-    -- Reset all NPCs.
-    if SERVER then
-        for k,v in pairs(ents.GetAll()) do
-            if v:IsNPC() then
-                v:SetSchedule(SCHED_IDLE_STAND)
-                v:SetNPCState(NPC_STATE_IDLE)
-            end
-        end
-    end
-
 end
 
 function GM:IsRoundRestarting()
@@ -665,6 +660,14 @@ function GM:StartRound(cleaned, force)
     end
 
     if SERVER then
+
+        -- NOTE: If NPCs existed before players joined they often wander off.
+        -- This compensates by simply resetting the map when every player is available.
+        if self.RequiresRoundRestart == true and cleaned ~= true then
+            self.RequiresRoundRestart = nil
+            self:CleanUpMap()
+            return
+        end
 
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
