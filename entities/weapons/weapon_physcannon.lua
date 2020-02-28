@@ -1466,7 +1466,7 @@ function SWEP:AttachObject(ent, tr)
 
     local useGrabPos = false
     local grabPos = tr.HitPos
-    local attachmentPoint = ent:OBBCenter() -- ent:WorldToLocal(ent:OBBCenter())
+    local attachmentPoint
 
     if (self:IsMegaPhysCannon() == true and
         ent:IsNPC() and
@@ -1491,7 +1491,6 @@ function SWEP:AttachObject(ent, tr)
         ragdoll:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR) -- Its ugly if players collide
         ragdoll.IsPhysgunDamage = true
 
-        --attachmentPoint = Vector(0, 0, 0)
         dmgInfo = DamageInfo()
         dmgInfo:SetInflictor(owner)
         dmgInfo:SetAttacker(owner)
@@ -1501,12 +1500,17 @@ function SWEP:AttachObject(ent, tr)
         ent:TakeDamageInfo(dmgInfo)
 
         ent = ragdoll
-        useGrabPos = false
-
     end
 
+    local motionController = self:GetMotionController()
+
     if ent:IsRagdoll() then
-        attachmentPoint = Vector(0, 0, -16)
+        -- NOTE: This is off by default, the original implementation used the closest physics object
+        -- It makes the game play a lot better using the center for ragdolls.
+        useGrabPos = false
+        attachmentPoint = Vector(0, 0, 0)
+    else
+        attachmentPoint = ent:OBBCenter()
     end
 
     local phys = ent:GetPhysicsObject()
@@ -1519,7 +1523,6 @@ function SWEP:AttachObject(ent, tr)
         owner:SimulateGravGunPickup(ent, false)
     end
 
-    local motionController = self:GetMotionController()
     motionController:AttachObject(ent, grabPos, useGrabPos)
     self.ObjectAttached = true
 

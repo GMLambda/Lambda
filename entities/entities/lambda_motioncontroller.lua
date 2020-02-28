@@ -3,6 +3,11 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("motioncontroller")
+local abs = math.abs
+local PREDICTION_TOLERANCE = 33
+local PREDICTION_THRESHOLD = 1
+local DEFAULT_MAX_ANGULAR = 360.0 * 10.0
+local REDUCED_CARRY_MASS = 1.0
 
 DEFINE_BASECLASS("base_entity")
 
@@ -15,19 +20,14 @@ function ENT:SetupDataTables()
     self:NetworkVar("Float", 0, "TimeToArrive")
     self:NetworkVar("Entity", 0, "TargetObject")
 end
-
-function ENT:Initialize()
-
-    DbgPrint(self, "Initialize")
-
-    self:SetTargetTransform(Vector(0, 0, 0), Angle(0, 0, 0))
-
+    
+function ENT:ResetState()
     local shadowParams = {}
 
     -- Initialize shadow params.
     shadowParams.dt = 0
     shadowParams.secondstoarrive = 0
-    shadowParams.maxangular = 360 * 10
+    shadowParams.maxangular = DEFAULT_MAX_ANGULAR
     shadowParams.maxangulardamp = shadowParams.maxangular
     shadowParams.maxspeed = 4000
     shadowParams.maxspeeddamp = shadowParams.maxspeed * 2
@@ -37,8 +37,19 @@ function ENT:Initialize()
     self.ShadowParams = shadowParams
     self.SavedMass = {}
     self.SavedRotDamping = {}
-    self.ErrorTime = 0
-    self.Error = 0
+    self.ErrorTime = -1.0
+    self.Error = -1.0
+    self.ContactAmount = 0
+    self.LoadWeight = 0
+
+end
+
+function ENT:Initialize()
+
+    DbgPrint(self, "Initialize")
+
+    self:SetTargetTransform(Vector(0, 0, 0), Angle(0, 0, 0))
+    self:ResetState()
 
     -- We don't need anything visible.
     self:SetNotSolid(true)
@@ -161,26 +172,31 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
         return
     end
 
-    self.SavedMass = {}
-    self.SavedRotDamping = {}
+    self:ResetState()
     self.SavedBlocksLOS = obj:BlocksLOS()
-    self.ErrorTime = -1.0
-    self.Error = 0
 
-    for i = 0, obj:GetPhysicsObjectCount() - 1 do
+    local totalCount = obj:GetPhysicsObjectCount()
+    local carryMass = REDUCED_CARRY_MASS / totalCount
+    local totalWeight = 0
+    for i = 0, totalCount - 1 do
         local phys2 = obj:GetPhysicsObjectNum(i)
         if not IsValid(phys2) then
             continue
         end
-        self.SavedMass[i] = phys2:GetMass()
-        phys2:SetMass(1) -- Carry mass
+
+        local mass = phys2:GetMass()
+        totalWeight = totalWeight + mass
+
+        self.SavedMass[i] = mass
+        phys2:SetMass(carryMass)
 
         local linear, angular = phys2:GetDamping()
         self.SavedRotDamping[i] = angular
         phys2:SetDamping(linear, 10)
     end
+    self.LoadWeight = totalWeight
 
-    physObj:SetMass(1.0)
+    physObj:SetMass(REDUCED_CARRY_MASS)
     physObj:EnableDrag(false)
     physObj:Wake()
 
@@ -268,9 +284,8 @@ function ENT:Think()
         local obj = self.AttachedObject
         if IsValid(obj) then
             local phys = obj:GetPhysicsObject()
-            if IsValid(phys) then
-                -- NOTE: Not calling wake holds it back from calling PhysicsSimulate, also calling ENT:PhysWake did nothing on the client.
-                phys:Wake()
+            if CLIENT and IsValid(phys) then
+                self:PhysicsSimulate2(phys, FrameTime())
             end
         end
     end
@@ -284,10 +299,6 @@ function ENT:Think()
     return true
 
 end
-
-local abs = math.abs
-local PREDICTION_TOLERANCE = 33
-local PREDICTION_THRESHOLD = 1
 
 function ENT:ComputeNetworkError()
     local serverEnt = self:GetTargetObject()
@@ -315,7 +326,62 @@ function ENT:ManagePredictedObject()
     end
 end
 
+local function InContactWithHeavyObject(phys, maxMass)
+
+    local heavyContact = false
+
+    if phys.GetFrictionSnapshot ~= nil then
+        local contacts = phys:GetFrictionSnapshot()
+        for _,v in pairs(contacts) do
+            local other = v.Other
+            if IsValid(other) and (not other:IsMoveable() or other:GetMass() > maxMass) then
+                heavyContact = true
+                break
+            end
+        end
+    end
+
+    return heavyContact
+end
+
+function ENT:GetLoadWeight()
+    return self.LoadWeight
+end
+
+local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
+
+    local vel = Vector(inVel)
+    local angVel = Vector(inAngVel)
+
+    if phys.GetFrictionSnapshot ~= nil then
+        local contacts = phys:GetFrictionSnapshot()
+        for _,v in pairs(contacts) do
+            local other = v.Other
+            if not IsValid(other) then
+                continue
+            end
+            if not other:IsMoveable() then
+                local normal = v.Normal
+                angVel = normal * angVel:Dot(normal)
+                local proj = vel:Dot(normal)
+                if proj > 0.0 then
+                    vel = vel - (normal * proj)
+                end
+            end
+        end
+    end
+
+    return vel, angVel
+end
+
 function ENT:PhysicsSimulate( phys, dt )
+    -- For better interpolation the client runs this in Think
+    if SERVER then
+        return self:PhysicsSimulate2(phys, dt)
+    end
+end
+
+function ENT:PhysicsSimulate2( phys, dt )
 
     if self.AttachedObject == nil then
         return
@@ -334,12 +400,25 @@ function ENT:PhysicsSimulate( phys, dt )
         timeToArrive = FrameTime()
     end
 
+    if InContactWithHeavyObject(phys, self.LoadWeight) == true then
+        self.ContactAmount = math.Approach(self.ContactAmount, 0.1, dt * 2.0)
+    else
+        self.ContactAmount = math.Approach(self.ContactAmount, 1.0, dt * 2.0)
+    end
+
     shadowParams.dt = dt
+    shadowParams.maxangular = DEFAULT_MAX_ANGULAR * self.ContactAmount * self.ContactAmount * self.ContactAmount
     shadowParams.pos = self:GetTargetPos()
     shadowParams.angle = self:GetTargetAng()
     shadowParams.secondstoarrive = timeToArrive
 
     phys:ComputeShadowControl(shadowParams)
+
+    local vel = phys:GetVelocity()
+    local angVel = phys:GetAngleVelocity()
+
+    vel, angVel = PhysComputeSlideDirection(phys, vel, angVel, self.LoadWeight)
+    phys:SetVelocityInstantaneous(vel)
 
     timeToArrive = timeToArrive - dt
     if timeToArrive < 0 then
