@@ -1,6 +1,6 @@
 local DbgPrint = GetLogging("Resource")
 
-local WORKSHOP_BUILD = false
+local WORKSHOP_BUILD = true
 local WORKSHOP_ID = "780244493"
 
 function GM:InitializeResources()
