@@ -167,6 +167,14 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("WaitDistance", "3000")
         end)
 
+        -- Give everyone weapon_bugbait just in case
+        GAMEMODE:WaitForInput("leadgoal_vortigaunt", "OnSuccess", function(ent) 
+            for _, ply in pairs(player.GetAll()) do
+                DbgPrint("Giving all players bugbait")
+                ply:Give("weapon_bugbait")
+            end
+        end)
+
         -- Some players might refuse this, let this continue anyway.
         ents.WaitForEntityByName("aigl_vort", function(ent)
             ent:SetKeyValue("RetrieveDistance", "3000")
