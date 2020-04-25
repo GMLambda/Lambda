@@ -124,7 +124,7 @@ function ENT:StopOverlays(data, activator, caller)
         self.Activator = nil
         self.Active = false
         self.ActiveNum = 1
-    elseif not ply:GetScreenOverlayOwner() and not self.Activator == activator then
+    elseif self.Activator ~= activator or self.Activator == nil then
         GAMEMODE:StopScreenOverlay()
         self.Active = false
         self.ActiveNum = 1
