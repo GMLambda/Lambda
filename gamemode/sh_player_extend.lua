@@ -176,6 +176,18 @@ if SERVER then
         GAMEMODE:RevivePlayer(self, pos, ang, health)
     end
 
+    function PLAYER_META:SetScreenOverlayOwner(ent)
+        self:SetNWEntity("scrOverlay", ent)
+    end
+
+    function PLAYER_META:GetScreenOverlayOwner()
+        return self:GetNWEntity("scrOverlay")
+    end
+
+    function PLAYER_META:CleanScreenOverlayOwner()
+        self:SetScreenOverlayOwner(NULL)
+    end
+
 end -- SERVER
 
 function PLAYER_META:GetRagdollManager()

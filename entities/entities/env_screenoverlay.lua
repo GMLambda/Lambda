@@ -80,6 +80,7 @@ function ENT:StartOverlays(data, activator, caller)
 
     if IsValid(activator) and activator:IsPlayer() then
         GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"], activator)
+        activator:SetScreenOverlayOwner(self)
         self.Activator = activator
     else
         GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"])
@@ -116,17 +117,21 @@ function ENT:StopOverlays(data, activator, caller)
 
     if not self.Active then return end
 
-    self.Active = false
-    self.ActiveNum = 1
-
     activator = self:PropagatePlayerActivator(activator)
     DbgPrint("Propagated Activator", activator)
 
-    if IsValid(activator) then
+    if activator ~= self.Activator then return end
+
+    if IsValid(activator) and activator:GetScreenOverlayOwner() then
         GAMEMODE:StopScreenOverlay(activator)
+        activator:CleanScreenOverlayOwner()
         self.Activator = nil
+        self.Active = false
+        self.ActiveNum = 1
     else
         GAMEMODE:StopScreenOverlay()
+        self.Active = false
+        self.ActiveNum = 1
     end
 
     return true
