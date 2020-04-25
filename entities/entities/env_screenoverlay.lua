@@ -75,14 +75,13 @@ function ENT:StartOverlays(data, activator, caller)
         self.NextSwitch = 0
     end
 
-    activator = self:PropagatePlayerActivator(activator)
-    DbgPrint("Propagated Activator", activator)
-
-    if IsValid(activator) and activator:IsPlayer() then
-        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"], activator)
-        activator:SetScreenOverlayOwner(self)
-        self.Activator = activator
-    else
+    local ply = self:PropagatePlayerActivator(activator)
+    if IsValid(ply) and ply:IsPlayer() then
+        DbgPrint("Propagated Activator:", ply)
+        self.Activator = ply
+        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"], ply)
+        ply:SetScreenOverlayOwner(self)
+    elseif ply ~= activator then
         GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"])
     end
 
@@ -90,7 +89,7 @@ function ENT:StartOverlays(data, activator, caller)
 end
 
 function ENT:SwitchOverlay()
-    DbgPrint(self, "SwitchOverlay", self.activator, self.ActiveNum)
+    DbgPrint(self, "SwitchOverlay", self.Activator, self.ActiveNum)
 
     if self.Activator then
         GAMEMODE:StopScreenOverlay(self.Activator)
@@ -117,18 +116,15 @@ function ENT:StopOverlays(data, activator, caller)
 
     if not self.Active then return end
 
-    activator = self:PropagatePlayerActivator(activator)
-    DbgPrint("Propagated Activator", activator)
-
-    if activator ~= self.Activator then return end
-
-    if IsValid(activator) and activator:GetScreenOverlayOwner() then
-        GAMEMODE:StopScreenOverlay(activator)
-        activator:CleanScreenOverlayOwner()
+    local ply = self:PropagatePlayerActivator(activator)
+    if IsValid(ply) and ply:IsPlayer() and ply:GetScreenOverlayOwner()  and self.Activator == ply then
+        DbgPrint("Propagated Activator:", ply)
+        GAMEMODE:StopScreenOverlay(ply)
+        ply:CleanScreenOverlayOwner()
         self.Activator = nil
         self.Active = false
         self.ActiveNum = 1
-    else
+    elseif not ply:GetScreenOverlayOwner() and not self.Activator == activator then
         GAMEMODE:StopScreenOverlay()
         self.Active = false
         self.ActiveNum = 1
