@@ -1,3 +1,6 @@
+0.9.13
+- Added: env_screenoverlay multiplayer support.
+
 0.9.12
 - Fixed: Only auto switch to weapons when still holding the empty gun.
 - Fixed: HL2:EP1/HL2:DM game types not working correctly [Regression]
