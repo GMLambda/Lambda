@@ -3,6 +3,7 @@ if SERVER then
     util.AddNetworkString("LambdaPlayerSettings")
     util.AddNetworkString("LambdaPlayerSettingsChanged")
     util.AddNetworkString("LambdaPlayerDamage")
+    util.AddNetworkString("LambdaPlayerMatOverlay")
 end
 
 local DbgPrint = GetLogging("Player")
@@ -1139,6 +1140,27 @@ if SERVER then
             end
         end
         return engineEnt
+    end
+
+    function GM:StartScreenOverlay(mat, ply)
+            net.Start("LambdaPlayerMatOverlay")
+            net.WriteBool(true)
+            net.WriteString(mat)
+            if not ply then
+                net.Broadcast()
+            else
+                net.Send(ply)
+            end
+    end
+
+    function GM:StopScreenOverlay(ply)
+            net.Start("LambdaPlayerMatOverlay")
+            net.WriteBool(false)
+            if not ply then
+                net.Broadcast()
+            else
+                net.Send(ply)
+            end
     end
 
 else -- CLIENT
