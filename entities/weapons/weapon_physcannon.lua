@@ -1713,7 +1713,7 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
         self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
         self:SetNextIdleTime(CurTime() + 0.2)
 
-        ent:SetPhysicsAttacker(self:GetOwner(),30)
+        ent:SetPhysicsAttacker(self:GetOwner())
         
     end
 
