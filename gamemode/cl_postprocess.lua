@@ -138,3 +138,26 @@ end
 function GM:PostDrawOpaqueRenderables(bDrawingDepth,bDrawingSkybox)
 
 end
+
+function StartMaterialOverlay(mat)
+    hook.Add("RenderScreenspaceEffects", "ScreenOverlay", function()
+        DrawMaterialOverlay(mat, 0)
+    end)
+end
+
+function StopMaterialOverlay()
+    hook.Remove("RenderScreenspaceEffects", "ScreenOverlay")
+end
+
+net.Receive("LambdaPlayerMatOverlay", function() 
+    local state = net.ReadBool()
+    local mat
+
+    if state ~= false then
+        mat = net.ReadString()
+        StartMaterialOverlay(mat)
+    else
+        StopMaterialOverlay()
+    end
+
+end)

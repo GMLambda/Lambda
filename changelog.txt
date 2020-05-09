@@ -1,3 +1,8 @@
+0.9.13
+- Fixed: d2_coast_11: Not giving everyone weapon_bugbait
+- Fixed: d2_coast_03: Combine binoculars corrupting view for all players.
+- Added: env_screenoverlay multiplayer support.
+
 0.9.12
 - Fixed: Only auto switch to weapons when still holding the empty gun.
 - Fixed: HL2:EP1/HL2:DM game types not working correctly [Regression]

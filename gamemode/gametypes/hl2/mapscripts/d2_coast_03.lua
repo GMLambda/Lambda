@@ -65,6 +65,12 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        -- Combine and their binoculars... it just fucks your game up, nothing else.
+        ents.WaitForEntityByName("telescope", function(ent)
+            ent:SetKeyValue("wait", "20")
+            ent:SetKeyValue("spawnflags", "4")
+        end)
+
         ents.WaitForEntityByName("citizen_b_regular_original", function(ent)
             ent:SetHealth(100)
         end)

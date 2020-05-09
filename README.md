@@ -3,9 +3,7 @@
 Have you ever wanted to play the Half-Life 2 series with your friends online? Then Lambda is exactly what you are looking for. Lambda aims to provide seamless multiplayer support for the Half-Life 2 campaign maps, as well as user-created campaigns.
 
 ## Servers
-Half-Life 2 - 94.23.170.2:27016 
-
-Half-Life 2: Deathmatch - 94.23.170.2:27015
+Half-Life 2 - 176.31.255.166:27015
 
 ## Features
 - Level scenes reworked with checkpoints to be multiplayer friendly, players won't be forcibly teleported
