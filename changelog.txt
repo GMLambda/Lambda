@@ -1,6 +1,7 @@
 0.9.13
 - Fixed: d2_coast_11: Not giving everyone weapon_bugbait
 - Fixed: d2_coast_03: Combine binoculars corrupting view for all players.
+- Fixed: Players not being credited for kills with ragdolls and mega gravity gun.
 - Added: env_screenoverlay multiplayer support.
 
 0.9.12
