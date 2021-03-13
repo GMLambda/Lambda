@@ -2,9 +2,6 @@
 
 Have you ever wanted to play the Half-Life 2 series with your friends online? Then Lambda is exactly what you are looking for. Lambda aims to provide seamless multiplayer support for the Half-Life 2 campaign maps, as well as user-created campaigns.
 
-## Servers
-Half-Life 2 - 176.31.255.166:27015
-
 ## Features
 - Level scenes reworked with checkpoints to be multiplayer friendly, players won't be forcibly teleported
 - Full player and object transitioning between levels
@@ -37,6 +34,9 @@ Half-Life 2: Episode 2
 Half-Life 2: Deathmatch
 - Fully supported.
 
+Half-Life 1/Source
+ - Nope, but you can check [out this.](https://steamcommunity.com/sharedfiles/filedetails/?id=1590755372)
+
 ## Campaign/Story Creation
 This is currently a work-in-progress, but will be documented soon. Here are the current specifications:
 1. Whatever Half-Life 2 uses already works
@@ -47,4 +47,4 @@ This is currently a work-in-progress, but will be documented soon. Here are the 
 This is the Lambda code repository, for more information you can use following links:
 
 [Steam Workshop](http://steamcommunity.com/sharedfiles/filedetails/?id=780244493)  
-[Discord](https://discord.gg/K42JUbC)  
+[Discord](https://discord.gg/K42JUbC)

@@ -20,6 +20,15 @@ local iTbl = {
 	Credits = "Huge thanks to the Garry's Mod team and the Metastruct servers",
 }
 
+local msg = [[
+	Welcome to Lambda's general menu. 
+
+	Here you can cast a vote, change your player 
+	model or player options and even server settings.
+
+	Stay tuned, there is more to come.
+]]
+
 local width, height
 local startW, startH = 15, 10
 local wOffset = 17
@@ -100,6 +109,13 @@ function PANEL_ABOUT:Init()
 		offset = offset + btnPnls[b]:GetWide() + 20
 	end
 
+	local msgTxt = self:Add("DLabel")
+	msgTxt:Dock(FILL)
+	msgTxt:DockMargin(5, 60, 5, 0)
+	msgTxt:SetContentAlignment(5)
+	msgTxt:SetText(msg)
+	msgTxt:SetFont("TargetIDSmall")
+	msgTxt:SetTextColor(colWHITE)
 end
 
 function PANEL_ABOUT:PaintOver()
