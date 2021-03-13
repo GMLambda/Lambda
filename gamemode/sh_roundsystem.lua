@@ -547,12 +547,16 @@ function GM:OnNewGame()
 
     if SERVER then
 
-        local defaultGlobals = self:GetGameTypeData("DefaultGlobalState")
-        if defaultGlobals ~= nil then
-            for k,v in pairs(defaultGlobals) do
-                game.SetGlobalState(k, v)
+        local function SetDefaultGlobals()
+            local defaultGlobals = self:GetGameTypeData("DefaultGlobalState")
+            if defaultGlobals ~= nil then
+                for k,v in pairs(defaultGlobals) do
+                    game.SetGlobalState(k, v)
+                end
             end
         end
+
+        SetDefaultGlobals()
 
         self:ResetGlobalStates()
 
@@ -561,6 +565,8 @@ function GM:OnNewGame()
             for k,v in pairs(mapscriptGlobals) do
                 game.SetGlobalState(k, v)
             end
+        else
+            SetDefaultGlobals()
         end
 
         -- FIXME: Don't ignore the delay time.

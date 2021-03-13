@@ -3,6 +3,7 @@ include("huds/hud_suit.lua")
 include("huds/hud_pickup.lua")
 include("huds/hud_roundinfo.lua")
 include("huds/hud_lambda.lua")
+include("huds/hud_lambda_info.lua")
 include("huds/hud_lambda_player.lua")
 include("huds/hud_lambda_vote.lua")
 include("huds/hud_lambda_settings.lua")
@@ -25,6 +26,7 @@ local function AskWeapon(ply, hud, wep)
 end
 
 local hidehud = GetConVar("hidehud")
+local MenuCookieStr = "LambdaMenuOpened"
 
 function GM:HUDInit(reloaded)
 
@@ -47,6 +49,15 @@ function GM:HUDInit(reloaded)
     -- We call this due to resolution changes.
     self:DeathNoticeHUDInit(reloaded)
 
+    -- Setup a cookie for F1 menu notification if the player has not yet opened it
+    local function MenuNotify()
+        if cookie.GetNumber(MenuCookieStr) == 0 then self:AddHint("Press F1 to open gamemode settings menu", 15, LocalPlayer()) end
+    end
+    if not cookie.GetNumber(MenuCookieStr) then
+        cookie.Set(MenuCookieStr, 0)
+        timer.Create("F1MenuNotify", 120, 15, MenuNotify)
+    end
+    
 end
 
 function GM:HUDTick()

@@ -1,7 +1,7 @@
 local PANEL = {}
 local colWHITE = Color(255, 255, 255, 195)
 
-PANEL.Options = {["lambda_voterestart"] = "Restart Map", ["lambda_voteskip"] = "Skip map", ["lambda_votemap"] = "Change map", ["lambda_votekick"] = "Kick player"}
+PANEL.Options = {["lambda_voterestart"] = "Restart map", ["lambda_voteskip"] = "Skip map", ["lambda_votemap"] = "Change map", ["lambda_votekick"] = "Kick player"}
 PANEL.Extended = {["lambda_votemap"] = function(map) RunConsoleCommand("lambda_votemap", map) end, ["lambda_votekick"] = function(sid) RunConsoleCommand("lambda_votekick",sid) end}
 
 function PANEL:Init()

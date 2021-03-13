@@ -3,7 +3,7 @@ local colWHITE = Color(255, 255, 255, 195)
 Derma_Install_Convar_Functions(PANEL)
 
 function PANEL:Init()
-
+	self:Dock(FILL)
 	self.Settings = {}
 
 	local availableSettings = GAMEMODE:GetSettingsTable() or {}

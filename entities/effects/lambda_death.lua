@@ -1,5 +1,14 @@
 EFFECT.Mat1 = Material( "lambda/death_point.vmt" )
 
+surface.CreateFont( "LAMBDA_1_PN",
+{
+    font = "Arial",
+    size = 24,
+    weight = 1000,
+    antialias = true,
+    additive = false,
+} )
+
 function EFFECT:Init( data )
 
 	local size = 64
@@ -61,8 +70,15 @@ function EFFECT:Render( )
 
 	local signsize = math.Clamp(dist / 20, self.Size / 2, self.Size * 5)
 	local offset_z = math.Clamp(dist / 20, 50, 200)
+	local textPos = math.Clamp(signsize / 2 + dist / 20 , 10, 50)
 
 	cam.IgnoreZ(true)
+
+	cam.Start2D()
+		local pos = self:GetPos() + (dir:Forward() * (offset_z + self.Dist + textPos))
+		local scrPos = pos:ToScreen()
+		draw.SimpleTextOutlined( self.PlayerName, "LAMBDA_1_PN", scrPos.x, scrPos.y, Color( 100, 20, 20, self.Alpha * 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color( 0, 0, 0, self.Alpha * 255 - 50) )
+	cam.End2D()
 
 	self.Mat1:SetFloat("$alpha", ((self.Alpha ^ 1.1) * 255) / 255)
 

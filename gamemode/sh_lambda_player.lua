@@ -701,6 +701,12 @@ if SERVER then
 
         ply.IsCurrentlySpawning = false
 
+        -- Notify the player to start the gamemode in multiplayer to avoid any possible gamemode issues.
+        if game.SinglePlayer() == true then
+            timer.Create("SPNotify", 2, 10, function() PrintMessage(HUD_PRINTCENTER, "You are in Singleplayer mode. For a better playing experience start Lambda in Multiplayer.") end)
+            PrintMessage(HUD_PRINTTALK, "You are in Singleplayer mode. For a better playing experience start Lambda in Multiplayer.")
+        end
+
     end
 
     function GM:CheckPlayerNotStuck(ply)

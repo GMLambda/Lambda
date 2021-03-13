@@ -311,8 +311,10 @@ SKIN.Colours.TooltipText = GWEN.TextureColor( 4 + 8 * 26, 500 )
 function SKIN:PaintPanel( panel, w, h )
 
 	if not panel.m_bBackground then return end
-	self.tex.Panels.Normal( 0, 0, w, h, panel.m_bgColor )
-
+	--self.tex.Panels.Normal( 0, 0, w, h, panel.m_bgColor )
+	
+	surface.SetDrawColor( Color( 0, 0, 0, 0 ) )
+	surface.DrawRect( 0, 0, w, h )
 end
 
 --[[---------------------------------------------------------
@@ -347,6 +349,11 @@ function SKIN:PaintFrame( panel, w, h )
 
 	end
 
+	surface.SetDrawColor( Color( 20, 20, 20, 255 ) )
+	surface.DrawRect( 0, 0, w, 26 )
+
+	surface.SetDrawColor( Color( 40, 40, 40, 250 ) )
+	surface.DrawRect( 0, 26, w, h - 26 )
 end
 
 --[[---------------------------------------------------------
@@ -355,6 +362,8 @@ end
 function SKIN:PaintButton( panel, w, h )
 
 	if not panel.m_bBackground then return end
+
+	panel:SetFont("DermaDefaultBold")
 
 	if panel.Depressed or panel:IsSelected() or panel:GetToggle() then
 		return self.tex.Button_Down( 0, 0, w, h )
@@ -517,7 +526,9 @@ function SKIN:PaintPropertySheet( panel, w, h )
 	local Offset = 0
 	if ActiveTab then Offset = ActiveTab:GetTall() - 8 end
 
-	self.tex.Tab_Control( 0, Offset, w, h-Offset )
+	--self.tex.Tab_Control( 0, Offset, w, h-Offset )
+	surface.SetDrawColor( Color( 10, 10, 10, 100 ) )
+	surface.DrawRect( 0, Offset + 6, w, h - Offset )
 
 end
 
@@ -529,13 +540,16 @@ function SKIN:PaintTab( panel, w, h )
 	if panel:IsActive() then
 		return self:PaintActiveTab( panel, w, h )
 	end
-
+	panel:SetFont("DermaDefaultBold")
 	self.tex.TabT_Inactive( 0, 0, w, h )
+	surface.SetDrawColor( Color( 0, 0, 0, 0 ) )
+	surface.DrawRect( 0, 0, w, h )
 
 end
 
 function SKIN:PaintActiveTab( panel, w, h )
 
+	panel:SetFont("DermaDefaultBold")
 	self.tex.TabT_Active( 0, 0, w, h )
 
 end
