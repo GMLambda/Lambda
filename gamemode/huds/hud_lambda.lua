@@ -18,12 +18,6 @@ function PANEL:Init()
 	self.Sheet:SetSize(W - 10, H)
 	self.TabPanels = {}
 
-	local ply = LocalPlayer()
-	if ply:IsAdmin() and not isadmin then
-		table.insert(self.Tabs, {"Admin", "admin_settings"})
-		isadmin = true
-	end
-
 	for k, v in ipairs(self.Tabs) do
 		local pnl_name = "Lambda" .. v[1] .. "Panel"
 		local pnl_icon = "lambda/icons/" .. v[2] .. ".png"

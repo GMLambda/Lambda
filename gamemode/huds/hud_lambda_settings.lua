@@ -8,15 +8,21 @@ function PANEL:Init()
 	sheetSettings:Dock(LEFT)
 	sheetSettings:SetSize(375 - 10, H)
 
+	if LocalPlayer():IsAdmin() or LocalPlayer():IsSuperAdmin() then
+		local PanelAdmin = sheetSettings:Add("LambdaAdminPanel")
+		sheetSettings:AddSheet("SERVER", PanelAdmin)
+		sheetSettings["Items"][1]["Tab"]:SetTextColor(Color(245, 10, 0, 200))
+	end
+
 	local PanelCrosshair = sheetSettings:Add("LambdaCrosshairPanel")
-	sheetSettings:AddSheet("Crosshair", PanelCrosshair)
+	sheetSettings:AddSheet("CROSSHAIR", PanelCrosshair)
 
 	local PanelPostFx = sheetSettings:Add("LambdaFXPanel")
-	sheetSettings:AddSheet("Effects", PanelPostFx)
+	sheetSettings:AddSheet("EFFECTS", PanelPostFx)
 
 	local PanelColor = sheetSettings:Add("LambdaColorPanel")
 	PanelColor:SetPaintBackground(false)
-	sheetSettings:AddSheet("Colors", PanelColor)
+	sheetSettings:AddSheet("COLORS", PanelColor)
 end
 vgui.Register("LambdaSettingsPanel", PANEL, "DPanel")
 
@@ -223,7 +229,7 @@ function PANEL_COLOR:Init()
 		colMixers[k]:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
 		colMixers[k]:SetAlphaBar(false)
 		colMixers[k]:SetPalette(false)
-		colSheet:AddSheet(v, colTabs[k])
+		colSheet:AddSheet(string.upper(v), colTabs[k])
 	end
 
 	for k, v in pairs(colMixers) do
