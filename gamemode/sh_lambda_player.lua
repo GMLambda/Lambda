@@ -433,6 +433,12 @@ if SERVER then
             end
         end
 
+        -- Give sandbox related weapons if lambda is in sandbox mode
+        if lambda_sandbox:GetInt() == 1 then
+            ply:Give("weapon_physgun")
+            ply:Give("gmod_tool")
+        end
+
     end
 
     function GM:GetNextBestWeapon(ply)

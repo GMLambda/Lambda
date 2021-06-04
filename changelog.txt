@@ -1,3 +1,7 @@
+0.9.15
+- Fixed: Info tab was not being required on client
+- Added: Simple sandbox mode (Option to derive Lambda from sandbox)
+
 0.9.14
 - Fixed: Reset leftover global states if none provided in mapscript
 - Improved: The menu looks slightly better now also with a new "Info" page

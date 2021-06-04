@@ -17,6 +17,10 @@ include("sh_interpvalue.lua")
 include("sh_timestamp.lua")
 include("sh_gma.lua")
 
+if lambda_sandbox:GetInt() == 1 then
+    DeriveGamemode("sandbox")
+end
+
 include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
 include("sh_mapdata.lua")

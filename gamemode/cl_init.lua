@@ -11,7 +11,11 @@ local DbgPrint = GetLogging("Client")
 
 -- This is nasty
 function GM:OnSpawnMenuOpen()
-    RunConsoleCommand("lastinv")
+    if lambda_sandbox:GetInt() == 1 and IsValid(g_SpawnMenu) then
+        g_SpawnMenu:Open()
+    else
+    	RunConsoleCommand("lastinv")
+    end
 end
 
 function GM:NetworkEntityCreated( ent )
