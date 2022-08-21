@@ -14,7 +14,11 @@ local bor = bit.bor
 local Vector = Vector
 local Angle = Angle
 local TraceLine = util.TraceLine
+local TraceHull = util.TraceHull
 local Color = Color
+local CurTime = CurTime
+
+local TraceMask = bor(MASK_SHOT)
 
 local ATTACHMENTS_GAPS_FP =
 {
@@ -473,15 +477,14 @@ function SWEP:PrimaryAttack()
     local start = owner:GetShootPos()
     local puntDist = physcannon_tracelength:GetFloat()
     local endPos = start + (fwd * puntDist)
-    local trMask = bor(MASK_SHOT, CONTENTS_GRATE)
 
-    local tr = util.TraceHull({
+    local tr = TraceHull({
         start = start,
         endpos = endPos,
         filter = owner,
         mins = Vector(-8, -8, -8),
         maxs = Vector(8, 8, 8),
-        mask = trMask
+        mask = TraceMask
     })
 
     local valid = true
@@ -499,7 +502,7 @@ function SWEP:PrimaryAttack()
         tr = TraceLine({
             start = start,
             endpos = endPos,
-            mask = trMask,
+            mask = TraceMask,
             filter = owner,
         })
         ent = tr.Entity
@@ -553,14 +556,8 @@ function SWEP:PrimaryAttack()
         return self:PuntNonVPhysics(ent, fwd, tr)
     end
 
-    if self:IsMegaPhysCannon() == false then
-        if ent:IsVPhysicsFlesh() then
-            return self:DryFire()
-        end
-    else
-        if ent:IsRagdoll() then
-            return self:PuntRagdoll(ent, fwd, tr)
-        end
+    if ent:IsRagdoll() and ent:GetCollisionGroup() ~= COLLISION_GROUP_DEBRIS then
+        return self:PuntRagdoll(ent, fwd, tr)
     end
 
     if ent:IsWeapon() == true then
@@ -675,7 +672,7 @@ function SWEP:FindObjectInCone(start, fwd, coneSize)
         local tr = TraceLine({
             start = start,
             endpos = v:WorldSpaceCenter(),
-            mask = bor(MASK_SHOT, CONTENTS_GRATE),
+            mask = TraceMask,
             filter = self.Owner
         })
 
@@ -732,7 +729,7 @@ function SWEP:FindObjectInConeMega(start, fwd, coneSize, ballCone, onlyCombineBa
         local tr = TraceLine({
             start = start,
             endpos = v:WorldSpaceCenter(),
-            mask = bor(MASK_SHOT, CONTENTS_GRATE),
+            mask = TraceMask,
             filter = self.Owner
         })
 
@@ -886,20 +883,19 @@ function SWEP:FindObjectTrace(owner)
     local start = owner:GetShootPos()
     local testLength = self:TraceLength() * 4.0
     local endPos = start + (fwd * testLength)
-    local trMask = bor(MASK_SHOT, CONTENTS_GRATE)
 
     local tr = TraceLine({
         start = start,
         endpos = endPos,
-        mask = trMask,
+        mask = TraceMask,
         filter = owner
     })
 
     if tr.Fraction == 1 or IsValid(tr.Entity) ~= true or tr.HitWorld == true then
-        tr = util.TraceHull({
+        tr = TraceHull({
             start = start,
             endpos = endPos,
-            mask = trMask,
+            mask = TraceMask,
             filter = owner,
             mins = Vector(-4, -4, -4),
             maxs = Vector(4, 4, 4)
@@ -1186,6 +1182,7 @@ function SWEP:WeaponIdle()
         else
             self:SendWeaponAnim(ACT_VM_IDLE)
         end
+        self:DoEffect(EFFECT_READY)
     end
 
 end
@@ -1933,7 +1930,7 @@ function SWEP:DoEffectNone(pos)
     end
 
     local core2 = self.EffectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(14.0, 0.1)
+    core2.Scale:InitFromCurrent(24.0, 0.1)
     core2.Alpha:InitFromCurrent(255, 0.2)
 
 end
@@ -2084,8 +2081,8 @@ function SWEP:DoEffectHolding(pos)
     end
 
     local core2 = effectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(18.0, 0.1)
-    core2.Alpha:InitFromCurrent(220, 0.2)
+    core2.Scale:InitFromCurrent(38.0, 0.1)
+    core2.Alpha:InitFromCurrent(150, 0.2)
 
 end
 
@@ -2094,6 +2091,7 @@ function SWEP:DoEffectLaunch(pos)
     DbgPrint("DoEffectLaunch")
 
     local owner = self:GetOwner()
+    local startPos = owner:GetShootPos()
     local endPos
     local shotDir
 
@@ -2103,27 +2101,27 @@ function SWEP:DoEffectLaunch(pos)
     if pos == nil then
         if attachedEnt ~= nil then
             endPos = attachedEnt:WorldSpaceCenter()
-            shotDir = endPos - owner:GetShootPos()
+            startPos = endPos
+            shotDir = endPos - startPos
         else
-            endPos = owner:GetShootPos()
             shotDir = owner:GetAimVector()
-
             local tr = TraceLine({
-                start = endPos,
-                endpos = endPos + (shotDir * 1900),
-                mask = MASK_SHOT,
+                start = startPos,
+                endpos = startPos + (shotDir * 1900),
+                mask = TraceMask,
                 filter = owner,
             })
-
             endPos = tr.HitPos
-            shotDir = endPos - owner:GetShootPos()
+            shotDir = endPos - startPos
         end
     else
         endPos = pos
-        shotDir = endPos - owner:GetShootPos()
+        shotDir = endPos - startPos
     end
 
     shotDir:Normalize()
+
+    local corePos, _ = self:GetCorePos(owner)
 
     local ef = EffectData()
     ef:SetOrigin(endPos)
@@ -2278,43 +2276,60 @@ function SWEP:OwnerChanged()
     self:DetachObject()
 end
 
-function SWEP:FormatViewModelAttachment(pos, inverse)
+function SWEP:FormatViewModelAttachment(vOrigin, bFrom)
 
-    local origin = EyePos()
-    local fov = LocalPlayer():GetFOV()
-    local worldx = math_tan( fov * math_pi / 360.0 )
-    local viewx = math_tan( self.ViewModelFOV * math_pi / 360.0 )
-    local factorX = worldx / viewx
-    local factorY = factorX
+    local nFOV = self.ViewModelFOV
+	local vEyePos = EyePos()
+	local aEyesRot = EyeAngles()
+	local vOffset = vOrigin - vEyePos
+	local vForward = aEyesRot:Forward()
 
-    local ang = EyeAngles()
-    local right = ang:Right()
-    local up = ang:Up()
-    local fwd = ang:Forward()
+	local nViewX = math.tan(nFOV * math.pi / 360)
 
-    local tmp = pos - origin
-    local transformed = Vector( right:Dot(tmp), up:Dot(tmp), fwd:Dot(tmp) )
+	if (nViewX == 0) then
+		vForward:Mul(vForward:Dot(vOffset))
+		vEyePos:Add(vForward)
+		
+		return vEyePos
+	end
 
-    if inverse then
-        if factorX ~= 0 and factorY ~= 0 then
-            transformed.x = transformed.x / factorX
-            transformed.y = transformed.y / factorX
-        else
-            transformed.x = 0
-            transformed.y = 0
-        end
-    else
-        transformed.x = transformed.x * factorX
-        transformed.y = transformed.y * factorX
-    end
+	-- FIXME: LocalPlayer():GetFOV() should be replaced with EyeFOV() when it's binded
+	local nWorldX = math.tan(LocalPlayer():GetFOV() * math.pi / 360)
 
-    return origin + (right * transformed.x) + (up * transformed.y) + (fwd * transformed.z)
+	if (nWorldX == 0) then
+		vForward:Mul(vForward:Dot(vOffset))
+		vEyePos:Add(vForward)
+		
+		return vEyePos
+	end
+
+	local vRight = aEyesRot:Right()
+	local vUp = aEyesRot:Up()
+
+	if not (bFrom) then
+		local nFactor = nWorldX / nViewX
+		vRight:Mul(vRight:Dot(vOffset) * nFactor)
+		vUp:Mul(vUp:Dot(vOffset) * nFactor)
+	else
+		local nFactor = nViewX / nWorldX
+		vRight:Mul(vRight:Dot(vOffset) * nFactor)
+		vUp:Mul(vUp:Dot(vOffset) * nFactor)
+	end
+
+	vForward:Mul(vForward:Dot(vOffset))
+
+	vEyePos:Add(vRight)
+	vEyePos:Add(vUp)
+	vEyePos:Add(vForward)
+
+	return vEyePos
 
 end
 
 function SWEP:UpdateDrawUsingViewModel()
     if self.EffectsInvalidated == true then
         self:InvalidateEffects()
+        print("Invalidated")
         self.EffectsInvalidated = false
     end
 
@@ -2431,19 +2446,10 @@ function SWEP:DrawBeam(startPos, endPos, width, color)
 
 end
 
-function SWEP:DrawCoreBeams(owner, vm)
-
-    if vm == nil and IsValid(owner) == true then
-        vm = owner:GetViewModel()
-    elseif vm == nil then
-        vm = self
-    end
-
-    local curTime = CurTime()
+function SWEP:GetCorePos(owner, vm)
     local corePos
     local maxEndCap = PHYSCANNON_ENDCAP3
     local shouldDrawUsingViewModel = self:ShouldDrawUsingViewModel()
-
     if shouldDrawUsingViewModel == true then
         if owner ~= nil then
             if IsValid(vm) == false then
@@ -2464,7 +2470,21 @@ function SWEP:DrawCoreBeams(owner, vm)
         end
         corePos = attachmentData.Pos
     end
+    return corePos, maxEndCap
+end
 
+function SWEP:DrawCoreBeams(owner, vm)
+
+    local shouldDrawUsingViewModel = self:ShouldDrawUsingViewModel()
+    if vm == nil and IsValid(owner) == true then
+        vm = owner:GetViewModel()
+    elseif vm == nil then
+        vm = self
+    end
+
+    local curTime = CurTime()
+    local corePos, maxEndCap = self:GetCorePos(owner, vm)
+    
     local colorScale = 0.6
     local isMegaPhysCannon = self:IsMegaPhysCannon()
 
@@ -2475,10 +2495,15 @@ function SWEP:DrawCoreBeams(owner, vm)
     local wepColor = self:GetWeaponColor() * colorScale
     local color = Color(wepColor.x * 255, wepColor.y * 255, wepColor.z * 255, 255)
     local beamDrawn = false
-    local beamWidth = 0.0
     local endPos
     local beamParameters = self.BeamParameters
     local effectParameters = self.EffectParameters
+
+    -- Swirl around the core.
+    local coreDist = 1.0
+    local corePosX = math.sin(CurTime()) * coreDist
+    local corePosY = math.cos(CurTime() + corePosX) * coreDist
+    local corePosZ = math.cos(CurTime() + corePosY) * coreDist
 
     render.SetMaterial(MAT_PHYSBEAM)
 
@@ -2522,17 +2547,13 @@ function SWEP:DrawCoreBeams(owner, vm)
             endPos = attachmentData.Pos
         end
 
-        local width = (5 + util.RandomFloat(0, 5)) * beamdata.Scale:Interp(curTime)
+        local width = (5 + util.RandomFloat(1, 15)) * beamdata.Scale:Interp(curTime)
 
         if width <= 0.0 then
             continue
         end
 
-        if width > beamWidth then
-            beamWidth = width
-        end
-
-        self:DrawBeam(endPos, corePos, width, color)
+        self:DrawBeam(endPos, corePos + Vector(corePosX, corePosY, corePosZ), width, color)
         beamDrawn = true
     end
 
@@ -2553,7 +2574,18 @@ function SWEP:SetupEffects()
     local effects = {}
     local beams = {}
 
-    local init = false
+    local shouldUseViewModel = self:ShouldDrawUsingViewModel()
+    local vm = self
+
+    if shouldUseViewModel then
+        local owner = self:GetOwner()
+        if IsValid(owner) == true then
+            local ownerVm = owner:GetViewModel()
+            if IsValid(ownerVm) then
+                vm = ownerVm
+            end
+        end
+    end
 
     -- Core
     do
@@ -2566,7 +2598,6 @@ function SWEP:SetupEffects()
             Col = Color(255, 255, 255),
         }
         effects[PHYSCANNON_CORE] = data
-        init = true
     end
 
     -- Blast
@@ -2580,7 +2611,6 @@ function SWEP:SetupEffects()
             Col = Color(255, 255, 255),
         }
         effects[PHYSCANNON_BLAST] = data
-        init = true
     end
 
     -- Glow sprites
@@ -2595,13 +2625,13 @@ function SWEP:SetupEffects()
         }
 
         local attachmentName
-        if self:ShouldDrawUsingViewModel() == true then
+        if shouldUseViewModel == true then
             attachmentName = ATTACHMENTS_GLOW_FP[n]
         else
             attachmentName = ATTACHMENTS_GLOW_TP[n]
         end
 
-        data.Attachment = self:LookupAttachment(attachmentName)
+        data.Attachment = vm:LookupAttachment(attachmentName)
 
         if data.Attachment == 0 then
             DbgPrint("Missing attachment: " .. tostring(attachmentName))
@@ -2612,7 +2642,7 @@ function SWEP:SetupEffects()
         init = true
     end
 
-    if self:ShouldDrawUsingViewModel() == true then
+    if shouldUseViewModel == true then
         attachmentGaps = ATTACHMENTS_GAPS_FP
     else
         attachmentGaps = ATTACHMENTS_GAPS_TP
@@ -2639,22 +2669,19 @@ function SWEP:SetupEffects()
         local data = {
             Scale = InterpValue(0.15 * SPRITE_SCALE, 0.15 * SPRITE_SCALE, 0.0),
             Alpha = InterpValue(255, 255, 0),
-            Attachment = self:LookupAttachment(attachmentName),
+            Attachment = vm:LookupAttachment(attachmentName),
             Visible = false,
             Mat = Material(PHYSCANNON_ENDCAP_SPRITE),
             Col = Color(255, 128, 0, 255),
         }
 
         effects[i] = data
-
         n = n + 1
-        init = true
-
     end
 
     do
         local data = {
-            Scale = InterpValue(0.0, 0.0, 0.1),
+            Scale = InterpValue(0.0, 0.0, 1.1),
             Alpha = InterpValue(255, 255, 0.1),
             Attachment = 1,
             Mat = Material(PHYSCANNON_CORE_WARP),
@@ -2662,7 +2689,6 @@ function SWEP:SetupEffects()
             Col = Color(255, 0, 0),
         }
         effects[PHYSCANNON_CORE_2] = data
-        init = true
     end
 
     if init == true then
