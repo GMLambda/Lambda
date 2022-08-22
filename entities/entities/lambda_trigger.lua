@@ -274,6 +274,15 @@ if SERVER then
         end
     end
 
+    function ENT:GetTimeout()
+        local timeout = self:GetNWVar("Timeout", 0)
+        if timeout ~= 0 then
+            return timeout
+        end
+        local setting = GAMEMODE:GetSetting("checkpoint_timeout")
+        return setting
+    end
+
     function ENT:OnRemove()
         -- Only send the info if really needed.
         self.TeamInside = false
@@ -359,9 +368,10 @@ if SERVER then
             if playersInside > 0 then
                 if self:GetNWVar("Disabled") == false then
                     if self.IsWaiting == false and playersInside > 0 then
-                        if self:GetNWVar("Timeout", 0) > 0 then
+                        local timeout = self:GetTimeout()
+                        if timeout > 0 then
                             DbgPrint("Setting next timeout")
-                            self.NextTimeout = GetSyncedTimestamp() + self:GetNWVar("Timeout", 0)
+                            self.NextTimeout = GetSyncedTimestamp() + timeout
                         else
                             DbgPrint("No timeout set")
                         end
@@ -424,21 +434,30 @@ if SERVER then
 
         --DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. tostring(self.WaitTime))
         --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
+        local timeoutEvent = false
         if self:GetNWVar("WaitForTeam") == true  then
             --DbgPrint("Waiting")
             if self.TeamInside == false then
-                local timeout = self:GetNWVar("Timeout", 0)
-                if timeout == 0 then
-                    --DbgPrint("timeout is 0!")
+                local timeout = self:GetTimeout()
+                if self.NextTimeout == 0 then
+                    -- Wait for all players without timeout.
                     return
-                elseif timeout > 0 and self.NextTimeout == 0 then
-                    return
-                elseif self.NextTimeout > 0 and GetSyncedTimestamp() < self.NextTimeout then
-                    return
+                else
+                    if GetSyncedTimestamp() < self.NextTimeout then
+                        return
+                    else
+                        -- Timeout event
+                        timeoutEvent = true
+                        self.NextTimeout = 0
+                    end
                 end
             else
                 self.IsWaiting = false
             end
+        end
+
+        if timeoutEvent == true then
+            self:OnTimeout()
         end
 
         if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
@@ -456,10 +475,66 @@ if SERVER then
 
     end
 
+    function ENT:TeleportAllToTrigger()
+
+        local missingEnts = {}
+        for _,v in pairs(ents.GetAll()) do
+            if not self:IsEntityTouching(v) and self:PassesTriggerFilters(v) then
+                local isAlive = true
+                if v:IsPlayer() then
+                    isAlive = v:Alive()
+                end
+                if isAlive then
+                    table.insert(missingEnts, v)
+                end
+            end
+        end
+
+        -- Teleport missing objects into the box
+        local centerPos = Vector(0, 0, 0)
+        local numEntries = 0
+        for k,_ in pairs(self.TouchingObjects) do
+            local ent = Entity(k)
+            if IsValid(ent) then
+                local pos  = ent:GetPos()
+                centerPos:Add(pos)
+                numEntries = numEntries + 1
+            end
+        end
+
+        if numEntries > 0 then
+            centerPos = centerPos / numEntries
+        else
+            -- This should in theory never happen but in case it does
+            -- lets have the location not at 0,0,0
+            centerPos = self:OBBCenter()
+        end
+
+        for _,v in pairs(missingEnts) do
+            if v:IsPlayer() then
+                v:TeleportPlayer(centerPos)
+            else
+                v:SetPos(centerPos)
+            end
+            -- Add to touching objects
+            self.TouchingObjects[v:EntIndex()] = CurTime()
+        end
+
+    end
+
+    function ENT:OnTimeout()
+
+        -- Teleport all entities that passes the filter rules
+        self:TeleportAllToTrigger()
+
+        -- Fire custom output
+        self:FireOutputs("OnWaitTimeout", nil, nil)
+
+    end
+
     function ENT:StartTouch(ent)
 
         --DbgPrint(self, "StartTouch(" .. tostring(ent) .. ")")
-
         local entIndex = ent:EntIndex()
 
         if self:GetNWVar("Disabled") == true then
@@ -564,11 +639,13 @@ if SERVER then
 
     end
 
+    function ENT:IsEntityTouching(ent)
+        local id = ent:EntIndex()
+        return self.TouchingObjects[id] ~= nil
+    end
+
     function ENT:IsPlayerTouching(ply)
-
-        local plyId = ply:EntIndex()
-        return self.TouchingObjects[plyId] ~= nil
-
+        return self:IsEntityTouching(ply)
     end
 
     function ENT:GetTouchingObjects()

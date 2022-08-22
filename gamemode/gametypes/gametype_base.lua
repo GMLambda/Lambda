@@ -433,6 +433,16 @@ function GAMETYPE:InitSettings()
         Clamp = { Min = 0, Max = 100 },
     })
 
+    GAMEMODE:AddSetting("checkpoint_timeout", {
+        Category = "SERVER",
+        NiceName = "#GM_CHECKPOINTTIMEOUT",
+        Description = "Checkpoint timeout, 0 disables the timeout",
+        Type = "int",
+        Default = 60,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 100 },
+    })
+
     GAMEMODE:AddSetting("player_god", {
         Category = "SERVER",
         NiceName = "#GM_GODMODE",
