@@ -17,6 +17,7 @@ local TraceLine = util.TraceLine
 local TraceHull = util.TraceHull
 local Color = Color
 local CurTime = CurTime
+local EffectsInvalidated = false
 
 local TraceMask = bor(MASK_SHOT)
 
@@ -134,14 +135,13 @@ local physcannon_mega_tracelength = CreateConVar("physcannon_mega_tracelength", 
 local physcannon_mega_pullforce = CreateConVar("physcannon_mega_pullforce", "8000", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 local physcannon_ball_cone = CreateConVar("physcannon_ball_cone", "0.997", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED) );
 
-local physcannon_glow
-local physcannon_glow_mode
-
+local physcannon_glow_mode = false
 if CLIENT then
-    physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE) );
+    local physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE) );
     physcannon_glow_mode = physcannon_glow:GetInt()
     cvars.AddChangeCallback( "physcannon_glow", function( convar_name, value_old, value_new )
-        physcannon_glow_mode = value_new
+        physcannon_glow_mode = tonumber(value_new)
+        EffectsInvalidated = true
     end )
 end
 
@@ -1273,7 +1273,7 @@ function SWEP:EmitLight(glowMode, pos, brightness, color)
         if pt == nil then
             pt = ProjectedTexture()
             pt:SetTexture( "effects/flashlight/soft" )
-            pt:SetFarZ(200)
+            pt:SetFarZ(150)
             self.ProjectedTexture = pt
         end
         local owner = self:GetOwner()
@@ -1328,22 +1328,22 @@ function SWEP:UpdateGlow()
     end
 
     local glowMode = physcannon_glow_mode
-
+    
     -- If disabled and previously enabled remove projected texture.
     if (glowMode == 0 or glowMode == 2) and self.ProjectedTexture ~= nil then
         self.ProjectedTexture:Remove()
         self.ProjectedTexture = nil
     end
-
+    
     if glowMode == 0 then
         return
     end
-
+    
     local curTime = CurTime()
     if curTime < self.NextGlowUpdate then
         return
     end
-
+    
     local entPos = nil
     local owner = self:GetOwner()
     if self:ShouldDrawUsingViewModel() == true then
@@ -1353,9 +1353,7 @@ function SWEP:UpdateGlow()
             return
         end
         entIndex = vm:EntIndex()
-        --entPos = owner:GetShootPos() + (owner:GetAimVector() * 35)
-        entPos = owner:GetShootPos() - (owner:GetAimVector() * 15)
-        --entPos = 
+        entPos = attachment.Pos - (owner:GetAimVector() * 15)
     else
         entIndex = self:EntIndex()
         local attachment = self:GetAttachment(1)
@@ -1364,18 +1362,18 @@ function SWEP:UpdateGlow()
         end
         entPos = attachment.Pos + (attachment.Ang:Forward() * 3.5)
     end
-
+    
     local wepColor = self:GetWeaponColor()
     local currentColor = self.CurrentWeaponColor
     currentColor.r = wepColor.r * 255
     currentColor.g = wepColor.g * 255
     currentColor.b = wepColor.b * 255
-
+    
     local brightness = 0.5
     if self:IsMegaPhysCannon() == true then
         brightness = 1
     end
-
+    
     self:EmitLight(glowMode, entPos, brightness * 0.5, currentColor)
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 
@@ -2327,10 +2325,9 @@ function SWEP:FormatViewModelAttachment(vOrigin, bFrom)
 end
 
 function SWEP:UpdateDrawUsingViewModel()
-    if self.EffectsInvalidated == true then
+    if EffectsInvalidated == true then
         self:InvalidateEffects()
-        print("Invalidated")
-        self.EffectsInvalidated = false
+        EffectsInvalidated = false
     end
 
     local newValue = self:IsCarriedByLocalPlayer() and LocalPlayer():ShouldDrawLocalPlayer() == false
@@ -2345,7 +2342,7 @@ function SWEP:UpdateDrawUsingViewModel()
     end
 
     -- Mark for next frame otherwise positions are incorrect.
-    self.EffectsInvalidated = newValue ~= self.DrawUsingViewModel
+    EffectsInvalidated = newValue ~= self.DrawUsingViewModel
     self.DrawUsingViewModel = newValue
 end
 
@@ -2557,13 +2554,12 @@ function SWEP:DrawCoreBeams(owner, vm)
         beamDrawn = true
     end
 
-    if beamDrawn == true and physcannon_glow:GetBool() == true and curTime >= self.NextBeamGlow then
+    if beamDrawn == true and physcannon_glow_mode == 1 and curTime >= self.NextBeamGlow then
         local brightness = 0.5
         if isMegaPhysCannon == true then
             brightness = 1
         end
-
-        self:EmitLight(corePos, brightness, color)
+        self:EmitLight(physcannon_glow_mode, corePos, brightness, color)
         self.NextBeamGlow = curTime + GLOW_UPDATE_DT
     end
 
@@ -2892,7 +2888,7 @@ function SWEP:UpdateEffects()
             beamdata.Scale:InitFromCurrent(0.5, 0.1)
             beamdata.Lifetime = 0.05 + (math.random() * 0.1)
 
-            if physcannon_glow:GetBool() == true then
+            if physcannon_glow_mode == 1 then
 
                 local params = self.EffectParameters[i]
                 if params == nil then
@@ -2914,7 +2910,7 @@ function SWEP:UpdateEffects()
                     brightness = 1
                 end
 
-                self:EmitLight(attachmentData.Pos, brightness, color)
+                self:EmitLight(physcannon_glow_mode, attachmentData.Pos, brightness, color)
                 self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
             end
 
