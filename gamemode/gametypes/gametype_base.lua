@@ -420,7 +420,7 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 20,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 100 },
+        Clamp = { Min = 0, Max = 600 },
     })
 
     GAMEMODE:AddSetting("map_change_timeout", {
@@ -430,7 +430,7 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 100 },
+        Clamp = { Min = 0, Max = 600 },
     })
 
     GAMEMODE:AddSetting("checkpoint_timeout", {
@@ -440,7 +440,7 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 100 },
+        Clamp = { Min = 0, Max = 600 },
     })
 
     GAMEMODE:AddSetting("player_god", {
