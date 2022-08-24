@@ -1,4 +1,5 @@
 0.9.15
+- Feature: Checkpoints can now have a timeout, setting is controlled by 'lambda_checkpoint_timeout', 0 disables the timeout.
 - Fixed: Gravity Gun not being able to get objects behind fences.
 - Fixed: Gravity Gun not allowing to punt non-debris ragdolls.
 - Fixed: Gravity Gun effects breaking when transitioning from third-person to first-person view.
