@@ -428,3 +428,34 @@ end
 
 function GM:PlayerClassChanged( ply, newID )
 end
+
+function GM:PostDrawOpaqueRenderables()
+
+    local ply = LocalPlayer()
+    if not IsValid(ply) then
+        return
+    end
+
+    if self:ShouldDrawLocalPlayer(ply) ~= true then
+        return
+    end
+
+    local viewlock = ply:GetViewLock()
+    if viewlock ~= VIEWLOCK_SETTINGS_ON and viewlock ~= VIEWLOCK_SETTINGS_RELEASE then
+        return
+    end
+
+    -- Draw player on top of everything when the viewlock is active.
+    cam.IgnoreZ(true)
+    render.SuppressEngineLighting(true)
+
+    ply:DrawModel()
+    local wep = ply:GetActiveWeapon()
+    if IsValid(wep) then
+        wep:DrawModel()
+    end
+
+    render.SuppressEngineLighting(false)
+    cam.IgnoreZ(false)
+
+end
