@@ -185,8 +185,12 @@ function GAMETYPE:GetItemRespawnTime()
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then return false end
-
+    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then 
+        return false 
+    end
+    if ent.ShouldRespawnWeapon ~= nil and ent:ShouldRespawnWeapon() == false then
+        return false
+    end
     return true
 end
 
@@ -221,6 +225,9 @@ function GAMETYPE:CanPlayerSpawn(ply, spawn)
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
+    if IsValid(ent) and ent:GetClass() == "item_suit" then
+        return true
+    end
     return false
 end
 

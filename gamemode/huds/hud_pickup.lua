@@ -73,6 +73,10 @@ function GM:HUDWeaponPickedUp( wep )
 	if ( !IsValid( LocalPlayer() ) || !LocalPlayer():Alive() ) then return end
 	if ( !IsValid( wep ) ) then return end
 	if ( !isfunction( wep.GetPrintName ) ) then return end
+	
+	if wep.ShouldHidePickupInfo ~= nil and wep:ShouldHidePickupInfo() == true then
+		return
+	end
 
 	local pickup = {}
 	pickup.time			= CurTime()

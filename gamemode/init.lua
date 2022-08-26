@@ -53,7 +53,16 @@ end
 
 function GM:InsertLevelDesignerPlacedObject(obj)
     local objects = self.LevelRelevantObjects or {}
-    objects[obj] = { class = obj:GetClass(), pos = obj:GetPos(), ang = obj:GetAngles(), name = obj:GetName() }
+    objects[obj] = { 
+        class = obj:GetClass(),
+        pos = obj:GetPos(),
+        ang = obj:GetAngles(),
+        name = obj:GetName(),
+        outputs = table.Copy(obj.EntityOutputs or {}),
+    }
+    if not table.IsEmpty(objects[obj].outputs) then
+        PrintTable(objects[obj])
+    end
     self.LevelRelevantObjects = objects
 end
 

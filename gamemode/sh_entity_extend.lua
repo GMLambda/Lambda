@@ -360,6 +360,7 @@ function ENTITY_META:EnableRespawn(state, time)
         time = time or 1
 
         self:CallOnRemove("LambdaRespawn", function(ent)
+            --[[
             local class = ent:GetClass()
             local pos = ent:GetPos()
             local ang = ent:GetAngles()
@@ -373,7 +374,8 @@ function ENTITY_META:EnableRespawn(state, time)
                 new:Spawn()
                 new:EnableRespawn(true)
             end)
-
+            ]]
+            GAMEMODE:RespawnObject(ent, time)
         end)
 
     else
