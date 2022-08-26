@@ -44,6 +44,13 @@ function PANEL:OnKeyCodePressed(key)
 		self:Close()
 	end
 end
+
+function PANEL:Think()
+	if input.IsKeyDown(KEY_ESCAPE) then
+		self:Close()
+		gui.HideGameUI()
+	end
+end
 vgui.Register("HudPlayerSettings", PANEL, "DFrame")
 
 
@@ -65,11 +72,12 @@ net.Receive("LambdaPlayerSettings", function(len)
 	end
 end)
 
-function ShowSettings()
+function ShowSettings(tab)
 	if LAMBDA_PLAYER_SETTINGS ~= nil then
 		LAMBDA_PLAYER_SETTINGS:Remove()
 	end
 	LAMBDA_PLAYER_SETTINGS = vgui.Create("HudPlayerSettings")
 	LAMBDA_PLAYER_SETTINGS:MakePopup()
 	LAMBDA_PLAYER_SETTINGS:SetSkin("Lambda")
+	LAMBDA_PLAYER_SETTINGS:SetTab(tab or 1)
 end
