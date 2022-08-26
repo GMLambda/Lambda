@@ -10,7 +10,7 @@ function PANEL:Init()
 	self:SetSkin("Lambda")
 	self:SetSize(W, H)
 	self:SetPos(20, ScrH() / 2 - (H / 2))
-	self:SetTitle("")
+	self:SetTitle("SETTINGS - " .. string.upper(GAMEMODE:GetGameTypeData("Name")))
 
 	self.Sheet = self:Add("DPropertySheet")
 	self.Sheet.RootPanel = self

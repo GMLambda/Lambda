@@ -4,6 +4,7 @@ Derma_Install_Convar_Functions(PANEL)
 
 function PANEL:Init()
 	self:Dock(FILL)
+	self:DockPadding(0, 0, 22, 0)
 	self.Settings = {}
 
 	local availableSettings = GAMEMODE:GetSettingsTable() or {}

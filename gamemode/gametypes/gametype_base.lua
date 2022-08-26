@@ -436,7 +436,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("checkpoint_timeout", {
         Category = "SERVER",
         NiceName = "#GM_CHECKPOINTTIMEOUT",
-        Description = "Checkpoint timeout, 0 disables the timeout",
+        Description = "Checkpoint timeout",
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
