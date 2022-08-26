@@ -33,18 +33,46 @@ if SERVER then
 
         local posLocked = ply:IsPositionLocked()
         if posLocked == false then
-            self:TogglePlayerSettings(ply, true)
+            self:TogglePlayerSettings(ply, true, 1)
         end
 
     end
 
-    function GM:TogglePlayerSettings(ply, state)
+    function GM:ShowTeam(ply)
+
+        local posLocked = ply:IsPositionLocked()
+        if posLocked == false then
+            self:TogglePlayerSettings(ply, true, 2)
+        end
+
+    end
+
+    function GM:ShowSpare1(ply)
+
+        local posLocked = ply:IsPositionLocked()
+        if posLocked == false then
+            self:TogglePlayerSettings(ply, true, 3)
+        end
+
+    end
+
+    function GM:ShowSpare2(ply)
+
+        local posLocked = ply:IsPositionLocked()
+        if posLocked == false then
+            self:TogglePlayerSettings(ply, true, 4)
+        end
+
+    end
+
+    function GM:TogglePlayerSettings(ply, state, tab)
 
         if state == true then
             DbgPrint(ply, "Changing to settings")
             ply:LockPosition(true, VIEWLOCK_SETTINGS_ON)
             net.Start("LambdaPlayerSettings")
             net.WriteBool(true)
+            net.WriteUInt(tab, 3)
             net.Send(ply)
         else
             DbgPrint(ply, "Leaveing settings")

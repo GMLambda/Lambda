@@ -29,6 +29,10 @@ function PANEL:Init()
 	cookie.Set("LambdaMenuOpened", 1)
 end
 
+function PANEL:SetTab(tab)
+	self.Sheet:SetActiveTab(self.Sheet:GetItems()[tab].Tab)
+end
+
 function PANEL:OnClose()
 	net.Start("LambdaPlayerSettings")
 	net.WriteBool(false)
@@ -36,7 +40,7 @@ function PANEL:OnClose()
 end
 
 function PANEL:OnKeyCodePressed(key)
-	if key == KEY_F1 then
+	if key == KEY_F1 or key == KEY_F2 or key == KEY_F3 or key == KEY_F4 then
 		self:Close()
 	end
 end
@@ -45,6 +49,9 @@ vgui.Register("HudPlayerSettings", PANEL, "DFrame")
 
 net.Receive("LambdaPlayerSettings", function(len)
 	local state = net.ReadBool()
+	local tab = net.ReadUInt(3) 
+
+	if tab > 4 then tab = 1 end
 
 	if LAMBDA_PLAYER_SETTINGS ~= nil then
 		LAMBDA_PLAYER_SETTINGS:Remove()
@@ -54,6 +61,7 @@ net.Receive("LambdaPlayerSettings", function(len)
 		LAMBDA_PLAYER_SETTINGS = vgui.Create("HudPlayerSettings")
 		LAMBDA_PLAYER_SETTINGS:MakePopup()
 		LAMBDA_PLAYER_SETTINGS:SetSkin("Lambda")
+		LAMBDA_PLAYER_SETTINGS:SetTab(tab)
 	end
 end)
 
