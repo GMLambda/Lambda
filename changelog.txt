@@ -5,6 +5,7 @@
 - Fixed: Gravity Gun effects breaking when transitioning from third-person to first-person view.
 - Fixed: Gravity Gun not respecting setting for glow mode.
 - Fixed: Gravity Gun light comes from player instead of the gun.
+- Improved: Miscellaneous improvements to the gamemode menu.
 - Improved: Render always the player when in settings menu.
 - Changed: Do not give all weapons on missing map scripts.
 
