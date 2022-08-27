@@ -4,7 +4,7 @@ local DbgPrint = GetLogging("Commands")
 local restrictedStr = "Unauthorized access for command: "
 
 -- Check for user rights if ran by player or it is ran by console
-local function plyCheck(ply)
+local function isAuthority(ply)
 
     if IsValid(ply) and ply:IsAdmin() or not IsValid(ply) then return true end 
     return false 
@@ -26,7 +26,7 @@ function GM:RegisterCommand(name, fn, helptext, flags, restricted)
     if restricted == true then
         local _fn = fn
         fn = function(ply, cmd, args) 
-            if plyCheck(ply) then 
+            if isAuthority(ply) then 
                 _fn(ply, cmd, args) 
             else 
                 ply:ChatPrint(restrictedStr .. name, 10, ply)
