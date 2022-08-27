@@ -78,13 +78,13 @@ GM:RegisterCommand("reload",
     true)
 
 GM:RegisterCommand("nextmap",
-    function() GAMEMODE:GetNextMap() game.ConsoleCommand("changelevel " .. nextmap .. "\n") end,
+    function() game.ConsoleCommand("changelevel " .. GAMEMODE:GetNextMap() .. "\n") end,
     "Change map to the next one",
     bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE),
     true)
 
 GM:RegisterCommand("prevmap",
-    function() GAMEMODE:GetPrevMap() game.ConsoleCommand("changelevel " .. nextmap .. "\n") end,
+    function() game.ConsoleCommand("changelevel " .. GAMEMODE:GetPreviousMap() .. "\n") end,
     "Change map to the previous one",
     bit.bor(FCVAR_CLIENTCMD_CAN_EXECUTE,  FCVAR_SERVER_CAN_EXECUTE),
     true)
