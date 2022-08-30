@@ -4,6 +4,7 @@ Derma_Install_Convar_Functions(PANEL)
 
 function PANEL:Init()
 	self:Dock(FILL)
+	self:DockPadding(0, 0, 22, 0)
 	self.Settings = {}
 
 	local availableSettings = GAMEMODE:GetSettingsTable() or {}
@@ -71,6 +72,21 @@ function PANEL:AddIntOption(x, y, id, setting)
 	pnl.lbl:SetText(setting.Description)
 	pnl.lbl:SizeToContents()
 	pnl.lbl:SetVisible(true)
+
+	-- For options with some more information on them
+	if setting.HelpText then
+		pnl.tp = self:Add("DPanel")
+		pnl.tp:SetPos(x, 5 + y)
+		pnl.tp:SetSize(w + pnl.lbl:GetWide() + 25, y)
+		pnl.tp:SetTooltip(setting.HelpText)
+
+		pnl.ht = self:Add("DImage")
+		pnl.ht:SetPos(w + pnl.lbl:GetWide() + 15, y + 9)
+		pnl.ht:SetImage("lambda/icons/info.png")
+		pnl.ht:SetSize(10, 10)
+		pnl.ht:SetImageColor(Color(105, 105, 225, 195))
+		pnl.ht:SetVisible(true)
+	end
 
 	pnl.OnValueChanged = function(self, v)
 		GAMEMODE:ChangeAdminConfiguration(id, v)

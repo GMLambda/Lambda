@@ -98,6 +98,7 @@ function GM:AddSetting(id, option, fn)
     setting.Name = id
     setting.NiceName = option.NiceName
     setting.Description = option.Description
+    setting.HelpText = option.HelpText
     setting.Type = option.Type
     setting.Flags = option.flags
     setting.CVar = GetConVar(actualName)

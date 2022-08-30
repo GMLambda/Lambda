@@ -69,8 +69,17 @@
 			"type"		"Numeric"
 			"default"	"120"
 		}
-		
+
 		8
+		{
+			"name"		"lambda_checkpoint_timeout"
+			"text"		"Checkpoint timeout"
+			"help"		"How long before people are moved to current waiting checkpoint (0 is disabled)"
+			"type"		"Numeric"
+			"default"	"60"
+		}
+		
+		9
 		{
 			"name"		"lambda_gametype"
 			"text"		"Gametype"
