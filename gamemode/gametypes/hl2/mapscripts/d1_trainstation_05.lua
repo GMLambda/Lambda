@@ -20,7 +20,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -57,22 +56,14 @@ function MAPSCRIPT:PostInit()
 
         local mapscript = self
 
-        -- We gotta give all players the suit, some might be not so willing to take it and thats bad.
+        -- Enable HEV as soon someone gets it.
         GAMEMODE:WaitForInput("suiton", "Enable", function(ent)
-            for _,v in pairs(player.GetAll()) do
-                -- Equip suit.
-                v:EquipSuit()
-                v:SetHealth(100)
-
-                -- Update model.
-                GAMEMODE:PlayerSetModel(v)
-
-                local loadout = GAMEMODE:GetMapScript().DefaultLoadout
-                loadout.HEV = true
-            end
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            loadout.HEV = true
         end)
 
         for _,v in pairs(ents.FindByClass("item_suit")) do
+            -- Typically not an item we respawn at all times, manually flag it.
             v:EnableRespawn(true)
         end
 
