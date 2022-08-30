@@ -58,6 +58,7 @@ function GM:InsertLevelDesignerPlacedObject(obj)
         pos = obj:GetPos(),
         ang = obj:GetAngles(),
         name = obj:GetName(),
+        spawnflags = obj:GetSpawnFlags(),
         outputs = table.Copy(obj.EntityOutputs or {}),
     }
     if not table.IsEmpty(objects[obj].outputs) then

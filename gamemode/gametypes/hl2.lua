@@ -181,7 +181,7 @@ function GAMETYPE:GetWeaponRespawnTime()
 end
 
 function GAMETYPE:GetItemRespawnTime()
-    return -1
+    return 0.5
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
@@ -225,9 +225,6 @@ function GAMETYPE:CanPlayerSpawn(ply, spawn)
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
-    if IsValid(ent) and ent:GetClass() == "item_suit" then
-        return true
-    end
     return false
 end
 
