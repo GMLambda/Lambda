@@ -5,6 +5,7 @@
 - Fixed: Gravity Gun effects breaking when transitioning from third-person to first-person view.
 - Fixed: Gravity Gun not respecting setting for glow mode.
 - Fixed: Gravity Gun light comes from player instead of the gun.
+- Fixed: SWEPS fired by NPCs being extremly inaccurate.
 - Improved: Miscellaneous improvements to the gamemode menu.
 - Improved: Console command registration.
 - Improved: Render always the player when in settings menu.
