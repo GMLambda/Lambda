@@ -186,6 +186,7 @@ function GM:OnReloaded()
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()
+    self:InitializeDifficulty()
 end
 
 function GM:MountRequiredContent()
