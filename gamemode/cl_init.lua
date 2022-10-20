@@ -447,7 +447,14 @@ function GM:PostDrawOpaqueRenderables()
 
     -- Draw player on top of everything when the viewlock is active.
     cam.IgnoreZ(true)
+
     render.SuppressEngineLighting(true)
+    render.SetLightingOrigin( ply:GetPos() )
+    render.ResetModelLighting( 1, 1, 1 )
+    render.SetAmbientLight(1,1,1)
+    for i = 0, 6 do
+        render.SetModelLighting( i, 0.5, 0.5, 0.5 )
+    end
 
     ply:DrawModel()
     local wep = ply:GetActiveWeapon()
