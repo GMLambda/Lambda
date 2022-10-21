@@ -234,7 +234,6 @@ function GM:PlayerCanPickupItem(ply, item)
     if self:CallGameTypeFunc("ShouldRespawnItem", item) == true then
         self:RespawnObject(item)
     else
-        print("Not respawning item: " .. class)
         return true
     end
 
