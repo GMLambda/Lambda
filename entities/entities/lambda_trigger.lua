@@ -61,7 +61,10 @@ if SERVER then
         self:SetupNWVar("WaitForTeam", "bool", { Default = false, KeyValue = "teamwait"} )
         self:SetupNWVar("LockPlayers", "bool", { Default = false, KeyValue = "lockplayers"} )
         self:SetupNWVar("Blocked", "bool", { Default = false, KeyValue = "blocked", OnChange = self.HandleBlockingUpdate } )
+        -- If WaitForTeam is enabled this specifies the timeout to when to force trigger.
         self:SetupNWVar("Timeout", "float", { Default = 0, KeyValue = "timeout" } )
+        -- Teleport all players on timeout.
+        self:SetupNWVar("TimeoutTeleport", "bool", { Default = true, KeyValue = "timeoutteleport"})
         self:SetupNWVar("DisableEndTouch", "bool", { Default = false, KeyValue = "disableendtouch" })
         self:SetupNWVar("ShowWait", "bool", { Default = true, KeyValue = "showwait" })
         self:SetupNWVar("MessagePos", "vector", { Default = Vector(0, 0, 0), KeyValue = "messagepos" })
@@ -466,7 +469,7 @@ if SERVER then
         end
 
         if timeoutEvent == true then
-            self:OnTimeout()
+            self:FireOnTimeout()
         end
 
         if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
@@ -531,13 +534,19 @@ if SERVER then
 
     end
 
-    function ENT:OnTimeout()
+    function ENT:FireOnTimeout()
 
         -- Teleport all entities that passes the filter rules
-        self:TeleportAllToTrigger()
+        if self:GetNWVar("TimeoutTeleport", false) == true then
+            self:TeleportAllToTrigger()
+        end
 
         -- Fire custom output
         self:FireOutputs("OnWaitTimeout", nil, nil)
+
+        if self.OnWaitTimeout ~= nil and isfunction(self.OnWaitTimeout) then
+            self:OnWaitTimeout()
+        end
 
     end
 
@@ -1113,7 +1122,7 @@ else -- CLIENT
             remaining = 0
         end
 
-        local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5)
+        local bounce = math.sin(SysTime() * 5) + math.cos(SysTime() * 5)
         pos = pos + (Vector(0, 0, 1) * bounce)
 
         local screenPos = pos:ToScreen()
