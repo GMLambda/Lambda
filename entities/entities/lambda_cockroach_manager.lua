@@ -10,7 +10,6 @@ local HIDING_MODELS =
 {
     ["models/props_junk/wood_crate001a.mdl"] = true,
     ["models/props_junk/wood_pallet001a.mdl"] = true,
-    ["models/props_vehicles/car004b_physics.mdl"] = true,
     ["models/props_junk/cardboard_box001a.mdl"] = true,
     ["models/props_junk/cardboard_box001b.mdl"] = true,
     ["models/props_junk/trashdumpster01a.mdl"] = true,
