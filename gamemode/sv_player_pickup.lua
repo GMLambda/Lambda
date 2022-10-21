@@ -43,7 +43,6 @@ local function respawnItem(gm, data)
     end
 
     if data.options.persistent == true then
-        print("Persistent")
         e:EnableRespawn(true, data.options.delay)
     end
 
@@ -105,6 +104,7 @@ function GM:RespawnObject(obj, options)
         data.name = obj:GetName()
         data.levelDesignerPlaced = false
         data.options = options
+        data.outputs = table.Copy(obj.EntityOutputs or {})
     else
         data = table.Copy(data)
         data.levelDesignerPlaced = true

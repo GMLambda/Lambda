@@ -159,7 +159,13 @@ function MAPSCRIPT:PostInit()
             newSuit:Fire("AddOutput", "OnPlayerTouch song_suit,PlaySound,,0,-1")
             newSuit:Fire("AddOutput", "OnPlayerTouch lambda_suit_trigger,Enable,,0,-1")
             newSuit:EnableRespawn(true)
-
+            -- HACK: Calling Fire or SetKeyValue doesn't trigger hooks, we have to manually store them.
+            newSuit.EntityOutputs = {
+                ["OnPlayerTouch"] = {
+                    "song_suit,PlaySound,,0,-1",
+                    "lambda_suit_trigger,Enable,,0,-1",
+                }
+            }
             -- Remove old.
             itemSuit:Remove()
         end
