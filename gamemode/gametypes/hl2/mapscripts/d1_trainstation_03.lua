@@ -25,7 +25,6 @@ MAPSCRIPT.EntityFilterByName =
 {
     ["logic_flr1tv_turnoffallscreens"] = true,
     ["ai_breakin_cop3goal4_blockplayer"] = true,
-    ["ai_breakin_cop3goal4_blockplayer"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
