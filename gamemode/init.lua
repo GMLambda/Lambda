@@ -61,9 +61,6 @@ function GM:InsertLevelDesignerPlacedObject(obj)
         spawnflags = obj:GetSpawnFlags(),
         outputs = table.Copy(obj.EntityOutputs or {}),
     }
-    if not table.IsEmpty(objects[obj].outputs) then
-        PrintTable(objects[obj])
-    end
     self.LevelRelevantObjects = objects
 end
 
