@@ -93,6 +93,10 @@ function ENTITY_META:RemoveSpawnFlags(flags)
 
 end
 
+function ENTITY_META:SetSpawnFlags(flags)
+    self:SetKeyValue("spawnflags", flags)
+end
+
 function ENTITY_META:IsDoor()
     local class = self:GetClass()
     return class == "prop_door_rotating" or class == "func_door" or class == "func_door_rotating"
@@ -350,32 +354,16 @@ function ENTITY_META:GetObjectCaps()
     return self:ObjectCaps()
 end
 
-function ENTITY_META:EnableRespawn(state, time)
+function ENTITY_META:EnableRespawn(state, delay)
     -- On shutdown this actually errors thats why this check exists.
     if not IsValid(self) then
         return
     end
 
     if state == true then
-        time = time or 1
-
         self:CallOnRemove("LambdaRespawn", function(ent)
-            local class = ent:GetClass()
-            local pos = ent:GetPos()
-            local ang = ent:GetAngles()
-            local mdl = ent:GetModel()
-
-            timer.Simple(time, function()
-                local new = ents.Create(class)
-                new:SetPos(pos)
-                new:SetAngles(ang)
-                new:SetModel(mdl)
-                new:Spawn()
-                new:EnableRespawn(true)
-            end)
-
+            GAMEMODE:RespawnObject(ent, {delay = delay, persistent = true})
         end)
-
     else
         self:RemoveCallOnRemove("LambdaRespawn")
     end

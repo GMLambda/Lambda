@@ -53,7 +53,14 @@ end
 
 function GM:InsertLevelDesignerPlacedObject(obj)
     local objects = self.LevelRelevantObjects or {}
-    objects[obj] = { class = obj:GetClass(), pos = obj:GetPos(), ang = obj:GetAngles(), name = obj:GetName() }
+    objects[obj] = { 
+        class = obj:GetClass(),
+        pos = obj:GetPos(),
+        ang = obj:GetAngles(),
+        name = obj:GetName(),
+        spawnflags = obj:GetSpawnFlags(),
+        outputs = table.Copy(obj.EntityOutputs or {}),
+    }
     self.LevelRelevantObjects = objects
 end
 

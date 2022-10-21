@@ -42,7 +42,7 @@ function ENT:Reset()
     self:Activate()
 end
 
-local MAT = Material( "lambda/run_point.vmt" )
+local MAT = Material( "lambda/checkpoint.vmt" )
 local OFFSET_Z = Vector(0, 0, 60)
 local SIZE = 64
 

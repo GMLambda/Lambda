@@ -249,6 +249,9 @@ end
 --if SERVER then
 
     function ENT:AddSpawnFlags(flags)
+        if flags == nil then
+            error("Can not add nil as spawn flag")
+        end
         local flags = bit.bor(self:GetSpawnFlags(), flags)
         self:SetKeyValue("spawnflags", tostring(flags))
     end

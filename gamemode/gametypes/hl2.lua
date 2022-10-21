@@ -181,12 +181,16 @@ function GAMETYPE:GetWeaponRespawnTime()
 end
 
 function GAMETYPE:GetItemRespawnTime()
-    return -1
+    return 0.5
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then return false end
-
+    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then 
+        return false 
+    end
+    if ent.ShouldRespawnWeapon ~= nil and ent:ShouldRespawnWeapon() == false then
+        return false
+    end
     return true
 end
 

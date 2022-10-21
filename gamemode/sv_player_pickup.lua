@@ -14,56 +14,81 @@ function GM:InitializeItemRespawn()
     self.RespawnQueue = {}
 end
 
-function GM:UpdateItemRespawn()
+local function respawnItem(gm, data)
 
-    local function respawnItem(data)
+    DbgPrintPickup("Respawning object " .. data.class)
 
-        DbgPrintPickup("Respawning object " .. data.class)
-
-        local e = ents.Create(data.class)
-        e.UniqueEntityId = data.uniqueId
-        e:SetPos(data.pos)
-        e:SetAngles(data.ang)
-        e:SetName(data.name)
-        e:Spawn()
-        e:Activate()
-
-        -- Keep it as level designer placed object.
-        if data.levelDesignerPlaced == true then
-            self:InsertLevelDesignerPlacedObject(e)
+    local e = ents.Create(data.class)
+    e.UniqueEntityId = data.uniqueId
+    e:SetPos(data.pos)
+    e:SetAngles(data.ang)
+    e:SetName(data.name)
+    e:SetSpawnFlags(data.spawnflags or 0)
+    for k, outputs in pairs(data.outputs or {}) do
+        for _,output in pairs(outputs) do
+            local outputStr = k .. " " .. output
+            e:Fire("AddOutput", outputStr)
         end
+    end
+    -- FIXME: This is a bit hacky as calling Entity:Fire will not call our hooks
+    -- to populate this.
+    e.EntityOutputs = data.outputs
 
-        if data.delay > 0.0 then
-            e:EmitSound("AlyxEmp.Charge")
+    e:Spawn()
+    e:Activate()
 
-            local effectdata = EffectData()
-            effectdata:SetOrigin( data.pos )
-            effectdata:SetScale(1)
-            effectdata:SetMagnitude(5)
-            util.Effect( "ElectricSpark", effectdata )
-        end
+    -- Keep it as level designer placed object.
+    if data.levelDesignerPlaced == true then
+        gm:InsertLevelDesignerPlacedObject(e)
+    end
+
+    if data.options.persistent == true then
+        e:EnableRespawn(true, data.options.delay)
+    end
+
+    if data.options.delay > 0.0 then
+        e:EmitSound("AlyxEmp.Charge")
+
+        local effectPos = e:GetPos() + e:OBBCenter()
+        local effectdata = EffectData()
+        effectdata:SetOrigin( effectPos )
+        effectdata:SetScale(1)
+        effectdata:SetEntity(e)
+        effectdata:SetMagnitude(1)
+        effectdata:SetRadius(1)
+        util.Effect( "cball_explode", effectdata )
 
     end
+
+end
+
+function GM:UpdateItemRespawn()
 
     local curTime = CurTime()
     for k,v in pairs(self.RespawnQueue) do
         if curTime >= v.respawnTime then
-            respawnItem(v)
+            respawnItem(self, v)
             table.remove(self.RespawnQueue, k)
         end
     end
 
 end
 
-function GM:RespawnObject(obj, delay)
+function GM:RespawnObject(obj, options)
 
-    DbgPrintPickup("Respawning object " .. tostring(obj) .. " in " .. tostring(delay) .. " seconds")
+    options = options or {}
+    options.delay = options.delay or self:CallGameTypeFunc("GetItemRespawnTime")
+    if options.persistent == nil then
+        options.persistent = false
+    end
+
+    DbgPrintPickup("Respawning object " .. tostring(obj) .. " in " .. tostring(options.delay) .. " seconds")
 
     for _,v in pairs(self.RespawnQueue) do
         if v.item == obj then
             -- Only update time.
             DbgPrintPickup("Updating respawn of " .. tostring(obj))
-            v.respawnTime = CurTime() + delay
+            v.respawnTime = CurTime() + options.delay
             return
         end
     end
@@ -78,13 +103,16 @@ function GM:RespawnObject(obj, delay)
         data.ang = obj:GetAngles()
         data.name = obj:GetName()
         data.levelDesignerPlaced = false
+        data.options = options
+        data.outputs = table.Copy(obj.EntityOutputs or {})
     else
         data = table.Copy(data)
         data.levelDesignerPlaced = true
+        data.options = options
     end
+
     data.uniqueId = obj.UniqueEntityId
-    data.respawnTime = CurTime() + delay
-    data.delay = delay
+    data.respawnTime = CurTime() + options.delay
     data.item = obj
 
     table.insert(self.RespawnQueue, data)
@@ -183,7 +211,7 @@ function GM:PlayerCanPickupItem(ply, item)
     end
 
     local class = item:GetClass()
-
+    
     -- Dont pickup stuff if we dont need it.
     if class == "item_health" or class == "item_healthvial" or class == "item_healthkit" then
         if ply:Health() >= ply:GetMaxHealth() then
@@ -196,20 +224,16 @@ function GM:PlayerCanPickupItem(ply, item)
     elseif class == "item_suit" then
         if ply:IsSuitEquipped() == true then
             return false
-        else
-            return true
         end
     end
 
     if self:PlayerCanPickupAmmo(ply, item) == false then
         return false
     end
-
+    
     if self:CallGameTypeFunc("ShouldRespawnItem", item) == true then
-        local respawnTime = self:CallGameTypeFunc("GetItemRespawnTime") or 1
-        self:RespawnObject(item, respawnTime)
+        self:RespawnObject(item)
     else
-        DbgPrint("Not respawning item: " .. class)
         return true
     end
 
@@ -293,14 +317,16 @@ function GM:WeaponEquip(wep, owner)
             if not IsValid(ply) then return end
             ply:SelectWeapon(class)
         end)
-        ply:EmitSound("Player.PickupWeapon")
+        if wep.ShouldHidePickupInfo == nil or wep.ShouldHidePickupInfo() ~= true then
+            ply:EmitSound("Player.PickupWeapon")
+        end
     end
 
     if wep.CreatedForPlayer ~= owner and wep.DroppedByPlayer == nil then
 
         if AMMO_LIKE_WEAPONS[wep:GetClass()] ~= true and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
             local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0.5
-            self:RespawnObject(wep, respawnTime)
+            self:RespawnObject(wep, {delay = respawnTime})
         end
 
     end

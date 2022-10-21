@@ -33,6 +33,7 @@ if SERVER then
     SF_TRIG_TOUCH_DEBRIS                    = 0x400     -- Will touch physics debris objects
     SF_TRIGGER_ONLY_NPCS_IN_VEHICLES        = 0x800     -- *if* NPCs can fire this trigger, only NPCs in vehicles do so (respects player ally flag too)
     SF_TRIGGER_DISALLOW_BOTS                = 0x1000    -- Bots are not allowed to fire this trigger
+    SF_TRIGGER_ONLY_PLAYER_WITH_HEV         = 0x8000    -- Triggers only on players with the hev suit.
 
     function ENT:IsLambdaTrigger()
         return true
@@ -60,9 +61,13 @@ if SERVER then
         self:SetupNWVar("WaitForTeam", "bool", { Default = false, KeyValue = "teamwait"} )
         self:SetupNWVar("LockPlayers", "bool", { Default = false, KeyValue = "lockplayers"} )
         self:SetupNWVar("Blocked", "bool", { Default = false, KeyValue = "blocked", OnChange = self.HandleBlockingUpdate } )
+        -- If WaitForTeam is enabled this specifies the timeout to when to force trigger.
         self:SetupNWVar("Timeout", "float", { Default = 0, KeyValue = "timeout" } )
+        -- Teleport all players on timeout.
+        self:SetupNWVar("TimeoutTeleport", "bool", { Default = true, KeyValue = "timeoutteleport"})
         self:SetupNWVar("DisableEndTouch", "bool", { Default = false, KeyValue = "disableendtouch" })
         self:SetupNWVar("ShowWait", "bool", { Default = true, KeyValue = "showwait" })
+        self:SetupNWVar("MessagePos", "vector", { Default = Vector(0, 0, 0), KeyValue = "messagepos" })
 
         -- Internal variables
         self.TeamInside = false
@@ -110,6 +115,10 @@ if SERVER then
         end
 
         if self:HasSpawnFlags( SF_TRIGGER_ONLY_CLIENTS_OUT_OF_VEHICLES )  then
+            self:AddSpawnFlags( SF_TRIGGER_ALLOW_CLIENTS );
+        end
+
+        if self:HasSpawnFlags(SF_TRIGGER_ONLY_PLAYER_WITH_HEV) then
             self:AddSpawnFlags( SF_TRIGGER_ALLOW_CLIENTS );
         end
 
@@ -184,12 +193,15 @@ if SERVER then
 
     end
 
-    function ENT:SetupTrigger(pos, ang, mins, maxs, spawn)
+    function ENT:SetupTrigger(pos, ang, mins, maxs, spawn, spawnflags)
 
         --DbgPrint("Creating Trigger at " .. tostring(pos) .. "\n\tMins: "..tostring(mins) .. "\n\tMaxs: " .. tostring(maxs))
+        if spawnflags == nil then
+            spawnflags = SF_TRIGGER_ALLOW_CLIENTS
+        end
         self:SetPos(pos)
         self:SetAngles(ang)
-        self:SetKeyValue("spawnflags", SF_TRIGGER_ALLOW_CLIENTS)
+        self:AddSpawnFlags(spawnflags)
         self:SetTrigger(true)
         self:SetMoveType(0)
         self:SetNoDraw(true)
@@ -457,7 +469,7 @@ if SERVER then
         end
 
         if timeoutEvent == true then
-            self:OnTimeout()
+            self:FireOnTimeout()
         end
 
         if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
@@ -522,13 +534,19 @@ if SERVER then
 
     end
 
-    function ENT:OnTimeout()
+    function ENT:FireOnTimeout()
 
         -- Teleport all entities that passes the filter rules
-        self:TeleportAllToTrigger()
+        if self:GetNWVar("TimeoutTeleport", false) == true then
+            self:TeleportAllToTrigger()
+        end
 
         -- Fire custom output
         self:FireOutputs("OnWaitTimeout", nil, nil)
+
+        if self.OnWaitTimeout ~= nil and isfunction(self.OnWaitTimeout) then
+            self:OnWaitTimeout()
+        end
 
     end
 
@@ -694,12 +712,17 @@ if SERVER then
             end
 
             if self:HasSpawnFlags(SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES) and ent:IsPlayer() then
-
                 if ent:InVehicle() == false then
                     --DbgPrint("Client must be in vehicle")
                     return false
                 end
 
+            end
+
+            if self:HasSpawnFlags(SF_TRIGGER_ONLY_PLAYER_WITH_HEV) and ent:IsPlayer() then
+                if ent:IsSuitEquipped() == false then
+                    return false
+                end
             end
 
             if self:HasSpawnFlags(SF_TRIGGER_ONLY_CLIENTS_OUT_OF_VEHICLES) and ent:IsPlayer() then
@@ -797,6 +820,8 @@ if SERVER then
             net.WriteVector(self:OBBCenter())
             net.WriteVector(self:OBBMins())
             net.WriteVector(self:OBBMaxs())
+            local msgPos = self:GetNWVar("MessagePos", Vector(0, 0, 0))
+            net.WriteVector(msgPos)
         end
         net.Send(ply)
 
@@ -833,6 +858,8 @@ if SERVER then
             net.WriteVector(self:OBBCenter())
             net.WriteVector(self:OBBMins())
             net.WriteVector(self:OBBMaxs())
+            local msgPos = self:GetNWVar("MessagePos", Vector(0, 0, 0))
+            net.WriteVector(msgPos)
         end
 
         net.Send(ply)
@@ -880,6 +907,7 @@ else -- CLIENT
             local center = net.ReadVector()
             local obbMins = net.ReadVector()
             local obbMaxs = net.ReadVector()
+            local messagePos = net.ReadVector()
 
             DbgPrint(self, "Trigger(" .. entIndex .. ") waiting for team, timeout: " .. timeout)
 
@@ -888,6 +916,7 @@ else -- CLIENT
             LAMBDA_TRIGGERS[entIndex].Center = center
             LAMBDA_TRIGGERS[entIndex].Mins = obbMins
             LAMBDA_TRIGGERS[entIndex].Maxs = obbMaxs
+            LAMBDA_TRIGGERS[entIndex].MessagePos = messagePos
             LAMBDA_TRIGGERS[entIndex].PlayerCount = 0
             LAMBDA_TRIGGERS[entIndex].ActivePlayers = {}
             LAMBDA_TRIGGERS[entIndex].Waiting = true
@@ -935,11 +964,13 @@ else -- CLIENT
             local center = net.ReadVector()
             local maxs = net.ReadVector()
             local mins = net.ReadVector()
+            local msgPos = net.ReadVector()
             LAMBDA_TRIGGERS[entIndex].MeshData = meshData
             LAMBDA_TRIGGERS[entIndex].Pos = pos
             LAMBDA_TRIGGERS[entIndex].Center = center
             LAMBDA_TRIGGERS[entIndex].Maxs = maxs
             LAMBDA_TRIGGERS[entIndex].Mins = mins
+            LAMBDA_TRIGGERS[entIndex].MessagePos = msgPos
             DbgPrint("Trigger(" .. entIndex .. ") now blocked")
         else
             -- What shall we do about this?
@@ -967,7 +998,7 @@ else -- CLIENT
 
     end)
 
-    local MAT_POINTER = Material( "lambda/trigger.vmt" )
+    local MAT_POINTER = Material( "lambda/run_point.vmt" )
 
     surface.CreateFont( "LAMBDA_1",
     {
@@ -1015,7 +1046,23 @@ else -- CLIENT
         return col
     end
 
-    local function DrawTriggerWaiting(activePlayers, scheduledTime, pos, ang, obbMins, obbMaxs, realPos)
+    local Vec3Zero = Vector(0, 0, 0)
+    local function DrawTriggerWaiting(data)
+
+        local activePlayers = data.ActivePlayers
+        local scheduledTime = data.Timeout
+        local pos = data.Pos + data.Center
+        local ang = Angle(0, 0, 0)
+        local realPos = data.Pos 
+        local obbMins = data.Mins
+        local obbMaxs = data.Maxs
+        
+        local allowLocalView = true
+        -- If the trigger has specified the message position use that.
+        if data.MessagePos ~= Vec3Zero then
+            pos = data.Pos + data.MessagePos
+            allowLocalView = false
+        end
 
         local playerCount = 0
         local activePlayerCount = #activePlayers
@@ -1032,7 +1079,6 @@ else -- CLIENT
 
         local distance = eyePos:Distance(pos)
         local localView = false
-        local allowLocalView = true
         local textColor = GetTextColor()
         local colorBg = GetBGColor()
 
@@ -1076,7 +1122,7 @@ else -- CLIENT
             remaining = 0
         end
 
-        local bounce = math.sin(CurTime() * 5) + math.cos(CurTime() * 5)
+        local bounce = math.sin(SysTime() * 5) + math.cos(SysTime() * 5)
         pos = pos + (Vector(0, 0, 1) * bounce)
 
         local screenPos = pos:ToScreen()
@@ -1195,7 +1241,7 @@ else -- CLIENT
         for k, data in pairs(LAMBDA_TRIGGERS) do
 
             if data.Waiting == true then
-                DrawTriggerWaiting(data.ActivePlayers, data.Timeout, data.Pos + data.Center, Angle(0, 0, 0), data.Pos, data.Mins, data.Maxs)
+                DrawTriggerWaiting(data)
             end
 
         end
