@@ -157,7 +157,7 @@ function MAPSCRIPT:PostInit()
         end)
 
         local medkit = ents.Create("weapon_lambda_medkit")
-        medkit:SetPos(Vector(-9653.991211, -3418.812256, 362.399658))
+        medkit:SetPos(Vector(-8176.953613, -3195.601563, 233.364426))
         medkit:SetAngles(Angle(0, -148.108, 0))
         medkit:Spawn()
 

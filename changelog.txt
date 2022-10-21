@@ -10,6 +10,7 @@
 - Improved: Console command registration.
 - Improved: Render always the player when in settings menu.
 - Improved: d1_trainstation_05 map script.
+- Improved: d1_trainstation_06 map script, move med-kit further away.
 - Changed: Do not give all weapons on missing map scripts.
 
 0.9.14
