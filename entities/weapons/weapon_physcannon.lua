@@ -271,7 +271,6 @@ function SWEP:Initialize()
 
     self.ElementDebounce = CurTime()
     self.CheckSuppressTime = CurTime()
-    self.DebounceSecondary = false
     self:SetHoldType(self.HoldType)
     self.ElementPosition = InterpValue(0.0, 0.0, 0)
     self.LastElementDestination = 0
@@ -426,9 +425,10 @@ function SWEP:LaunchObject(ent, fwd, force)
     self:SetNextPrimaryFire(CurTime() + 0.5)
     self:SetNextSecondaryFire(CurTime() + 0.5)
 
-    self.ElementDebounce = CurTime() + 0.1
+    self.ElementDebounce = CurTime() + 1.0
     self.CheckSuppressTime = CurTime() + 0.25
     self.ChangeState = ELEMENT_STATE_CLOSED
+    self.Secondary.Automatic = true
 
     self:DoEffect(EFFECT_LAUNCH, ent:WorldSpaceCenter())
 
@@ -577,6 +577,10 @@ function SWEP:CanSecondaryAttack()
     local owner = self.Owner
     if IsValid(owner) ~= true then
         DbgPrint("Invalid owner")
+        return false
+    end
+
+    if CurTime() < self.ElementDebounce then
         return false
     end
 
@@ -1352,10 +1356,8 @@ function SWEP:UpdateGlow()
         if attachment == nil then
             return
         end
-        entIndex = vm:EntIndex()
         entPos = attachment.Pos - (owner:GetAimVector() * 15)
     else
-        entIndex = self:EntIndex()
         local attachment = self:GetAttachment(1)
         if attachment == nil then
             return
@@ -2141,7 +2143,6 @@ function SWEP:DoEffectLaunch(pos)
 end
 
 function SWEP:DoEffectIdle()
-
 end
 
 function SWEP:DoEffectPulling()
