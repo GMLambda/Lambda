@@ -103,24 +103,6 @@ if SERVER then
 
     end
 
-    local function DissolveEntity(ent)
-
-        ent:SetOwner(NULL)
-
-        local name = "dissolve_" .. tostring(ent:EntIndex())
-        ent:SetName(name)
-
-        local dissolver = ents.Create("env_entity_dissolver")
-        dissolver:SetKeyValue("target", name)
-        dissolver:SetKeyValue("dissolvetype", "0")
-        dissolver:Spawn()
-        dissolver:Activate()
-
-        dissolver:Fire("Dissolve", ent:GetName(), 0)
-        dissolver:Fire("Kill", ent:GetName(), 0.1)
-
-    end
-
     function GM:HandleCriticalNPCDeath(npc)
 
         local gameType = self:GetGameType()
@@ -194,7 +176,7 @@ if SERVER then
 
             npc:SetKeyValue("spawnflags", spawnFlags)
 
-            DissolveEntity(wep)
+            wep:Dissolve()
             wep = nil
 
         end
