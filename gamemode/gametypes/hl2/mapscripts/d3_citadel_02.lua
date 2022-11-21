@@ -56,59 +56,68 @@ MAPSCRIPT.EntityFilterByName =
     ["podtrain_player"] = true,
 }
 
-function MAPSCRIPT:Init()
+MAPSCRIPT.PlayerQueue = {}
+MAPSCRIPT.NextPlayerPod = CurTime()
 
-    self.PlayerQueue = {}
-
-end
-
-function MAPSCRIPT:CreatePlayerPod()
+function MAPSCRIPT:CreatePlayerPod(id)
 
     local tracktrain = ents.Create("func_tracktrain")
-    tracktrain:SetKeyValue("movesound", "d3_citadel.playerpod_move")
-    tracktrain:SetKeyValue("volume", "d3_citadel.playerpod_move")
-    tracktrain:SetKeyValue("velocitytype", "1")
-    tracktrain:SetKeyValue("target", "pod_player_start")
-    tracktrain:SetKeyValue("stopsound", "d3_citadel.playerpod_stop")
-    tracktrain:SetKeyValue("spawnflags", "11")
-    tracktrain:SetKeyValue("startspeed", "200")
+    tracktrain:SetKeyValue("MoveSound", "d3_citadel.playerpod_move")
+    tracktrain:SetKeyValue("MoveSoundMaxPitch", "130")
+    tracktrain:SetKeyValue("MoveSoundMinPitch", "90")
     tracktrain:SetKeyValue("orientationtype", "3")
+    tracktrain:SetKeyValue("volume", "10")
+    tracktrain:SetKeyValue("velocitytype", "1")
+    tracktrain:SetKeyValue("StopSound", "d3_citadel.playerpod_stop")
+    tracktrain:SetKeyValue("spawnflags", "11")
+    tracktrain:SetKeyValue("speed", "0")
+    tracktrain:SetKeyValue("startspeed", "200")
     tracktrain:SetKeyValue("wheels", "0")
-    -- -6272.000000 6656.000000 2754.000000
-    tracktrain:SetPos(Vector(-6466, 6656, 2754))
-    --tracktrain:SetName("podtrain_player")
+    tracktrain:SetKeyValue("height", "4")
+    tracktrain:SetKeyValue("bank", "0")
+    tracktrain:SetKeyValue("ManualAccelSpeed", "0")
+    tracktrain:SetKeyValue("ManualDecelSpeed", "0")
+    tracktrain:SetKeyValue("MoveSoundMaxTime", "0")
+    tracktrain:SetKeyValue("MoveSoundMinTime", "0")
+
+    -- pod_player38
+    -- pod_player_start
+    tracktrain:SetKeyValue("target", "pod_player_start")
+    tracktrain:SetName("podtrain_player_" .. tostring(id))
+    tracktrain:SetPos(Vector(-6466, 6734, 2727))
     tracktrain:Spawn()
     tracktrain:Activate()
-
+    
     local podarm = ents.Create("prop_dynamic")
     podarm:SetModel("models/vehicles/Inner_pod_arm.mdl")
-    podarm:SetPos(Vector(-6471, 6647, 2736))
+    podarm:SetPos(Vector(-6471, 6725, 2709))
     podarm:SetAngles(Angle(0, 270, 0))
     podarm:SetParent(tracktrain)
     podarm:Spawn()
 
     local podrotator = ents.Create("prop_dynamic")
     podrotator:SetModel("models/vehicles/Inner_pod_rotator.mdl")
-    podrotator:SetPos(Vector(-6471, 6647, 2736))
+    podrotator:SetPos(Vector(-6471, 6725, 2709.09))
     podrotator:SetAngles(Angle(0, 270, 0))
-    podrotator:SetParent(tracktrain)
+    podrotator:SetParent(podarm)
+    podrotator:SetName("podrotator_" .. tostring(id))
     podrotator:Spawn()
 
     local pod = ents.Create("prop_vehicle_prisoner_pod")
-    pod:SetName("pod_player2")
-    pod:SetPos(Vector(-6472, 6640, 2661))
-    pod:SetAngles(Angle(0, 0, 0))
-    pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_pod.txt")
+    pod:SetName("pod_player_" .. tostring(id))
+    pod:SetPos(Vector(-6492, 6718, 2635))
+    pod:SetAngles(Angle(15, 0, 0))
     pod:SetModel("models/vehicles/prisoner_pod_inner.mdl")
+    pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_pod.txt")
+    pod:SetKeyValue("vehiclelocked", "1")
+    pod:SetKeyValue("solid", "0")
+    -- HACK: Instead of a constraint we parent it, constraints pretty unstable and odd
+    -- looking in multiplayer.
+    pod:SetParent(podrotator)
     pod:Spawn()
     pod:Activate()
-    --pod:SetParent(tracktrain)
 
-    -- FIXME: This is somewhat wrong.
-    local rel1 = Vector(-3, -3, 0)
-    local rel2 = Vector(14, -1, 37)
-    -- Constraint
-    constraint.AdvBallsocket(podrotator, pod, 0, 0, rel1, rel2, 0, 0, 0, -15, 0, 0, 15, 0, 0.8, 0.8, 0.8, 0, 1)
+    tracktrain.AttachedChildPod = pod
 
     return pod, tracktrain
 
@@ -120,7 +129,7 @@ function MAPSCRIPT:Think()
 
     local ct = CurTime()
 
-    for k,v in pairs(self.PlayerQueue or {}) do
+    for k,v in pairs(self.PlayerQueue) do
         if ct < v.timestamp then
             continue
         end
@@ -128,16 +137,54 @@ function MAPSCRIPT:Think()
 
         local ply = v.player
         if IsValid(ply) and ply:Alive() == true then
-            local pod, tracktrain = self:CreatePlayerPod()
-            ply:RemoveEffects(EF_NODRAW)
-            ply:DrawWorldModel(true)
-            ply:DrawViewModel(true)
-            ply:EnterVehicle(pod)
-            tracktrain:Fire("StartForward")
+            local pod, tracktrain = self:CreatePlayerPod(ply:EntIndex())
+            -- Delay entering vehicle until next frame, this seems
+            -- to cause issues otherwise.
+            util.RunNextFrame(function()
+                ply:RemoveEffects(EF_NODRAW)
+                ply:DrawWorldModel(true)
+                ply:DrawViewModel(true)
+                ply:EnterVehicle(pod)
+                tracktrain:Fire("StartForward")
+            end)
         end
 
         break
     end
+
+end
+
+local function DropPod(tracktrain)
+
+    local pod = tracktrain.AttachedChildPod
+    local pos = pod:GetPos()
+
+    local randVec = VectorRand() * 5
+    randVec.z = -1
+    randVec.y = randVec.y + 30
+
+    pod:SetParent(nil)
+    pod:SetPos(pos)
+    local physObj = pod:GetPhysicsObject()
+    if IsValid(physObj) then
+        physObj:SetVelocity(randVec)
+    end
+
+    local effectdata = EffectData()
+    effectdata:SetOrigin( tracktrain:GetPos() )
+    effectdata:SetMagnitude(5)
+    effectdata:SetScale(1)
+    util.Effect( "ManhackSparks", effectdata )
+
+    local effectdata = EffectData()
+    effectdata:SetOrigin( tracktrain:GetPos() )
+    effectdata:SetMagnitude(5)
+    effectdata:SetScale(1)
+    util.Effect( "Sparks", effectdata )
+
+    tracktrain:EmitSound("Metal_Box.Break")
+
+    tracktrain:Remove()
 
 end
 
@@ -146,17 +193,22 @@ function MAPSCRIPT:PostInit()
     if SERVER then
 
         self.PlayerQueue = {}
-        self.NextPlayerPod = CurTime() + 2
+        self.NextPlayerPod = CurTime()
+
+        local dissolver = ents.Create("env_entity_dissolver")
+        dissolver:SetPos(Vector(3917.164063, 13303.861328, 4439.324707))
+        dissolver:SetKeyValue("dissolvetype", "0")
+        dissolver:SetKeyValue("magnitude", "250")
+        dissolver:Spawn()
+        dissolver:Activate()
 
         ents.WaitForEntityByName("track_dump", function(ent)
             ent:SetWaitTime(0.2) -- Turn to trigger_multiple.
-            ent.OnTrigger = function(ent, other)
-                if other:IsPlayer() and IsValid(other:GetVehicle()) then
-                    local vehicle = other:GetVehicle()
-                    vehicle:Fire("Unlock")
-                    vehicle:Fire("Open")
-                    vehicle:Fire("ExitVehicle", "", 1)
-                    vehicle:Remove()
+            ent:Fire("Enable")
+            ent:SetKeyValue("spawnflags", "33")
+            ent.StartTouch = function(ent, other)
+                if other:IsPlayer() then
+                    other:LockPosition(false)
                 end
             end
         end)
@@ -165,18 +217,39 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("teamwait", "1")
             ent.OnTrigger = function()
                 TriggerOutputs({
-                    {"trigger_vphysics_03_fall", "Kill", "", 0.0},
-                    {"cit02_cit03_trans", "ChangeLevel", "", 2.00},
+                    {"trigger_vphysics_03_fall", "Kill", 0.0, ""},
+                    {"cit02_cit03_trans", "ChangeLevel", 2.0, ""},
                 })
             end
         end)
 
-        ents.WaitForEntityByName("pod_player", function(ent)
-            -- FIX: Only remove if theres no transitioned player in it.
-            if IsValid(ent:GetDriver()) == false then
-                ent:Remove()
+        local pathDisconnect = ents.Create("lambda_path_tracker")
+        pathDisconnect:SetName("lambda_drop_pod")
+        pathDisconnect.OnPass = function(s, data, activator, caller)
+            if IsValid(activator) and IsValid(activator.AttachedChildPod) then
+                DropPod(activator)
             end
+        end
+        pathDisconnect:Spawn()
+
+        ents.WaitForEntityByName("pod_player37", function(ent)
+            ent:Fire("AddOutput", "OnPass lambda_drop_pod,OnPass,,0,-1")
         end)
+
+        local dissolveTrigger = ents.Create("trigger_multiple")
+        dissolveTrigger:SetupTrigger(
+            Vector(3889.122803, 13407.586914, 3520.031250),
+            Angle(0, 0, 0),
+            Vector(-160, -260, 0),
+            Vector(160, 260, 30)
+        )
+        dissolveTrigger:AddSpawnFlags(66)
+        dissolveTrigger:SetName("lambda_dissolve_trigger")
+        dissolveTrigger.OnStartTouch = function(ent, other)
+            if other:IsVehicle() then
+                dissolver:Fire("Dissolve", other:GetName())
+            end
+        end
 
     end
 
@@ -197,7 +270,11 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
         player = ply
     })
 
-    self.NextPlayerPod = self.NextPlayerPod + 4
+    local curTime = CurTime()
+    if curTime > self.NextPlayerPod then
+        self.NextPlayerPod = curTime
+    end
+    self.NextPlayerPod = self.NextPlayerPod + 5
 
 end
 
