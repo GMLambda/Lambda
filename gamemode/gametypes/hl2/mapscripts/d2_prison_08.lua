@@ -43,7 +43,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -54,9 +53,6 @@ MAPSCRIPT.EntityFilterByName =
     ["NClip_sec_tp_door_1"] = true,
     ["PClip_sec_tp_door_1"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

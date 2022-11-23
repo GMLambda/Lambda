@@ -24,7 +24,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =

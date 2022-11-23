@@ -35,17 +35,12 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
     ["startobjects"] = true,
-    --["test_name"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

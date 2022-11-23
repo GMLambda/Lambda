@@ -195,13 +195,6 @@ function MAPSCRIPT:PostInit()
         self.PlayerQueue = {}
         self.NextPlayerPod = CurTime()
 
-        local dissolver = ents.Create("env_entity_dissolver")
-        dissolver:SetPos(Vector(3917.164063, 13303.861328, 4439.324707))
-        dissolver:SetKeyValue("dissolvetype", "0")
-        dissolver:SetKeyValue("magnitude", "250")
-        dissolver:Spawn()
-        dissolver:Activate()
-
         ents.WaitForEntityByName("track_dump", function(ent)
             ent:SetWaitTime(0.2) -- Turn to trigger_multiple.
             ent:Fire("Enable")
@@ -247,7 +240,7 @@ function MAPSCRIPT:PostInit()
         dissolveTrigger:SetName("lambda_dissolve_trigger")
         dissolveTrigger.OnStartTouch = function(ent, other)
             if other:IsVehicle() then
-                dissolver:Fire("Dissolve", other:GetName())
+                other:Dissolve()
             end
         end
 

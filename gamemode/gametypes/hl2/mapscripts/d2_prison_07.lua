@@ -45,7 +45,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -61,9 +60,6 @@ MAPSCRIPT.EntityFilterByName =
     ["relationship_alyx_vs_turret_like"] = true,
     ["relationship_turret_vs_player_like"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

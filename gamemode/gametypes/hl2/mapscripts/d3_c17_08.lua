@@ -43,16 +43,12 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
     ["player_spawn_items_maker"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

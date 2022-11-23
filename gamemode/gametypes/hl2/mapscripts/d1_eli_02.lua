@@ -34,7 +34,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -48,9 +47,6 @@ MAPSCRIPT.EntityFilterByName =
     ["pclip_exit_door_raven2"] = true,
     ["brush_exit_door_raven_PClip"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

@@ -23,7 +23,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -32,9 +31,6 @@ MAPSCRIPT.EntityFilterByName =
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_ammo"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

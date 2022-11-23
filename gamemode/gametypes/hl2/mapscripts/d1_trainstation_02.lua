@@ -22,9 +22,6 @@ MAPSCRIPT.GlobalStates =
     ["gordon_invulnerable"] = GLOBAL_ON,
 }
 
-function MAPSCRIPT:Init()
-end
-
 function MAPSCRIPT:PostInit()
 
     if SERVER then

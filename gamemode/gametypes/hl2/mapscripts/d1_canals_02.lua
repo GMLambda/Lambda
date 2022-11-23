@@ -26,7 +26,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -35,9 +34,6 @@ MAPSCRIPT.EntityFilterByName =
     ["global_newgame_spawner_crowbar"] = true,
     ["global_newgame_spawner_pistol"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

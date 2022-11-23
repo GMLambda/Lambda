@@ -30,9 +30,6 @@ MAPSCRIPT.ImportantPlayerNPCNames =
     ["lamarr_jumper"] = true,   -- In any case this should restart.
 }
 
-function MAPSCRIPT:Init()
-end
-
 function MAPSCRIPT:PostInit()
 
     if SERVER then

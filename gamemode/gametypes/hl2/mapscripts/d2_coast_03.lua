@@ -38,12 +38,10 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-    --["test_name"] = true,
     ["player_spawn_items"] = true,
     ["player_spawn_items_maker"] = true,
     ["invulnerable"] = true,
@@ -57,9 +55,6 @@ MAPSCRIPT.ImportantPlayerNPCNames =
 }
 
 MAPSCRIPT.VehicleGuns = true
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

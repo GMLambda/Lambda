@@ -42,7 +42,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -58,9 +57,6 @@ MAPSCRIPT.ImportantPlayerNPCNames =
 {
     ["vortigaunt_bugbait"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

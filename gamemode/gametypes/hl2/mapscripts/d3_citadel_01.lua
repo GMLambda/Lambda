@@ -52,9 +52,6 @@ MAPSCRIPT.EntityFilterByName =
     ["global_newgame_template_ammo"] = true,
 }
 
-function MAPSCRIPT:Init()
-end
-
 function MAPSCRIPT:PostInit()
 
     if SERVER then

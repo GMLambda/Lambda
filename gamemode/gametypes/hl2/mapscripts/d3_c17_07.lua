@@ -43,7 +43,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -51,9 +50,6 @@ MAPSCRIPT.EntityFilterByName =
     ["player_items_template"] = true,
     ["pclip_gate1"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 
