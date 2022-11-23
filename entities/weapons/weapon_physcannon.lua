@@ -580,10 +580,6 @@ function SWEP:CanSecondaryAttack()
         return false
     end
 
-    if CurTime() < self.ElementDebounce then
-        return false
-    end
-
     return true
 
 end
