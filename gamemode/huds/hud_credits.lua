@@ -51,6 +51,7 @@ local FONT_REMAP =
 {
 	["CreditsOutroText"] = "LambdaCreditsOutroTextRemap",
 	["CreditsOutroLogos"] = "LambdaCreditsOutroLogosRemap",
+	["CreditsOutroValve"] = "LambdaCreditsOutroTextRemap",
 	["CreditsText"] = "LambdaCreditsTextRemap",
 	["WeaponIcons"] = "LambdaWeaponIconsRemap",
 }
