@@ -34,6 +34,7 @@ MAPSCRIPT.EntityFilterByName =
     ["global_newgame_template_ammo"] = true,
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_base_items"] = true,
+    ["global_newgame_spawner_suit"] = true,
 
     ["playerpod1_train"] = true,
     ["playerpod2_train"] = true,
@@ -150,6 +151,8 @@ function CreatePOD(bayname)
     pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_pod.txt")
     pod:SetKeyValue("angles", "15 0 0")
     pod:SetKeyValue("targetname", podName)
+    pod:Fire("AddOutput", "PlayerOn !self,Close,,0,-1")
+    pod:Fire("AddOutput", "PlayerOn !self,Lock,,0.01,-1")
     pod:Spawn()
     pod:Activate()
 
@@ -240,6 +243,11 @@ function MAPSCRIPT:PostInit()
         cameraTrigger:SetName("lambda_camera_trigger")
         cameraTrigger:Fire("AddOutput", "OnStartTouch pod_02_track_inspection,EnableAlternatePath,,0.0,-1")
         cameraTrigger:Fire("AddOutput", "OnStartTouch pen_camera_1,SetAngry,,0.5,-1")
+
+        ents.WaitForEntityByName("pen_camera_1", function(ent)
+            ent:SetKeyValue("outerradius", "200")
+            ent:SetKeyValue("innerradius", "150")
+        end)
     end
 
 end

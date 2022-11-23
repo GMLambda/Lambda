@@ -111,6 +111,9 @@ function MAPSCRIPT:CreatePlayerPod(id)
     pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_pod.txt")
     pod:SetKeyValue("vehiclelocked", "1")
     pod:SetKeyValue("solid", "0")
+    pod:Fire("AddOutput", "PlayerOn !self,Close,,0,-1")
+    pod:Fire("AddOutput", "PlayerOn !self,Lock,,0.01,-1")
+
     -- HACK: Instead of a constraint we parent it, constraints pretty unstable and odd
     -- looking in multiplayer.
     pod:SetParent(podrotator)
@@ -145,6 +148,7 @@ function MAPSCRIPT:Think()
                 ply:DrawWorldModel(true)
                 ply:DrawViewModel(true)
                 ply:EnterVehicle(pod)
+                ply:LockPosition(false)
                 tracktrain:Fire("StartForward")
             end)
         end

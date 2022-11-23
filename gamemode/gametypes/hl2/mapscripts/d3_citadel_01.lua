@@ -56,6 +56,12 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
+        for _,v in pairs(ents.FindByClass("info_player_start")) do
+            local pos = v:GetPos()
+            pos.z = pos.z + 2 -- Raise it a bit, players get stuck in the ground
+            v:SetPos(pos)
+        end
+
         local triggers = ents.FindByPos(Vector(10624, 4592, -1664), "trigger_once")
         for _,v in pairs(triggers) do v:Remove() end
 
@@ -160,6 +166,10 @@ function MAPSCRIPT:PostInit()
         test:Spawn()
         test:Activate()
 
+        for _,v in pairs(ents.FindByClass("prop_vehicle_prisoner_pod")) do
+            v:Fire("AddOutput", "PlayerOn !self,Close,,0,-1")
+            v:Fire("AddOutput", "PlayerOn !self,Lock,,0.01,-1")
+        end
     end
 
 end
