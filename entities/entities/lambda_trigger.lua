@@ -674,7 +674,7 @@ if SERVER then
         for entId,_ in pairs(self.TouchingObjects) do
             local ent = Entity(entId)
             if IsValid(ent) then
-                table.insert(touching, ent)
+                touching[entId] = ent
             else
                 -- Lets clean it up
                 self.TouchingObjects[entId] = nil
