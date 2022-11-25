@@ -2,22 +2,12 @@ local PANEL = {}
 local colWHITE = Color(255, 255, 255, 235)
 local colGRAY = Color(155, 155, 155, 175)
 
-local ver
-local changelogText
+local changelogText = "Unable to read changelog."
 
 local f = file.Open("gamemodes/lambda/changelog.txt", "r", "GAME")
 if f ~= nil then
-	ver = f:ReadLine()
 	changelogText = f:Read(f:Size())
 	f:Close()
-end
-
-if ver == nil then
-	ver = "0.0.0"
-end
-
-if changelogText == nil then
-	changelogText = "Unable to read changelog."
 end
 
 local linkTbl = {
@@ -28,7 +18,7 @@ local linkTbl = {
 
 local iTbl = {
 	Title = "LAMBDA CO-OP FRAMEWORK",
-	Version = "VERSION: " .. ver,
+	Version = "VERSION: " .. tostring(GM.Version),
 	Gametype = "GAMETYPE: ",
 	Authors = "Created by ZehMatt, knoxed, PotcFdk, Amic3r",
 	Credits = "Huge thanks to the Garry's Mod team and the Metastruct servers",
@@ -71,7 +61,7 @@ function PANEL_ABOUT:Init()
 	local titleOffset = 10
 
 	pnls.Logo = self:Add("DImage")
-	pnls.Logo:SetImage("../gamemodes/lambda/icon24.png")
+	pnls.Logo:SetImage("gamemodes/lambda/icon24.png")
 	pnls.Logo:SetSize(32, 32)
 
 	pnls.Title = self:Add("DLabel")
@@ -88,7 +78,7 @@ function PANEL_ABOUT:Init()
 	pnls.Credits = self:Add("DLabel")
 	
 	for id, pnl in pairs(pnls) do
-		if id != "Logo" then
+		if id ~= "Logo" then
 			pnls[id]:SetText(iTbl[id])
 			pnls[id]:SetTextColor(colWHITE)
 			pnls[id]:SizeToContents()
@@ -145,7 +135,7 @@ function PANEL_CLOG:Init()
 	local clog = self:Add("DTextEntry")
 	clog:SetMultiline(true)
 	clog:Dock(FILL)
-	clog:SetValue(ver .. changelogText)
+	clog:SetValue(changelogText)
 	clog:SetVerticalScrollbarEnabled(true)
 	clog:SetEnabled(false)
 	clog:SetDrawBackground(false)
