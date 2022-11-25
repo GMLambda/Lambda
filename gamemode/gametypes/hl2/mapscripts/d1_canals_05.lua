@@ -28,7 +28,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -36,9 +35,6 @@ MAPSCRIPT.EntityFilterByName =
     ["global_newgame_entmaker"] = true,
     ["relay_rockfall_start"] = true, -- Don't do that, its trivial.
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

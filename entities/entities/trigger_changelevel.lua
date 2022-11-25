@@ -85,7 +85,20 @@ end
 function ENT:DoChangeLevel()
     DbgPrint(self, "DoChangeLevel")
     local restart = self:HasSpawnFlags(SF_CHANGELEVEL_RESTART)
-    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, self:GetTouchingObjects(), restart)
+
+    local touchingObjects = self:GetTouchingObjects()
+    if self.Landmark ~= nil and self.Landmark ~= "" then
+        local tmp = {}
+        for _,landmark in pairs(ents.FindByName(self.Landmark)) do
+            if landmark:GetClass() == "trigger_transition" and landmark.GetTouching ~= nil then
+                for _,v in pairs(landmark:GetTouching()) do
+                    touchingObjects[v:EntIndex()] = v
+                end
+            end
+        end
+    end
+
+    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, touchingObjects, restart)
 end
 
 end

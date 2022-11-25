@@ -45,7 +45,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -58,9 +57,6 @@ MAPSCRIPT.EntityFilterByName =
     ["bigdestroy3_fade"] = true,
     ["damagefilter_barney"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

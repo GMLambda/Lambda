@@ -38,16 +38,25 @@ local LOOK_DISTANCE = 100
 
 local FOOD_MODELS =
 {
+    ["models/props_junk/garbage_glassbottle001a.mdl"] = true,
+    ["models/props_junk/garbage_glassbottle002a.mdl"] = true,
     ["models/props_junk/garbage_glassbottle003a.mdl"] = true,
     ["models/props_junk/garbage_metalcan001a.mdl"] = true,
-    ["models/props_junk/garbage_takeoutcarton001a.mdl"] = true,
-    ["models/props_junk/garbage_glassbottle002a.mdl"] = true,
     ["models/props_junk/garbage_metalcan002a.mdl"] = true,
+    ["models/props_junk/garbage_takeoutcarton001a.mdl"] = true,
     ["models/props_junk/garbage_milkcarton002a.mdl"] = true,
     ["models/props_junk/garbage128_composite001b.mdl"] = true,
     ["models/props_junk/garbage128_composite001a.mdl"] = true,
     ["models/props_junk/garbage256_composite001b.mdl"] = true,
+    ["models/props_junk/garbage_plasticbottle001a.mdl"] = true,
+    ["models/props_junk/garbage_plasticbottle002a.mdl"] = true,
+    ["models/props_junk/garbage_plasticbottle003a.mdl"] = true,
     ["models/props_junk/garbage_bag001a.mdl"] = true,
+    ["models/props_junk/popcan01a.mdl"] = true,
+    ["models/humans/charple01.mdl"] = true,
+    ["models/humans/charple02.mdl"] = true,
+    ["models/humans/charple03.mdl"] = true,
+    ["models/humans/charple04.mdl"] = true,
     ["models/humans/corpse1.mdl"] = true,
     ["models/player/corpse1.mdl"] = true,
     ["models/Gibs/Fast_Zombie_Torso.mdl"] = true,
@@ -62,7 +71,6 @@ local HIDING_MODELS =
 {
     ["models/props_junk/wood_crate001a.mdl"] = true,
     ["models/props_junk/wood_pallet001a.mdl"] = true,
-    ["models/props_vehicles/car004b_physics.mdl"] = true,
     ["models/props_junk/cardboard_box001a.mdl"] = true,
     ["models/props_junk/cardboard_box001b.mdl"] = true,
     ["models/props_junk/trashdumpster01a.mdl"] = true,
@@ -77,6 +85,7 @@ local HIDING_MODELS =
     ["models/props_c17/furnituredresser001a.mdl"] = true,
     ["models/props_vehicles/car004b_physics.mdl"] = true,
     ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true,
+    ["models/props_junk/trashdumpster01a.mdl"] = true,
 }
 
 util.PrecacheModel(COCKROACH_MDL);

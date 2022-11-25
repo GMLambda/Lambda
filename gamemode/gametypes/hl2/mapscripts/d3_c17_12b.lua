@@ -43,7 +43,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
     ["npc_cscanner"] = true,
 }
 
@@ -54,9 +53,6 @@ MAPSCRIPT.EntityFilterByName =
     ["entry_ceiling_debris_1"] = true,
     ["entry_ceiling_debris_clip_1"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

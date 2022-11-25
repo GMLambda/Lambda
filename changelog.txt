@@ -1,24 +1,27 @@
-0.9.15
+0.9.14
 - Feature: Checkpoints can now have a timeout, setting is controlled by 'lambda_checkpoint_timeout', 0 disables the timeout.
-- Fixed: Gravity Gun not being able to get objects behind fences.
-- Fixed: Gravity Gun not allowing to punt non-debris ragdolls.
-- Fixed: Gravity Gun effects breaking when transitioning from third-person to first-person view.
-- Fixed: Gravity Gun not respecting setting for glow mode.
-- Fixed: Gravity Gun light comes from player instead of the gun.
-- Fixed: SWEPS fired by NPCs being extremly inaccurate.
 - Improved: Miscellaneous improvements to the gamemode menu.
 - Improved: Console command registration.
 - Improved: Render always the player when in settings menu.
 - Improved: d1_trainstation_05 map script.
 - Improved: d1_trainstation_06 map script, move med-kit further away.
-- Changed: Do not give all weapons on missing map scripts.
-
-0.9.14
-- Fixed: Reset leftover global states if none provided in mapscript
-- Improved: The menu looks slightly better now also with a new "Info" page
+- Improved: d3_citadel_01 map script.
+- Improved: d3_citadel_02 map script.
+- Improved: d3_citadel_03 map script.
+- Improved: d3_citadel_04 map script.
+- Improved: d3_citadel_05 map script.
 - Added: A hint for players that have not yet opened the gamemode menu
 - Added: A warning notification for players starting the gamemode in Singleplayer mode
 - Added: Player name on top of death effect
+- Fixed: Player sometimes loose ammo over map transitioning.
+- Fixed: Gravity Gun not being able to get objects behind fences.
+- Fixed: Gravity Gun not allowing to punt non-debris ragdolls.
+- Fixed: Gravity Gun effects breaking when transitioning from third-person to first-person view.
+- Fixed: Gravity Gun not respecting setting for glow mode.
+- Fixed: Gravity Gun light comes from player instead of the gun.
+- Fixed: SWEPS fired by NPCs being extremly inaccurate, fixes some weapon addon compatibility issues.
+- Fixed: Reset leftover global states if none provided in mapscript
+- Changed: Do not give all weapons on missing map scripts.
 
 0.9.13
 - Fixed: d2_coast_11: Not giving everyone weapon_bugbait
@@ -49,18 +52,18 @@
 - Improved: Ability to register game types via addons.
 
 0.9.9
-- Fix: Sprint not working correctly with newer Garry's Mod version (dev).
-- Fix: Sound not playing when sprinting is denied.
+- Fixed: Sprint not working correctly with newer Garry's Mod version (dev).
+- Fixed: Sound not playing when sprinting is denied.
 
 0.9.8
-- Fix: Soundscrapes playing indefinitely
+- Fixed: Soundscrapes playing indefinitely
 
 0.9.7
-- Fix: env_credits throwing errors if credits file is missing.
-- Fix: entities not registering outputs via AcceptInput
-- Fix: point_viewcontrol having uninitialized angle.
-- Fix: d3_c17_02 having default player loadout.
-- Fix: PLAYER_META:Give not working in rare cases.
+- Fixed: env_credits throwing errors if credits file is missing.
+- Fixed: entities not registering outputs via AcceptInput
+- Fixed: point_viewcontrol having uninitialized angle.
+- Fixed: d3_c17_02 having default player loadout.
+- Fixed: PLAYER_META:Give not working in rare cases.
 
 0.9.6
 - Feature: Accelerated backhopping
@@ -71,29 +74,29 @@
 - Improved: Transitioning from d3_citadel_05 to d3_breen_01
 - Improved: Better round restart info.
 - Improved: Players get the medkit now at d1_trainstation_06 instead of d1_trainstation_05.
-- Fix: Potential crash after changelevel.
-- Fix: point_viewcontrol not behaving like original.
-- Fix: Some entity outputs being fired twice.
-- Fix: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
-- Fix: d3_breen_01: Platforms would stop moving if player reached top.
-- Fix: Medkit not properly working in singleplayer.
-- Fix: Selection of best weapon on depleted ammo and player spawn.
-- Fix: Settings not correctly clamped.
-- Fix: Physcannon throwing errors when players die.
-- Fix: Settings showing up twice.
-- Fix: Vehicles getting displayed in kill feed instead of player.
-- Fix: d3_citadel_05: Default weapons not being removed.
-- Fix: d3_citadel_05: Keep the pod cycle active after the player left the area.
-- Fix: Networked variables being overwritten by client ignoring server value.
+- Fixed: Potential crash after changelevel.
+- Fixed: point_viewcontrol not behaving like original.
+- Fixed: Some entity outputs being fired twice.
+- Fixed: Lua errors when cleaning up map during players view controlled by point_viewcontrol.
+- Fixed: d3_breen_01: Platforms would stop moving if player reached top.
+- Fixed: Medkit not properly working in singleplayer.
+- Fixed: Selection of best weapon on depleted ammo and player spawn.
+- Fixed: Settings not correctly clamped.
+- Fixed: Physcannon throwing errors when players die.
+- Fixed: Settings showing up twice.
+- Fixed: Vehicles getting displayed in kill feed instead of player.
+- Fixed: d3_citadel_05: Default weapons not being removed.
+- Fixed: d3_citadel_05: Keep the pod cycle active after the player left the area.
+- Fixed: Networked variables being overwritten by client ignoring server value.
 
 0.9.5
 - Improved: Add projected textures as an option for physcannon glow, enabled by default (physcannon_glow = 1)
-- Fix: Physcannon not dropping attached object when weapon dropped.
+- Fixed: Physcannon not dropping attached object when weapon dropped.
 
 0.9.4
 - Feature: Add 'LambdaInitializeMapList(maplist)' hook, allows addons to add/remove maps from the list.
-- Fix: Vote system did not consider amount of voters, 2/3 is required to be a valid vote.
-- Fix: Gravity gun throwing errors in some cases.
+- Fixed: Vote system did not consider amount of voters, 2/3 is required to be a valid vote.
+- Fixed: Gravity gun throwing errors in some cases.
 
 0.9.3
 - Feature: Realism difficulty, for people who like a challenge.
@@ -110,24 +113,24 @@
 - Improved: Kill feed overhaul, now considers screen resolution.
 - Improved: Replaced bullet impact sounds with more realistic ones.
 - Improved: Proxy animation models for episodic support, currently incomplete.
-- Fix: PLAYER:Give not working properly in some cases.
-- Fix: Physcannon not networking idle time causing stuttery momvement.
-- Fix: d1_town_02 lock door to prevent backtracking.
-- Fix: Physcannon missing sprites glow sprites on end caps.
-- Fix: Vehicle view not resetting roll.
-- Fix: Item respawn spam.
-- Fix: d2_prison_05 blocking players near map end.
-- Fix: NPC Maker not spawning NPCs in some cases.
-- Fix: d1_trainstation_01 queue sometimes blocking the player.
-- Fix: Don't render player blockades in Skybox rendering pass.
-- Fix: Gravity Gun not resetting beam properly on FP/TP view change.
-- Fix: Some delayed inputs firing after map reset.
-- Fix: trigger displaying waiting info when requested not to.
-- Fix: Pending entity outputs not being cleared on map restart.
-- Fix: Round information HUDs missing when first connected.
+- Fixed: PLAYER:Give not working properly in some cases.
+- Fixed: Physcannon not networking idle time causing stuttery momvement.
+- Fixed: d1_town_02 lock door to prevent backtracking.
+- Fixed: Physcannon missing sprites glow sprites on end caps.
+- Fixed: Vehicle view not resetting roll.
+- Fixed: Item respawn spam.
+- Fixed: d2_prison_05 blocking players near map end.
+- Fixed: NPC Maker not spawning NPCs in some cases.
+- Fixed: d1_trainstation_01 queue sometimes blocking the player.
+- Fixed: Don't render player blockades in Skybox rendering pass.
+- Fixed: Gravity Gun not resetting beam properly on FP/TP view change.
+- Fixed: Some delayed inputs firing after map reset.
+- Fixed: trigger displaying waiting info when requested not to.
+- Fixed: Pending entity outputs not being cleared on map restart.
+- Fixed: Round information HUDs missing when first connected.
 
 0.9.2:
-- Fix: logic_auto and trigger_auto firing too many events.
+- Fixed: logic_auto and trigger_auto firing too many events.
 - Improved: Slightly offset the glow on physcannon to prevent culling.
 
 0.9.1:
@@ -149,70 +152,70 @@
 - Improved: Flashlight no longer drains suit energy.
 - Improved: Overall performance improvements for server and client.
 - Improved: Players will no longer have empty grenades or slams in their inventory.
-- Add: Game content mounting for episodic content, automatically creates and mounts GMA based on gametype.
-- Add: ConVar to block moving weapons/items by shooting them, 'lambda_prevent_item_move <bool>'.
-- Add: ConVar to disable ammo limits, 'lambda_limit_default_ammo <bool>'.
-- Fix: trigger_hurt using invalid damage type.
-- Fix: d2_coast_01 having default map items
-- Fix: d2_coast_03 having default map items.
-- Fix: Prediction errors caused by 'friendly_encounter' game state.
-- Fix: Physcannon not stopping looping sounds and not detaching on player death.
-- Fix: Physcannon ignoring the mass.
-- Fix: Physcannon spamming animation events.
-- Fix: Physcannon unable to push back enemies such as headcrabs.
-- Fix: Weapons can only be picked up once now per player.
-- Fix: Player not spawning properly when starting with d3_c17_07.
-- Fix: Player being left behind after battle in d3_c17_07.
-- Fix: Disallow players going back in d1_town_02 preventing disruptive play.
-- Fix: Missing changelevel blockade in d3_c17_07.
-- Fix: Prevent player from going back in d1_town_02
-- Fix: NPC's sometimes not playing the scene under unknown situations.
-- Fix: Server sometimes not starting a new round 
-- Fix: Scripted scenes getting stuck, forced playback after timeout.
-- Fix: Networked velocity per client, no longer using estimates on player animations.
-- Fix: Enemies not enabled when going back from d2_coast_08 to d2_coast_07.
-- Fix: Remove more default map spawn items, managed by Lambda.
-- Fix: Reset global state on d1_trainstation_01 to d1_trainstation_05.
-- Fix: d1_trainstation_05 do not lock up players in barney room by an invisible wall.
-- Fix: Prevent non-players enforcing touch events on triggers.
-- Fix: Settings not replicating.
-- Fix: d3_c17_07 creating infinite soldiers when player does not meet alyx.
-- Fix: Barney to appear twice on d3_c17_10a.
-- Fix: Barney to appear twice on d3_c17_10b.
-- Fix: Players not getting the crowbar on d1_trainstation_06.
-- Fix: Suit would recharge too fast, prevents players from infinite sprinting.
-- Fix: Ragdolls wouldn't be properly transitioned.
+- Added: Game content mounting for episodic content, automatically creates and mounts GMA based on gametype.
+- Added: ConVar to block moving weapons/items by shooting them, 'lambda_prevent_item_move <bool>'.
+- Added: ConVar to disable ammo limits, 'lambda_limit_default_ammo <bool>'.
+- Fixed: trigger_hurt using invalid damage type.
+- Fixed: d2_coast_01 having default map items
+- Fixed: d2_coast_03 having default map items.
+- Fixed: Prediction errors caused by 'friendly_encounter' game state.
+- Fixed: Physcannon not stopping looping sounds and not detaching on player death.
+- Fixed: Physcannon ignoring the mass.
+- Fixed: Physcannon spamming animation events.
+- Fixed: Physcannon unable to push back enemies such as headcrabs.
+- Fixed: Weapons can only be picked up once now per player.
+- Fixed: Player not spawning properly when starting with d3_c17_07.
+- Fixed: Player being left behind after battle in d3_c17_07.
+- Fixed: Disallow players going back in d1_town_02 preventing disruptive play.
+- Fixed: Missing changelevel blockade in d3_c17_07.
+- Fixed: Prevent player from going back in d1_town_02
+- Fixed: NPC's sometimes not playing the scene under unknown situations.
+- Fixed: Server sometimes not starting a new round 
+- Fixed: Scripted scenes getting stuck, forced playback after timeout.
+- Fixed: Networked velocity per client, no longer using estimates on player animations.
+- Fixed: Enemies not enabled when going back from d2_coast_08 to d2_coast_07.
+- Fixed: Remove more default map spawn items, managed by Lambda.
+- Fixed: Reset global state on d1_trainstation_01 to d1_trainstation_05.
+- Fixed: d1_trainstation_05 do not lock up players in barney room by an invisible wall.
+- Fixed: Prevent non-players enforcing touch events on triggers.
+- Fixed: Settings not replicating.
+- Fixed: d3_c17_07 creating infinite soldiers when player does not meet alyx.
+- Fixed: Barney to appear twice on d3_c17_10a.
+- Fixed: Barney to appear twice on d3_c17_10b.
+- Fixed: Players not getting the crowbar on d1_trainstation_06.
+- Fixed: Suit would recharge too fast, prevents players from infinite sprinting.
+- Fixed: Ragdolls wouldn't be properly transitioned.
 
 0.9:
 - Removed: Freezing physics when trying to jump off them.
 - Removed: Animation blending. 
-- Fix: Giving players more ammo than they can carry on weapon pickup.
-- Fix: Weapon damage not properly set via cvars. 
-- Fix: d1_canals_05 not opening gate, manually possible now. 
-- Fix: Giving default ammo ammount, only give what player carried from level to level. 
-- Fix: Draws the player weapon with player tracker now. 
-- Fix: Checkpoints not properly resetting. 
-- Fix: Death symbol using incorrect eye position. 
-- Fix: Weapon switching not stopping reload. 
-- Fix: Output log vanishing if EPOE is present. 
-- Fix: Hopefully fixed players timing out while they shouldn't. 
-- Fix: Player tracking being invisible in some cases. Better debug info on triggers. 
-- Fix: Player tracking being client option, now server side.
-- Fix: Grenade duplicating on death. 
-- Fix: User never signaled connection, consider him fully connected when message arrives.
-- Fix: Commands being unable to ran from server console.
-- Fix: Bots having invalid models. 
-- Fix: Sprint sound not working on singleplayer game.
-- Fix: Passing nil ent on Touch.
-- Fix: Calling Touch manually if the player left a trigger that disabled EndTouch events.
-- Fix: Autoreload not reloading mapscripts.
-- Fix: d1_trainstation_05 messing up barneys spawn if player is nearby, simply closing the soda door.
-- Fix: Dog disappearing in d3_c17_02.
-- Fix: Door never opening in d3_c17_03.
-- Fix: Pickup hud not being properly aligned and sized.
-- Fix: Fire sounds not stopping in some cases.
-- Fix: Player unable to select weapons using passenger seat.
-- Fix: Player seeing the vehicle symbol when inside vehicle.
+- Fixed: Giving players more ammo than they can carry on weapon pickup.
+- Fixed: Weapon damage not properly set via cvars. 
+- Fixed: d1_canals_05 not opening gate, manually possible now. 
+- Fixed: Giving default ammo ammount, only give what player carried from level to level. 
+- Fixed: Draws the player weapon with player tracker now. 
+- Fixed: Checkpoints not properly resetting. 
+- Fixed: Death symbol using incorrect eye position. 
+- Fixed: Weapon switching not stopping reload. 
+- Fixed: Output log vanishing if EPOE is present. 
+- Fixed: Hopefully fixed players timing out while they shouldn't. 
+- Fixed: Player tracking being invisible in some cases. Better debug info on triggers. 
+- Fixed: Player tracking being client option, now server side.
+- Fixed: Grenade duplicating on death. 
+- Fixed: User never signaled connection, consider him fully connected when message arrives.
+- Fixed: Commands being unable to ran from server console.
+- Fixed: Bots having invalid models. 
+- Fixed: Sprint sound not working on singleplayer game.
+- Fixed: Passing nil ent on Touch.
+- Fixed: Calling Touch manually if the player left a trigger that disabled EndTouch events.
+- Fixed: Autoreload not reloading mapscripts.
+- Fixed: d1_trainstation_05 messing up barneys spawn if player is nearby, simply closing the soda door.
+- Fixed: Dog disappearing in d3_c17_02.
+- Fixed: Door never opening in d3_c17_03.
+- Fixed: Pickup hud not being properly aligned and sized.
+- Fixed: Fire sounds not stopping in some cases.
+- Fixed: Player unable to select weapons using passenger seat.
+- Fixed: Player seeing the vehicle symbol when inside vehicle.
 - Improved: Precision on GetSyncedTimestamp. 
 - Improved: Minor performance improvements. 
 - Improved: Reduced distance of player stats.

@@ -375,6 +375,7 @@ function GM:PreCleanupMap()
 
         for _,v in pairs(player.GetAll()) do
             v:KillSilent()
+            v:LockPosition(false)
         end
 
         -- Prevent recursions.
@@ -707,7 +708,7 @@ function GM:StartRound(cleaned, force)
 
     self:ResetMapScript()
 
-    if self.MapScript.Init ~= nil then
+    if self.MapScript ~= nil and self.MapScript.Init ~= nil then
         self.MapScript:Init()
     end
 

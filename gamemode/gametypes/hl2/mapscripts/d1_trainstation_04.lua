@@ -20,7 +20,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -32,9 +31,6 @@ MAPSCRIPT.EntityFilterByName =
     ["lcs_knockout_kickdoor"] = true,
     --["npc_knockout_cop_upstairs"] = true, -- If players are still up they would see them spawn.
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

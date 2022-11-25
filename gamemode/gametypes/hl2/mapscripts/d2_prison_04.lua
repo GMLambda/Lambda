@@ -57,9 +57,6 @@ MAPSCRIPT.GlobalStates =
     ["antlion_allied"] = GLOBAL_ON,
 }
 
-function MAPSCRIPT:Init()
-end
-
 function MAPSCRIPT:PostInit()
 
     if SERVER then

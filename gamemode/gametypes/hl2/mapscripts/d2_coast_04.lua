@@ -40,12 +40,10 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
 {
-    --["test_name"] = true,
     ["global_newgame_template_base_items"] = true,
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_ammo"] = true,
@@ -54,9 +52,6 @@ MAPSCRIPT.EntityFilterByName =
 }
 
 MAPSCRIPT.VehicleGuns = true
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

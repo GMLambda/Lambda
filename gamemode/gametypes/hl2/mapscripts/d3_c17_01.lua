@@ -47,7 +47,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -58,9 +57,6 @@ MAPSCRIPT.EntityFilterByName =
     ["trigger_closeTPDoor"] = true,
     ["teleport_screenoverlay_Kleiner_1"] = true,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

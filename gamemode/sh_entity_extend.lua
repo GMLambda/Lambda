@@ -485,3 +485,48 @@ end
 function ENTITY_META:BlocksLOS( )
     return self:IsEFlagSet(EFL_DONTBLOCKLOS) == false
 end
+
+function ENTITY_META:DispatchResponse(response)
+    self:Input("DispatchResponse", self, self, response)
+end
+
+ENTITY_DISSOLVE_NORMAL = 0
+ENTITY_DISSOLVE_ELECTRICAL = 1
+ENTITY_DISSOLVE_ELECTRICAL_LIGHT = 2
+ENTITY_DISSOLVE_CORE = 3
+
+function ENTITY_META:Dissolve(dissolveType)
+
+    if dissolveType == nil then
+        dissolveType = ENTITY_DISSOLVE_NORMAL
+    end
+
+    self:SetOwner(NULL)
+
+    local name = self:GetName()
+    if name == nil or name == "" then
+        name = "dissolve_" .. tostring(self:EntIndex())
+        self:SetName(name)
+    end
+
+    local dissolver = ents.Create("env_entity_dissolver")
+    dissolver:SetKeyValue("target", name)
+    dissolver:SetKeyValue("dissolvetype", tostring(dissolveType))
+    -- Ensure all clients receive this.
+    dissolver:AddEFlags(EFL_FORCE_CHECK_TRANSMIT)
+    dissolver:Spawn()
+    dissolver:Activate()
+
+    dissolver:Fire("Dissolve", name, 0)
+    dissolver:Fire("Kill", "", 0.1)
+
+    if self:IsNPC() then
+        -- Play any appropriate noises when we start to dissolve
+        if dissolveType == ENTITY_DISSOLVE_ELECTRICAL or dissolveType == ENTITY_DISSOLVE_ELECTRICAL_LIGHT then
+            self:DispatchResponse( "TLK_ELECTROCUTESCREAM" );
+        else
+            self:DispatchResponse( "TLK_DISSOLVESCREAM" );
+        end
+    end 
+
+end

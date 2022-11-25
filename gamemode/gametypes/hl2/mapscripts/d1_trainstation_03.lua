@@ -25,7 +25,6 @@ MAPSCRIPT.EntityFilterByName =
 {
     ["logic_flr1tv_turnoffallscreens"] = true,
     ["ai_breakin_cop3goal4_blockplayer"] = true,
-    ["ai_breakin_cop3goal4_blockplayer"] = true,
 }
 
 MAPSCRIPT.GlobalStates =
@@ -33,9 +32,6 @@ MAPSCRIPT.GlobalStates =
     ["gordon_precriminal"] = GLOBAL_ON,
     ["gordon_invulnerable"] = GLOBAL_ON,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

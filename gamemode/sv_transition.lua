@@ -347,6 +347,7 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
         end
         data.Include = true
     else
+        DbgPrint("Player not in transition volume: " .. tostring(ply))
         data.Include = false
         data.Weapons = {} -- Ditch the table, no need.
     end

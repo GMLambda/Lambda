@@ -62,7 +62,7 @@ if CLIENT then
     function ENT:RenderPlayer()
 
         local ply = self:GetParent()
-        if not IsValid(ply) or not ply:IsPlayer() then
+        if not IsValid(ply) or not ply:IsPlayer() or ply:GetNoDraw() == true then
             return
         end
 
@@ -107,7 +107,7 @@ if CLIENT then
     function ENT:RenderPlayerStats()
 
         local ply = self:GetParent()
-        if not IsValid(ply) or not ply:IsPlayer() then
+        if not IsValid(ply) or not ply:IsPlayer() or ply:GetNoDraw() == true then
             return
         end
 

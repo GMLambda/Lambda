@@ -43,7 +43,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -51,9 +50,6 @@ MAPSCRIPT.EntityFilterByName =
     ["player_spawn_items"] = true,
     ["lobby_frontdoors_counter"] = true, -- Use custom counter.
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

@@ -24,7 +24,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
     ["env_fade"] = true,
 }
 
@@ -44,9 +43,6 @@ MAPSCRIPT.GlobalStates =
 {
     ["super_phys_gun"] = GLOBAL_ON,
 }
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 

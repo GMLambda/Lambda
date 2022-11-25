@@ -42,7 +42,6 @@ MAPSCRIPT.InputFilters =
 
 MAPSCRIPT.EntityFilterByClass =
 {
-    --["env_global"] = true,
 }
 
 MAPSCRIPT.EntityFilterByName =
@@ -55,9 +54,6 @@ MAPSCRIPT.ImportantPlayerNPCNames =
 }
 
 MAPSCRIPT.VehicleGuns = true
-
-function MAPSCRIPT:Init()
-end
 
 function MAPSCRIPT:PostInit()
 
