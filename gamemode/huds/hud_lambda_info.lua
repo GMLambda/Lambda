@@ -2,9 +2,23 @@ local PANEL = {}
 local colWHITE = Color(255, 255, 255, 235)
 local colGRAY = Color(155, 155, 155, 175)
 
-local f = file.Open("lambda/changelog.txt", "r", "LUA")
-local ver, changelogText = f:ReadLine(), f:Read(f:Size())
-f:Close()
+local ver
+local changelogText
+
+local f = file.Open("gamemodes/lambda/changelog.txt", "r", "GAME")
+if f ~= nil then
+	ver = f:ReadLine()
+	changelogText = f:Read(f:Size())
+	f:Close()
+end
+
+if ver == nil then
+	ver = "0.0.0"
+end
+
+if changelogText == nil then
+	changelogText = "Unable to read changelog."
+end
 
 local linkTbl = {
 	["Workshop"] = "https://steamcommunity.com/sharedfiles/filedetails/?id=780244493",

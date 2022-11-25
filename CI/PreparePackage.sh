@@ -14,3 +14,4 @@ cp addon.json publish/addon.json
 cp icon24.png publish/gamemodes/lambda/icon24.png
 cp logo.png publish/gamemodes/lambda/logo.png
 cp lambda.txt publish/gamemodes/lambda/lambda.txt
+cp changelog.txt publish/gamemodes/lambda/changelog.txt
