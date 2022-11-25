@@ -10,9 +10,9 @@
 - Improved: d3_citadel_03 map script.
 - Improved: d3_citadel_04 map script.
 - Improved: d3_citadel_05 map script.
-- Added: A hint for players that have not yet opened the gamemode menu
-- Added: A warning notification for players starting the gamemode in Singleplayer mode
-- Added: Player name on top of death effect
+- Added: A hint for players that have not yet opened the gamemode menu.
+- Added: A warning notification for players starting the gamemode in Singleplayer mode.
+- Added: Player name on top of death effect.
 - Fixed: Player sometimes loose ammo over map transitioning.
 - Fixed: Gravity Gun not being able to get objects behind fences.
 - Fixed: Gravity Gun not allowing to punt non-debris ragdolls.
@@ -20,11 +20,12 @@
 - Fixed: Gravity Gun not respecting setting for glow mode.
 - Fixed: Gravity Gun light comes from player instead of the gun.
 - Fixed: SWEPS fired by NPCs being extremly inaccurate, fixes some weapon addon compatibility issues.
-- Fixed: Reset leftover global states if none provided in mapscript
+- Fixed: Reset leftover global states if none provided in mapscript.
+- Fixed: Lambda menu hint displaying the wrong binding.
 - Changed: Do not give all weapons on missing map scripts.
 
 0.9.13
-- Fixed: d2_coast_11: Not giving everyone weapon_bugbait
+- Fixed: d2_coast_11: Not giving everyone weapon_bugbait.
 - Fixed: d2_coast_03: Combine binoculars corrupting view for all players.
 - Fixed: Players not being credited for kills with ragdolls and mega gravity gun.
 - Added: env_screenoverlay multiplayer support.
@@ -34,11 +35,11 @@
 - Fixed: HL2:EP1/HL2:DM game types not working correctly [Regression]
 - Fixed: NPCs ragdolls would have different pose when killed with gravity gun.
 - Improved: Gravity gun functions now closer to the original and interpolates at clients frame time.
-- Added: Support for ep1_citadel_00 (Episode 1)
-- Added: Support for ep1_citadel_01 (Episode 1)
-- Added: Support for ep1_citadel_02b (Episode 1)
-- Added: Support for ep1_citadel_03 (Episode 1)
-- Added: Support for ep1_citadel_03 (Episode 1)
+- Added: Support for ep1_citadel_00 (Episode 1).
+- Added: Support for ep1_citadel_01 (Episode 1).
+- Added: Support for ep1_citadel_02b (Episode 1).
+- Added: Support for ep1_citadel_03 (Episode 1).
+- Added: Support for ep1_citadel_03 (Episode 1).
 
 0.9.11
 - Fixed: Lua error on death when dropped weapon can not be spawned.
