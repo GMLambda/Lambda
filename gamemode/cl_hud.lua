@@ -26,7 +26,11 @@ local function AskWeapon(ply, hud, wep)
 end
 
 local hidehud = GetConVar("hidehud")
+
 local MenuCookieStr = "LambdaMenuOpened"
+local NextMenuHint = SysTime()
+local MenuHintInitialDelay = 5
+local MenuHintDelay = 120
 
 function GM:HUDInit(reloaded)
 
@@ -51,12 +55,27 @@ function GM:HUDInit(reloaded)
 
     -- Setup a cookie for F1 menu notification if the player has not yet opened it
     local function MenuNotify()
-        if cookie.GetNumber(MenuCookieStr) == 0 then self:AddHint("Press F1 to open gamemode settings menu", 15, LocalPlayer()) end
+        if cookie.GetNumber(MenuCookieStr, 0) ~= 0 then
+            return
+        end
+        if SysTime() < NextMenuHint then
+            return
+        end
+        local ply = LocalPlayer()
+        if not IsValid(ply) or ply:Alive() == false then
+            -- When clients initially spawn use a smaller delay.
+            NextMenuHint = SysTime() + MenuHintInitialDelay
+            return
+        end
+        local keyBind = input.LookupBinding("gm_showhelp")
+        if keyBind == "no value" then
+            keyBind = "UNBOUND:gm_showhelp"
+        end
+        self:AddHint("Press <" .. keyBind .. "> to open gamemode settings menu", 10, LocalPlayer()) 
+        NextMenuHint = SysTime() + MenuHintDelay
     end
-    if not cookie.GetNumber(MenuCookieStr) then
-        cookie.Set(MenuCookieStr, 0)
-        timer.Create("F1MenuNotify", 120, 15, MenuNotify)
-    end
+
+    timer.Create("LambdaMenuNotify", 1, 0, MenuNotify)
     
 end
 
