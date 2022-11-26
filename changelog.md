@@ -1,3 +1,5 @@
+0.9.15 (in development)
+
 0.9.14
 - Feature: Checkpoints can now have a timeout, setting is controlled by 'lambda_checkpoint_timeout', 0 disables the timeout.
 - Improved: Environmental player speech is now an option 'lambda_player_speech', 0 disables it.
