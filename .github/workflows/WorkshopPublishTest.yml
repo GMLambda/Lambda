@@ -1,0 +1,11 @@
+name: Workshop Update - Test
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  Workshop-Publish-Test:
+    uses: ./.github/workflows/WorkshopPublish.yml
+    with:
+      workshop-id: '801875828'
+    secrets: inherit

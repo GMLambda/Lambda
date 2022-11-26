@@ -2,14 +2,9 @@ if SERVER then
     AddCSLuaFile()
 end
 
-GM.Name = "Lambda"
-GM.Author = "N/A"
-GM.Email = "N/A"
-GM.Website = "https://github.com/ZehMatt/Lambda"
-GM.Version = "0.9.10"
-
 DEFINE_BASECLASS( "gamemode_base" )
 
+include("sh_lambda_build.lua")
 include("sh_debug.lua")
 include("sh_convars.lua")
 include("sh_string_extend.lua")
