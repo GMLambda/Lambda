@@ -44,7 +44,7 @@ jobs:
         ./CI/PreparePackage.sh
     - name: Get Version
       id: parser
-      if: "contains(github.ref, 'release-')"
+      if: "contains(github.ref, 'release/')"
       uses: johngeorgewright/parse-version-action@v1.0.2
       with:
         ref: ${{ github.ref }}
@@ -55,7 +55,7 @@ jobs:
         echo -e 'GM.WorkshopID = "${{ inputs.workshop-id }}"' >> publish/gamemodes/lambda/gamemode/sh_lambda_build.lua
         echo -e 'GM.WorkshopBuild = true' >> publish/gamemodes/lambda/gamemode/sh_lambda_build.lua
     - name: Patch Workshop Version
-      if: "contains(github.ref, 'release-')"
+      if: "contains(github.ref, 'release/')"
       run: |
         echo -e 'GM.Version = "${{ steps.parser.outputs.version }}"' >> publish/gamemodes/lambda/gamemode/sh_lambda_build.lua
     - name: Dump Workshop Info
@@ -67,4 +67,4 @@ jobs:
     - name: Upload to Workshop
       run: |
         echo "Updating workshop entry ${{ inputs.workshop-id }}"
-        ./tools/gmodws "$STEAM_USERNAME" ${{ inputs.workshop-id }} lambda.gma
+        ./tools/gmodws "$STEAM_USERNAME" ${{ inputs.workshop-id }} lambda.gma "List of changes: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}/changelog.md"
