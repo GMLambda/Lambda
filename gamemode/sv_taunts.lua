@@ -125,12 +125,12 @@ function GM:PlayPlayerTaunt(ply, category, tauntIndex)
         return
     end
 
-    local gender = ply:GetGender()
+    local mdlCategory = ply:GetModelCategory()
     local categoryId = category
     if not isnumber(categoryId) then
         categoryId = self:GetTauntCategoryId(category)
     end
-    local taunts = self:GetTaunts(categoryId, gender)
+    local taunts = self:GetTaunts(categoryId, mdlCategory)
     local taunt = taunts[tauntIndex]
     local snd = table.Random(taunt.Sounds)
 

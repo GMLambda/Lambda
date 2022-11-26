@@ -300,6 +300,24 @@ function GAMETYPE:InitSettings()
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
+    GAMEMODE:AddSetting("player_speech", {
+        Category = "SERVER",
+        NiceName = "#GM_PLAYERSPEECH",
+        Description = "Player Speech, talks based on surroundings",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
+    GAMEMODE:AddSetting("player_damage_speech", {
+        Category = "SERVER",
+        NiceName = "#GM_PLAYERHURTSOUNDS",
+        Description = "Player damage speech",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+    })
+
 end
 
 function GAMETYPE:GetCampaignName(map)

@@ -871,25 +871,22 @@ if SERVER then
         end
 
         local dmg = dmgInfo:GetDamage()
+        local dmgForce = dmgInfo:GetDamageForce() * 0.1
 
+        -- Apply the velocity to all weapons, when dropped they have zero.
         for _,v in ipairs(ply.LastWeaponsDropped) do
             local phys = v:GetPhysicsObject()
             if IsValid(phys) then
-                phys:SetVelocity(dmgInfo:GetDamageForce() * 0.03)
+                phys:SetVelocity(dmgForce * 0.03)
             end
         end
-
-        local gender = ply:GetGender()
-        local snd = table.Random(self.HurtSounds[gender][HITGROUP_GENERIC])
-
-        ply:EmitSound(snd)
+        
         ply:SetShouldServerRagdoll(false)
 
         local damgeDist = dmgInfo:GetDamagePosition():Distance(ply:GetPos())
         local enableGore = true
         local gibPlayer = false
         local didExplode = false
-        local dmgForce = dmgInfo:GetDamageForce() * 0.1
         local vel2D = ply:GetVelocity():Length2D()
         if enableGore == true then
             local damageForceLen = dmgForce:Length2D()
@@ -1122,35 +1119,6 @@ if SERVER then
     function GM:GetFallDamage( ply, speed )
         speed = speed - 480
         return speed * (100 / (1024-480))
-    end
-
-    function GM:EmitPlayerHurt(amount, ply, hitgroup)
-
-        if ply:WaterLevel() == 3 then
-            return
-        end
-
-        if ply:Health() - amount <= 0 then
-            -- Dead people dont say stuff
-            return
-        end
-
-        if hitgroup == nil or hitgroup == HITGROUP_HEAD or hitgroup == HITGROUP_GEAR then
-            hitgroup = HITGROUP_GENERIC
-        end
-
-        local gender = ply:GetGender()
-        local hurtsounds = self.HurtSounds[gender][hitgroup]
-
-        ply.NextHurtSound = ply.NextHurtSound or 0
-
-        local curTime = CurTime()
-        if curTime - ply.NextHurtSound >= 2 then
-            local snd = table.Random(hurtsounds)
-            ply:EmitSound(snd)
-            ply.NextHurtSound = curTime + 2
-        end
-
     end
 
     function GM:PlayerUse(ply, ent)

@@ -1,5 +1,7 @@
 0.9.14
 - Feature: Checkpoints can now have a timeout, setting is controlled by 'lambda_checkpoint_timeout', 0 disables the timeout.
+- Improved: Environmental player speech is now an option 'lambda_player_speech', 0 disables it.
+- Improved: Damage player speech is now an option 'lambda_player_damage_speech', 0 disables it.
 - Improved: Miscellaneous improvements to the gamemode menu.
 - Improved: Console command registration.
 - Improved: Render always the player when in settings menu.
