@@ -217,6 +217,187 @@ local SPEECH_GROUPS =
     },
 }
 
+local HURT_SOUNDS = {
+    ["zombie"] =
+    {
+        [HITGROUP_GENERIC] = {
+            "npc/zombie/zombie_pain1.wav",
+            "npc/zombie/zombie_pain2.wav",
+            "npc/zombie/zombie_pain3.wav",
+            "npc/zombie/zombie_pain4.wav",
+            "npc/zombie/zombie_pain5.wav",
+        },
+    },
+    ["combine"] =
+    {
+        [HITGROUP_GENERIC] = {
+            "npc/combine_soldier/pain1.wav",
+            "npc/combine_soldier/pain2.wav",
+            "npc/combine_soldier/pain3.wav",
+        },
+    },
+    ["monk"] =
+    {
+        [HITGROUP_GENERIC] = {
+            "vo/ravenholm/monk_pain01.wav",
+            "vo/ravenholm/monk_pain02.wav",
+            "vo/ravenholm/monk_pain03.wav",
+            "vo/ravenholm/monk_pain04.wav",
+            "vo/ravenholm/monk_pain05.wav",
+            "vo/ravenholm/monk_pain06.wav",
+            "vo/ravenholm/monk_pain07.wav",
+            "vo/ravenholm/monk_pain08.wav",
+            "vo/ravenholm/monk_pain09.wav",
+            "vo/ravenholm/monk_pain10.wav",
+            "vo/ravenholm/monk_pain12.wav",
+        },
+    },
+    ["barney"] =
+    {
+        [HITGROUP_GENERIC] = {
+            "vo/npc/barney/ba_pain01.wav",
+            "vo/npc/barney/ba_pain02.wav",
+            "vo/npc/barney/ba_pain03.wav",
+            "vo/npc/barney/ba_pain04.wav",
+            "vo/npc/barney/ba_pain05.wav",
+            "vo/npc/barney/ba_pain06.wav",
+            "vo/npc/barney/ba_pain07.wav",
+            "vo/npc/barney/ba_pain08.wav",
+            "vo/npc/barney/ba_pain09.wav",
+            "vo/npc/barney/ba_pain10.wav",
+        },
+    },
+    ["alyx"] =
+    {
+        [HITGROUP_GENERIC] = {
+            "vo/npc/alyx/hurt04.wav",
+            "vo/npc/alyx/hurt05.wav",
+            "vo/npc/alyx/hurt06.wav",
+            "vo/npc/alyx/hurt08.wav",
+        },
+    },
+    ["male"] = 
+    {
+        [HITGROUP_LEFTARM] = {
+            "vo/npc/male01/myarm01.wav",
+            "vo/npc/male01/myarm02.wav"
+        },
+        [HITGROUP_RIGHTARM] = {
+            "vo/npc/male01/myarm01.wav",
+            "vo/npc/male01/myarm02.wav"
+        },
+        [HITGROUP_LEFTLEG] = {
+            "vo/npc/male01/myleg01.wav",
+            "vo/npc/male01/myleg02.wav"
+        },
+        [HITGROUP_RIGHTLEG] = {
+            "vo/npc/male01/myleg01.wav",
+            "vo/npc/male01/myleg02.wav"
+        },
+        [HITGROUP_STOMACH] = {
+            "vo/npc/male01/hitingut01.wav",
+            "vo/npc/male01/hitingut02.wav",
+            "vo/npc/male01/mygut02.wav"
+        },
+        [HITGROUP_GENERIC] = {
+            "vo/npc/male01/pain01.wav",
+            "vo/npc/male01/pain02.wav",
+            "vo/npc/male01/pain03.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain05.wav",
+            "vo/npc/male01/pain06.wav",
+            "vo/npc/male01/pain07.wav",
+            "vo/npc/male01/pain08.wav",
+            "vo/npc/male01/pain09.wav"
+        },
+        [HITGROUP_CHEST] = {
+            "vo/npc/male01/pain01.wav",
+            "vo/npc/male01/pain02.wav",
+            "vo/npc/male01/pain03.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain05.wav",
+            "vo/npc/male01/pain06.wav",
+            "vo/npc/male01/pain07.wav",
+            "vo/npc/male01/pain08.wav",
+            "vo/npc/male01/pain09.wav"
+        },
+        [HITGROUP_GEAR] = {
+            "vo/npc/male01/pain01.wav",
+            "vo/npc/male01/pain02.wav",
+            "vo/npc/male01/pain03.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain04.wav",
+            "vo/npc/male01/pain05.wav",
+            "vo/npc/male01/pain06.wav",
+            "vo/npc/male01/pain07.wav",
+            "vo/npc/male01/pain08.wav",
+            "vo/npc/male01/pain09.wav"
+        },
+
+    },
+    ["female"] = {
+        [HITGROUP_LEFTARM] = {
+            "vo/npc/female01/myarm01.wav",
+            "vo/npc/female01/myarm02.wav"
+        },
+        [HITGROUP_RIGHTARM] = {
+            "vo/npc/female01/myarm01.wav",
+            "vo/npc/female01/myarm02.wav"
+        },
+        [HITGROUP_LEFTLEG] = {
+            "vo/npc/female01/myleg01.wav",
+            "vo/npc/female01/myleg02.wav"
+        },
+        [HITGROUP_RIGHTLEG] = {
+            "vo/npc/female01/myleg01.wav",
+            "vo/npc/female01/myleg02.wav"
+        },
+        [HITGROUP_STOMACH] = {
+            "vo/npc/female01/hitingut01.wav",
+            "vo/npc/female01/hitingut02.wav",
+            "vo/npc/female01/mygut02.wav"
+        },
+        [HITGROUP_GENERIC] = {
+            "vo/npc/female01/pain01.wav",
+            "vo/npc/female01/pain02.wav",
+            "vo/npc/female01/pain03.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain05.wav",
+            "vo/npc/female01/pain06.wav",
+            "vo/npc/female01/pain07.wav",
+            "vo/npc/female01/pain08.wav",
+            "vo/npc/female01/pain09.wav"
+        },
+        [HITGROUP_CHEST] = {
+            "vo/npc/female01/pain01.wav",
+            "vo/npc/female01/pain02.wav",
+            "vo/npc/female01/pain03.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain05.wav",
+            "vo/npc/female01/pain06.wav",
+            "vo/npc/female01/pain07.wav",
+            "vo/npc/female01/pain08.wav",
+            "vo/npc/female01/pain09.wav"
+        },
+        [HITGROUP_GEAR] = {
+            "vo/npc/female01/pain01.wav",
+            "vo/npc/female01/pain02.wav",
+            "vo/npc/female01/pain03.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain04.wav",
+            "vo/npc/female01/pain05.wav",
+            "vo/npc/female01/pain06.wav",
+            "vo/npc/female01/pain07.wav",
+            "vo/npc/female01/pain08.wav",
+            "vo/npc/female01/pain09.wav"
+        },
+    },
+}
+
 local InSpeechUpdate = false
 local NextSpeech = nil
 
@@ -248,7 +429,7 @@ local function EmitPlayerSpeech(ply, group, minWait, delay)
         return false
     end
 
-    local vos = groupData.VO[ply:GetGender()]
+    local vos = groupData.VO[ply:GetModelCategory()]
     if vos == nil then 
         return false 
     end 
@@ -294,6 +475,10 @@ end
 
 function GM:OnPlayerKilledEnemy(ply, npc)
 
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end
+
     if ply.KillStreakTime == nil or CurTime() > ply.KillStreakTime then
         ply.KillStreak = 0
     end
@@ -325,6 +510,10 @@ end
 
 function GM:HandleNPCContact(viewer, npc, isCriminal)
 
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end
+
     if viewer.FriendlyInSight == false or isCriminal == false then
         return
     end
@@ -353,6 +542,10 @@ end
 
 function GM:HandlePlayerContact(viewer, ply, isCriminal)
 
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end
+
     local alive = ply:Alive()
     local acknowledgeDeath = false
 
@@ -375,6 +568,10 @@ function GM:HandleWeaponContact(viewer, wep, isCriminal)
 end
 
 function GM:HandleGrenadeContact(viewer, nate)
+
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end 
 
     if nate.Acknowledged == true then
         return
@@ -411,6 +608,10 @@ end
 
 function GM:OnPlayerReload(ply, event, data)
 
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end 
+
     if ply.FriendlyNearby == false then
         return
     end
@@ -428,6 +629,10 @@ local ENTITY_CLASS_HANDLER =
 }
 
 function GM:UpdatePlayerSpeech(ply)
+
+    if self:GetSetting("player_speech", false) ~= true then
+        return
+    end 
 
     if ply:Alive() == false then
         return
@@ -516,5 +721,50 @@ function GM:UpdatePlayerSpeech(ply)
     end
 
     InSpeechUpdate = false
+
+end
+
+function GM:EmitPlayerHurt(amount, ply, hitgroup)
+
+    if self:GetSetting("player_damage_speech", false) ~= true then
+        return
+    end
+
+    if ply:WaterLevel() == 3 then
+        return
+    end
+
+    if ply:Health() - amount <= 0 then
+        -- Dead people dont say stuff
+        return
+    end
+
+    if hitgroup == nil or hitgroup == HITGROUP_HEAD or hitgroup == HITGROUP_GEAR then
+        hitgroup = HITGROUP_GENERIC
+    end
+
+    local mdlCategory = ply:GetModelCategory()
+    local group = HURT_SOUNDS[mdlCategory]
+    if group == nil then
+        return
+    end
+
+    local hurtsounds = group[hitgroup]
+    if hurtsounds == nil then
+        hurtsounds = group[HITGROUP_GENERIC]
+    end
+    if hurtsounds == nil then
+        DbgPrint("Missing hurt sounds for HITGROUP_GENERIC in group " .. mdlCategory)
+        return
+    end
+
+    ply.NextHurtSound = ply.NextHurtSound or 0
+
+    local curTime = CurTime()
+    if curTime - ply.NextHurtSound >= 2 then
+        local snd = table.Random(hurtsounds)
+        ply:EmitSound(snd)
+        ply.NextHurtSound = curTime + 2
+    end
 
 end

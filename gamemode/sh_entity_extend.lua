@@ -7,7 +7,7 @@ local male_bbox = Vector(22.291288, 20.596443, 72.959808)
 local female_bbox = Vector(21.857199, 20.744711, 71.528900)
 
 -- Credits to CapsAdmin
-local function EstimateModelGender(ent)
+local function EstimateModelCategory(ent)
 
     local mdl = ent:GetModel()
     if not mdl then
@@ -29,18 +29,20 @@ local function EstimateModelGender(ent)
     if seq ~= nil and seq > 0 then
         return "combine"
     end
-
-    seq = ent:LookupSequence("walk_all")
-    if seq ~= nil and seq > 0 then
-        local info = ent:GetSequenceInfo(seq)
-        if info.bbmax == male_bbox then
-            return "male"
-        elseif info.bbmax == female_bbox then
-            return "female"
-        end
+    
+    if mdl:lower():find("monk.mdl", 1, true) then
+        return "monk"
     end
 
-    if mdl:lower():find("female") or
+    if mdl:lower():find("barney.mdl", 1, true) then
+        return "barney"
+    end
+
+    if mdl:lower():find("alyx.mdl", 1, true) then
+        return "alyx"
+    end
+
+    if mdl:lower():find("female", 1, true) or
         ent:LookupBone("ValveBiped.Bip01_R_Pectoral") or
         ent:LookupBone("ValveBiped.Bip01_L_Pectoral")
     then
@@ -63,19 +65,19 @@ function ENTITY_META:GetActivator()
 
 end    
 
-function ENTITY_META:GetGender()
+function ENTITY_META:GetModelCategory()
 
     local oldCache = false
     local mdl = self:GetModel()
 
-    if self.CachedGenderModel == nil or self.CachedGenderModel ~= mdl then
-        self.CachedGenderModel = mdl
+    if self.CachedModelCategoryModel == nil or self.CachedModelCategoryModel ~= mdl then
+        self.CachedModelCategoryModel = mdl
         oldCache = true
     end
     if oldCache == true then
-        self.CachedGender = EstimateModelGender(self)
+        self.CachedModelCategory = EstimateModelCategory(self)
     end
-    return self.CachedGender
+    return self.CachedModelCategory
 
 end
 

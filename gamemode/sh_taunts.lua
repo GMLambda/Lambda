@@ -18,18 +18,18 @@ local function GetCategoryIndex(category)
     return nil
 end
 
-local function InsertTaunt(categoryId, gender, name, files)
+local function InsertTaunt(categoryId, mdlCategory, name, files)
     if Categories[categoryId] == nil then
         error("Invalid category id.")
         return
     end
     Taunts[categoryId] = Taunts[categoryId] or {}
-    Taunts[categoryId][gender] = Taunts[categoryId][gender] or {}
+    Taunts[categoryId][mdlCategory] = Taunts[categoryId][mdlCategory] or {}
     local data = {
         Name = name,
         Sounds = files,
     }
-    table.insert(Taunts[categoryId][gender], data)
+    table.insert(Taunts[categoryId][mdlCategory], data)
 end
 
 local CAT_TAUNTS = InsertCategory("Taunts")
@@ -92,6 +92,35 @@ InsertTaunt(CAT_TAUNTS, "combine", "Affirmative", {"npc/combine_soldier/vo/affir
 InsertTaunt(CAT_TAUNTS, "combine", "Nice", {"npc/metropolice/vo/chuckle.wav"})
 InsertTaunt(CAT_TAUNTS, "combine", "Help", {"npc/metropolice/vo/help.wav"})
 
+InsertTaunt(CAT_TAUNTS, "alyx", "Over there", {"vo/k_lab/al_there.wav", "vo/novaprospekt/al_there.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Over here", {"vo/trainyard/al_overhere.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Take cover", {"vo/npc/female01/takecover02.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Follow me", {"vo/novaprospekt/al_followme01.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Let's get going", {"vo/novaprospekt/al_letsgetgoing.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Cover me", {"vo/npc/alyx/coverme01.wav", "vo/npc/alyx/coverme02.wav", "vo/npc/alyx/coverme03.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Let's go", {"vo/streetwar/alyx_gate/al_letsgo.wav", "vo/streetwar/alyx_gate/al_letsgo01.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Excuse me", {"vo/npc/alyx/al_excuse03.wav"})
+InsertTaunt(CAT_TAUNTS, "alyx", "Watch out", {"vo/npc/alyx/watchout01.wav", "vo/npc/alyx/watchout02.wav"})
+
+InsertTaunt(CAT_TAUNTS, "monk", "Over there", {"vo/ravenholm/exit_goquickly.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Over here", {"vo/ravenholm/shotgun_overhere.wav", "vo/ravenholm/monk_overhere.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Take cover", {"vo/ravenholm/bucket_guardwell.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Follow me", {"vo/ravenholm/monk_followme.wav", "vo/ravenholm/grave_stayclose.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Cover me", {"vo/ravenholm/monk_coverme01.wav", "vo/ravenholm/monk_coverme02.wav", "vo/ravenholm/monk_coverme03.wav", "vo/ravenholm/monk_coverme04.wav", "vo/ravenholm/monk_coverme05.wav", "vo/ravenholm/monk_coverme07.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Let's go", {"vo/ravenholm/exit_goquickly.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Watch out", {"vo/ravenholm/monk_danger03.wav", "vo/ravenholm/monk_danger02.wav", "vo/ravenholm/monk_danger01.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Behind you", {"vo/ravenholm/firetrap_lookout.wav"})
+InsertTaunt(CAT_TAUNTS, "monk", "Help", {"vo/ravenholm/monk_helpme01.wav", "vo/ravenholm/monk_helpme02.wav", "vo/ravenholm/monk_helpme04.wav", "vo/ravenholm/monk_helpme05.wav"})
+
+InsertTaunt(CAT_TAUNTS, "barney", "Over there", {"vo/streetwar/sniper/ba_letsgetgoing.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Over here", {"vo/streetwar/sniper/ba_overhere.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Take cover", {"vo/ravenholm/bucket_guardwell.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Follow me", {"vo/npc/barney/ba_followme02.wav", "vo/npc/barney/ba_followme05.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Let's go", {"vo/npc/barney/ba_letsgo.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Watch out", {"vo/npc/barney/ba_lookout.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Help", {"vo/streetwar/rubble/ba_helpmeout.wav"})
+InsertTaunt(CAT_TAUNTS, "barney", "Done", {"vo/streetwar/nexus/ba_done.wav"})
+
 InsertTaunt(CAT_TAUNTS, "male", "Over there", {"vo/npc/male01/overthere01.wav", "vo/npc/male01/overthere02.wav"})
 InsertTaunt(CAT_TAUNTS, "male", "Over here", {"vo/npc/male01/overhere01.wav"})
 InsertTaunt(CAT_TAUNTS, "male", "Take cover", {"vo/npc/male01/takecover02.wav"})
@@ -134,7 +163,7 @@ InsertTaunt(CAT_TAUNTS, "female", "Hi", {"vo/npc/female01/hi01.wav", "vo/npc/fem
 InsertTaunt(CAT_TAUNTS, "female", "Yeah", {"vo/npc/female01/yeah02.wav"})
 InsertTaunt(CAT_TAUNTS, "female", "Okay", {"vo/npc/female01/ok01.wav", "vo/npc/female01/ok02.wav"})
 InsertTaunt(CAT_TAUNTS, "female", "No", {"vo/npc/female01/no01.wav"})
-InsertTaunt(CAT_TAUNTS, "female", "Nice", {"vo/npc/female01/nice.wav"})
+InsertTaunt(CAT_TAUNTS, "female", "Nice", {"vo/npc/female01/nice01.wav", "vo/npc/female01/nice02.wav"})
 InsertTaunt(CAT_TAUNTS, "female", "Help", {"vo/npc/female01/help01.wav"})
 InsertTaunt(CAT_TAUNTS, "female", "Sorry", {"vo/npc/female01/sorry01.wav", "vo/npc/female01/sorry02.wav", "vo/npc/female01/sorry03.wav"})
 InsertTaunt(CAT_TAUNTS, "female", "Leave it alone", {"vo/npc/female01/answer38.wav"})
@@ -168,11 +197,11 @@ function GM:GetTauntCategoryId(category)
     return GetCategoryIndex(category)
 end
 
-function GM:GetTaunts(categoryId, gender)
-    return Taunts[categoryId][gender]
+function GM:GetTaunts(categoryId, mdlCategory)
+    return Taunts[categoryId][mdlCategory]
 end
 
 function GM:GetPlayerTaunts(ply, categoryId)
-    local gender = ply:GetGender()
-    return self:GetTaunts(categoryId, gender)
+    local mdlCategory = ply:GetModelCategory()
+    return self:GetTaunts(categoryId, mdlCategory)
 end
