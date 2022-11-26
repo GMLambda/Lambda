@@ -114,7 +114,6 @@ InsertTaunt(CAT_TAUNTS, "monk", "Help", {"vo/ravenholm/monk_helpme01.wav", "vo/r
 
 InsertTaunt(CAT_TAUNTS, "barney", "Over there", {"vo/streetwar/sniper/ba_letsgetgoing.wav"})
 InsertTaunt(CAT_TAUNTS, "barney", "Over here", {"vo/streetwar/sniper/ba_overhere.wav"})
-InsertTaunt(CAT_TAUNTS, "barney", "Take cover", {"vo/ravenholm/bucket_guardwell.wav"})
 InsertTaunt(CAT_TAUNTS, "barney", "Follow me", {"vo/npc/barney/ba_followme02.wav", "vo/npc/barney/ba_followme05.wav"})
 InsertTaunt(CAT_TAUNTS, "barney", "Let's go", {"vo/npc/barney/ba_letsgo.wav"})
 InsertTaunt(CAT_TAUNTS, "barney", "Watch out", {"vo/npc/barney/ba_lookout.wav"})
