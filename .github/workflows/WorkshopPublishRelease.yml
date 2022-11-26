@@ -4,7 +4,7 @@ on:
     branches:
       - 'release/**'
 jobs:
-  Workshop-Publish-Test:
+  Workshop-Publish-Release:
     uses: ./.github/workflows/WorkshopPublish.yml
     with:
       workshop-id: '780244493'
