@@ -7,5 +7,5 @@ jobs:
   Workshop-Publish-Test:
     uses: ./.github/workflows/WorkshopPublish.yml
     with:
-      workshop-id: '801875828' # 780244493
+      workshop-id: '780244493'
     secrets: inherit
