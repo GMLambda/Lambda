@@ -113,6 +113,10 @@ function GM:EntityRemoved(ent)
     if class == "logic_choreographed_scene" and self.LogicChoreographedScenes ~= nil then
         self.LogicChoreographedScenes[ent] = nil
     end
+
+    if SERVER and ent:IsNPC() then
+        self:UnregisterNPC(ent)
+    end
 end
 
 -- NOTE: This case is probably fixed, this was due to an uninitialized variable
@@ -427,12 +431,12 @@ function GM:OnEntityCreated(ent)
             if entityProcessor ~= nil and entityProcessor.PostFrame == true then
                 entityProcessor.Fn(self, ent)
             end
+            
+            if ent:IsNPC() then
+                self:RegisterNPC(ent)
+            end
 
         end)
-
-        if ent:IsNPC() then
-            self:RegisterNPC(ent)
-        end
 
         -- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
         if ent:IsVehicle() then

@@ -37,6 +37,14 @@ MAPSCRIPT.EntityFilterByName =
 {
     ["global_newgame_template"] = true,
     ["relay_guncave_gate_exit_close"] = true,
+    ["filter_invulnerable"] = true,
+}
+
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+    ["npc_vort_gun"] = true,
+    ["npc_cit_gate"] = true,
+    ["npc_cit_briefer"] = true,
 }
 
 MAPSCRIPT.VehicleGuns = false
@@ -45,35 +53,16 @@ function MAPSCRIPT:PostInit()
 
     if SERVER then
 
-        local npc_vort_gun
-        local npc_cit_gate
-        local npc_cit_briefer
-
-        ents.WaitForEntityByName("filter_invulnerable", function(ent)
-            ent:Remove()
-        end)
-        ents.WaitForEntityByName("npc_vort_gun", function(ent)
-            ent.ImportantNPC = true
-            npc_vort_gun = ent
-        end)
-        ents.WaitForEntityByName("npc_cit_gate", function(ent)
-            ent.ImportantNPC = true
-            npc_cit_gate = ent
-        end)
-        ents.WaitForEntityByName("npc_cit_briefer", function(ent)
-            ent.ImportantNPC = true
-            npc_cit_briefer = ent
-        end)
-        GAMEMODE:WaitForInput("door_guncave_exit", "Open", function(ent)
-            if IsValid(npc_vort_gun) then
-                npc_vort_gun.ImportantNPC = false
-            end
-            if IsValid(npc_cit_gate) then
-                npc_cit_gate.ImportantNPC = false
-            end
-            if IsValid(npc_cit_briefer) then
-                npc_cit_briefer.ImportantNPC = false
-            end
+        GAMEMODE:WaitForInput("door_guncave_exit", "Open", function()
+            ents.WaitForEntityByName("npc_vort_gun", function(ent)
+                GAMEMODE:UnregisterMissionCriticalNPC(ent)
+            end)
+            ents.WaitForEntityByName("npc_cit_gate", function(ent)
+                GAMEMODE:UnregisterMissionCriticalNPC(ent)
+            end)
+            ents.WaitForEntityByName("npc_cit_briefer", function(ent)
+                GAMEMODE:UnregisterMissionCriticalNPC(ent)
+            end)
         end)
 
         self.VehicleGuns = false

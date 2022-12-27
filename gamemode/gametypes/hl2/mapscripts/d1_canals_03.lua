@@ -28,6 +28,11 @@ MAPSCRIPT.EntityFilterByClass =
 {
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+    ["matt"] = true,
+}
+
 MAPSCRIPT.EntityFilterByName =
 {
     ["global_newgame_template"] = true,
@@ -67,13 +72,14 @@ function MAPSCRIPT:PostInit()
         local matt
         ents.WaitForEntityByName("matt", function(ent)
             matt = ent
+            -- The NPC doesn't start with 100 health.
             matt:SetHealth(100)
-            matt.ImportantNPC = true
         end)
 
         GAMEMODE:WaitForInput("door_manhack_break_1p", "EnableMotion", function(ent)
             if IsValid(matt) then
-                matt.ImportantNPC = false -- Feel free to die now.
+                -- No longer relevant when this input fires.
+                GAMEMODE:UnregisterMissionCriticalNPC(matt)
             end
         end)
 

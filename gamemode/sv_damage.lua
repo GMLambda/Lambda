@@ -62,6 +62,10 @@ function GM:EntityTakeDamage(target, dmginfo)
     local inflictor = dmginfo:GetInflictor()
     local targetClass = target:GetClass()
     local dmgText = GetDamageTypeText(dmginfo)
+    local attackerIsPlayer = false
+    if (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()) then
+        attackerIsPlayer = true
+    end
 
     DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor) .. ", Type: " .. dmgText)
 
@@ -79,15 +83,9 @@ function GM:EntityTakeDamage(target, dmginfo)
             self:ScaleNPCDamage(target, HITGROUP_GENERIC, dmginfo)
         end
 
-        local restrictedNPCNames = self:GetGameTypeData("ImportantPlayerNPCNames") or {}
-        local restrictedNPCClasses = self:GetGameTypeData("ImportantPlayerNPCClasses") or {}
-        local npcName = target:GetName()
-        local isRestricted = restrictedNPCNames[npcName] == true or restrictedNPCClasses[targetClass] == true
-        local attackerIsPlayer = ((IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer()))
-        -- Check if player is attacking friendlies.
-        if attackerIsPlayer == true and isRestricted == true and self:GetSetting("allow_npcdmg") == false then
+        if attackerIsPlayer == true and self:IsNPCMissionCritical(target) and self:GetSetting("allow_npcdmg") == false then
             DbgPrint("Filtering damage on restricted NPC")
-            dmginfo:ScaleDamage(0)
+            dmginfo:SetDamage(0)
             return true
         end
 

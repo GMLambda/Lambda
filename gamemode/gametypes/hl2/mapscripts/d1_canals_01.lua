@@ -31,6 +31,12 @@ MAPSCRIPT.EntityFilterByName =
     ["start_item_template"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+    ["boxcar_human"] = true,
+    ["boxcar_vort"] = true,
+}
+
 function MAPSCRIPT:PostInit()
 
     if SERVER then
@@ -46,26 +52,14 @@ function MAPSCRIPT:PostInit()
             phys:SetMass(200)
         end 
 
-        local boxcar_human
-        local boxcar_vort
-        ents.WaitForEntityByName("boxcar_human", function(ent)
-            ent.ImportantNPC = true
-            boxcar_human = ent
-        end)
-
-        ents.WaitForEntityByName("boxcar_vort", function(ent)
-            ent.ImportantNPC = true
-            boxcar_vort = ent
-        end)
-
-        GAMEMODE:WaitForInput("boxcar_human", "StopScripting", function(ent)
-            DbgPrint("NPCs no longer important")
-            if IsValid(boxcar_vort) then
-                boxcar_vort.ImportantNPC = false
-            end
-            if IsValid(boxcar_human) then
-                boxcar_human.ImportantNPC = false
-            end
+        GAMEMODE:WaitForInput("boxcar_human", "StopScripting", function()
+            -- No longer mission relevant.
+            ents.WaitForEntityByName("boxcar_human", function(ent)
+                GAMEMODE:UnregisterMissionCriticalNPC(ent)
+            end)
+            ents.WaitForEntityByName("boxcar_vort", function(ent)
+                GAMEMODE:UnregisterMissionCriticalNPC(ent)
+            end)
         end)
 
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(650.433105, -6424.663086, 540.031250))

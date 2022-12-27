@@ -69,61 +69,110 @@ if SERVER then
         DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
 
     end
+    
+    local NPC_TYPE_ENEMY = 0
+    local NPC_TYPE_MISSION_CRITICAL = 1
+    local NPC_TYPE_NEUTRAL = 2
+
+    function GM:ClassifyNPCType(npc)
+        local npcClass = npc:GetClass()
+        local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC")
+        if enemyClasses ~= nil and enemyClasses[npcClass] == true then
+            return NPC_TYPE_ENEMY
+        end
+        local npcName = npc:GetName()
+        local importantPlayerNPCNames = self:GetGameTypeData("ImportantPlayerNPCNames")
+        local importantPlayerNPCClasses = self:GetGameTypeData("ImportantPlayerNPCClasses")
+        local mapScript = self.MapScript
+        if importantPlayerNPCNames ~= nil and importantPlayerNPCNames[npcName] == true then
+            return NPC_TYPE_MISSION_CRITICAL
+        elseif importantPlayerNPCClasses ~= nil and importantPlayerNPCClasses[npcClass] == true then
+            return NPC_TYPE_MISSION_CRITICAL
+        elseif mapScript ~= nil and mapScript.ImportantPlayerNPCNames ~= nil and mapScript.ImportantPlayerNPCNames[npcName] == true then
+            return NPC_TYPE_MISSION_CRITICAL
+        elseif mapScript ~= nil and mapScript.ImportantPlayerNPCClasses ~= nil and mapScript.ImportantPlayerNPCClasses[npcClass] == true then
+            return NPC_TYPE_MISSION_CRITICAL
+        end
+        return NPC_TYPE_NEUTRAL
+    end
+
+    GM.EnemyNPCs = GM.EnemyNPCs or {}
+    GM.MissionCriticalNPCs = GM.MissionCriticalNPCs or {}
+
+    function GM:RegisterEnemyNPC(npc)
+        DbgPrint("Registered Enemy NPC", npc)
+        self.EnemyNPCs[npc] = npc
+    end
+
+    function GM:UnregisterEnemyNPC(npc)
+        DbgPrint("Unregistered Enemy NPC", npc)
+        self.MissionCriticalNPCs[npc] = nil
+    end
+
+    function GM:RegisterMissionCriticalNPC(npc)
+        print("Mission critical NPC registered", npc, npc:GetName())
+        self.MissionCriticalNPCs[npc] = true
+    end
+
+    function GM:UnregisterMissionCriticalNPC(npc)
+        DbgPrint("Unregistered mission critical NPC", npc, npc:GetName())
+        self.MissionCriticalNPCs[npc] = nil
+    end
+
+    function GM:IsNPCMissionCritical(npc)
+        return self.MissionCriticalNPCs[npc] == true
+    end
+
+    function GM:UnregisterNPC(npc)
+        DbgPrint("Unregistering NPC", npc)
+        self.EnemyNPCs[npc] = nil
+        self.MissionCriticalNPCs[npc] = nil
+    end
 
     function GM:RegisterNPC(npc)
 
+        DbgPrint("GM:RegisterNPC", npc, npc:GetName())
+
         -- Enable lag compensation on NPCs
         npc:SetLagCompensated(true)
-
-        self.EnemyNPCs = self.EnemyNPCs or {}
-
-        local enemyClasses = self:GetGameTypeData("ClassesEnemyNPC") or {}
-        local npcClass = npc:GetClass()
-        if enemyClasses[npcClass] == true then
-            self.EnemyNPCs[npc] = npc
+        
+        -- Determine the type of NPC and register it in the corresponding tables.
+        local npcType = self:ClassifyNPCType(npc)
+        if npcType == NPC_TYPE_ENEMY then
+            self:RegisterEnemyNPC(npc)
+        elseif npcType == NPC_TYPE_MISSION_CRITICAL then
+            self:RegisterMissionCriticalNPC(npc)
+        else
+            -- For neutral npcs we don't have to do anything below.
+            return
         end
 
+        -- Adjust difficulty for the newly spawend NPC
         self:AdjustNPCDifficulty(npc)
 
+        -- Workaround for combine soliders with shotguns not having a different skin.
         local equip = npc:GetInternalVariable("additionalequipment")
-        if npcClass == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
+        if npc:GetClass() == "npc_combine_s" and (equip == "ai_weapon_shotgun" or equip == "weapon_shotgun") then
             -- HACKHACK: I'm guessing garry removed loading skins based on their weapons at some point.
             npc:SetSkin(1)
         end
 
-        if self.MapScript.OnRegisterNPC ~= nil then
-            self.MapScript:OnRegisterNPC(npc)
-        end
-
+        -- Make episodic content work.
         if npc:GetClass() == "npc_alyx" then
             local interactor = ents.Create("lambda_npc_interactions")
             interactor:LinkNPC(npc)
             interactor:Spawn()
         end
 
+        if self.MapScript.OnRegisterNPC ~= nil then
+            self.MapScript:OnRegisterNPC(npc)
+        end
+
     end
 
     function GM:HandleCriticalNPCDeath(npc)
 
-        local gameType = self:GetGameType()
-        local mapScript = self.MapScript
-        local name = npc:GetName()
-        local class = npc:GetClass()
-        local missionFailure = false
-
-        if gameType.ImportantPlayerNPCNames[name] == true then
-            missionFailure = true
-        elseif gameType.ImportantPlayerNPCClasses[class] == true then
-            missionFailure = true
-        elseif mapScript ~= nil and mapScript.ImportantPlayerNPCNames ~= nil and mapScript.ImportantPlayerNPCNames[name] == true then
-            missionFailure = true
-        elseif mapScript ~= nil and mapScript.ImportantPlayerNPCClasses ~= nil and mapScript.ImportantPlayerNPCClasses[class] == true then
-            missionFailure = true
-        elseif npc.ImportantNPC == true then
-            missionFailure = true
-        end
-
-        if missionFailure == true then
+        if self:IsNPCMissionCritical(npc) == true then
             self:RestartRound("GAMEOVER_ALLY")
             self:RegisterRoundLost()
         end
@@ -193,6 +242,7 @@ if SERVER then
 
         self:HandleCriticalNPCDeath(npc)
         self:RegisterNPCDeath(npc, attacker, inflictor)
+        self:UnregisterNPC(npc)
 
     end
 
