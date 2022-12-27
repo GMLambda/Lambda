@@ -1,4 +1,5 @@
 0.9.15 (in development)
+- Fixed: 'lambda_allow_npcdmg' having no effect, mission critical NPCs are now protected from player damage when disabled.
 
 0.9.14
 - Feature: Checkpoints can now have a timeout, setting is controlled by 'lambda_checkpoint_timeout', 0 disables the timeout.

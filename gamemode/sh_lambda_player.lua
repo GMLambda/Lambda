@@ -1145,24 +1145,24 @@ if SERVER then
     end
 
     function GM:StartScreenOverlay(mat, ply)
-            net.Start("LambdaPlayerMatOverlay")
-            net.WriteBool(true)
-            net.WriteString(mat)
-            if not ply then
-                net.Broadcast()
-            else
-                net.Send(ply)
-            end
+        net.Start("LambdaPlayerMatOverlay")
+        net.WriteBool(true)
+        net.WriteString(mat)
+        if not ply then
+            net.Broadcast()
+        else
+            net.Send(ply)
+        end
     end
 
     function GM:StopScreenOverlay(ply)
-            net.Start("LambdaPlayerMatOverlay")
-            net.WriteBool(false)
-            if not ply then
-                net.Broadcast()
-            else
-                net.Send(ply)
-            end
+        net.Start("LambdaPlayerMatOverlay")
+        net.WriteBool(false)
+        if not ply then
+            net.Broadcast()
+        else
+            net.Send(ply)
+        end
     end
 
 else -- CLIENT

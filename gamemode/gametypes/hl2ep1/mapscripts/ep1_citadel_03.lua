@@ -31,6 +31,11 @@ MAPSCRIPT.GlobalStates =
     ["super_phys_gun"] = GLOBAL_ON,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames =
+{
+    ["Mossman2"] = true,
+}
+
 function MAPSCRIPT:PostInit()
 
     if SERVER then
@@ -154,10 +159,6 @@ function MAPSCRIPT:PostInit()
         checkpoint2Trigger.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
-
-        ents.WaitForEntityByName("Mossman2", function(ent) 
-            ent.ImportantNPC = false
-        end)
 
         local elevator_exit
         ents.WaitForEntityByName("Train_lift_coreexit", function(ent)

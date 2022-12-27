@@ -36,14 +36,6 @@ MAPSCRIPT.DefaultLoadout =
     HEV = true,
 }
 
-MAPSCRIPT.InputFilters =
-{
-}
-
-MAPSCRIPT.EntityFilterByClass =
-{
-}
-
 MAPSCRIPT.EntityFilterByName =
 {
     ["player_spawn_items_maker"] = true,
@@ -51,6 +43,7 @@ MAPSCRIPT.EntityFilterByName =
 
 MAPSCRIPT.ImportantPlayerNPCNames =
 {
+    ["citizen_greeter"] = true,
 }
 
 MAPSCRIPT.VehicleGuns = true
@@ -62,14 +55,13 @@ function MAPSCRIPT:PostInit()
 
         local citizen_greeter
         ents.WaitForEntityByName("citizen_greeter", function(ent)
-            ent.ImportantNPC = true
             ent:SetHealth(100)
             citizen_greeter = ent
         end)
 
         GAMEMODE:WaitForInput("greeter_dropships", "Start", function(ent)
             if IsValid(citizen_greeter) then
-                citizen_greeter.ImportantNPC = false
+                GAMEMODE:UnregisterMissionCriticalNPC(citizen_greeter)
             end
         end)
         
