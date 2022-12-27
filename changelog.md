@@ -1,3 +1,5 @@
+0.9.16 (in development)
+
 0.9.15
 - Fixed: Incorrect addon structure causing custom content to not load for clients. [Regression]
 - Fixed: 'lambda_allow_npcdmg' having no effect, mission critical NPCs are now protected from player damage when disabled.
