@@ -7,7 +7,7 @@ mkdir publish/gamemodes/lambda
 
 cp -R backgrounds/ publish/gamemodes/lambda/backgrounds/
 cp -R gamemode/ publish/gamemodes/lambda/gamemode/
-cp -R content/ publish/gamemodes/lambda/content
+cp -R content/* publish/
 cp -R entities/ publish/gamemodes/lambda/entities/
 
 cp addon.json publish/addon.json
