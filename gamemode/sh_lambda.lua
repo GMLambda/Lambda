@@ -137,4 +137,5 @@ if CLIENT then
     language.Add("LAMBDA_Campaign", "CAMPAIGN")
     language.Add("LAMBDA_Chapter", "CHAPTER")
     language.Add("LAMBDA_Frags", "FRAGS LEFT")
+    language.Add("LAMBDA_ChangingLevelMap", "CHANGING TO LEVEL")
 end

@@ -98,7 +98,7 @@ function ENT:DoChangeLevel()
         end
     end
 
-    GAMEMODE:ChangeLevel(self, string.lower(self.TargetMap), self.Landmark, touchingObjects, restart)
+    GAMEMODE:RequestChangeLevel(self, string.lower(self.TargetMap), self.Landmark, touchingObjects, restart)
 end
 
 end

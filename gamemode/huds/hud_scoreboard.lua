@@ -21,6 +21,29 @@ local SB_PING_METER = {}
 local SB_PLY_LINE = {}
 local SB_PANEL = {}
 
+local function GetScoreboardInfo()
+    local gm = GAMEMODE
+	local scoreboardInfo = gm:GetGameType():GetScoreboardInfo()
+	if gm:IsChangingLevel() then
+		-- Inject info into the scoreboard, this should be refactored.
+		local remaining = math.max(0, GAMEMODE:GetLevelChangeTime() - GetSyncedTimestamp())
+		local changingStr = GAMEMODE:GetLevelChangeMap() .. " in " .. string.format("%.02f", remaining) .. " seconds."
+        table.insert(scoreboardInfo, {
+			name = "LAMBDA_ChangingLevelMap",
+            value = changingStr,
+        })
+    end
+	return scoreboardInfo
+end
+
+local function CalculcateInfoSize()
+	local scoreboardInfo = GetScoreboardInfo()
+	local numEntries = table.Count(scoreboardInfo)
+	local maxCols = math.min(2, numEntries)
+	local numRows = math.ceil(numEntries / maxCols)
+	return (numRows * 25)
+end
+
 function SB_PING_METER:Init()
 	self:Dock(FILL)
 	self:DockMargin(0, 3, 0, 0)
@@ -200,7 +223,6 @@ SBPlayerLine = vgui.RegisterTable(SB_PLY_LINE, "DPanel")
 function SB_PANEL:Init()
 	self.Scores = self:Add("DScrollPanel")
 	self.Scores:Dock(FILL)
-	self.Scores:DockMargin(0, 250, 0, 0)
 	self.Focused = false
 end
 
@@ -211,10 +233,10 @@ end
 
 local function DrawBar(x, y, w, name, value)
 	surface.SetDrawColor(orange)
-	surface.DrawRect(x + 2, y - 56, 4, 24)
+	surface.DrawRect(x, y - 56, 4, 24)
 	surface.SetMaterial(gradientL)
 	surface.SetDrawColor(dark2)
-	surface.DrawRect(x + 6, y - 56, w - 11, 24)
+	surface.DrawRect(x + 4, y - 56, w - 6, 24)
 
 	name = string.upper(Localize(name))
 	value = string.upper(Localize(value))
@@ -236,41 +258,58 @@ end
 function SB_PANEL:Paint(w, h)
 	local _, y = self.Scores:GetPos()
 	-- this was the best way to get an image in here... screw u dimage and power of 2
+	--
+	local sizeInfo = CalculcateInfoSize()
+	y = y - sizeInfo + 20
+	
 	surface.SetMaterial(lambda_logo)
 	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(94, -160, 512, 512)
 
-	local n = 700 / table.Count(GAMEMODE:GetGameType():GetScoreboardInfo())
-	local x = 0
-
-	for k, v in pairs(GAMEMODE:GetGameType():GetScoreboardInfo()) do
-		DrawBar(x, y, n, v.name, v.value)
-		x = x + n + 2
-	end
+	local scoreboardInfo = GetScoreboardInfo()
+	local numEntries = table.Count(scoreboardInfo)
+	local maxCols = math.min(2, numEntries)
+	local numRows = math.ceil(numEntries / maxCols)
 
 	DrawHostName(x,y,w,h)
 
+	local idx = 1
+	for _ = 1, numRows do
+		local maxRowCols = math.min(maxCols, numEntries - (idx - 1))
+		local n = 700 / maxRowCols
+		local x = 0
+		for col = 1, maxRowCols do
+			local v = scoreboardInfo[idx]
+			DrawBar(x, y, n - 1, v.name, v.value)
+			x = x + n + 1
+			idx = idx + 1
+		end
+		y = y + 26
+	end
+
+	y = y - 46
+
 	surface.SetMaterial(gradientR)
 	surface.SetDrawColor(dark)
-	surface.DrawTexturedRect(300, y - 28, w - 302, 24)
+	surface.DrawTexturedRect(300, y - 4, w - 302, 24)
 
 	if GAMEMODE:GetGameType().PlayerTiming then
 		surface.SetMaterial(time_logo)
 		surface.SetDrawColor(white)
-		surface.DrawTexturedRect(467, y - 24, 16, 16)
+		surface.DrawTexturedRect(467, y, 16, 16)
 	end
 
 	surface.SetMaterial(frag_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(550, y - 24, 16, 16)
+	surface.DrawTexturedRect(550, y, 16, 16)
 
 	surface.SetMaterial(death_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(601, y - 24, 16, 16)
+	surface.DrawTexturedRect(601, y, 16, 16)
 
 	surface.SetMaterial(ping_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(650, y - 24, 16, 16)
+	surface.DrawTexturedRect(650, y, 16, 16)
 end
 
 function SB_PANEL:Think()
@@ -294,6 +333,10 @@ function SB_PANEL:Think()
 		gui.EnableScreenClicker(true)
 	end
 
+	-- We need to reset this otherwise it bugs out.
+	local sizeInfo = CalculcateInfoSize()
+	self.Scores:DockMargin(0, 230 + sizeInfo, 0, 0)
+
 end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
@@ -301,17 +344,14 @@ SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
 LAMBDA_SCOREBOARD_OPEN = LAMBDA_SCOREBOARD_OPEN or false 
 
-if IsValid(LAMBDA_SCOREBOARD) then
-	LAMBDA_SCOREBOARD:Remove()
-	LAMBDA_SCOREBOARD = nil
-end
-
 function GM:ScoreboardShow(keepOpen)
 
-	if not IsValid(LAMBDA_SCOREBOARD) then
-		LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
+	if IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD:Remove()
+		LAMBDA_SCOREBOARD = nil
 	end
 
+	LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
 	if IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD:Show()
 		LAMBDA_SCOREBOARD_OPEN = true
