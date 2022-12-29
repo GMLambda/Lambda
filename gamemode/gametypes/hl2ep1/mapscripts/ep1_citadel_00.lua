@@ -215,7 +215,7 @@ function MAPSCRIPT:PostInit()
                 end
             end
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
-            return false -- Suppress this.
+            return true -- Suppress this.
         end)
 
         -- Give gravity gun by default once picked up
