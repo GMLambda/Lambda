@@ -353,45 +353,41 @@ end
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 
 LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
-LAMBDA_SCOREBOARD_OPEN = LAMBDA_SCOREBOARD_OPEN or false 
+LAMBDA_KEEP_SCOREBOARD = LAMBDA_KEEP_SCOREBOARD or false
 
-function GM:ScoreboardShow(keepOpen)
+function GM:SetKeepScoreboardOpen(keepOpen)
+	if keepOpen == true then
+		LAMBDA_KEEP_SCOREBOARD = true
+	else
+		LAMBDA_KEEP_SCOREBOARD = false
+	end
+end
 
-	if IsValid(LAMBDA_SCOREBOARD) and LAMBDA_SCOREBOARD.KeepOpen == true then
+function GM:ShouldKeepScoreboardOpen()
+	return LAMBDA_KEEP_SCOREBOARD
+end
+
+function GM:ScoreboardShow()
+	if IsValid(LAMBDA_SCOREBOARD) then
 		return
 	end
 
-	if IsValid(LAMBDA_SCOREBOARD) then
-		LAMBDA_SCOREBOARD:Remove()
-		LAMBDA_SCOREBOARD = nil
-	end
-
 	LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
+
 	if IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD:Show()
-		LAMBDA_SCOREBOARD_OPEN = true
 	end
-
-	LAMBDA_SCOREBOARD.KeepOpen = keepOpen
-
-	return false
 end
 
-function GM:IsScoreboardOpen()
-	return LAMBDA_SCOREBOARD_OPEN
-end 
-
 function GM:ScoreboardHide()
-
-	if IsValid(LAMBDA_SCOREBOARD) then
-		if LAMBDA_SCOREBOARD.KeepOpen ~= true then
-			LAMBDA_SCOREBOARD.Focus = false
-			gui.EnableScreenClicker(false)
-			LAMBDA_SCOREBOARD:Hide()
-			LAMBDA_SCOREBOARD_OPEN = false
-		end
+	if not IsValid(LAMBDA_SCOREBOARD) then
+		return
 	end
 
-	return false
+	LAMBDA_SCOREBOARD.Focus = false
+	gui.EnableScreenClicker(false)
 
+	LAMBDA_SCOREBOARD:Hide()
+	LAMBDA_SCOREBOARD:Remove()
+	LAMBDA_SCOREBOARD = nil
 end

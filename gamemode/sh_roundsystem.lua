@@ -377,13 +377,15 @@ else -- CLIENT
     end
 
     function GM:HandleRoundInfoFinished(infoType, params)
-        self:ScoreboardShow(true)
+        self:SetKeepScoreboardOpen(true)
+        self:ScoreboardShow()
     end
 
     function GM:HandleRoundInfoChangeLevel(infoType, params)
         self.ChangeLevelTime = params.ChangeLevelTime
         self.ChangeLevelMap = params.NextMap
-        self:ScoreboardShow(true)
+        self:SetKeepScoreboardOpen(true)
+        self:ScoreboardShow()
     end
 
     function GM:HandleRoundInfoChange(infoType, params)
