@@ -1,7 +1,8 @@
 surface.CreateFont("lambda_sb_def", {font = "Verdana", size = 22, weight = 400, antialias = true})
 surface.CreateFont("lambda_sb_num", {font = "HudHintTextLarge", size = 18, weight = 600, antialias = true})
-surface.CreateFont("lambda_sb_def_sm", {font = "Roboto Light", size = 16, weight = 300, antialias = true})
+surface.CreateFont("lambda_sb_def_sm", {font = "Roboto Light", size = 16, weight = 400, antialias = true})
 surface.CreateFont("lambda_sb_def_nsm", {font = "DermaLarge", size = 26, weight = 600, antialias = true})
+surface.CreateFont("lambda_sb_def_ping", {font = "DermaLarge", size = 14, weight = 100, antialias = true})
 
 local lambda_logo = Material("lambda/logo_512.png", "noclamp smooth")
 local frag_logo = Material("lambda/icons/gun.png", "noclamp smooth")
@@ -48,8 +49,8 @@ function SB_PING_METER:Init()
 	self:Dock(FILL)
 	self:DockMargin(0, 3, 0, 0)
 	self.PingNum = self:Add("DLabel")
-	self.PingNum:SetPos(18, 2)
-	self.PingNum:SetFont("DebugFixed")
+	self.PingNum:SetPos(20, 3)
+	self.PingNum:SetFont("lambda_sb_def_ping")
 	self.PingNum:SetTextColor(white)
 	self.PingNum:SetContentAlignment(4)
 	self:SetWidth(50)
@@ -67,30 +68,38 @@ function SB_PING_METER:Think()
 end
 
 function SB_PING_METER:Paint(w, h)
+
 	surface.SetDrawColor(Color(90, 90, 92, 200))
-	surface.DrawRect(0, 15, 3, 4)
-	surface.DrawRect(4, 12, 3, 7)
-	surface.DrawRect(8, 8, 3, 11)
-	surface.DrawRect(12, 4, 3, 15)
+
+	local h1 = 4
+	local h2 = 7
+	local h3 = 10
+	local h4 = 13
+	local offsetY = 1 + (h4 / 2)
+
+	surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+	surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+	surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
+	surface.DrawRect(12, offsetY, 3, h4)
 
 	if self.PlyPing <= 50 then
 		surface.SetDrawColor(Color(0, 255, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
-		surface.DrawRect(8, 8, 3, 11)
-		surface.DrawRect(12, 4, 3, 15)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+		surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
+		surface.DrawRect(12, offsetY, 3, h4)
 	elseif self.PlyPing <= 100 and self.PlyPing > 50 then
 		surface.SetDrawColor(Color(255, 227, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
-		surface.DrawRect(8, 8, 3, 11)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+		surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
 	elseif self.PlyPing <= 150 and self.PlyPing > 100 then
 		surface.SetDrawColor(Color(255, 80, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
 	elseif self.PlyPing > 150 then
 		surface.SetDrawColor(Color(255, 0, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
+		surface.SetDrawColor(Color(255, 80, 0, 200))
 	end
 end
 
@@ -337,6 +346,8 @@ function SB_PANEL:Think()
 	local sizeInfo = CalculcateInfoSize()
 	self.Scores:DockMargin(0, 230 + sizeInfo, 0, 0)
 
+	self:InvalidateLayout()
+
 end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
@@ -345,6 +356,10 @@ LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
 LAMBDA_SCOREBOARD_OPEN = LAMBDA_SCOREBOARD_OPEN or false 
 
 function GM:ScoreboardShow(keepOpen)
+
+	if IsValid(LAMBDA_SCOREBOARD) and LAMBDA_SCOREBOARD.KeepOpen == true then
+		return
+	end
 
 	if IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD:Remove()
@@ -357,9 +372,7 @@ function GM:ScoreboardShow(keepOpen)
 		LAMBDA_SCOREBOARD_OPEN = true
 	end
 
-	if LAMBDA_SCOREBOARD.KeepOpen ~= true then
-		LAMBDA_SCOREBOARD.KeepOpen = keepOpen
-	end
+	LAMBDA_SCOREBOARD.KeepOpen = keepOpen
 
 	return false
 end
