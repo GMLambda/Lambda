@@ -16,6 +16,7 @@ GAMETYPE.MapList = {"dm_lockdown", "dm_overwatch", "dm_steamlab", "dm_underpass"
 GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
+GAMETYPE.PostRoundMapVote = true
 
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = 2

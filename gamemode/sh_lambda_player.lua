@@ -1403,11 +1403,10 @@ function GM:StartCommand(ply, cmd)
     end
 
     if CLIENT then
-        if self:IsScoreboardOpen() == true then
+        if cmd:KeyDown(IN_SCORE) then
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK)) )
             cmd:SetButtons( bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK2)) )
         end
-
         if self:GetSetting("allow_auto_jump") == true and lambda_auto_jump:GetBool() == true then
             if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
                 cmd:SetButtons( bit.band( cmd:GetButtons(), bit.bnot( IN_JUMP ) ) )

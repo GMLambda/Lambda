@@ -1,7 +1,8 @@
 surface.CreateFont("lambda_sb_def", {font = "Verdana", size = 22, weight = 400, antialias = true})
 surface.CreateFont("lambda_sb_num", {font = "HudHintTextLarge", size = 18, weight = 600, antialias = true})
-surface.CreateFont("lambda_sb_def_sm", {font = "Roboto Light", size = 16, weight = 300, antialias = true})
+surface.CreateFont("lambda_sb_def_sm", {font = "Roboto Light", size = 16, weight = 400, antialias = true})
 surface.CreateFont("lambda_sb_def_nsm", {font = "DermaLarge", size = 26, weight = 600, antialias = true})
+surface.CreateFont("lambda_sb_def_ping", {font = "DermaLarge", size = 14, weight = 100, antialias = true})
 
 local lambda_logo = Material("lambda/logo_512.png", "noclamp smooth")
 local frag_logo = Material("lambda/icons/gun.png", "noclamp smooth")
@@ -21,12 +22,65 @@ local SB_PING_METER = {}
 local SB_PLY_LINE = {}
 local SB_PANEL = {}
 
+local function GetScoreboardInfo()
+    local gm = GAMEMODE
+	local scoreboardInfo = gm:GetGameType():GetScoreboardInfo()
+	if gm:IsChangingLevel() then
+		-- Inject info into the scoreboard, this should be refactored.
+		local remaining = math.max(0, GAMEMODE:GetLevelChangeTime() - GetSyncedTimestamp())
+		local changingStr = GAMEMODE:GetLevelChangeMap() .. " in " .. string.format("%.02f", remaining) .. " seconds."
+        table.insert(scoreboardInfo, {
+			name = "LAMBDA_ChangingLevelMap",
+            value = changingStr,
+        })
+    end
+	return scoreboardInfo
+end
+
+local function GetColSpaceRequired(col)
+
+	surface.SetFont("lambda_sb_def_sm")
+	local w,h = surface.GetTextSize(Localize(col.name) .. " " .. Localize(col.value))
+	return w + 60, h
+
+end
+
+local function ComputeEntries(info)
+	local rows = {}
+	local cols = {}
+
+	local colSpaceUsed = 0
+	local maxRowWidth = 700
+	local maxCols = 4
+
+	for _,v in pairs(info) do
+		local colW, colH = GetColSpaceRequired(v)
+		if colSpaceUsed + colW > maxRowWidth then
+			table.insert(rows, cols)
+			cols = {}
+			colSpaceUsed = 0
+		end
+		colSpaceUsed = colSpaceUsed + colW
+		table.insert(cols, v)
+
+		if(#cols >= maxCols) then
+			table.insert(rows, cols)
+			cols = {}
+			colSpaceUsed = 0
+		end
+	end
+	if #cols ~= 0 then
+		table.insert(rows, cols)
+	end
+	return rows
+end
+
 function SB_PING_METER:Init()
 	self:Dock(FILL)
 	self:DockMargin(0, 3, 0, 0)
 	self.PingNum = self:Add("DLabel")
-	self.PingNum:SetPos(18, 2)
-	self.PingNum:SetFont("DebugFixed")
+	self.PingNum:SetPos(20, 3)
+	self.PingNum:SetFont("lambda_sb_def_ping")
 	self.PingNum:SetTextColor(white)
 	self.PingNum:SetContentAlignment(4)
 	self:SetWidth(50)
@@ -44,36 +98,46 @@ function SB_PING_METER:Think()
 end
 
 function SB_PING_METER:Paint(w, h)
+
 	surface.SetDrawColor(Color(90, 90, 92, 200))
-	surface.DrawRect(0, 15, 3, 4)
-	surface.DrawRect(4, 12, 3, 7)
-	surface.DrawRect(8, 8, 3, 11)
-	surface.DrawRect(12, 4, 3, 15)
+
+	local h1 = 4
+	local h2 = 7
+	local h3 = 10
+	local h4 = 13
+	local offsetY = 1 + (h4 / 2)
+
+	surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+	surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+	surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
+	surface.DrawRect(12, offsetY, 3, h4)
 
 	if self.PlyPing <= 50 then
 		surface.SetDrawColor(Color(0, 255, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
-		surface.DrawRect(8, 8, 3, 11)
-		surface.DrawRect(12, 4, 3, 15)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+		surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
+		surface.DrawRect(12, offsetY, 3, h4)
 	elseif self.PlyPing <= 100 and self.PlyPing > 50 then
 		surface.SetDrawColor(Color(255, 227, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
-		surface.DrawRect(8, 8, 3, 11)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
+		surface.DrawRect(8, offsetY + h4 - h3, 3, h3)
 	elseif self.PlyPing <= 150 and self.PlyPing > 100 then
 		surface.SetDrawColor(Color(255, 80, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
-		surface.DrawRect(4, 12, 3, 7)
+		surface.DrawRect(0, offsetY + h4 - h1, 3, h1)
+		surface.DrawRect(4, offsetY + h4 - h2, 3, h2)
 	elseif self.PlyPing > 150 then
 		surface.SetDrawColor(Color(255, 0, 0, 200))
-		surface.DrawRect(0, 15, 3, 4)
+		surface.SetDrawColor(Color(255, 80, 0, 200))
 	end
 end
 
 derma.DefineControl("SBPingmeter", "Draws ping", SB_PING_METER, "DPanel")
 
 function SB_PLY_LINE:Init()
+
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 
 	self.AvatarButton = self:Add("DButton")
 	self.AvatarButton:Dock(LEFT)
@@ -200,21 +264,21 @@ SBPlayerLine = vgui.RegisterTable(SB_PLY_LINE, "DPanel")
 function SB_PANEL:Init()
 	self.Scores = self:Add("DScrollPanel")
 	self.Scores:Dock(FILL)
-	self.Scores:DockMargin(0, 250, 0, 0)
 	self.Focused = false
 end
 
 function SB_PANEL:PerformLayout()
 	self:SetSize(700, ScrH() - 250)
 	self:SetPos(ScrW() / 2 - 350, 0)
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 end
 
 local function DrawBar(x, y, w, name, value)
 	surface.SetDrawColor(orange)
-	surface.DrawRect(x + 2, y - 56, 4, 24)
+	surface.DrawRect(x, y - 56, 4, 24)
 	surface.SetMaterial(gradientL)
 	surface.SetDrawColor(dark2)
-	surface.DrawRect(x + 6, y - 56, w - 11, 24)
+	surface.DrawRect(x + 4, y - 56, w - 6, 24)
 
 	name = string.upper(Localize(name))
 	value = string.upper(Localize(value))
@@ -236,46 +300,61 @@ end
 function SB_PANEL:Paint(w, h)
 	local _, y = self.Scores:GetPos()
 	-- this was the best way to get an image in here... screw u dimage and power of 2
+	--
+	local sizeInfo = #self.InfoEntries * 25
+
+	y = y - sizeInfo + 20
+	
 	surface.SetMaterial(lambda_logo)
 	surface.SetDrawColor(white)
 	surface.DrawTexturedRect(94, -160, 512, 512)
 
-	local n = 700 / table.Count(GAMEMODE:GetGameType():GetScoreboardInfo())
-	local x = 0
-
-	for k, v in pairs(GAMEMODE:GetGameType():GetScoreboardInfo()) do
-		DrawBar(x, y, n, v.name, v.value)
-		x = x + n + 2
-	end
+	local scoreboardInfo = GetScoreboardInfo()
+	local numEntries = table.Count(scoreboardInfo)
+	local maxCols = math.min(2, numEntries)
+	local numRows = math.ceil(numEntries / maxCols)
 
 	DrawHostName(x,y,w,h)
 
+	for _,cols in pairs(self.InfoEntries) do
+		local n = 700 / #cols
+		local x = 0
+		for _,col in pairs(cols) do
+			DrawBar(x, y, n - 1, col.name, col.value)
+			x = x + n + 1
+		end
+		y = y + 26
+	end
+
+	y = y - 46
+
 	surface.SetMaterial(gradientR)
 	surface.SetDrawColor(dark)
-	surface.DrawTexturedRect(300, y - 28, w - 302, 24)
+	surface.DrawTexturedRect(300, y - 4, w - 302, 24)
 
 	if GAMEMODE:GetGameType().PlayerTiming then
 		surface.SetMaterial(time_logo)
 		surface.SetDrawColor(white)
-		surface.DrawTexturedRect(467, y - 24, 16, 16)
+		surface.DrawTexturedRect(467, y, 16, 16)
 	end
 
 	surface.SetMaterial(frag_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(550, y - 24, 16, 16)
+	surface.DrawTexturedRect(550, y, 16, 16)
 
 	surface.SetMaterial(death_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(601, y - 24, 16, 16)
+	surface.DrawTexturedRect(601, y, 16, 16)
 
 	surface.SetMaterial(ping_logo)
 	surface.SetDrawColor(white)
-	surface.DrawTexturedRect(650, y - 24, 16, 16)
+	surface.DrawTexturedRect(650, y, 16, 16)
 end
 
 function SB_PANEL:Think()
 
 	self.ScoreEntries = self.ScoreEntries or {}
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 
 	for k, v in pairs(player.GetAll()) do
 		if self.ScoreEntries[v] ~= nil then
@@ -294,51 +373,53 @@ function SB_PANEL:Think()
 		gui.EnableScreenClicker(true)
 	end
 
+	-- We need to reset this otherwise it bugs out.
+	local infoHeight = #self.InfoEntries * 25
+	self.Scores:DockMargin(0, 230 + infoHeight, 0, 0)
+
+	self:InvalidateLayout()
+
 end
 
 SBMain = vgui.RegisterTable(SB_PANEL, "EditablePanel")
 
 LAMBDA_SCOREBOARD = LAMBDA_SCOREBOARD or nil
-LAMBDA_SCOREBOARD_OPEN = LAMBDA_SCOREBOARD_OPEN or false 
+LAMBDA_KEEP_SCOREBOARD = LAMBDA_KEEP_SCOREBOARD or false
 
-if IsValid(LAMBDA_SCOREBOARD) then
-	LAMBDA_SCOREBOARD:Remove()
-	LAMBDA_SCOREBOARD = nil
+function GM:SetKeepScoreboardOpen(keepOpen)
+	if keepOpen == true then
+		LAMBDA_KEEP_SCOREBOARD = true
+	else
+		LAMBDA_KEEP_SCOREBOARD = false
+	end
 end
 
-function GM:ScoreboardShow(keepOpen)
+function GM:ShouldKeepScoreboardOpen()
+	return LAMBDA_KEEP_SCOREBOARD
+end
 
-	if not IsValid(LAMBDA_SCOREBOARD) then
-		LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
+function GM:ScoreboardShow()
+	if IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD:InvalidateLayout()
+		return
 	end
+
+	LAMBDA_SCOREBOARD = vgui.CreateFromTable(SBMain)
 
 	if IsValid(LAMBDA_SCOREBOARD) then
 		LAMBDA_SCOREBOARD:Show()
-		LAMBDA_SCOREBOARD_OPEN = true
 	end
-
-	if LAMBDA_SCOREBOARD.KeepOpen ~= true then
-		LAMBDA_SCOREBOARD.KeepOpen = keepOpen
-	end
-
-	return false
 end
 
-function GM:IsScoreboardOpen()
-	return LAMBDA_SCOREBOARD_OPEN
-end 
-
 function GM:ScoreboardHide()
-
-	if IsValid(LAMBDA_SCOREBOARD) then
-		if LAMBDA_SCOREBOARD.KeepOpen ~= true then
-			LAMBDA_SCOREBOARD.Focus = false
-			gui.EnableScreenClicker(false)
-			LAMBDA_SCOREBOARD:Hide()
-			LAMBDA_SCOREBOARD_OPEN = false
-		end
+	if not IsValid(LAMBDA_SCOREBOARD) then
+		return
 	end
 
-	return false
+	LAMBDA_SCOREBOARD.Focus = false
+	gui.EnableScreenClicker(false)
 
+	LAMBDA_SCOREBOARD:Hide()
+	LAMBDA_SCOREBOARD:Remove()
+	LAMBDA_SCOREBOARD = nil
 end

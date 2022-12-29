@@ -146,18 +146,17 @@ function GM:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
 
 end
 
-function GM:ChangeLevel(activator, map, landmark, playersInTrigger, restart)
+function GM:RequestChangeLevel(activator, map, landmark, playersInTrigger, restart)
+
+    if self.ChangingLevel == true then
+        return
+    end
 
     if playersInTrigger == nil then
         playersInTrigger = {}
     end
 
     DbgPrint("GM:ChangeLevel", activator, map, landmark, playersInTrigger, restart)
-
-    if self.ChangingLevel == true and g_debug_transitions:GetBool() == false then
-        DbgError("Called ChangeLevel twice!")
-        return
-    end
 
     self.ChangingLevel = true
 
@@ -167,10 +166,15 @@ function GM:ChangeLevel(activator, map, landmark, playersInTrigger, restart)
 
     local nextMap = map
     if g_debug_transitions:GetBool() ~= true then
-        --timer.Simple(0.1, function()
-            game.ConsoleCommand("changelevel " .. nextMap .. "\n")
-        --end)
+        local changeLevelDelay = self:GetSetting("changelevel_delay", 0)
+        self:SetRoundChangingLevel(map, changeLevelDelay)
     end
+
+end
+
+function GM:ChangeLevel(map)
+
+    game.ConsoleCommand("changelevel " .. map .. "\n")
 
 end
 
@@ -184,11 +188,11 @@ function GM:ChangeToNextLevel()
         if v.TargetMap == nextMap then
 
             local landmark = v.Landmark
-            return self:ChangeLevel(nil, nextMap, landmark, {})
+            return self:RequestChangeLevel(nil, nextMap, landmark, {})
 
         end
     end
 
-    return self:ChangeLevel(nil, nextMap, nil, {})
+    return self:RequestChangeLevel(nil, nextMap, nil, {})
 
 end

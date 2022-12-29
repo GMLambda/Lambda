@@ -495,6 +495,16 @@ function GAMETYPE:InitSettings()
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
+    GAMEMODE:AddSetting("changelevel_delay", {
+        Category = "SERVER",
+        NiceName = "#GM_ABH",
+        Description = "The amount in seconds to wait before changing to the next map",
+        Type = "int",
+        Default = 6,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = { Min = 0, Max = 600 },
+    })
+
 end
 
 function GAMETYPE:GetScoreboardInfo()

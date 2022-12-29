@@ -5,12 +5,14 @@ end
 
 local DbgPrint = GetLogging("RoundLogic")
 
+local STATE_NONE = -3
 local STATE_BOOTING = -2
 local STATE_IDLE = -1
 local STATE_RESTART_REQUESTED = 0
 local STATE_RESTARTING = 1
 local STATE_RUNNING = 2
 local STATE_FINISHED = 3
+local STATE_CHANGING_LEVEL = 4
 
 ROUND_INFO_NONE = 0
 ROUND_INFO_PLAYERRESPAWN = 1
@@ -18,6 +20,7 @@ ROUND_INFO_ROUNDRESTART = 2
 ROUND_INFO_WAITING_FOR_PLAYER = 3
 ROUND_INFO_STARTED = 4
 ROUND_INFO_FINISHED = 5
+ROUND_INFO_CHANGELEVEL = 6
 
 function GM:ShouldWaitForPlayers()
     local res = self:GetGameTypeData("WaitForPlayers")
@@ -58,13 +61,7 @@ function GM:GetRoundStartTime()
 end
 
 function GM:RoundElapsedTime()
-
-    if self:GetRoundState() == STATE_RUNNING then
-        return GetSyncedTimestamp() - self:GetRoundStartTime()
-    end
-
-    return 0
-
+    return GetSyncedTimestamp() - self:GetRoundStartTime()
 end
 
 if SERVER then
@@ -268,14 +265,27 @@ if SERVER then
     function GM:RoundStateFinished()
     end
 
+    function GM:RoundStateChangingLevel()
+        if GetSyncedTimestamp() < self.ChangeLevelTime then
+            return
+        end
+        -- Avoid coming back here and avoid notifying the client.
+        self.RoundState = STATE_NONE 
+
+        -- Invoke a changelevel command to actually change the map.
+        self:ChangeLevel(self.ChangeLevelMap)
+    end
+
     local ROUND_STATE_LOGIC =
     {
+        [STATE_NONE] = function() end,
         [STATE_BOOTING] = GM.RoundStateBooting,
         [STATE_IDLE] = GM.RoundStateIdle,
         [STATE_RESTART_REQUESTED] = GM.RoundStateRestartRequested,
         [STATE_RESTARTING] = GM.RoundStateRestarting,
         [STATE_RUNNING] = GM.RoundStateRunning,
         [STATE_FINISHED] = GM.RoundStateFinished,
+        [STATE_CHANGING_LEVEL] = GM.RoundStateChangingLevel,
     }
 
     function GM:RoundThink()
@@ -284,52 +294,74 @@ if SERVER then
         local fn = ROUND_STATE_LOGIC[state]
         if fn ~= nil then
             fn(self)
+        else
+            error("Missing round state handler: " .. tostring(state))
         end
 
     end
 
-    function GM:FinishRound()
+    function GM:SetRoundChangingLevel(nextMap, delay)
 
-        self:SetRoundState(STATE_END_RESULTS)
+        self:SetRoundState(STATE_CHANGING_LEVEL)
 
         for _,v in pairs(player.GetAll()) do
             v:Freeze(true)
         end
 
-        local gameType = self:GetGameType()
-        local mapOptions = table.Copy(gameType.MapList)
-        for k,v in pairs(mapOptions) do
-            local r = math.random(1, #mapOptions)
-            mapOptions[k] = mapOptions[r]
-            mapOptions[r] = string.lower(v)
-        end
+        self.ChangeLevelTime = GetSyncedTimestamp() + delay
+        self.ChangeLevelMap = nextMap
 
-        local prevMap = self:GetPreviousMap()
-        if prevMap ~= nil then
-            prevMap = string.lower(prevMap)
-            table.RemoveByValue(mapOptions, prevMap)
-        end
+        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_CHANGELEVEL, {
+            NextMap = nextMap,
+            ChangeLevelTime = self.ChangeLevelTime,
+        })
 
-        local curMap = self:GetCurrentMap()
-        if curMap ~= nil then
-            curMap = string.lower(curMap)
-            table.RemoveByValue(mapOptions, curMap)
-        end
+    end
 
-        while #mapOptions > 8 do
-            local k = math.random(1, #mapOptions)
-            table.remove(mapOptions, k)
+    function GM:FinishRound()
+
+        self:SetRoundState(STATE_FINISHED)
+
+        for _,v in pairs(player.GetAll()) do
+            v:Freeze(true)
         end
 
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_FINISHED, {
         })
 
-        timer.Simple(5, function()
-            self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, { mustComplete = true }, mapOptions, {}, function(vote, failed, timeout, winningOption)
-                local picked = mapOptions[winningOption]
-                self:ChangeLevel(nil, picked, nil, {})
+        if self:GetGameTypeData("PostRoundMapVote") == true then
+            local gameType = self:GetGameType()
+            local mapOptions = table.Copy(gameType.MapList)
+            for k,v in pairs(mapOptions) do
+                local r = math.random(1, #mapOptions)
+                mapOptions[k] = mapOptions[r]
+                mapOptions[r] = string.lower(v)
+            end
+
+            local prevMap = self:GetPreviousMap()
+            if prevMap ~= nil then
+                prevMap = string.lower(prevMap)
+                table.RemoveByValue(mapOptions, prevMap)
+            end
+
+            local curMap = self:GetCurrentMap()
+            if curMap ~= nil then
+                curMap = string.lower(curMap)
+                table.RemoveByValue(mapOptions, curMap)
+            end
+
+            while #mapOptions > 8 do
+                local k = math.random(1, #mapOptions)
+                table.remove(mapOptions, k)
+            end
+
+            timer.Simple(5, function()
+                self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, { mustComplete = true }, mapOptions, {}, function(vote, failed, timeout, winningOption)
+                    local picked = mapOptions[winningOption]
+                    self:RequestChangeLevel(nil, picked, nil, {})
+                end)
             end)
-        end)
+        end
 
     end
 
@@ -339,13 +371,23 @@ else -- CLIENT
     end
 
     function GM:HandleRoundInfoFinished(infoType, params)
-        self:ScoreboardShow(true)
+        self:SetKeepScoreboardOpen(true)
+        self:ScoreboardShow()
+    end
+
+    function GM:HandleRoundInfoChangeLevel(infoType, params)
+        self.ChangeLevelTime = params.ChangeLevelTime
+        self.ChangeLevelMap = params.NextMap
+        self:SetKeepScoreboardOpen(true)
+        self:ScoreboardShow()
     end
 
     function GM:HandleRoundInfoChange(infoType, params)
 
         if infoType == ROUND_INFO_FINISHED then
             self:HandleRoundInfoFinished(infoType, params)
+        elseif infoType == ROUND_INFO_CHANGELEVEL then
+            self:HandleRoundInfoChangeLevel(infoType, params)
         elseif infoType == ROUND_INFO_STARTED then
             self:HandleRoundInfoStarted(infoType, params)
         else
@@ -360,7 +402,6 @@ else -- CLIENT
         local params = net.ReadTable()
 
         DbgPrint("Received round state info: " .. tostring(infoType))
-        --PrintTable(params)
 
         GAMEMODE:HandleRoundInfoChange(infoType, params)
 
@@ -371,11 +412,15 @@ end
 function GM:PreCleanupMap()
     DbgPrint("GM:PreCleanupMap")
 
+    -- Because of reload testing.
+    self.ChangingLevel = false
+
     if SERVER then
 
         for _,v in pairs(player.GetAll()) do
             v:KillSilent()
             v:LockPosition(false)
+            v:Freeze(false)
         end
 
         -- Prevent recursions.
@@ -748,4 +793,16 @@ end
 
 function GM:IsRoundRunning()
     return self:GetRoundState() == STATE_RUNNING
+end
+
+function GM:IsChangingLevel()
+    return self:GetRoundState() == STATE_CHANGING_LEVEL
+end
+
+function GM:GetLevelChangeMap()
+    return self.ChangeLevelMap
+end
+
+function GM:GetLevelChangeTime()
+    return self.ChangeLevelTime
 end

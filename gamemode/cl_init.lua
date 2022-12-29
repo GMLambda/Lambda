@@ -419,10 +419,24 @@ function GM:OnContextMenuClose()
     self:ShowTauntSelection(false)
 end
 
-function GM:PlayerBindPress(ply, bind, pressed)
-    if self:IsTauntSelectionOpen() == true and
-       self:TauntSelectionInput(ply, bind, pressed) == true then
+function GM:PlayerBindPress(ply, bind, pressed, code)
+    if self:IsChangingLevel() then
+        -- Disallow everything from here on.
         return true
+    end
+    if ply:KeyDown(IN_SCORE) and (bind == "invnext" or bind == "invprev") then
+        -- Avoid weapon selection when the scoreboard is open.
+        return true
+    end
+    if self:ShouldKeepScoreboardOpen() == true then
+        -- Prevent closing the scoreboard.
+        if bind == "+showscores" then
+            return true
+        end
+    else
+        if self:IsTauntSelectionOpen() == true and self:TauntSelectionInput(ply, bind, pressed) == true then
+            return true
+        end
     end
 end
 
