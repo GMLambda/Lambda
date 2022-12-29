@@ -37,12 +37,42 @@ local function GetScoreboardInfo()
 	return scoreboardInfo
 end
 
-local function CalculcateInfoSize()
-	local scoreboardInfo = GetScoreboardInfo()
-	local numEntries = table.Count(scoreboardInfo)
-	local maxCols = math.min(2, numEntries)
-	local numRows = math.ceil(numEntries / maxCols)
-	return (numRows * 25)
+local function GetColSpaceRequired(col)
+
+	surface.SetFont("lambda_sb_def_sm")
+	local w,h = surface.GetTextSize(Localize(col.name) .. " " .. Localize(col.value))
+	return w + 60, h
+
+end
+
+local function ComputeEntries(info)
+	local rows = {}
+	local cols = {}
+
+	local colSpaceUsed = 0
+	local maxRowWidth = 700
+	local maxCols = 4
+
+	for _,v in pairs(info) do
+		local colW, colH = GetColSpaceRequired(v)
+		if colSpaceUsed + colW > maxRowWidth then
+			table.insert(rows, cols)
+			cols = {}
+			colSpaceUsed = 0
+		end
+		colSpaceUsed = colSpaceUsed + colW
+		table.insert(cols, v)
+
+		if(#cols >= maxCols) then
+			table.insert(rows, cols)
+			cols = {}
+			colSpaceUsed = 0
+		end
+	end
+	if #cols ~= 0 then
+		table.insert(rows, cols)
+	end
+	return rows
 end
 
 function SB_PING_METER:Init()
@@ -106,6 +136,8 @@ end
 derma.DefineControl("SBPingmeter", "Draws ping", SB_PING_METER, "DPanel")
 
 function SB_PLY_LINE:Init()
+
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 
 	self.AvatarButton = self:Add("DButton")
 	self.AvatarButton:Dock(LEFT)
@@ -238,6 +270,7 @@ end
 function SB_PANEL:PerformLayout()
 	self:SetSize(700, ScrH() - 250)
 	self:SetPos(ScrW() / 2 - 350, 0)
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 end
 
 local function DrawBar(x, y, w, name, value)
@@ -268,7 +301,8 @@ function SB_PANEL:Paint(w, h)
 	local _, y = self.Scores:GetPos()
 	-- this was the best way to get an image in here... screw u dimage and power of 2
 	--
-	local sizeInfo = CalculcateInfoSize()
+	local sizeInfo = #self.InfoEntries * 25
+
 	y = y - sizeInfo + 20
 	
 	surface.SetMaterial(lambda_logo)
@@ -282,16 +316,12 @@ function SB_PANEL:Paint(w, h)
 
 	DrawHostName(x,y,w,h)
 
-	local idx = 1
-	for _ = 1, numRows do
-		local maxRowCols = math.min(maxCols, numEntries - (idx - 1))
-		local n = 700 / maxRowCols
+	for _,cols in pairs(self.InfoEntries) do
+		local n = 700 / #cols
 		local x = 0
-		for col = 1, maxRowCols do
-			local v = scoreboardInfo[idx]
-			DrawBar(x, y, n - 1, v.name, v.value)
+		for _,col in pairs(cols) do
+			DrawBar(x, y, n - 1, col.name, col.value)
 			x = x + n + 1
-			idx = idx + 1
 		end
 		y = y + 26
 	end
@@ -324,6 +354,7 @@ end
 function SB_PANEL:Think()
 
 	self.ScoreEntries = self.ScoreEntries or {}
+	self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 
 	for k, v in pairs(player.GetAll()) do
 		if self.ScoreEntries[v] ~= nil then
@@ -343,8 +374,8 @@ function SB_PANEL:Think()
 	end
 
 	-- We need to reset this otherwise it bugs out.
-	local sizeInfo = CalculcateInfoSize()
-	self.Scores:DockMargin(0, 230 + sizeInfo, 0, 0)
+	local infoHeight = #self.InfoEntries * 25
+	self.Scores:DockMargin(0, 230 + infoHeight, 0, 0)
 
 	self:InvalidateLayout()
 
@@ -369,6 +400,7 @@ end
 
 function GM:ScoreboardShow()
 	if IsValid(LAMBDA_SCOREBOARD) then
+		LAMBDA_SCOREBOARD:InvalidateLayout()
 		return
 	end
 

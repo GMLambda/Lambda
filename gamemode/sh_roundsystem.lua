@@ -61,13 +61,7 @@ function GM:GetRoundStartTime()
 end
 
 function GM:RoundElapsedTime()
-
-    if self:GetRoundState() == STATE_RUNNING then
-        return GetSyncedTimestamp() - self:GetRoundStartTime()
-    end
-
-    return 0
-
+    return GetSyncedTimestamp() - self:GetRoundStartTime()
 end
 
 if SERVER then
