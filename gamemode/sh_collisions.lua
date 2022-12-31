@@ -2,36 +2,34 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local COLLISION_ID_PAIRS = {}
---local DbgPrint = GetLogging("Collision")
+function GM:ShouldCollide(ent1, ent2)
 
-local function GetPairId(ent1, ent2)
-    local id1 = ent1:GetCreationID()
-    local id2 = ent2:GetCreationID()
-
-    if (id2 < id1) then
-        id1, id2 = id2, id1
+    if ent1:IsPlayer() and ent2:IsPlayer() then
+        if self:GetSetting("playercollision") == false then
+            return false
+        end
+        if ent1:GetNWBool("DisablePlayerCollide", false) == true or ent2:GetNWBool("DisablePlayerCollide", false) == true then
+            return false
+        end
+    elseif (ent1:IsNPC() and ent2:GetClass() == "trigger_changelevel") or
+       (ent2:IsNPC() and ent1:GetClass() == "trigger_changelevel")
+    then
+        return false
     end
 
-    local id = bit.lshift(id2, 16)
-    id = bit.bor(id, id1)
+    -- Nothing collides with blocked triggers except players.
+    if ent1.IsLambdaTrigger ~= nil and ent1:IsLambdaTrigger() == true then
+        if ent2:IsPlayer() == true or ent2:IsVehicle() == true then
+            return ent1:IsBlocked()
+        end
+        return false
+    elseif ent2.IsLambdaTrigger ~= nil and ent2:IsLambdaTrigger() == true then
+        if ent1:IsPlayer() == true or ent1:IsVehicle() == true then
+            return ent2:IsBlocked()
+        end
+        return false
+    end
 
-    return id
-end
+    return true
 
-hook.Add("ShouldCollide", "LambdaShouldCollide", function(ent1, ent2)
-    local id = GetPairId(ent1, ent2)
-
-    return COLLISION_ID_PAIRS[id] or true
-end)
-
-local ENTITY_META = FindMetaTable("Entity")
-
-function ENTITY_META:SetCollideWith(ent2, state)
-    local id = GetPairId(self, ent2)
-    self:EnableCustomCollisions(state)
-    ent2:EnableCustomCollisions(state)
-    COLLISION_ID_PAIRS[id] = state
-    self:CollisionRulesChanged()
-    ent2:CollisionRulesChanged()
 end
