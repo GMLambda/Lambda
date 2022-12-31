@@ -89,12 +89,7 @@ function GM:Tick()
     end
 
     if SERVER then
-        while #plys > 0 do
-            local i = math.random(1, #plys)
-            local v = plys[i]
-            table.remove(plys, i)
-            self:UpdatePlayerSpeech(v)
-        end
+        self:UpdatePlayerSpeech()
     end
 
     local gameType = self:GetGameType()

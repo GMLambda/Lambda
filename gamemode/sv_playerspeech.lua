@@ -628,12 +628,21 @@ local ENTITY_CLASS_HANDLER =
     ["npc_grenade_frag"] = GM.HandleGrenadeContact,
 }
 
-function GM:UpdatePlayerSpeech(ply)
+function GM:UpdatePlayerSpeech()
 
     if self:GetSetting("player_speech", false) ~= true then
         return
     end 
 
+    -- Update one player per tick.
+    local plys = util.GetAllPlayers()
+    local playerCount = #plys
+    if playerCount == 0 then
+        return
+    end
+    local plyIdx = engine.TickCount() % playerCount
+    local ply = plys[1 + plyIdx]
+    
     if ply:Alive() == false then
         return
     end
