@@ -566,3 +566,15 @@ function util.RandomInt(min, max)
     return math.Clamp(math.Round(math.random(min, max)), min, max)
 
 end
+
+local PLAYER_LIST_CACHE_TICK = 0
+local PLAYER_LIST_CACHE = {}
+
+-- Keeps a table of players per tick, this table should be not modified.
+function util.GetAllPlayers()
+    local curTick = engine.TickCount()
+    if PLAYER_LIST_CACHE_TICK ~= curTick then
+        PLAYER_LIST_CACHE = player.GetAll()
+    end
+    return PLAYER_LIST_CACHE
+end
