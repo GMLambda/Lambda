@@ -570,11 +570,15 @@ end
 local PLAYER_LIST_CACHE_TICK = 0
 local PLAYER_LIST_CACHE = {}
 
--- Keeps a table of players per tick, this table should be not modified.
 function util.GetAllPlayers()
     local curTick = engine.TickCount()
     if PLAYER_LIST_CACHE_TICK ~= curTick then
         PLAYER_LIST_CACHE = player.GetAll()
+    else
+        local curCount = player.GetCount()
+        if #PLAYER_LIST_CACHE ~= curCount then
+            error("Player list was modified at the same tick")
+        end
     end
     return PLAYER_LIST_CACHE
 end

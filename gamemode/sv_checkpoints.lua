@@ -183,7 +183,7 @@ function GM:UpdateCheckoints()
     local bestPos
     local bestTr
 
-    for _,v in pairs(player.GetAll()) do
+    for _,v in pairs(util.GetAllPlayers()) do
         local ply = v
         if ply:Alive() == false  then
             continue
@@ -380,7 +380,7 @@ function GM:SetVehicleCheckpoint(pos, ang)
 
     if self.LastSelectedSpawnPoint ~= nil and IsValid(self.LastSelectedSpawnPoint) then
         local checkpointPos = self.LastSelectedSpawnPoint:GetPos()
-        for _,v in pairs(player.GetAll()) do
+        for _,v in pairs(util.GetAllPlayers()) do
             if v:Alive() == false or v:InVehicle() == true then
                 continue
             end

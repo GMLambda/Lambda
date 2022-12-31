@@ -342,7 +342,7 @@ if SERVER then
         local alivePlayers = 0
         local playerCount = 0
 
-        for _,v in pairs(player.GetAll()) do
+        for _,v in pairs(util.GetAllPlayers()) do
             if v:Alive() then
                 alivePlayers = alivePlayers + 1
             end

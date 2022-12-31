@@ -206,7 +206,7 @@ function GM:HandleShotImpactingWater(ent, attacker, tr, dmginfo, data)
             self:AddWaterBullet(timestamp, startPos, endPos, ang, 0)
         else
             local plys = {}
-            for _,v in pairs(player.GetAll()) do
+            for _,v in pairs(util.GetAllPlayers()) do
                 -- TODO: Should we really just show it the person who is in water?, I couldn`t see them from above
                 if v ~= ent and v:WaterLevel() == 3 then
                     table.insert(plys, v)

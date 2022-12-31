@@ -80,7 +80,7 @@ function GM:Tick()
         self.LastAllowCollisions = self:GetSetting("playercollision")
     end
 
-    local plys = player.GetAll()
+    local plys = util.GetAllPlayers()
     for _,v in pairs(plys) do
         self:PlayerThink(v)
         if collisionChanged == true then

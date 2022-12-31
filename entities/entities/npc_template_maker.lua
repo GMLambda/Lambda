@@ -143,7 +143,7 @@ function ENT:FindSpawnDestination()
 
     local vecPlayerCenter = Vector(0,0,0)
     local centerDiv = 0
-    for k,v in pairs(player.GetAll()) do
+    for k,v in pairs(util.GetAllPlayers()) do
         vecPlayerCenter = vecPlayerCenter + v:GetPos()
         centerDiv = centerDiv + 1
     end
@@ -159,7 +159,7 @@ function ENT:FindSpawnDestination()
             if self.CriterionVisibility ~= TS_YN_DONT_CARE then
 
                 local visible = false
-                for _, ply in pairs(player.GetAll()) do
+                for _, ply in pairs(util.GetAllPlayers()) do
                     if ply:VisibleVec(destPos) then
                         visible = true
                         break

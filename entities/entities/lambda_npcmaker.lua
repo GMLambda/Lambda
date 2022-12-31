@@ -296,7 +296,7 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
 
         local closestDist = 999999
         if self:ShouldUseDistance() == true then
-            for _,v in pairs(player.GetAll()) do
+            for _,v in pairs(util.GetAllPlayers()) do
                 if v:IsFlagSet(FL_NOTARGET) then
                     continue
                 end
