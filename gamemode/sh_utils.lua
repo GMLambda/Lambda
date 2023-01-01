@@ -581,7 +581,9 @@ function util.GetAllPlayers()
     else
         local curCount = player.GetCount()
         if #PLAYER_LIST_CACHE ~= curCount then
-            error("Player list was modified at the same tick")
+            -- Ensure the cache is up to date at all times, this should rarerly
+            -- to never happen.
+            PLAYER_LIST_CACHE = player.GetAll()
         end
     end
     return PLAYER_LIST_CACHE
