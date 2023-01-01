@@ -9,6 +9,13 @@ surface.CreateFont( "LAMBDA_1_PN",
     additive = false,
 } )
 
+local math_Clamp = math.Clamp
+local CurTime = CurTime
+local FrameTime = FrameTime
+local IsValid = IsValid
+local render = render
+local cam = cam
+
 function EFFECT:Init( data )
 
 	local size = 64
@@ -64,18 +71,19 @@ function EFFECT:Render( )
 
 	local Normal = self.Normal
 	local eyePos = EyePos()
+	local entPos = self:GetPos()
 	local dir = Normal:Angle()
-	local ang = eyePos - self:GetPos()
-	local dist = eyePos:Distance(self:GetPos())
+	local ang = eyePos - entPos
+	local dist = eyePos:Distance(entPos)
 
-	local signsize = math.Clamp(dist / 20, self.Size / 2, self.Size * 5)
-	local offset_z = math.Clamp(dist / 20, 50, 200)
-	local textPos = math.Clamp(signsize / 2 + dist / 20 , 10, 50)
+	local signsize = math_Clamp(dist / 20, self.Size / 2, self.Size * 5)
+	local offset_z = math_Clamp(dist / 20, 50, 200)
+	local textPos = math_Clamp(signsize / 2 + dist / 20 , 10, 50)
 
 	cam.IgnoreZ(true)
 
 	cam.Start2D()
-		local pos = self:GetPos() + (dir:Forward() * (offset_z + self.Dist + textPos))
+		local pos = entPos + (dir:Forward() * (offset_z + self.Dist + textPos))
 		local scrPos = pos:ToScreen()
 		draw.SimpleTextOutlined( self.PlayerName, "LAMBDA_1_PN", scrPos.x, scrPos.y, Color( 100, 20, 20, self.Alpha * 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color( 0, 0, 0, self.Alpha * 255 - 50) )
 	cam.End2D()
@@ -83,7 +91,7 @@ function EFFECT:Render( )
 	self.Mat1:SetFloat("$alpha", ((self.Alpha ^ 1.1) * 255) / 255)
 
 	render.SetMaterial( self.Mat1 )
-	render.DrawQuadEasy( self:GetPos() + (dir:Forward() * (offset_z + self.Dist)) ,
+	render.DrawQuadEasy( entPos + (dir:Forward() * (offset_z + self.Dist)) ,
 						 ang,
 						 signsize, signsize,
 						 Color( 255, 255, 255, (self.Alpha ^ 1.1) * 255 ),

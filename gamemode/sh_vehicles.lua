@@ -1,5 +1,10 @@
 -- Those are the returned collision bounds for the airboat, big enough to work on the jeep.
 local DbgPrint = GetLogging("Vehicle")
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 local VEHICLE_THINK = 1
 

@@ -4,6 +4,9 @@ end
 
 --local DbgPrint = print
 local DbgPrint = GetLogging("EnvZoom")
+local CurTime = CurTime
+local player = player
+local IsValid = IsValid
 
 -- Spawnflags
 local ENV_ZOOM_OVERRIDE = 1

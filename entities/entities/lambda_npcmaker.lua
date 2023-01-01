@@ -1,4 +1,11 @@
 local DbgPrint = GetLogging("NPCMaker")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local player = player
+local IsValid = IsValid
 
 DEFINE_BASECLASS("lambda_entity")
 

@@ -1,4 +1,8 @@
 --local DbgPrint = GetLogging("PostProcess")
+local CurTime = CurTime
+local Vector = Vector
+local math = math
+local IsValid = IsValid
 
 GRAIN_RT = GRAIN_RT or GetRenderTarget("LambdaFilmGrain", ScrW(), ScrH(), true)
 GRAIN_MAT = GRAIN_MAT or CreateMaterial("LambdaFilmGrain" .. CurTime(), "UnlitGeneric",

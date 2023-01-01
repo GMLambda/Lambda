@@ -1,4 +1,10 @@
 local DbgPrint = GetLogging("PlayerSpeech")
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
+local IsFriendEntityName = IsFriendEntityName
 
 local SPEECH_GROUPS =
 {

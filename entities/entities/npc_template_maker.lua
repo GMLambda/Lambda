@@ -1,4 +1,9 @@
 local DbgPrint = GetLogging("NPCMaker")
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local IsValid = IsValid
 
 DEFINE_BASECLASS( "lambda_npcmaker" )
 

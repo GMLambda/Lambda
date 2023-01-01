@@ -1,4 +1,8 @@
 --local DbgPrint = GetLogging("Ragdoll")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local table = table
 
 local ImpactSounds =
 {

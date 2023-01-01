@@ -1,5 +1,10 @@
 --local DbgPrint = print
 local DbgPrint = GetLogging("RoachManager")
+local CurTime = CurTime
+local util = util
+local ents = ents
+local player = player
+local IsValid = IsValid
 
 ENT.Base = "lambda_entity"
 ENT.Type = "point"

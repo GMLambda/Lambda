@@ -1,6 +1,10 @@
 AddCSLuaFile()
 
 local DbgPrint = GetLogging("Util")
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 -- Any utility function should go in here.
 if SERVER then

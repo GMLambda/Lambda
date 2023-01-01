@@ -1,5 +1,12 @@
 AddCSLuaFile()
 
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+
 --local DbgPrint = GetLogging("EntityExt")
 local ENTITY_META = FindMetaTable("Entity")
 

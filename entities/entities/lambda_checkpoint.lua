@@ -1,5 +1,10 @@
 AddCSLuaFile()
 
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+
 ENT.Base = "lambda_entity"
 ENT.Type = "anim"
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT

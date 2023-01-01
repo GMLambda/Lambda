@@ -4,6 +4,11 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("RoundLogic")
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 local STATE_NONE = -3
 local STATE_BOOTING = -2
@@ -658,11 +663,11 @@ function GM:PostRoundSetup()
 
     -- GoldSrc support.
     for _,v in pairs(ents.FindByClass("trigger_auto")) do
-        v:Input("Enable")
+        v:Fire("Enable")
     end
 
     for _,v in pairs(ents.FindByClass("logic_auto")) do
-        v:Input("Enable")
+        v:Fire("Enable")
     end
 
     local loadType = self:GetMapLoadType()

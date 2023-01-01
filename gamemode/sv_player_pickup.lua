@@ -1,5 +1,10 @@
 local DbgPrintPickup = GetLogging("Pickup")
 local DbgPrint = DbgPrintPickup
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 function GM:InitializePlayerPickup(ply)
     ply.ObjectPickupTable = {}

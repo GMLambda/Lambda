@@ -8,6 +8,14 @@ end
 
 local DbgPrint = GetLogging("Player")
 local DbgPrintDmg = GetLogging("Damage")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local player = player
+local IsValid = IsValid
+local table = table
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -1376,6 +1384,25 @@ end
 function GM:StartCommand(ply, cmd)
 
     self:CalculateMovementAccuracy(ply)
+
+    if ply:IsBot() then
+        local rnd  = math.random(0, 200)
+        if rnd < 1 then
+            cmd:AddKey(IN_JUMP)
+        end
+        rnd  = math.random(0, 100)
+        if rnd < 1 then
+            cmd:AddKey(IN_USE)
+        end
+        rnd  = math.random(0, 200)
+        if rnd < 1 then
+            cmd:AddKey(IN_ATTACK)
+        end
+        rnd  = math.random(0, 10)
+        if rnd < 1 then
+            cmd:AddKey(IN_DUCK)
+        end
+    end
 
     if ply:IsPositionLocked() == true then
         local vel = ply:GetVelocity()

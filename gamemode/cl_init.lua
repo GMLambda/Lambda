@@ -8,6 +8,10 @@ include("cl_hud.lua")
 DEFINE_BASECLASS( "gamemode_base" )
 
 local DbgPrint = GetLogging("Client")
+local CurTime = CurTime
+local Vector = Vector
+local math = math
+local IsValid = IsValid
 
 -- This is nasty
 function GM:OnSpawnMenuOpen()

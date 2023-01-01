@@ -4,6 +4,15 @@ local showtriggers = GetConVar("showtriggers")
 local DbgPrint = GetLogging("Trigger")
 local DbgPrint2 = GetLogging("TriggerTouch")
 
+local IsValid = IsValid
+local Entity = Entity
+local CurTime = CurTime
+local table = table
+local net = net
+local util = util
+local IsFriendEntityName = IsFriendEntityName
+local Vector = Vector
+
 local TRIGGER_MSG_PLAYER_COUNT = 0
 local TRIGGER_MSG_SHOWWAIT = 1
 local TRIGGER_MSG_SETBLOCKED = 2
@@ -1046,7 +1055,10 @@ else -- CLIENT
         return col
     end
 
+    local LocalPlayer = LocalPlayer
+    local EyeAngles = EyeAngles
     local Vec3Zero = Vector(0, 0, 0)
+
     local function DrawTriggerWaiting(data)
 
         local activePlayers = data.ActivePlayers
@@ -1067,7 +1079,7 @@ else -- CLIENT
         local playerCount = 0
         local activePlayerCount = #activePlayers
 
-        for _,v in pairs(player.GetAll()) do
+        for _,v in pairs(util.GetAllPlayers()) do
             if v:Alive() then
                 playerCount = playerCount + 1
             end

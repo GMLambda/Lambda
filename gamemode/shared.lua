@@ -48,6 +48,10 @@ include("sh_collisions.lua")
 include("sh_gametypes.lua")
 
 local DbgPrint = GetLogging("Shared")
+local CurTime = CurTime
+local util = util
+local ents = ents
+local IsValid = IsValid
 
 function GM:Tick()
 

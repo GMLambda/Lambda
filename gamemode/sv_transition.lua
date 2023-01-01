@@ -1,4 +1,9 @@
 local DbgPrint = GetLogging("Transition")
+local util = util
+local ents = ents
+local player = player
+local IsValid = IsValid
+local table = table
 
 local ENT_TYPE_NPC = 0
 local ENT_TYPE_VEHICLE = 1
@@ -166,7 +171,6 @@ local TRANSITION_BLACKLIST =
     ["env_soundscape"] = true,
     ["lambda_checkpoint"] = true,
     ["move_rope"] = true,
-    ["trigger_transition"] = true,
     ["game_ragdoll_manager"] = true,
     ["env_fog_controller"] = true,
     ["npc_template_maker"] = true,

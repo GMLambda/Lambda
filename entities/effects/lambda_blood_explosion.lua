@@ -1,3 +1,5 @@
+local ParticleEmitter = ParticleEmitter
+
 function EFFECT:Init( data )
 
 	local size = 64

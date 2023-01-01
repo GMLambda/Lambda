@@ -46,6 +46,8 @@ util.AddNetworkString("LambdaDeathEvent")
 
 local DbgPrint = GetLogging("Server")
 local DbgPrintDmg = GetLogging("Damage")
+local IsValid = IsValid
+local table = table
 
 function GM:GetNextUniqueEntityId()
     self.UniqueEntityId = self.UniqueEntityId or 0

@@ -1,3 +1,8 @@
+local util = util
+local player = player
+local IsValid = IsValid
+local table = table
+
 if SERVER then
 
     AddCSLuaFile()

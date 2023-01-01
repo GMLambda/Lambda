@@ -1,6 +1,11 @@
 AddCSLuaFile()
 
 local DbgPrint = GetLogging("Player")
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
+
 local PLAYER_META = FindMetaTable("Player")
 
 -- Ensure autoreload will not screw this up.

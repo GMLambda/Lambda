@@ -3,6 +3,10 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("NPCExt")
+local ents = ents
+local IsValid = IsValid
+local Vector = Vector
+
 local META_NPC = FindMetaTable("NPC")
 
 if SERVER then

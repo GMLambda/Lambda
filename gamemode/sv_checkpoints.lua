@@ -1,4 +1,9 @@
 local DbgPrint = GetLogging("Checkpoints")
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 local GRID_SIZE = 712
 local GRID_SIZE_Z = 128 -- Approximate floor height.

@@ -1,6 +1,11 @@
 AddCSLuaFile()
 
 local DbgPrint = GetLogging("EntsExt")
+local Vector = Vector
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
 
 if SERVER then
 

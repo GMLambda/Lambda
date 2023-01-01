@@ -1,3 +1,7 @@
+local CurTime = CurTime
+local util = util
+local IsValid = IsValid
+
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
 

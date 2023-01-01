@@ -4,6 +4,12 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Bullets")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local IsValid = IsValid
+local table = table
 local band = bit.band
 local bor = bit.bor
 
