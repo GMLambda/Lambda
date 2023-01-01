@@ -576,6 +576,8 @@ if SERVER then
         ply:StripAmmo()
         ply:StripWeapons()
 
+        ply:DisablePlayerCollide(true)
+
         -- Lets remove whatever the player left on vehicles behind before he got killed.
         if ply.Reviving ~= true then
             self:RemovePlayerVehicles(ply)
@@ -588,8 +590,6 @@ if SERVER then
         elseif ply.Reviving == true then
             hook.Call( "PlayerLoadoutRevive", GAMEMODE, ply )
         end
-
-        ply:SetCustomCollisionCheck(true)
 
         if self.MapScript.PrePlayerSpawn ~= nil then
             self.MapScript:PrePlayerSpawn(ply)
@@ -1808,7 +1808,36 @@ function GM:CalculateMovementAccuracy(ent)
 end
 
 function GM:PlayerUpdateSettings(ply)
+end
 
+function GM:CheckPlayerCollision(ply)
+    local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
+    if disablePlayerCollide == false then
+        return
+    end
+    local curTime = CurTime()
+    if curTime < ply.NextPlayerCollideTest then
+        return
+    end
+    if ply:IsPositionLocked() ~= false then
+        return
+    end
+    local hullMin, hullMax = ply:GetHull()
+    local tr = util.TraceHull({
+        start = ply:GetPos(),
+        endpos = ply:GetPos(),
+        filter = ply,
+        mins = hullMin,
+        maxs = hullMax,
+        mask = MASK_SHOT_HULL,
+    })
+    if tr.Hit == false then
+        ply:DisablePlayerCollide(false)
+        DbgPrint(ply, "Reset player collision.")
+    else
+        DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
+    end
+    ply.NextPlayerCollideTest = curTime + 2
 end
 
 function GM:PlayerThink(ply)
@@ -1823,37 +1852,7 @@ function GM:PlayerThink(ply)
             end
         end
 
-    end
-
-    local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
-
-    if SERVER then
-        if disablePlayerCollide == true and CurTime() >= ply.NextPlayerCollideTest and ply:IsPositionLocked() == false then
-
-            local hullMin, hullMax = ply:GetHull()
-
-            local tr = util.TraceHull({
-                start = ply:GetPos(),
-                endpos = ply:GetPos(),
-                filter = ply,
-                mins = hullMin,
-                maxs = hullMax,
-                mask = MASK_SHOT_HULL,
-            })
-
-            if tr.Hit == false then
-                ply:DisablePlayerCollide(false)
-                DbgPrint("Reset player collision.")
-            --else
-                --DbgPrint("Trace Hit: " .. tostring(tr.Entity))
-            end
-
-        end
-    else
-        if ply.LastDisablePlayerCollide ~= disablePlayerCollide then
-            ply:CollisionRulesChanged()
-            ply.LastDisablePlayerCollide = disablePlayerCollide
-        end
+        self:CheckPlayerCollision(ply)
     end
 
 end

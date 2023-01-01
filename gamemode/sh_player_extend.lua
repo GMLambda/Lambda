@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-local DbgPrint = GetLogging("PlayerExt")
+local DbgPrint = GetLogging("Player")
 local PLAYER_META = FindMetaTable("Player")
 
 -- Ensure autoreload will not screw this up.
@@ -29,13 +29,17 @@ if SERVER then
     end
 
     function PLAYER_META:DisablePlayerCollide(state, temporarily)
-        if state == true then
-            self.NextPlayerCollideTest = CurTime() + 2
-        end
         if temporarily == nil then
             temporarily = true
         end
+        local isActive = self:GetNWBool("DisablePlayerCollide")
         self:SetNWBool("DisablePlayerCollide", state)
+        if state == true then
+            self.NextPlayerCollideTest = CurTime() + 2
+            self:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+        elseif state == false then
+            self:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+        end
         self.DisablePlayerCollisionTemporarily = temporarily
         self:CollisionRulesChanged()
         DbgPrint(self, "DisablePlayerCollide", tostring(state))

@@ -365,7 +365,7 @@ if SERVER then
         if self:GetNWVar("WaitForTeam") == true then
 
             local playersAlive = 0
-            for _,v in pairs(player.GetAll()) do
+            for _,v in pairs(util.GetAllPlayers()) do
                 if v:Alive() then
                     playersAlive = playersAlive + 1
                 end
@@ -417,14 +417,14 @@ if SERVER then
 
         local waitTime = self:GetNWVar("WaitTime")
 
-        local waitForTeam = self:GetNWVar("WaitForTeam")
-        if waitForTeam == true and ent:IsPlayer() then
-            ent:DisablePlayerCollide(true)
-        end
-
         if self:GetNWVar("Disabled") == true or self:GetNWVar("Blocked") == true then
             --DbgPrint("Disabled")
             return
+        end
+
+        local waitForTeam = self:GetNWVar("WaitForTeam")
+        if waitForTeam == true and ent:IsPlayer() then
+            ent:DisablePlayerCollide(true)
         end
 
         if self.NextWait ~= nil and self.NextWait ~= 0 then
