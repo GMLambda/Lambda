@@ -1385,7 +1385,8 @@ function GM:StartCommand(ply, cmd)
 
     self:CalculateMovementAccuracy(ply)
 
-    if ply:IsBot() then
+    -- TODO: Make this a new setting so bots do random things.
+    if false and ply:IsBot() then
         local rnd  = math.random(0, 200)
         if rnd < 1 then
             cmd:AddKey(IN_JUMP)
