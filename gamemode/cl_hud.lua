@@ -19,6 +19,8 @@ include("huds/hud_credits.lua")
 
 DEFINE_BASECLASS( "gamemode_base" )
 
+local IsValid = IsValid
+
 local function AskWeapon(ply, hud, wep)
     if IsValid( wep ) and wep.HUDShouldDraw ~= nil then
         return wep.HUDShouldDraw( wep, name )

@@ -1,6 +1,8 @@
 AddCSLuaFile()
 
 local DbgPrint = GetLogging("PlayerList")
+local util = util
+local table = table
 
 function GM:InitializePlayerList()
     DbgPrint("InitializePlayerList")

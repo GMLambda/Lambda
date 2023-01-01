@@ -1,6 +1,7 @@
 DEFINE_BASECLASS( "gamemode_base" )
 
 local DbgPrint = GetLogging("Damage")
+local IsValid = IsValid
 
 local DMG_TYPES =
 {

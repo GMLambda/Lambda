@@ -2,6 +2,9 @@ if SERVER then
     AddCSLuaFile()
 end
 
+local math = math
+local CurTime = CurTime
+
 INTERP_LINEAR = 1
 INTERP_SPLINE = 2
 

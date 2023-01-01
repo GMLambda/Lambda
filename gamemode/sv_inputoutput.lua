@@ -1,4 +1,6 @@
 local DbgPrint = GetLogging("IO")
+local ents = ents
+local table = table
 
 GM.InputFilters = {}
 GM.OutputCallbacks = {}

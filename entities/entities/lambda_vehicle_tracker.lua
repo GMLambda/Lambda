@@ -1,6 +1,11 @@
-local DbgPrint = GetLogging("Vehicle")
-
 AddCSLuaFile()
+
+local DbgPrint = GetLogging("Vehicle")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local IsValid = IsValid
 
 ENT.Base = "base_anim"
 ENT.Type = "anim"
@@ -59,6 +64,10 @@ if SERVER then
 elseif CLIENT then
 
     local pixVis = util.GetPixelVisibleHandle()
+    local LocalPlayer = LocalPlayer
+    local EyePos = EyePos
+    local EyeAngles = EyeAngles
+    local render = render
 
     surface.CreateFont( "LAMBDA_1_VEHICLE",
     {

@@ -1,6 +1,10 @@
 AddCSLuaFile()
 
 local DbgPrint = GetLogging("Util")
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 -- Any utility function should go in here.
 if SERVER then
@@ -565,4 +569,22 @@ function util.RandomInt(min, max)
     -- This sucks, who cares tho.
     return math.Clamp(math.Round(math.random(min, max)), min, max)
 
+end
+
+local PLAYER_LIST_CACHE_TICK = 0
+local PLAYER_LIST_CACHE = {}
+
+function util.GetAllPlayers()
+    local curTick = engine.TickCount()
+    if PLAYER_LIST_CACHE_TICK ~= curTick then
+        PLAYER_LIST_CACHE = player.GetAll()
+    else
+        local curCount = player.GetCount()
+        if #PLAYER_LIST_CACHE ~= curCount then
+            -- Ensure the cache is up to date at all times, this should rarerly
+            -- to never happen.
+            PLAYER_LIST_CACHE = player.GetAll()
+        end
+    end
+    return PLAYER_LIST_CACHE
 end

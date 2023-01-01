@@ -3,6 +3,7 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("GameType")
+local table = table
 
 include("gametypes/gametype_base.lua")
 include("gametypes/hl2.lua")

@@ -128,7 +128,7 @@ end
 
 function ENT:RadiationThink()
 
-    for _,v in pairs(player.GetAll()) do
+    for _,v in pairs(util.GetAllPlayers()) do
 
         local pos2 = v:GetPos()
 

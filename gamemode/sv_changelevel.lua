@@ -1,4 +1,8 @@
 local DbgPrint = GetLogging("Level")
+local util = util
+local ents = ents
+local IsValid = IsValid
+
 local g_debug_transitions = GetConVar("g_debug_transitions")
 
 function GM:InitializeCurrentLevel()

@@ -1,5 +1,10 @@
 AddCSLuaFile()
 
+local IsValid = IsValid
+local Vector = Vector
+local util = util
+local math = math
+
 ENT.Base = "base_anim"
 ENT.Type = "anim"
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
@@ -14,10 +19,6 @@ function ENT:Initialize()
                 return
             end
             ent:RenderPlayer()
-        end)
-
-        hook.Add("HUDPaint", self, function(ent)
-            --ent:RenderPlayerStats()
         end)
     end
     self:DrawShadow(false)
@@ -38,6 +39,13 @@ function ENT:UpdateTransmitState()
 end
 
 if CLIENT then
+
+    local surface = surface
+    local LocalPlayer = LocalPlayer
+    local EyeAngles = EyeAngles
+    local EyePos = EyePos
+    local draw = draw
+    local cam = cam
 
     local pixVis = util.GetPixelVisibleHandle()
     local font = "DermaLarge"
@@ -91,7 +99,9 @@ if CLIENT then
             ply:DrawModel()
 
             for _,v in pairs(ply:GetChildren()) do
-                if v == self then continue end
+                if v == self then
+                    continue
+                end
                 v:DrawModel()
 
                 if v:GetClass() == "weapon_physcannon" and v.AttachedEnt ~= nil then

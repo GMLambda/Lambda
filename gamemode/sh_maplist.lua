@@ -3,6 +3,7 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("MapList")
+local table = table
 
 function GM:InitializeMapList()
     self.MapList = table.Copy(self:GetGameTypeData("MapList") or {})

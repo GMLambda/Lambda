@@ -3,6 +3,8 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Difficulty")
+local player = player
+local IsValid = IsValid
 
 DMG_SCALE_PVN = 1
 DMG_SCALE_NVP = 2

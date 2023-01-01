@@ -1,4 +1,11 @@
 local DbgPrint = GetLogging("NPCMaker")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local player = player
+local IsValid = IsValid
 
 DEFINE_BASECLASS("lambda_entity")
 
@@ -47,7 +54,6 @@ function ENT:PreInitialize()
     self:SetupNWVar("SpawnFrequency", "float", { Default = 0, KeyValue = "SpawnFrequency" })
     self:SetupNWVar("LiveChildren", "int", { Default = 0 })
     self:SetupNWVar("CreatedCount", "int", { Default = 0 })
-    self:SetupNWVar("ScaleLiveChildren", "bool", { Default = true, KeyValue = "ScaleLiveChildren" })
 
 end
 
@@ -132,80 +138,48 @@ function ENT:AcceptInput(name, activator, caller, data)
 
 end
 
-function ENT:GetScaledMaxLiveChildren()
-
-    if self.CachedMaxLiveChildren ~= nil then
-        return self.CachedMaxLiveChildren
+function ENT:GetScaleCount()
+    if self:GetNWVar("DisableScaling") == true then
+        return 0
     end
-
-    local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
-    local res = 0
-
-    if self:GetNWVar("DisableScaling") == true or
-        self:GetNWVar("ScaleLiveChildren") ~= true or
-        (GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true) then
-        DbgPrint("Using original MaxLiveChildren: " .. maxLiveChildren)
-        res = maxLiveChildren
-        self.CachedMaxLiveChildren = res
-        return res
+    if GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true then
+        return 0
     end
-
     if self.PrecacheData ~= nil then
         local class = self.PrecacheData["classname"]
-
         if IsFriendEntityName(class) then
-            res = maxLiveChildren
-            self.CachedMaxLiveChildren = res
-            return res
+            return 0
         end
     end
-
     local playerCount = player.GetCount()
     local scale = GAMEMODE:GetNPCSpawningScale()
     local extraCount = math.ceil(playerCount * scale)
+    return extraCount
+end
 
-    res = maxLiveChildren + extraCount
-    self.CachedMaxLiveChildren = res
-
-    if res > 100 then
-        res = 100
+function ENT:GetScaledMaxLiveChildren()
+    if self.CachedMaxLiveChildren ~= nil then
+        return self.CachedMaxLiveChildren
     end
-    return res
+    local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
+    local scaledCount = self:GetScaleCount()
+    local res = math.Clamp(maxLiveChildren + scaledCount, 0, 100)
 
+    self.CachedMaxLiveChildren = res
+    return res
 end
 
 function ENT:GetScaledMaxNPCs()
-
     if self.CachedMaxNPCCount ~= nil then
         return self.CachedMaxNPCCount
     end
 
     local maxNPCCount = self:GetNWVar("MaxNPCCount")
-    local res = 0
+    local scaledCount = self:GetScaleCount()
+    local res = math.Clamp(maxNPCCount + scaledCount, 0, 100)
 
-    if self:GetNWVar("DisableScaling") == true or
-        (GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true) then
-        return maxNPCCount
-    end
-
-    local playerCount = player.GetCount()
-    local scale = GAMEMODE:GetNPCSpawningScale()
-    local extraCount = math.ceil(playerCount * scale)
-    
-    local res = maxNPCCount + extraCount
-
-    if self.PrecacheData ~= nil then
-        local class = self.PrecacheData["classname"]
-        if IsFriendEntityName(class) then
-            res = maxNPCCount
-        end
-    end
-
-    if res > 100 then
-        res = 100
-    end
+    self.CachedMaxNPCCount = res
     return res
-
 end
 
 -- To prevent spawning NPCs if players just turn their backs for a brief moment
@@ -329,7 +303,7 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
 
         local closestDist = 999999
         if self:ShouldUseDistance() == true then
-            for _,v in pairs(player.GetAll()) do
+            for _,v in pairs(util.GetAllPlayers()) do
                 if v:IsFlagSet(FL_NOTARGET) then
                     continue
                 end

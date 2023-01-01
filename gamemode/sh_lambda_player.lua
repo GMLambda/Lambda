@@ -8,6 +8,14 @@ end
 
 local DbgPrint = GetLogging("Player")
 local DbgPrintDmg = GetLogging("Damage")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local player = player
+local IsValid = IsValid
+local table = table
 
 DEFINE_BASECLASS( "gamemode_base" )
 
@@ -576,6 +584,8 @@ if SERVER then
         ply:StripAmmo()
         ply:StripWeapons()
 
+        ply:DisablePlayerCollide(true)
+
         -- Lets remove whatever the player left on vehicles behind before he got killed.
         if ply.Reviving ~= true then
             self:RemovePlayerVehicles(ply)
@@ -588,8 +598,6 @@ if SERVER then
         elseif ply.Reviving == true then
             hook.Call( "PlayerLoadoutRevive", GAMEMODE, ply )
         end
-
-        ply:SetCustomCollisionCheck(true)
 
         if self.MapScript.PrePlayerSpawn ~= nil then
             self.MapScript:PrePlayerSpawn(ply)
@@ -1377,6 +1385,26 @@ function GM:StartCommand(ply, cmd)
 
     self:CalculateMovementAccuracy(ply)
 
+    -- TODO: Make this a new setting so bots do random things.
+    if false and ply:IsBot() then
+        local rnd  = math.random(0, 200)
+        if rnd < 1 then
+            cmd:AddKey(IN_JUMP)
+        end
+        rnd  = math.random(0, 100)
+        if rnd < 1 then
+            cmd:AddKey(IN_USE)
+        end
+        rnd  = math.random(0, 200)
+        if rnd < 1 then
+            cmd:AddKey(IN_ATTACK)
+        end
+        rnd  = math.random(0, 10)
+        if rnd < 1 then
+            cmd:AddKey(IN_DUCK)
+        end
+    end
+
     if ply:IsPositionLocked() == true then
         local vel = ply:GetVelocity()
         vel.x = 0
@@ -1808,7 +1836,36 @@ function GM:CalculateMovementAccuracy(ent)
 end
 
 function GM:PlayerUpdateSettings(ply)
+end
 
+function GM:CheckPlayerCollision(ply)
+    local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
+    if disablePlayerCollide == false then
+        return
+    end
+    local curTime = CurTime()
+    if curTime < ply.NextPlayerCollideTest then
+        return
+    end
+    if ply:IsPositionLocked() ~= false then
+        return
+    end
+    local hullMin, hullMax = ply:GetHull()
+    local tr = util.TraceHull({
+        start = ply:GetPos(),
+        endpos = ply:GetPos(),
+        filter = ply,
+        mins = hullMin,
+        maxs = hullMax,
+        mask = MASK_SHOT_HULL,
+    })
+    if tr.Hit == false then
+        ply:DisablePlayerCollide(false)
+        DbgPrint(ply, "Reset player collision.")
+    else
+        DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
+    end
+    ply.NextPlayerCollideTest = curTime + 2
 end
 
 function GM:PlayerThink(ply)
@@ -1823,37 +1880,7 @@ function GM:PlayerThink(ply)
             end
         end
 
-    end
-
-    local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
-
-    if SERVER then
-        if disablePlayerCollide == true and CurTime() >= ply.NextPlayerCollideTest and ply:IsPositionLocked() == false then
-
-            local hullMin, hullMax = ply:GetHull()
-
-            local tr = util.TraceHull({
-                start = ply:GetPos(),
-                endpos = ply:GetPos(),
-                filter = ply,
-                mins = hullMin,
-                maxs = hullMax,
-                mask = MASK_SHOT_HULL,
-            })
-
-            if tr.Hit == false then
-                ply:DisablePlayerCollide(false)
-                DbgPrint("Reset player collision.")
-            --else
-                --DbgPrint("Trace Hit: " .. tostring(tr.Entity))
-            end
-
-        end
-    else
-        if ply.LastDisablePlayerCollide ~= disablePlayerCollide then
-            ply:CollisionRulesChanged()
-            ply.LastDisablePlayerCollide = disablePlayerCollide
-        end
+        self:CheckPlayerCollision(ply)
     end
 
 end

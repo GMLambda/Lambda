@@ -1,6 +1,9 @@
 --local DbgPrint = print
 -- REFACTOR ME: lambad_entity as base
 local DbgPrint = GetLogging("Trigger")
+local util = util
+local ents = ents
+local player = player
 
 ENT.Base = "base_point"
 ENT.Type = "point"

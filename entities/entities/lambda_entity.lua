@@ -1,4 +1,6 @@
 local DbgPrint = GetLogging("LambdaEnt")
+local util = util
+local IsValid = IsValid
 
 ENT.Base = "base_entity"
 ENT.Type = "anim"

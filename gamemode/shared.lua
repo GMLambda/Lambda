@@ -43,10 +43,15 @@ include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
+include("sh_collisions.lua")
 
 include("sh_gametypes.lua")
 
 local DbgPrint = GetLogging("Shared")
+local CurTime = CurTime
+local util = util
+local ents = ents
+local IsValid = IsValid
 
 function GM:Tick()
 
@@ -80,7 +85,7 @@ function GM:Tick()
         self.LastAllowCollisions = self:GetSetting("playercollision")
     end
 
-    local plys = player.GetAll()
+    local plys = util.GetAllPlayers()
     for _,v in pairs(plys) do
         self:PlayerThink(v)
         if collisionChanged == true then
@@ -89,12 +94,7 @@ function GM:Tick()
     end
 
     if SERVER then
-        while #plys > 0 do
-            local i = math.random(1, #plys)
-            local v = plys[i]
-            table.remove(plys, i)
-            self:UpdatePlayerSpeech(v)
-        end
+        self:UpdatePlayerSpeech()
     end
 
     local gameType = self:GetGameType()
@@ -279,38 +279,6 @@ function GM:InitPostEntity()
     else
         self:HUDInit()
     end
-
-end
-
-function GM:ShouldCollide(ent1, ent2)
-
-    if ent1:IsPlayer() and ent2:IsPlayer() then
-        if self:GetSetting("playercollision") == false then
-            return false
-        end
-        if ent1:GetNWBool("DisablePlayerCollide", false) == true or ent2:GetNWBool("DisablePlayerCollide", false) == true then
-            return false
-        end
-    elseif (ent1:IsNPC() and ent2:GetClass() == "trigger_changelevel") or
-       (ent2:IsNPC() and ent1:GetClass() == "trigger_changelevel")
-    then
-        return false
-    end
-
-    -- Nothing collides with blocked triggers except players.
-    if ent1.IsLambdaTrigger ~= nil and ent1:IsLambdaTrigger() == true then
-        if ent2:IsPlayer() == true or ent2:IsVehicle() == true then
-            return ent1:IsBlocked()
-        end
-        return false
-    elseif ent2.IsLambdaTrigger ~= nil and ent2:IsLambdaTrigger() == true then
-        if ent1:IsPlayer() == true or ent1:IsVehicle() == true then
-            return ent2:IsBlocked()
-        end
-        return false
-    end
-
-    return true
 
 end
 

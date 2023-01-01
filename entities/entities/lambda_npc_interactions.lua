@@ -1,3 +1,7 @@
+local CurTime = CurTime
+local util = util
+local IsValid = IsValid
+
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
 
@@ -31,7 +35,7 @@ function ENT:SearchForInteractTargets()
     end
 
     local visible = {}
-    for _,v in pairs(player.GetAll()) do
+    for _,v in pairs(util.GetAllPlayers()) do
         if v:Alive() == false then
             continue
         end

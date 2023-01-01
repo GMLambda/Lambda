@@ -2,6 +2,12 @@ if SERVER then
     AddCSLuaFile()
 end
 
+local CurTime = CurTime
+local Vector = Vector
+local math = math
+local IsValid = IsValid
+local engine = engine
+
 --local DbgPrint = GetLogging("Animation")
 local engineTick = engine.TickInterval()
 

@@ -3,6 +3,12 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Ragdoll")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local IsValid = IsValid
 
 ENT.Base = "base_anim"
 ENT.Type = "anim"

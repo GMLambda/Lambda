@@ -6,6 +6,11 @@ end
 
 local DbgPrint = GetLogging("NPC")
 local DbgPrintDmg = GetLogging("Damage")
+local CurTime = CurTime
+local math = math
+local ents = ents
+local IsValid = IsValid
+local table = table
 
 local SOLIDER_GEAR_SOUNDS =
 {

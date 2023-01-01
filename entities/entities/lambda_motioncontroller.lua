@@ -4,6 +4,12 @@ end
 
 local DbgPrint = GetLogging("motioncontroller")
 local abs = math.abs
+local CurTime = CurTime
+local Vector = Vector
+local math = math
+local IsValid = IsValid
+local FrameTime = FrameTime
+
 local PREDICTION_TOLERANCE = 33
 local PREDICTION_THRESHOLD = 1
 local DEFAULT_MAX_ANGULAR = 360.0 * 10.0

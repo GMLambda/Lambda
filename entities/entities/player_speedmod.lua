@@ -14,7 +14,7 @@ function ENT:AcceptInput(inputName, activator, called, data)
 
     if inputName == "ModifySpeed" then
         local speed = tonumber(data)
-        for _,v in pairs(player.GetAll()) do
+        for _,v in pairs(util.GetAllPlayers()) do
             v:Flashlight(false)
             v:SetLaggedMovementValue(speed)
         end

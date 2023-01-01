@@ -3,6 +3,8 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Settings")
+local table = table
+local math = math
 
 function GM:InitSettings()
     DbgPrint("GM:InitSettings")

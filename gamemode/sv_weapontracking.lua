@@ -1,11 +1,13 @@
 
+local CurTime = CurTime
+local IsValid = IsValid
+
 function GM:InitializeWeaponTracking()
     self.TrackedWeapons = {}
     self.NextWeaponCheck = CurTime() + 0.1
 end
 
 function GM:TrackWeapon(wep)
-    --self.TrackedWeapons[wep] = true
     table.insert(self.TrackedWeapons, wep)
 end
 

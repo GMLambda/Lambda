@@ -4,6 +4,11 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("RoundLogic")
+local util = util
+local ents = ents
+local IsValid = IsValid
+local table = table
+local CurTime = CurTime
 
 local STATE_NONE = -3
 local STATE_BOOTING = -2

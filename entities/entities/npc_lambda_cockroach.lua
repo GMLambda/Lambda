@@ -1,6 +1,13 @@
-local DbgPrint = GetLogging("Roach")
-
 AddCSLuaFile()
+
+local DbgPrint = GetLogging("Roach")
+local CurTime = CurTime
+local Vector = Vector
+local util = util
+local math = math
+local ents = ents
+local player = player
+local IsValid = IsValid
 
 ENT.Base = "base_ai"
 ENT.Type = "ai"
