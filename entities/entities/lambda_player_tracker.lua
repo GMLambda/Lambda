@@ -15,10 +15,6 @@ function ENT:Initialize()
             end
             ent:RenderPlayer()
         end)
-
-        hook.Add("HUDPaint", self, function(ent)
-            --ent:RenderPlayerStats()
-        end)
     end
     self:DrawShadow(false)
 end
