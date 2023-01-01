@@ -26,7 +26,7 @@ local HIDING_MODELS =
     ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true,
 }
 
-local MAX_COCKROACHES = 30
+local MAX_COCKROACHES = 20
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
@@ -99,6 +99,8 @@ function ENT:SpawnRoach()
         table.RemoveByValue(self.Roaches, e)
     end, roach)
     table.insert(self.Roaches, roach)
+
+    DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. MAX_COCKROACHES)
 
 end
 
