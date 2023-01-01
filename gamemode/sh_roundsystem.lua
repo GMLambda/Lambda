@@ -658,11 +658,11 @@ function GM:PostRoundSetup()
 
     -- GoldSrc support.
     for _,v in pairs(ents.FindByClass("trigger_auto")) do
-        v:Fire("Enable")
+        v:Input("Enable")
     end
 
     for _,v in pairs(ents.FindByClass("logic_auto")) do
-        v:Fire("Enable")
+        v:Input("Enable")
     end
 
     local loadType = self:GetMapLoadType()

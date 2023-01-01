@@ -84,6 +84,7 @@ end
 
 function ENT:Enable()
     self:SetNWVar("Disabled", false)
+    self:NextThink(CurTime())
 end
 
 function ENT:Disable()
