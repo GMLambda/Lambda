@@ -1,4 +1,5 @@
 0.9.16 (in development)
+- Improved: Major performance improvements with lots of players on the server.
 
 0.9.15
 - Fixed: Incorrect addon structure causing custom content to not load for clients. [Regression]
