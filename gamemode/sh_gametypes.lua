@@ -90,6 +90,17 @@ function GameTypes:Get(name)
     return self.Registered[mappedName]
 end
 
+function GameTypes:GetByMap(mapName)
+    for gameTypeName, v in pairs(self.Registered) do
+        for _, map in pairs(v.MapList or {}) do
+            if string.iequals(map, mapName) then
+                return gameTypeName
+            end
+        end
+    end
+    return nil
+end
+
 function GM:LoadGameTypes()
     hook.Run("LambdaLoadGameTypes", GameTypes)
     if SERVER then
@@ -134,6 +145,18 @@ end
 
 function GM:SetGameType(gametype, isFallback)
     DbgPrint("SetGameType: " .. tostring(gametype))
+
+    if gametype == "auto" then
+        DbgPrint("Trying to detect game type based on map")
+        local currentMap = game.GetMap():lower()
+        gametype = GameTypes:GetByMap(currentMap)
+        if gametype ~= nil then
+            DbgPrint("Detected game type '" .. gametype .. "' for map " .. currentMap)
+        else
+            DbgPrint("No game type registered that contains the map " .. currentMap)
+        end
+    end
+
     local gametypeData = GameTypes:Get(gametype)
     if gametypeData == nil then
         error("Unable to find gametype: " .. gametype)
