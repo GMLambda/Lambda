@@ -115,7 +115,7 @@ if SERVER then
     end
 
     function GM:RegisterMissionCriticalNPC(npc)
-        print("Mission critical NPC registered", npc, npc:GetName())
+        DbgPrint("Mission critical NPC registered", npc, npc:GetName())
         self.MissionCriticalNPCs[npc] = true
     end
 

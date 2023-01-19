@@ -496,6 +496,26 @@ if SERVER then
 
     end
 
+    local function TeleportPosFilter(ent)
+        return ent:IsPlayer() == false
+    end
+
+    local function GetTeleportPos(ply, pos)
+        
+        local hullMins, hullMaxs = ply:GetHull()
+        local tr = util.TraceHull( {
+            start = pos + Vector(0, 0, 70),
+            endpos = pos,
+            filter = TeleportPosFilter,
+            mins = hullMins,
+            maxs = hullMaxs,
+            mask = MASK_SHOT_HULL,
+        } )
+
+        return tr.HitPos 
+        
+    end
+
     function ENT:TeleportAllToTrigger()
 
         local missingEnts = {}
@@ -533,7 +553,8 @@ if SERVER then
 
         for _,v in pairs(missingEnts) do
             if v:IsPlayer() then
-                v:TeleportPlayer(centerPos)
+                local teleportPos = GetTeleportPos(v, centerPos)
+                v:TeleportPlayer(teleportPos)
             else
                 v:SetPos(centerPos)
             end

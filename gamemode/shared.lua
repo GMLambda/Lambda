@@ -80,16 +80,17 @@ function GM:Tick()
 
     -- Make sure physics don't go crazy when we toggle it.
     local collisionChanged = false
-    if self.LastAllowCollisions ~= self:GetSetting("playercollision") then
+    local playersCollide = self:GetSetting("playercollision")
+    if self.LastAllowCollisions ~= playersCollide then
         collisionChanged = true
-        self.LastAllowCollisions = self:GetSetting("playercollision")
+        self.LastAllowCollisions = playersCollide
     end
 
     local plys = util.GetAllPlayers()
     for _,v in pairs(plys) do
         self:PlayerThink(v)
-        if collisionChanged == true then
-            v:CollisionRulesChanged()
+        if SERVER and collisionChanged == true and playersCollide == false then
+            v:DisablePlayerCollide(true)
         end
     end
 
