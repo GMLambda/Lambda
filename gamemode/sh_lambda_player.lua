@@ -1838,18 +1838,25 @@ end
 function GM:PlayerUpdateSettings(ply)
 end
 
-function GM:CheckPlayerCollision(ply)
-    local disablePlayerCollide = ply:GetNWBool("DisablePlayerCollide", false)
-    if disablePlayerCollide == false then
-        return
-    end
+function GM:CheckPlayerCollision(ply)    
     local curTime = CurTime()
-    if curTime < ply.NextPlayerCollideTest then
+    if ply.NextPlayerCollideTest == nil or curTime < ply.NextPlayerCollideTest then
         return
     end
     if ply:IsPositionLocked() ~= false then
         return
     end
+
+    -- If server set collisions off don't bother reverting.
+    local playersCollide = self:GetSetting("playercollision", true)
+    if playersCollide == false then
+        return
+    end
+
+    if ply:IsPlayerCollisionEnabled() == true then
+        return
+    end
+    
     local hullMin, hullMax = ply:GetHull()
     local tr = util.TraceHull({
         start = ply:GetPos(),
@@ -1859,13 +1866,15 @@ function GM:CheckPlayerCollision(ply)
         maxs = hullMax,
         mask = MASK_SHOT_HULL,
     })
-    if tr.Hit == false then
+
+    if tr.Hit == false and tr.Fraction == 1 then
         ply:DisablePlayerCollide(false)
+        ply:SetNoCollideWithTeammates(false)
         DbgPrint(ply, "Reset player collision.")
     else
         DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
+        ply.NextPlayerCollideTest = curTime + 2
     end
-    ply.NextPlayerCollideTest = curTime + 2
 end
 
 function GM:PlayerThink(ply)

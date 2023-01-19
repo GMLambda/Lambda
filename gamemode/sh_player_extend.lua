@@ -33,21 +33,25 @@ if SERVER then
         self:DisablePlayerCollide(true)
     end
 
-    function PLAYER_META:DisablePlayerCollide(state, temporarily)
-        if temporarily == nil then
-            temporarily = true
-        end
-        local isActive = self:GetNWBool("DisablePlayerCollide")
+    function PLAYER_META:DisablePlayerCollide(state)
+        local oldState = self:GetNWBool("DisablePlayerCollide", false)
         self:SetNWBool("DisablePlayerCollide", state)
-        if state == true then
-            self.NextPlayerCollideTest = CurTime() + 2
-            self:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
-        elseif state == false then
-            self:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+        if oldState ~= state and state == true then
+            self:SetNoCollideWithTeammates(state)
+            self:CollisionRulesChanged()
+        else
+            -- Players can temporarily intersect, we don't disable it here.
+            -- This is handled in sh_lambda_player:CheckPlayerCollision
         end
-        self.DisablePlayerCollisionTemporarily = temporarily
-        self:CollisionRulesChanged()
-        DbgPrint(self, "DisablePlayerCollide", tostring(state))
+
+        self.NextPlayerCollideTest = CurTime() + 2
+        if oldState ~= state then
+            DbgPrint(self, "DisablePlayerCollide", tostring(state))
+        end
+    end
+
+    function PLAYER_META:IsPlayerCollisionEnabled()
+        return self:GetNWBool("DisablePlayerCollide", true) == false
     end
 
     function PLAYER_META:GetFOVOwner()
