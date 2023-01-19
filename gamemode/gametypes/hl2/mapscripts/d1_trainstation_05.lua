@@ -183,7 +183,12 @@ function MAPSCRIPT:PostInit()
         )
         checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end        
+        end
+        
+        -- Reposition alyx intro position a bit
+        ents.WaitForEntityByName("mark_alyx_intro", function(ent)
+            ent:SetPos(Vector(-6491.843262, -876.207031, 64.031250))
+        end)
 
     end
 
