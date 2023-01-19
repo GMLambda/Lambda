@@ -1,7 +1,9 @@
 0.9.16 (in development)
 - Improved: Major performance improvements with lots of players on the server.
 - Improved: Setting lambda_gametype to "auto" will detect the right gametype based on the loaded map.
+- Improved: Scoreboard UI tweaks, allows to show more information provided by game type.
 - Fixed: ep1_citadel_00: Dog intro scene not working correctly.
+- Changed: Scoreboard will now show at the end of each map, this can be controlled by 'lambda_changelevel_delay'.
 
 0.9.15
 - Fixed: Incorrect addon structure causing custom content to not load for clients. [Regression]
