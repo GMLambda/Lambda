@@ -19,8 +19,6 @@ end
 
 function EFFECT:Think()
     local emitter = self.Emitter
-    local ply = self.Player
-
     for i = 0, 3 do
         local particle = emitter:Add("particle/smokesprites_000" .. math.random(1, 9), self.Pos)
         particle:SetVelocity(self.Normal * self.Magnitude)

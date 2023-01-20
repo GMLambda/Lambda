@@ -3,20 +3,17 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("motioncontroller")
+local math = math
 local abs = math.abs
 local CurTime = CurTime
 local Vector = Vector
-local math = math
 local IsValid = IsValid
 local FrameTime = FrameTime
-
 local PREDICTION_TOLERANCE = 33
 local PREDICTION_THRESHOLD = 1
 local DEFAULT_MAX_ANGULAR = 360.0 * 10.0
 local REDUCED_CARRY_MASS = 1.0
-
 DEFINE_BASECLASS("base_entity")
-
 ENT.Base = "base_entity"
 ENT.Type = "anim"
 
@@ -26,10 +23,9 @@ function ENT:SetupDataTables()
     self:NetworkVar("Float", 0, "TimeToArrive")
     self:NetworkVar("Entity", 0, "TargetObject")
 end
-    
+
 function ENT:ResetState()
     local shadowParams = {}
-
     -- Initialize shadow params.
     shadowParams.dt = 0
     shadowParams.secondstoarrive = 0
@@ -39,7 +35,6 @@ function ENT:ResetState()
     shadowParams.maxspeeddamp = shadowParams.maxspeed * 2
     shadowParams.dampfactor = 0.8
     shadowParams.teleportdistance = 0
-
     self.ShadowParams = shadowParams
     self.SavedMass = {}
     self.SavedRotDamping = {}
@@ -47,26 +42,22 @@ function ENT:ResetState()
     self.Error = -1.0
     self.ContactAmount = 0
     self.LoadWeight = 0
-
 end
 
 function ENT:Initialize()
-
     DbgPrint(self, "Initialize")
-
     self:SetTargetTransform(Vector(0, 0, 0), Angle(0, 0, 0))
     self:ResetState()
-
     -- We don't need anything visible.
     self:SetNotSolid(true)
     self:SetMoveType(MOVETYPE_NONE)
     self:SetNoDraw(true)
-
 end
 
 function ENT:SetTargetTransform(pos, ang)
     self:SetTargetPos(pos)
     self:SetTargetAng(ang)
+
     if SERVER then
         self:SetTimeToArrive(FrameTime())
     end
@@ -78,24 +69,20 @@ function ENT:UpdateTransmitState()
 end
 
 function ENT:ComputeError()
-
-    if self.ErrorTime <= 0 then
-        return 0
-    end
-
-    if self:IsObjectAttached() == false then
-        return 0
-    end
-
+    if self.ErrorTime <= 0 then return 0 end
+    if self:IsObjectAttached() == false then return 0 end
     local attachedObject = self:GetAttachedObject()
     local phys = attachedObject:GetPhysicsObject()
+
     if not IsValid(phys) then
         DbgPrint("No physics object, forcing detach")
+
         return 9999
     end
 
     local shadowParams = self.ShadowParams
     local pos
+
     if phys.GetShadowPosition ~= nil then
         pos = phys:GetShadowPosition()
     else
@@ -103,13 +90,17 @@ function ENT:ComputeError()
     end
 
     local err = (shadowParams.pos - pos):Length()
+
     if self.ErrorTime > 1 then
         self.ErrorTime = 1
     end
+
     local speed = err / self.ErrorTime
+
     if speed > shadowParams.maxspeed then
         err = err * 0.5
     end
+
     self.Error = (0.97 - self.ErrorTime) * self.Error + err * self.ErrorTime
 
     if attachedObject:IsEFlagSet(EFL_IS_BEING_LIFTED_BY_BARNACLE) then
@@ -119,17 +110,16 @@ function ENT:ComputeError()
     self.ErrorTime = 0
 
     return self.Error
-
 end
 
 function ENT:FindNearestChildObject(obj, pos)
-
     local res = obj:GetPhysicsObject()
     local bestDist = 999999
 
     for i = 0, obj:GetPhysicsObjectCount() - 1 do
         local phys = obj:GetPhysicsObjectNum(i)
         local dist = (pos - phys:GetPos()):LengthSqr()
+
         if dist < bestDist then
             bestDist = dist
             res = phys
@@ -137,19 +127,12 @@ function ENT:FindNearestChildObject(obj, pos)
     end
 
     return res
-
 end
 
 function ENT:AttachObject(obj, grabPos, useGrabPos)
-
-    if IsValid(self.AttachedObject) then
-        return
-    end
-
+    if IsValid(self.AttachedObject) then return end
     DbgPrint(self, "AttachObject", obj)
-
     self:StartMotionController()
-
     local physObj
 
     if SERVER then
@@ -162,7 +145,9 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
         else
             obj:PhysicsInit(SOLID_VPHYSICS)
         end
+
         physObj = obj:GetPhysicsObject()
+
         if not IsValid(physObj) then
             DbgPrint("Unable to create physics on client")
         end
@@ -175,74 +160,67 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
 
     if not IsValid(physObj) then
         DbgPrint("Invalid physics object, can not attach.")
+
         return
     end
 
     self:ResetState()
     self.SavedBlocksLOS = obj:BlocksLOS()
-
     local totalCount = obj:GetPhysicsObjectCount()
     local factor = totalCount / 7.5
-    if factor < 1.0 then factor = 1.0 end
+
+    if factor < 1.0 then
+        factor = 1.0
+    end
+
     local carryMass = REDUCED_CARRY_MASS / factor
     local totalWeight = 0
+
     for i = 0, totalCount - 1 do
         local phys2 = obj:GetPhysicsObjectNum(i)
-        if not IsValid(phys2) then
-            continue
-        end
-
+        if not IsValid(phys2) then continue end
         local mass = phys2:GetMass()
         totalWeight = totalWeight + mass
-
         self.SavedMass[i] = mass
         phys2:SetMass(carryMass)
-
         local linear, angular = phys2:GetDamping()
         self.SavedRotDamping[i] = angular
         phys2:SetDamping(linear, 10)
     end
-    self.LoadWeight = totalWeight
 
+    self.LoadWeight = totalWeight
     physObj:SetMass(REDUCED_CARRY_MASS)
     physObj:EnableDrag(false)
     physObj:Wake()
-
     obj:SetBlocksLOS(false)
-
     self:AddToMotionController(physObj)
     self.AttachedObject = obj
 
     if SERVER then
         self:SetTargetObject(obj)
     end
-
 end
 
 function ENT:DetachObject()
-
     DbgPrint(self, "DetachObject")
 
     if IsValid(self.AttachedObject) then
-
         local obj = self.AttachedObject
-
         local phys = obj:GetPhysicsObject()
+
         if IsValid(phys) then
             self:RemoveFromMotionController(phys)
 
             for i = 0, obj:GetPhysicsObjectCount() - 1 do
                 local physObj = obj:GetPhysicsObjectNum(i)
-                if not IsValid(physObj) then
-                    continue
-                end
+                if not IsValid(physObj) then continue end
 
                 if self.SavedMass ~= nil and self.SavedMass[i] ~= nil then
                     physObj:SetMass(self.SavedMass[i])
                 end
 
                 if self.SavedRotDamping ~= nil and self.SavedRotDamping[i] ~= nil then
-                    local linear,_ = physObj:GetDamping()
+                    local linear, _ = physObj:GetDamping()
                     physObj:SetDamping(linear, self.SavedRotDamping[i])
                 end
 
@@ -251,13 +229,12 @@ function ENT:DetachObject()
 
             phys:EnableDrag(true)
             phys:Wake()
-
             obj:SetBlocksLOS(self.SavedBlocksLOS)
             self.SavedMass = {}
             self.SavedRotDamping = {}
 
             if CLIENT then
-               obj:PhysicsDestroy()
+                obj:PhysicsDestroy()
             end
         else
             DbgPrint(self, "No valid physics: " .. tostring(phys))
@@ -273,12 +250,10 @@ function ENT:DetachObject()
         --self:SetNW2Entity("AttachedObj", nil)
         self:SetTargetObject(NULL)
     end
-
 end
 
 function ENT:Think()
     --DbgPrint(self, "Tick")
-
     local ent = self.AttachedObject
 
     -- Check if the entity is still valid
@@ -288,10 +263,11 @@ function ENT:Think()
     end
 
     if ent ~= nil then
-
         local obj = self.AttachedObject
+
         if IsValid(obj) then
             local phys = obj:GetPhysicsObject()
+
             if CLIENT and IsValid(phys) then
                 self:PhysicsSimulate2(phys, FrameTime())
             end
@@ -299,13 +275,12 @@ function ENT:Think()
     end
 
     if SERVER then
-        self:NextThink( CurTime() )
+        self:NextThink(CurTime())
     else
-        self:SetNextClientThink( CurTime() )
+        self:SetNextClientThink(CurTime())
     end
 
     return true
-
 end
 
 function ENT:ComputeNetworkError()
@@ -314,6 +289,7 @@ function ENT:ComputeNetworkError()
     local objectPos = serverEnt:GetPos()
     local posDelta = objectPos - targetPos
     local errorPos = ((abs(posDelta.x) / PREDICTION_TOLERANCE) + (abs(posDelta.y) / PREDICTION_TOLERANCE) + (abs(posDelta.z) / PREDICTION_TOLERANCE)) / 3
+
     return errorPos
 end
 
@@ -321,6 +297,7 @@ function ENT:ManagePredictedObject()
     if CLIENT and game.SinglePlayer() == false then
         local ent = self.AttachedObject
         local serverEnt = self:GetTargetObject()
+
         if ent == nil and IsValid(serverEnt) then
             -- We give the prediction a tolerance, so objects being detached wont instantly fly to us
             -- while on the server they are still being detached.
@@ -335,13 +312,14 @@ function ENT:ManagePredictedObject()
 end
 
 local function InContactWithHeavyObject(phys, maxMass)
-
     local heavyContact = false
 
     if phys.GetFrictionSnapshot ~= nil then
         local contacts = phys:GetFrictionSnapshot()
-        for _,v in pairs(contacts) do
+
+        for _, v in pairs(contacts) do
             local other = v.Other
+
             if IsValid(other) and (not other:IsMoveable() or other:GetMass() > maxMass) then
                 heavyContact = true
                 break
@@ -357,21 +335,21 @@ function ENT:GetLoadWeight()
 end
 
 local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
-
     local vel = Vector(inVel)
     local angVel = Vector(inAngVel)
 
     if phys.GetFrictionSnapshot ~= nil then
         local contacts = phys:GetFrictionSnapshot()
-        for _,v in pairs(contacts) do
+
+        for _, v in pairs(contacts) do
             local other = v.Other
-            if not IsValid(other) then
-                continue
-            end
+            if not IsValid(other) then continue end
+
             if not other:IsMoveable() or other:GetMass() >= minMass then
                 local normal = v.Normal
                 angVel = normal * angVel:Dot(normal)
                 local proj = vel:Dot(normal)
+
                 if proj > 0.0 then
                     vel = vel - (normal * proj)
                 end
@@ -382,19 +360,13 @@ local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
     return vel, angVel
 end
 
-function ENT:PhysicsSimulate( phys, dt )
+function ENT:PhysicsSimulate(phys, dt)
     -- For better interpolation the client runs this in Think
-    if SERVER then
-        return self:PhysicsSimulate2(phys, dt)
-    end
+    if SERVER then return self:PhysicsSimulate2(phys, dt) end
 end
 
-function ENT:PhysicsSimulate2( phys, dt )
-
-    if self.AttachedObject == nil then
-        return
-    end
-
+function ENT:PhysicsSimulate2(phys, dt)
+    if self.AttachedObject == nil then return end
     local shadowParams = self.ShadowParams
     local timeToArrive
 
@@ -419,16 +391,13 @@ function ENT:PhysicsSimulate2( phys, dt )
     shadowParams.pos = self:GetTargetPos()
     shadowParams.angle = self:GetTargetAng()
     shadowParams.secondstoarrive = timeToArrive
-
     phys:ComputeShadowControl(shadowParams)
-
     local vel = phys:GetVelocity()
     local angVel = phys:GetAngleVelocity()
-
     vel, angVel = PhysComputeSlideDirection(phys, vel, angVel, self.LoadWeight)
     phys:SetVelocityInstantaneous(vel)
-
     timeToArrive = timeToArrive - dt
+
     if timeToArrive < 0 then
         timeToArrive = 0
     end
@@ -437,13 +406,11 @@ function ENT:PhysicsSimulate2( phys, dt )
     self:SetTimeToArrive(timeToArrive)
 
     return Vector(0, 0, 0), Vector(0, 0, 0), SIM_LOCAL_ACCELERATION
-
 end
 
 function ENT:IsObjectAttached()
-    if IsValid(self.AttachedObject) == true then
-        return true
-    end
+    if IsValid(self.AttachedObject) == true then return true end
+
     return false
 end
 
