@@ -329,10 +329,10 @@ end
 
 function SB_PANEL:Paint(w, h)
     local _, y = self.Scores:GetPos()
-    local x = 0
     -- this was the best way to get an image in here... screw u dimage and power of 2
     --
     local sizeInfo = #self.InfoEntries * 25
+    local x = 0
     y = y - sizeInfo + 20
     surface.SetMaterial(lambda_logo)
     surface.SetDrawColor(white)
@@ -341,6 +341,7 @@ function SB_PANEL:Paint(w, h)
 
     for _, cols in pairs(self.InfoEntries) do
         local n = 700 / #cols
+        x = 0
 
         for _, col in pairs(cols) do
             DrawBar(x, y, n - 1, col.name, col.value)
