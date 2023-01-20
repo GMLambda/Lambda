@@ -23,7 +23,6 @@ function MAPSCRIPT:Init()
 end
 
 function MAPSCRIPT:PostInit()
-    if SERVER then end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
