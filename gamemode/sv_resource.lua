@@ -23,13 +23,14 @@ function GM:AddResourceDir(dir)
 
     for k, v in pairs(folders) do
         local f = dir .. "/" .. v
+
         if file.IsDir(resourceDir .. "/" .. f, "LUA") then
             foundDir = true
             self:AddResourceDir(f)
         end
     end
 
-    if !foundDir then
+    if not foundDir then
         DbgPrint("Directory " .. dir .. " was added successfully")
     end
 end

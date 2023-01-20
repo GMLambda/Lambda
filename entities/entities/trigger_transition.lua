@@ -1,57 +1,45 @@
 if SERVER then
+    ENT.Base = "lambda_trigger"
+    ENT.Type = "brush"
+    DEFINE_BASECLASS("lambda_trigger")
 
-ENT.Base = "lambda_trigger"
-ENT.Type = "brush"
+    function ENT:Initialize()
+        --DbgPrint(self, "trigger_once:Initialize")
+        BaseClass.Initialize(self)
+        BaseClass.SetWaitTime(self, 0) -- Never remove.
+        self:AddSolidFlags(FSOLID_TRIGGER_TOUCH_DEBRIS)
+    end
 
-DEFINE_BASECLASS( "lambda_trigger" )
+    function ENT:PassesTriggerFilters(ent)
+        -- Anything goes in here.
+        return true
+    end
 
-function ENT:Initialize()
+    function ENT:StartTouch(ent)
+        --DbgPrint(self, "StartTouch(" .. tostring(ent) .. ")")
+        return BaseClass.StartTouch(self, ent)
+    end
 
-    --DbgPrint(self, "trigger_once:Initialize")
+    function ENT:Touch(ent)
+        --DbgPrint(self, "Touch(" .. tostring(ent) .. ")")
+        return BaseClass.Touch(self, ent)
+    end
 
-    BaseClass.Initialize(self)
-    BaseClass.SetWaitTime(self, 0) -- Never remove.
+    function ENT:GetTouching()
+        local trList = {}
 
-    self:AddSolidFlags(FSOLID_TRIGGER_TOUCH_DEBRIS)
+        local tr = util.TraceEntity({
+            start = self:GetPos(),
+            endpos = self:GetPos(),
+            mask = MASK_ALL,
+            ignoreworld = true,
+            filter = function(ent)
+                table.insert(trList, ent)
 
-end
+                return false
+            end
+        }, self)
 
-function ENT:PassesTriggerFilters(ent)
-
-    return true -- Anything goes in here.
-
-end
-
-function ENT:StartTouch(ent)
-
-    --DbgPrint(self, "StartTouch(" .. tostring(ent) .. ")")
-    return BaseClass.StartTouch(self, ent)
-
-end
-
-function ENT:Touch(ent)
-
-    --DbgPrint(self, "Touch(" .. tostring(ent) .. ")")
-    return BaseClass.Touch(self, ent)
-
-end
-
-function ENT:GetTouching()
-
-    local trList = {}
-    local tr = util.TraceEntity({
-        start = self:GetPos(),
-        endpos = self:GetPos(),
-        mask = MASK_ALL,
-        ignoreworld = true,
-        filter = function(ent)
-            table.insert(trList, ent)
-            return false
-        end,
-    }, self)
-    return trList
-
-end
-
-
+        return trList
+    end
 end

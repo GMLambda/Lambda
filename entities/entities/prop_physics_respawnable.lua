@@ -4,35 +4,32 @@ end
 
 ENT.Base = "lambda_entity"
 ENT.Type = "anim"
-
 DEFINE_BASECLASS("lambda_entity")
-
 local DEFAULT_RESPAWN_TIME = 60.0
 
 function ENT:SpawnProp()
-
     local ent = ents.Create("prop_physics")
-    for _,v in pairs(self.StoredKeyValues) do
+
+    for _, v in pairs(self.StoredKeyValues) do
         ent:SetKeyValue(v.Key, v.Val)
     end
+
     ent:Spawn()
+
     ent:CallOnRemove(self, function()
         if IsValid(self) then
             self:PropDestroyed(ent)
         end
     end)
-    ent:EmitSound("AlyxEmp.Charge")
 
+    ent:EmitSound("AlyxEmp.Charge")
     self.OriginalSpawnPos = ent:GetPos()
     self.OriginalSpawnAng = ent:GetAngles()
-
     self.OriginalOBBMins = ent:OBBMins()
     self.OriginalOBBMaxs = ent:OBBMaxs()
-
     self.ActiveProp = ent
     self.NextRespawnTime = 0
     self.Think = self.IdleThink
-
 end
 
 function ENT:PropDestroyed(ent)
@@ -43,14 +40,20 @@ end
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    self:SetupNWVar("RespawnTime", "float", { Default = DEFAULT_RESPAWN_TIME, KeyValue = "RespawnTime"} )
+
+    self:SetupNWVar("RespawnTime", "float", {
+        Default = DEFAULT_RESPAWN_TIME,
+        KeyValue = "RespawnTime"
+    })
 end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
+
     if SERVER then
         self:SpawnProp()
     end
+
     self:DrawShadow(false)
     self:AddEffects(EF_NODRAW)
 end
@@ -60,43 +63,45 @@ end
 
 function ENT:IdleThink()
     self:NextThink(CurTime() + 10)
+
     return true
 end
 
 function ENT:RespawnThink()
     self:NextThink(CurTime() + 0.5)
+    if self.NextRespawnTime == 0 or CurTime() < self.NextRespawnTime then return true end
 
-    if self.NextRespawnTime == 0 or CurTime() < self.NextRespawnTime then
-        return true
-    end
-
-    local tr = util.TraceHull(
-    {
+    local tr = util.TraceHull({
         start = self.OriginalSpawnPos,
         endpos = self.OriginalSpawnPos,
         mins = self.OriginalOBBMins,
         maxs = self.OriginalOBBMaxs,
         filter = self,
-        mask = MASK_SOLID,
+        mask = MASK_SOLID
     })
 
     if tr.StartSolid == true or tr.AllSolid == true then
         -- Try again in a second.
         self.NextRespawnTime = CurTime() + 1.0
+
         return
     end
 
     self:SpawnProp()
+
     return true
 end
 
 function ENT:KeyValue(key, val)
     BaseClass.KeyValue(self, key, val)
-
     self.StoredKeyValues = self.StoredKeyValues or {}
+
     -- NOTE: This causes the overwrite the class of the entity, remove it.
     if key:iequals("classname") == false then
-        table.insert(self.StoredKeyValues, { Key = key, Val = val })
+        table.insert(self.StoredKeyValues, {
+            Key = key,
+            Val = val
+        })
     end
 end
 

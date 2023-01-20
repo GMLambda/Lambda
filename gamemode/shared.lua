@@ -2,8 +2,7 @@ if SERVER then
     AddCSLuaFile()
 end
 
-DEFINE_BASECLASS( "gamemode_base" )
-
+DEFINE_BASECLASS("gamemode_base")
 include("sh_lambda_build.lua")
 include("sh_debug.lua")
 include("sh_convars.lua")
@@ -11,7 +10,6 @@ include("sh_string_extend.lua")
 include("sh_interpvalue.lua")
 include("sh_timestamp.lua")
 include("sh_gma.lua")
-
 include("sh_surfaceproperties.lua")
 include("sh_player_list.lua")
 include("sh_mapdata.lua")
@@ -28,7 +26,6 @@ include("sh_sound_env.lua")
 include("sh_temp.lua")
 include("sh_bullets.lua")
 include("sh_hudhint.lua")
-
 include("sh_lambda.lua")
 include("sh_lambda_npc.lua")
 include("sh_lambda_player.lua")
@@ -44,9 +41,7 @@ include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
 include("sh_collisions.lua")
-
 include("sh_gametypes.lua")
-
 local DbgPrint = GetLogging("Shared")
 local CurTime = CurTime
 local util = util
@@ -54,7 +49,6 @@ local ents = ents
 local IsValid = IsValid
 
 function GM:Tick()
-
     if CLIENT then
         self:HUDTick()
     else
@@ -81,14 +75,17 @@ function GM:Tick()
     -- Make sure physics don't go crazy when we toggle it.
     local collisionChanged = false
     local playersCollide = self:GetSetting("playercollision")
+
     if self.LastAllowCollisions ~= playersCollide then
         collisionChanged = true
         self.LastAllowCollisions = playersCollide
     end
 
     local plys = util.GetAllPlayers()
-    for _,v in pairs(plys) do
+
+    for _, v in pairs(plys) do
         self:PlayerThink(v)
+
         if SERVER and collisionChanged == true and playersCollide == false then
             v:DisablePlayerCollide(true)
         end
@@ -99,18 +96,18 @@ function GM:Tick()
     end
 
     local gameType = self:GetGameType()
+
     if gameType.Think then
         gameType:Think()
     end
-
 end
 
 function GM:EntityRemoved(ent)
     -- HACK: Fix fire sounds never stopping if packet loss happened, we just force it to stop on deletion.
     ent:StopSound("General.BurningFlesh")
     ent:StopSound("General.BurningObject")
-
     local class = ent:GetClass()
+
     if class == "logic_choreographed_scene" and self.LogicChoreographedScenes ~= nil then
         self.LogicChoreographedScenes[ent] = nil
     end
@@ -123,21 +120,18 @@ end
 -- NOTE: This case is probably fixed, this was due to an uninitialized variable
 --       which Willox fixed, revisit this.
 function GM:CheckStuckScenes()
-
     local curTime = CurTime()
-    if self.LastStuckScenesCheck ~= nil and curTime - self.LastStuckScenesCheck < 0.5 then
-        return
-    end
+    if self.LastStuckScenesCheck ~= nil and curTime - self.LastStuckScenesCheck < 0.5 then return end
     self.LastStuckScenesCheck = curTime
 
-    for ent,_ in pairs(self.LogicChoreographedScenes or {}) do
-
+    for ent, _ in pairs(self.LogicChoreographedScenes or {}) do
         if not IsValid(ent) then
             table.remove(self.LogicChoreographedScenes, ent)
             continue
         end
 
         local waitingForActor = ent:GetInternalVariable("m_bWaitingForActor", false)
+
         if waitingForActor == true then
             if ent.WaitingForActor ~= true then
                 DbgPrint(ent, "now waiting for actor")
@@ -145,6 +139,7 @@ function GM:CheckStuckScenes()
                 ent.WaitingForActor = true
             elseif ent.WaitingForActor == true then
                 local delta = CurTime() - ent.WaitingForActorTime
+
                 if delta >= 5 then
                     DbgPrint("Long waiting logic_choreographed_scene")
                     ent:SetKeyValue("busyactor", "0")
@@ -155,28 +150,22 @@ function GM:CheckStuckScenes()
             if ent.WaitingForActor == true then
                 DbgPrint(ent, "no longer waiting")
             end
+
             ent.WaitingForActor = false
         end
-
     end
-
 end
 
 function GM:OnGamemodeLoaded()
-
     DbgPrint("GM:OnGamemodeLoaded")
-
     self.ServerStartupTime = GetSyncedTimestamp()
-
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()
     self:MountRequiredContent()
-
 end
 
 function GM:OnReloaded()
-
     DbgPrint("GM:OnReloaded")
 
     if CLIENT then
@@ -190,21 +179,20 @@ function GM:OnReloaded()
 end
 
 function GM:MountRequiredContent()
-
     local gametype = self:GetGameType()
     local filename = "lambda_mount_" .. gametype.GameType .. ".dat"
     local mountFiles = gametype.MountContent or {}
-
-    if table.Count(mountFiles) == 0 then
-        return true
-    end
+    if table.Count(mountFiles) == 0 then return true end
 
     if file.Exists(filename, "DATA") == false then
         DbgPrint("Creating new GMA mount package...")
+
         if GMA.CreatePackage(mountFiles, filename) == false then
             DbgPrint("Unable to create GMA archive, make sure you have the required content mounted.")
+
             return
         end
+
         DbgPrint("OK.")
     else
         DbgPrint("Found pre-existing GMA archive, no need to generate.")
@@ -213,28 +201,28 @@ function GM:MountRequiredContent()
     if file.Exists(filename, "DATA") == false then
         -- What?
         DbgPrint("Unable to find the GMA archive, unable to mount.")
+
         return
     end
 
     local res, _ = game.MountGMA("data/" .. filename)
+
     if res == false then
         DbgPrint("Unable to mount the required GMA, you may be unable to play.")
+
         return
     end
 
     DbgPrint("Mounted content!")
-
 end
 
 function GM:Initialize()
-
     DbgPrint("GM:Initialize")
     DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
-
     self:InitializeDifficulty()
     self:InitializePlayerList()
     self:InitializeRoundSystem()
-    
+
     if SERVER then
         self:ResetSceneCheck()
         self:ResetPlayerRespawnQueue()
@@ -243,9 +231,11 @@ function GM:Initialize()
         self:InitializeWeaponTracking()
         self:InitializeGlobalStates()
         self:InitializePlayerModels()
+
         if self.InitializeSkybox then
             self:InitializeSkybox()
         end
+
         self:InitializeCurrentLevel()
         self:TransferPlayers()
         self:InitializeResources()
@@ -258,16 +248,17 @@ function GM:ResetSceneCheck()
 end
 
 function GM:InitPostEntity()
-
     DbgPrint("GM:InitPostEntity")
 
     if SERVER then
         self:ResetGlobalStates()
         self:PostLoadTransitionData()
         self:InitializeMapVehicles()
+
         if self.PostInitializeSkybox then
             self:PostInitializeSkybox()
         end
+
         self:SetRoundBootingComplete()
         self.InitPostEntityDone = true
 
@@ -276,11 +267,9 @@ function GM:InitPostEntity()
                 self.MapScript:LevelPostInit()
             end
         end)
-
     else
         self:HUDInit()
     end
-
 end
 
 function GM:ProcessEnvHudHint(ent)
@@ -318,45 +307,63 @@ function GM:ProcessTriggerWeaponDissolve(ent)
 end
 
 function GM:ProcessLogicChoreographedScene(ent)
-
     self.LogicChoreographedScenes = self.LogicChoreographedScenes or {}
     self.LogicChoreographedScenes[ent] = true
-
 end
 
 -- HACKHACK: We assign the next path_track on the activator for transition data.
 function GM:ProcessPathTrackHack(ent)
     local tracker = self.PathTracker
+
     if not IsValid(tracker) then
         tracker = ents.Create("lambda_path_tracker")
         tracker:SetName("lambda_path_tracker")
         tracker:Spawn()
         self.PathTracker = tracker
     end
+
     ent:SetKeyValue("OnPass", "lambda_path_tracker,OnPass,,0,-1")
 end
 
 function GM:ProcessAntlionCollision(ent)
     -- Disable annoying collisions with antlions if allied.
-    if (game.GetGlobalState("antlion_allied") == GLOBAL_ON and
-        self:GetSetting("friendly_antlion_collision", true) == false) then
+    if (game.GetGlobalState("antlion_allied") == GLOBAL_ON and self:GetSetting("friendly_antlion_collision", true) == false) then
         ent:SetCollisionGroup(COLLISION_GROUP_WEAPON)
     end
 end
 
-local ENTITY_PROCESSORS =
-{
-    ["env_hudhint"] = { PostFrame = true, Fn = GM.ProcessEnvHudHint },
-    ["env_message"] = { PostFrame = true, Fn = GM.ProcessEnvMessage },
-    ["func_areaportal"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortal },
-    ["func_areaportalwindow"] = { PostFrame = true, Fn = GM.ProcessFuncAreaPortalWindow },
-    ["logic_choreographed_scene"] = { PostFrame = true, Fn = GM.ProcessLogicChoreographedScene },
-    ["path_track"] = { PostFrame = true, Fn = GM.ProcessPathTrackHack },
-    ["npc_antlion"] = { PostFrame = true, Fn = GM.ProcessAntlionCollision },
+local ENTITY_PROCESSORS = {
+    ["env_hudhint"] = {
+        PostFrame = true,
+        Fn = GM.ProcessEnvHudHint
+    },
+    ["env_message"] = {
+        PostFrame = true,
+        Fn = GM.ProcessEnvMessage
+    },
+    ["func_areaportal"] = {
+        PostFrame = true,
+        Fn = GM.ProcessFuncAreaPortal
+    },
+    ["func_areaportalwindow"] = {
+        PostFrame = true,
+        Fn = GM.ProcessFuncAreaPortalWindow
+    },
+    ["logic_choreographed_scene"] = {
+        PostFrame = true,
+        Fn = GM.ProcessLogicChoreographedScene
+    },
+    ["path_track"] = {
+        PostFrame = true,
+        Fn = GM.ProcessPathTrackHack
+    },
+    ["npc_antlion"] = {
+        PostFrame = true,
+        Fn = GM.ProcessAntlionCollision
+    }
 }
 
 function GM:OnEntityCreated(ent)
-
     if SERVER then
         local class = ent:GetClass()
         local entityProcessor = ENTITY_PROCESSORS[class]
@@ -370,22 +377,19 @@ function GM:OnEntityCreated(ent)
 
         -- Run this next frame so we can safely remove entities and have their actual names assigned.
         util.RunNextFrame(function()
-
-            if not IsValid(ent) then
-                return
-            end
+            if not IsValid(ent) then return end
 
             -- Required information for respawning some things.
-            ent.InitialSpawnData =
-            {
+            ent.InitialSpawnData = {
                 Pos = ent:GetPos(),
                 Ang = ent:GetAngles(),
                 Mins = ent:OBBMins(),
-                Maxs = ent:OBBMaxs(),
+                Maxs = ent:OBBMaxs()
             }
 
             if ent:IsWeapon() == true then
                 self:TrackWeapon(ent)
+
                 if ent:CreatedByMap() == true then
                     DbgPrint("Level designer created weapon: " .. tostring(ent))
                     self:InsertLevelDesignerPlacedObject(ent)
@@ -400,11 +404,10 @@ function GM:OnEntityCreated(ent)
             if entityProcessor ~= nil and entityProcessor.PostFrame == true then
                 entityProcessor.Fn(self, ent)
             end
-            
+
             if ent:IsNPC() then
                 self:RegisterNPC(ent)
             end
-
         end)
 
         -- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
@@ -412,17 +415,13 @@ function GM:OnEntityCreated(ent)
             self:HandleVehicleCreation(ent)
         end
     end
-
 end
 
 local function ReplaceFuncTankVolume(ent, volname)
-
     local newName = "Lambda" .. volname
 
     ents.WaitForEntityByName(volname, function(vol)
-
         DbgPrint("Replacing control volume for: " .. tostring(ent), volname)
-
         local newVol = ents.Create("trigger") -- Yes this actually exists and it has what func_tank needs.
         newVol:SetKeyValue("StartDisabled", "0")
         newVol:SetKeyValue("spawnflags", vol:GetSpawnFlags())
@@ -436,24 +435,21 @@ local function ReplaceFuncTankVolume(ent, volname)
         newVol:AddSolidFlags(FSOLID_TRIGGER)
         newVol:SetNotSolid(true)
         newVol:AddEffects(EF_NODRAW)
-
         -- The previous volume is no longer needed.
         vol:Remove()
-
     end)
 
     return newName
-
 end
 
 function GM:EntityKeyValue(ent, key, val)
-
     if self.MapScript then
         -- Monitor scripts that we have filtered by class name.
         if key:iequals("classname") == true then
             if self.MapScript.EntityFilterByClass and self.MapScript.EntityFilterByClass[val] == true then
                 DbgPrint("Removing filtered entity by class: " .. tostring(ent))
                 ent:Remove()
+
                 return
             end
         elseif key:iequals("targetname") == true then
@@ -461,18 +457,16 @@ function GM:EntityKeyValue(ent, key, val)
             if self.MapScript.EntityFilterByName and self.MapScript.EntityFilterByName[val] == true then
                 DbgPrint("Removing filtered entity by name: " .. tostring(ent) .. " (" .. val .. ")")
                 ent:Remove()
+
                 return
             end
         end
     end
 
     ent.LambdaKeyValues = ent.LambdaKeyValues or {}
-
     local entClass = ent:GetClass()
-    if entClass == "env_sprite" and key == "GlowProxySize" and tonumber(val) > 64 then
-        -- Fix console spam about maximum glow size, maximum value is 64.
-        return 64
-    end
+    if entClass == "env_sprite" and key == "GlowProxySize" and tonumber(val) > 64 then return 64 end -- Fix console spam about maximum glow size, maximum value is 64.
+
     if key == "globalstate" and val == "friendly_encounter" and entClass == "env_global" then
         -- HACKHACK: This solves an issue that causes prediction errors because clients arent aware of global states.
         return ""
@@ -480,6 +474,7 @@ function GM:EntityKeyValue(ent, key, val)
         -- HACKHACK: Because we replace the triggers with lua triggers func_tank will not work with control_volume.
         --           We replace the volume with a new created trigger that is not from lua.
         local newTriggerName = ReplaceFuncTankVolume(ent, val)
+
         return newTriggerName
     end
 
@@ -493,21 +488,15 @@ function GM:EntityKeyValue(ent, key, val)
 
     if self.MapScript.EntityKeyValue then
         res = self.MapScript:EntityKeyValue(ent, key, val)
-        if res ~= nil then
-            return res
-        end
+        if res ~= nil then return res end
     end
-
 end
 
 function GM:ApplyCorrectedDamage(dmginfo)
- 
     DbgPrint("ApplyCorrectedDamage")
-
     local attacker = dmginfo:GetAttacker()
 
     if IsValid(attacker) and (dmginfo:IsDamageType(DMG_BULLET) or dmginfo:IsDamageType(DMG_CLUB)) then
-
         local weaponTable = nil
         local wep = nil
 
@@ -522,15 +511,14 @@ function GM:ApplyCorrectedDamage(dmginfo)
         if weaponTable ~= nil and IsValid(wep) then
             local class = wep:GetClass()
             local dmgCVar = weaponTable[class]
+
             if dmgCVar ~= nil then
                 local dmgAmount = dmgCVar:GetInt()
                 DbgPrint("Setting modified weapon damage " .. tostring(dmgAmount) .. " on " .. class)
                 dmginfo:SetDamage(dmgAmount)
             end
         end
-
     end
 
     return dmginfo
-
 end

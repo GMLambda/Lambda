@@ -1,47 +1,39 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
+
+MAPSCRIPT.DefaultLoadout = {
     Weapons = {},
     Ammo = {},
     Armor = 30,
-    HEV = false,
+    HEV = false
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
+MAPSCRIPT.EntityFilterByClass = {}
+MAPSCRIPT.EntityFilterByName = {}
 
-MAPSCRIPT.EntityFilterByName =
-{
-}
-
-MAPSCRIPT.InputFilters =
-{
+MAPSCRIPT.InputFilters = {
     ["train_door_2_counter"] = {"Add"},
     ["razortrain_gate_cop_2"] = {"SetPoliceGoal"},
     ["cage_playerclip"] = {"Enable"},
     ["cage_door_counter"] = {"Add"},
     ["logic_kill_citizens"] = {"Trigger"},
-    ["storage_room_door"] = {"Close", "Lock"},
+    ["storage_room_door"] = {"Close", "Lock"}
 }
 
-MAPSCRIPT.GlobalStates =
-{
+MAPSCRIPT.GlobalStates = {
     ["gordon_precriminal"] = GLOBAL_ON,
     ["gordon_invulnerable"] = GLOBAL_ON,
     ["super_phys_gun"] = GLOBAL_OFF,
-    ["antlion_allied"] = GLOBAL_OFF,
+    ["antlion_allied"] = GLOBAL_OFF
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         local function fixCitizen(ent)
             ent:SetKeyValue("spawnflags", "16794640")
         end
@@ -49,7 +41,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("citizen_queue_start_1", fixCitizen)
         ents.WaitForEntityByName("citizen_queue_start_2", fixCitizen)
         ents.WaitForEntityByName("citizen_queue_start_3", fixCitizen)
-
         ents.RemoveByClass("trigger_once", Vector(-4614.97, -678.03, 16))
         ents.RemoveByClass("trigger_once", Vector(-4614.97, -806.03, 16))
         ents.RemoveByClass("trigger_once", Vector(-5022.15, -787.48, 0))
@@ -66,11 +57,10 @@ function MAPSCRIPT:PostInit()
         end)
 
         local queueTrigger = ents.Create("trigger_once")
-        queueTrigger:SetupTrigger(Vector(-4322.127441, -922.505859, -27.981224), Angle(0,0,0), Vector(-20, -20, 0), Vector(20, 20, 90))
+        queueTrigger:SetupTrigger(Vector(-4322.127441, -922.505859, -27.981224), Angle(0, 0, 0), Vector(-20, -20, 0), Vector(20, 20, 90))
         queueTrigger:SetKeyValue("teamwait", 0)
         queueTrigger:Fire("AddOutput", "OnTrigger customs_relay_send_to_train,Trigger,,0.0,-1")
         queueTrigger:Fire("AddOutput", "OnTrigger lambda_queue_pclip,Kill,,0.0,-1")
-
         local pclipBrush = ents.Create("func_brush")
         pclipBrush:SetPos(Vector(-4330.575195, -922.814453, 35))
         pclipBrush:SetName("lambda_queue_pclip")
@@ -91,7 +81,6 @@ function MAPSCRIPT:PostInit()
 
         -- Remove all default spawnpoints.
         ents.RemoveByClass("info_player_start")
-
         -- Annoying stuff.
         ents.RemoveByName("cage_playerclip")
         --ents.RemoveByName("barney_room_blocker")
@@ -111,33 +100,35 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- Fix point_viewcontrol, affect all players.
-        for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
+        for k, v in pairs(ents.FindByClass("point_viewcontrol")) do
             v:SetKeyValue("spawnflags", "128") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
         end
 
         -- Make the cop go outside the hallway so other players can still pass by.
-        local mark_cop_security_room_leave = ents.FindFirstByName("mark_cop_security_room_leave");
+        local mark_cop_security_room_leave = ents.FindFirstByName("mark_cop_security_room_leave")
         mark_cop_security_room_leave:SetPos(Vector(-4304, -464, -16))
 
         GAMEMODE:WaitForInput("logic_start_train", "Trigger", function()
-
             DbgPrint("Assigning new spawnpoint")
-
             local intro_train_2 = ents.FindFirstByName("intro_train_2")
             local pos = intro_train_2:LocalToWorld(Vector(-233.685928, 1.246165, 47.031250))
-            local cp = GAMEMODE:SetPlayerCheckpoint({ Pos = pos, Ang = Angle(0, 0, 0)})
+
+            local cp = GAMEMODE:SetPlayerCheckpoint({
+                Pos = pos,
+                Ang = Angle(0, 0, 0)
+            })
+
             cp:SetParent(intro_train_2)
 
             -- Disable them earlier, the black fadeout is gone.
-            for k,v in pairs(ents.FindByClass("point_viewcontrol")) do
+            for k, v in pairs(ents.FindByClass("point_viewcontrol")) do
                 v:Fire("Disable")
             end
-
         end)
 
         -- Block players from escaping control gate.
         local cage_playerclip = ents.Create("func_brush")
-        cage_playerclip:SetPos(Vector(-4226.9350585938, -417.03271484375,-31.96875))
+        cage_playerclip:SetPos(Vector(-4226.9350585938, -417.03271484375, -31.96875))
         cage_playerclip:SetModel("*68")
         cage_playerclip:SetKeyValue("spawnflags", "2")
         cage_playerclip:Spawn()
@@ -155,16 +146,23 @@ function MAPSCRIPT:PostInit()
 
         -- Create a trigger once all players are inside we setup a new spawnpoint and close the door.
         ents.RemoveByClass("trigger_once", Vector(-3442, -316, 8)) -- We will take over.
-
         local barney_room_trigger = ents.Create("trigger_once")
-        barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0,0,0), Vector(-150, -130, -50), Vector(150, 150, 50))
+        barney_room_trigger:SetupTrigger(Vector(-3450, -255, 20), Angle(0, 0, 0), Vector(-150, -130, -50), Vector(150, 150, 50))
         barney_room_trigger:SetKeyValue("teamwait", 1)
+
         barney_room_trigger.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint({
+                Pos = Vector(-3549, -347, -31),
+                Ang = Angle(0, 0, 0)
+            }, activator)
 
-            GAMEMODE:SetPlayerCheckpoint({ Pos = Vector(-3549, -347, -31), Ang = Angle(0, 0, 0)}, activator)
+            ents.WaitForEntityByName("security_intro_02", function(ent)
+                ent:Fire("Start")
+            end)
 
-            ents.WaitForEntityByName("security_intro_02", function(ent) ent:Fire("Start") end)
-            ents.WaitForEntityByName("barney_room_blocker", function(ent) ent:Fire("Enable") end)
+            ents.WaitForEntityByName("barney_room_blocker", function(ent)
+                ent:Fire("Enable")
+            end)
         end
 
         ents.WaitForEntityByName("barney_door_2", function(ent)
@@ -174,9 +172,7 @@ function MAPSCRIPT:PostInit()
         -- Use a better spot for barney
         local mark_barneyroom_comblock_4 = ents.FindFirstByName("mark_barneyroom_comblock_4")
         mark_barneyroom_comblock_4:SetPos(Vector(-3588, 3, -31))
-        
     end
-
 end
 
 return MAPSCRIPT

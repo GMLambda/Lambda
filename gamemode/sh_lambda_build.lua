@@ -6,7 +6,6 @@ GM.Name = "Lambda"
 GM.Author = "N/A"
 GM.Email = "N/A"
 GM.Website = "https://github.com/ZehMatt/Lambda"
-
 -- Testing: 801875828
 -- Release: 780244493
 -- Values will be overwritten by the CI for automated deployment.

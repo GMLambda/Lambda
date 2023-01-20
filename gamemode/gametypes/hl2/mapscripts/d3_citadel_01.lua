@@ -1,28 +1,14 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-        "weapon_physcannon",
-        "weapon_frag",
-        "weapon_shotgun",
-        "weapon_ar2",
-        "weapon_rpg",
-        "weapon_crossbow",
-        "weapon_bugbait",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
+    Ammo = {
         ["Pistol"] = 20,
         ["SMG1"] = 45,
         ["357"] = 6,
@@ -31,45 +17,46 @@ MAPSCRIPT.DefaultLoadout =
         ["AR2"] = 50,
         ["RPG_Round"] = 8,
         ["SMG1_Grenade"] = 3,
-        ["XBowBolt"] = 4,
+        ["XBowBolt"] = 4
     },
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-}
+MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
-
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
     ["global_newgame_template_local_items"] = true,
-    ["global_newgame_template_ammo"] = true,
+    ["global_newgame_template_ammo"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
-        for _,v in pairs(ents.FindByClass("info_player_start")) do
+        for _, v in pairs(ents.FindByClass("info_player_start")) do
             local pos = v:GetPos()
             pos.z = pos.z + 2 -- Raise it a bit, players get stuck in the ground
             v:SetPos(pos)
         end
 
         local triggers = ents.FindByPos(Vector(10624, 4592, -1664), "trigger_once")
-        for _,v in pairs(triggers) do v:Remove() end
+
+        for _, v in pairs(triggers) do
+            v:Remove()
+        end
 
         triggers = ents.FindByPos(Vector(11880, 5888, -1672), "trigger_multiple")
-        for _,v in pairs(triggers) do v:Remove() end
+
+        for _, v in pairs(triggers) do
+            v:Remove()
+        end
 
         triggers = ents.FindByPos(Vector(11176, 5888, -1672), "trigger_once")
-        for _,v in pairs(triggers) do v:Remove() end
+
+        for _, v in pairs(triggers) do
+            v:Remove()
+        end
 
         ents.WaitForEntityByName("fade_out", function(ent)
             ent:SetKeyValue("spawnflags", "4") -- Activator only
@@ -78,18 +65,10 @@ function MAPSCRIPT:PostInit()
 
         -- Create better fade-out trigger.
         local fadeTrigger = ents.Create("trigger_multiple")
-        fadeTrigger:SetupTrigger(
-            Vector(11176, 5888, -1672),
-            Angle(0, 0, 0),
-            Vector(-90, -90, -50),
-            Vector(150, 90, 100),
-            true,
-            SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES
-        )
+        fadeTrigger:SetupTrigger(Vector(11176, 5888, -1672), Angle(0, 0, 0), Vector(-90, -90, -50), Vector(150, 90, 100), true, SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES)
         fadeTrigger:Fire("AddOutput", "OnStartTouch fade_out,Fade,,0,-1")
 
         ents.WaitForEntityByName("player_track4", function(ent)
-            
             local newTrack = ents.Create("path_track")
             newTrack:SetPos(ent:GetPos())
             newTrack:SetAngles(ent:GetAngles())
@@ -99,7 +78,6 @@ function MAPSCRIPT:PostInit()
             newTrack:SetName("lambda_player_track4")
             newTrack:Spawn()
             newTrack:Activate()
-
             ent:Remove()
         end)
 
@@ -119,14 +97,8 @@ function MAPSCRIPT:PostInit()
 
         -- Kick players out of vehicle
         local kickTrigger = ents.Create("trigger_multiple")
-        kickTrigger:SetupTrigger(
-            Vector(11776, 5888, -1672),
-            Angle(0, 0, 0),
-            Vector(-40, -90, -70),
-            Vector(60, 90, 100),
-            true,
-            SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES
-        )
+        kickTrigger:SetupTrigger(Vector(11776, 5888, -1672), Angle(0, 0, 0), Vector(-40, -90, -70), Vector(60, 90, 100), true, SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES)
+
         kickTrigger.OnStartTouch = function(s, ent)
             ent:ExitVehicle()
             ent:TeleportPlayer(Vector(12091.439453, 5889.092773, -1775.968750))
@@ -135,14 +107,8 @@ function MAPSCRIPT:PostInit()
 
         -- Move changelevel trigger behind
         ents.RemoveByClass("trigger_changelevel")
-
         local changelevelTrigger = ents.Create("trigger_changelevel")
-        changelevelTrigger:SetupTrigger(
-            Vector(11776, 5888, -1672),
-            Angle(0, 0, 0),
-            Vector(-40, -90, -70),
-            Vector(370, 90, 100)
-        )
+        changelevelTrigger:SetupTrigger(Vector(11776, 5888, -1672), Angle(0, 0, 0), Vector(-40, -90, -70), Vector(370, 90, 100))
         changelevelTrigger:SetKeyValue("map", "d3_citadel_02")
         changelevelTrigger:SetKeyValue("landmark", "trans_cit01_cit02")
 
@@ -166,18 +132,15 @@ function MAPSCRIPT:PostInit()
         test:Spawn()
         test:Activate()
 
-        for _,v in pairs(ents.FindByClass("prop_vehicle_prisoner_pod")) do
+        for _, v in pairs(ents.FindByClass("prop_vehicle_prisoner_pod")) do
             v:Fire("AddOutput", "PlayerOn !self,Close,,0,-1")
             v:Fire("AddOutput", "PlayerOn !self,Lock,,0.01,-1")
         end
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

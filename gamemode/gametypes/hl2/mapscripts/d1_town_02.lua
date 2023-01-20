@@ -1,65 +1,44 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-        "weapon_physcannon",
-        "weapon_frag",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag"},
+    Ammo = {
         ["Pistol"] = 20,
         ["SMG1"] = 45,
         ["357"] = 3,
-        ["Grenade"] = 1,
+        ["Grenade"] = 1
     },
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-    ["buildingD_roofhatch"] = { "Close" }, -- Never close it, it might close while players climb up and get stuck.
+MAPSCRIPT.InputFilters = {
+    ["buildingD_roofhatch"] = {"Close"} -- Never close it, it might close while players climb up and get stuck.
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["startobjects_template"] = true,
-    ["damagefilter_monk"] = true,
+    ["damagefilter_monk"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         -- If we come from 03
         if GAMEMODE:GetPreviousMap() == "d1_town_03" then
             -- -3764.476807 -332.874481 -3327.968750
             local checkpointTransfer = GAMEMODE:CreateCheckpoint(Vector(-3764.476807, -332.874481, -3327.968750), Angle(0, 90, 0))
             GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
-
             -- If players fall they should rather die.
             local triggerHurt1 = ents.Create("trigger_hurt")
-            triggerHurt1:SetupTrigger(
-                Vector(-3212.359131, 344.832214, -3572.259033),
-                Angle(0, 0, 0),
-                Vector(-480, -500, 0),
-                Vector(500, 780, 115)
-            )
+            triggerHurt1:SetupTrigger(Vector(-3212.359131, 344.832214, -3572.259033), Angle(0, 0, 0), Vector(-480, -500, 0), Vector(500, 780, 115))
             triggerHurt1:SetKeyValue("damagetype", "32")
             triggerHurt1:SetKeyValue("damage", "200")
 
@@ -74,18 +53,13 @@ function MAPSCRIPT:PostInit()
                 -- Prevent trigger from opening it.
                 ent:SetName("lambda_returndoor")
             end)
-
         end
 
         if GAMEMODE:GetPreviousMap() ~= "d1_town_03" then
             local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1808.973267, 721.884277, -3071.968750), Angle(0, -180, 0))
             local checkpointTrigger1 = ents.Create("trigger_once")
-            checkpointTrigger1:SetupTrigger(
-                Vector(-1789.687012, 684.973572, -3071.968750),
-                Angle(0, 0, 0),
-                Vector(-50, -50, 0),
-                Vector(50, 50, 70)
-            )
+            checkpointTrigger1:SetupTrigger(Vector(-1789.687012, 684.973572, -3071.968750), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 70))
+
             checkpointTrigger1.OnTrigger = function(_, activator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             end
@@ -96,23 +70,17 @@ function MAPSCRIPT:PostInit()
             -- freightlift_lift
             local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-2948.138428, 887.582458, -3135.968750), Angle(0, -180, 0))
             local checkpointTrigger2 = ents.Create("trigger_once")
-            checkpointTrigger2:SetupTrigger(
-                Vector(-2942.757324, 895.897278, -3135.814697),
-                Angle(0, 0, 0),
-                Vector(-64, -45, 0),
-                Vector(64, 45, 90)
-            )
+            checkpointTrigger2:SetupTrigger(Vector(-2942.757324, 895.897278, -3135.814697), Angle(0, 0, 0), Vector(-64, -45, 0), Vector(64, 45, 90))
             checkpointTrigger2:SetKeyValue("teamwait", "1")
             checkpointTrigger2:Disable() -- Initially disabled, started by button.
+
             checkpointTrigger2.OnTrigger = function(_, activator)
-                TriggerOutputs({
-                    {"elevator_nodelink", "TurnOff", 10.0, ""},
-                    {"freight_lift_down_relay", "Trigger", 0, ""},
-                    {"freight_lift_button_2", "Lock", 0, ""},
-                })
+                TriggerOutputs({{"elevator_nodelink", "TurnOff", 10.0, ""}, {"freight_lift_down_relay", "Trigger", 0, ""}, {"freight_lift_button_2", "Lock", 0, ""}})
+
                 ents.WaitForEntityByName("freightlift_lift", function(ent)
                     checkpoint2:SetParent(ent)
                 end)
+
                 GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
             end
 
@@ -121,23 +89,17 @@ function MAPSCRIPT:PostInit()
                 if IsValid(checkpointTrigger2) then
                     checkpointTrigger2:Enable()
                 end
+
                 return true -- Suppress.
             end)
         else
             -- We spawn the monk in the second part sooner, players should not see him being spawned.
             -- -3396.734619 417.609131 -3327.968750
             local monkTrigger = ents.Create("trigger_once")
-            monkTrigger:SetupTrigger(
-                Vector(-3396.734619, 417.609131, -3327.968750),
-                Angle(0, 0, 0),
-                Vector(-64, -45, 0),
-                Vector(64, 45, 90)
-            )
+            monkTrigger:SetupTrigger(Vector(-3396.734619, 417.609131, -3327.968750), Angle(0, 0, 0), Vector(-64, -45, 0), Vector(64, 45, 90))
+
             monkTrigger.OnTrigger = function()
-                TriggerOutputs({
-                    {"church_monk_maker", "Spawn", 0.0, ""},
-                    {"church_monk_maker", "Disable", 0.0, ""},
-                })
+                TriggerOutputs({{"church_monk_maker", "Spawn", 0.0, ""}, {"church_monk_maker", "Disable", 0.0, ""}})
             end
 
             -- Reposition the awfully placed sounds.
@@ -159,15 +121,15 @@ function MAPSCRIPT:PostInit()
             sparkEffect:SetPos(Vector(-5022.800781, 596.170044, -3213.741211))
             sparkEffect:SetName("lambda_engine_break")
             sparkEffect:Spawn()
-            sparkEffect.AcceptInput = function(e, name, activator, caller, data)
-                if name == "BreakDown" then 
-                    local effectdata = EffectData()
-                    effectdata:SetOrigin( e:GetPos() )
-                    util.Effect( "ElectricSpark", effectdata )
 
+            sparkEffect.AcceptInput = function(e, name, activator, caller, data)
+                if name == "BreakDown" then
                     local effectdata = EffectData()
-                    effectdata:SetOrigin( e:GetPos() )
-                    util.Effect( "Explosion", effectdata )
+                    effectdata:SetOrigin(e:GetPos())
+                    util.Effect("ElectricSpark", effectdata)
+                    local effectdata = EffectData()
+                    effectdata:SetOrigin(e:GetPos())
+                    util.Effect("Explosion", effectdata)
                 end
             end
 
@@ -183,12 +145,8 @@ function MAPSCRIPT:PostInit()
             local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-4323.520996, 1618.552734, -3135.968750), Angle(0, -90, 0))
             checkpoint3:SetVisiblePos(Vector(-4171.976563, 1554.698975, -3135.968750))
             local checkpointTrigger3 = ents.Create("trigger_once")
-            checkpointTrigger3:SetupTrigger(
-                Vector(-4345.541504, 1502.828979, -3135.968750),
-                Angle(0, 0, 0),
-                Vector(-50, -50, 0),
-                Vector(300, 150, 70)
-            )
+            checkpointTrigger3:SetupTrigger(Vector(-4345.541504, 1502.828979, -3135.968750), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(300, 150, 70))
+
             checkpointTrigger3.OnTrigger = function(_, activator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
             end
@@ -196,25 +154,17 @@ function MAPSCRIPT:PostInit()
             local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(-4836.597168, 545.560608, -3263.968750), Angle(0, 90, 0))
             checkpoint4:SetVisiblePos(Vector(-4940.520996, 927.297485, -3263.968750))
             local checkpointTrigger4 = ents.Create("trigger_once")
-            checkpointTrigger4:SetupTrigger(
-                Vector(-5226.356445, 976.181213, -3263.959961),
-                Angle(0, 0, 0),
-                Vector(-350, -550, 0),
-                Vector(580, 550, 170)
-            )
+            checkpointTrigger4:SetupTrigger(Vector(-5226.356445, 976.181213, -3263.959961), Angle(0, 0, 0), Vector(-350, -550, 0), Vector(580, 550, 170))
+
             checkpointTrigger4.OnTrigger = function(_, activator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
             end
         end
-
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

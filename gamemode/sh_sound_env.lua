@@ -8,13 +8,7 @@ sound.Add({
     volume = 0.7,
     level = SNDLVL_NORM,
     pitch = 100,
-    sound = { 
-        "lambda/physics/flesh/flesh_impact_bullet1.wav",
-        "lambda/physics/flesh/flesh_impact_bullet2.wav",
-        "lambda/physics/flesh/flesh_impact_bullet3.wav",
-        "lambda/physics/flesh/flesh_impact_bullet4.wav",
-        "lambda/physics/flesh/flesh_impact_bullet5.wav",
-    },
+    sound = {"lambda/physics/flesh/flesh_impact_bullet1.wav", "lambda/physics/flesh/flesh_impact_bullet2.wav", "lambda/physics/flesh/flesh_impact_bullet3.wav", "lambda/physics/flesh/flesh_impact_bullet4.wav", "lambda/physics/flesh/flesh_impact_bullet5.wav"}
 })
 
 function GM:SetSoundSuppressed(suppress)
@@ -24,7 +18,6 @@ end
 local host_timescale = GetConVar("host_timescale")
 
 function GM:EntityEmitSound(data)
-
     local modifyPitch = true
     local modified
 
@@ -45,15 +38,10 @@ function GM:EntityEmitSound(data)
 
         p = math.Clamp(p, 0, 255)
         data.Pitch = p
-
     end
 
     local ent = data.Entity
-
-    if IsValid(ent) and ent:IsNPC() and string.sub(data.SoundName, 1, 16):iequals("player/footsteps") and self:NPCFootstep(ent, data) == false then
-        return false
-    end
+    if IsValid(ent) and ent:IsNPC() and string.sub(data.SoundName, 1, 16):iequals("player/footsteps") and self:NPCFootstep(ent, data) == false then return false end
 
     return modified
-
 end

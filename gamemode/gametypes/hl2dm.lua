@@ -190,12 +190,11 @@ function GAMETYPE:GetDifficultyData()
                 [HITGROUP_LEFTLEG] = 1,
                 [HITGROUP_RIGHTLEG] = 1
             }
-        },
+        }
     }
 end
 
 function GAMETYPE:InitSettings()
-    
     self.Base:InitSettings()
 
     GAMEMODE:AddSetting("dm_fraglimit", {
@@ -205,7 +204,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Value = 50,
         Flags = bit.bor(0, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 1000},
+        Clamp = {
+            Min = 0,
+            Max = 1000
+        }
     })
 
     GAMEMODE:AddSetting("dm_timelimit", {
@@ -215,7 +217,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Value = 10,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 30 },
+        Clamp = {
+            Min = 0,
+            Max = 30
+        }
     })
 
     GAMEMODE:AddSetting("dm_teamonly", {
@@ -224,9 +229,8 @@ function GAMETYPE:InitSettings()
         Description = "Team based",
         Type = "bool",
         Value = 0,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
-
 end
 
 function GAMETYPE:GetScoreboardInfo()

@@ -1,38 +1,28 @@
 if SERVER then
+    ENT.Base = "lambda_entity"
+    ENT.Type = "point"
+    DEFINE_BASECLASS("lambda_entity")
 
-ENT.Base = "lambda_entity"
-ENT.Type = "point"
+    function ENT:PreInitialize()
+        BaseClass.PreInitialize(self)
+        self:SetInputFunction("Command", self.InputCommand)
+    end
 
-DEFINE_BASECLASS( "lambda_entity" )
+    function ENT:Initialize()
+        BaseClass.Initialize(self)
+    end
 
-function ENT:PreInitialize()
+    function ENT:KeyValue(key, val)
+        BaseClass.KeyValue(self, key, val)
+    end
 
-    BaseClass.PreInitialize(self)
-    self:SetInputFunction("Command", self.InputCommand)
+    function ENT:InputCommand(data, activator, caller)
+        DbgPrint("Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
 
-end
+        return self:Command(data, activator, caller)
+    end
 
-function ENT:Initialize()
-
-    BaseClass.Initialize(self)
-
-end
-
-function ENT:KeyValue(key, val)
-
-    BaseClass.KeyValue(self, key, val)
-
-end
-
-function ENT:InputCommand(data, activator, caller)
-
-    DbgPrint("Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
-    return self:Command(data, activator, caller)
-
-end
-
-function ENT:Command(data, activator, caller)
-    -- Stub
-end
-
+    function ENT:Command(data, activator, caller)
+        -- Stub
+    end
 end

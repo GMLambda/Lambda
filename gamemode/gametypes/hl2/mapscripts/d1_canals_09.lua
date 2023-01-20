@@ -1,53 +1,34 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357"},
+    Ammo = {
         ["Pistol"] = 60,
-        ["SMG1"] = 60,
+        ["SMG1"] = 60
     },
     Armor = 0,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-}
+MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
-
-MAPSCRIPT.EntityFilterByName =
-{
-    ["global_newgame_entmaker"] = true,
+MAPSCRIPT.EntityFilterByName = {
+    ["global_newgame_entmaker"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
-    if SERVER then
-
-    end
-
+    if SERVER then end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

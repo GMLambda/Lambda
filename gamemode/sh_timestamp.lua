@@ -6,12 +6,10 @@ end
 
 CURRENT_TIMESTAMP = CURRENT_TIMESTAMP or 0
 TIMESTAMP_UPDATE_TIME = TIMESTAMP_UPDATE_TIME or 0
-
 local UpdateTime = 1
 local UpdateTimestamp
 
 if SERVER then
-
     util.AddNetworkString("LambdaTimeSync")
     util.AddNetworkString("LambdaTimeClientSync")
 
@@ -20,57 +18,50 @@ if SERVER then
     end)
 
     UpdateTimestamp = function()
-
         -- Entry update, make sure also set on world.
         local updateTimestamp = CURRENT_TIMESTAMP == 0
-
         CURRENT_TIMESTAMP = SysTime()
 
         if CURRENT_TIMESTAMP - TIMESTAMP_UPDATE_TIME >= UpdateTime then
-
             if player.GetCount() > 0 then
                 net.Start("LambdaTimeSync")
                 net.WriteDouble(CURRENT_TIMESTAMP)
                 net.Broadcast()
-            end 
-            
+            end
+
             TIMESTAMP_UPDATE_TIME = CURRENT_TIMESTAMP
             updateTimestamp = true
         end
 
         if updateTimestamp == true then
             local world = game.GetWorld()
+
             if IsValid(world) then
                 world:SetNW2Float("LambdaTimeSync", CURRENT_TIMESTAMP)
             end
         end
-
     end
-
 else
-
     net.Receive("LambdaTimeSync", function(len)
-
         local ply = LocalPlayer()
         TIMESTAMP_UPDATE_TIME = SysTime()
         CURRENT_TIMESTAMP = net.ReadDouble()
+
         if IsValid(ply) then
             CURRENT_TIMESTAMP = CURRENT_TIMESTAMP + ((ply:Ping() / 2) / 1000)
         end
-        --DbgPrint("Update")
-
     end)
-
+    --DbgPrint("Update")
 end
 
 function GetSyncedTimestamp()
-
     if CURRENT_TIMESTAMP == 0 then
         if SERVER then
             UpdateTimestamp()
         else
             -- This is a fallback to the last known timestamp before we are able to compensate.
             local world = game.GetWorld()
+
             if IsValid(world) then
                 CURRENT_TIMESTAMP = world:GetNW2Float("LambdaTimeSync", 0)
                 TIMESTAMP_UPDATE_TIME = SysTime()
@@ -80,10 +71,7 @@ function GetSyncedTimestamp()
         end
     end
 
-    if SERVER then
-        return SysTime()
-    end
-
+    if SERVER then return SysTime() end
     local res = CURRENT_TIMESTAMP
 
     if CLIENT then
@@ -98,13 +86,10 @@ local TEST_SYNC = false
 
 if TEST_SYNC == true then
     if SERVER then
-
         util.AddNetworkString("SyncTest")
 
         timer.Create("test", 1, 10, function()
-            if player.GetCount() == 0 then 
-                return 
-            end
+            if player.GetCount() == 0 then return end
             net.Start("SyncTest")
             net.WriteDouble(os.clock())
             net.WriteDouble(SysTime())
@@ -112,12 +97,10 @@ if TEST_SYNC == true then
             net.WriteDouble(GetSyncedTimestamp())
             net.Broadcast()
         end)
-
     else
-
         DbgPrint("  ", "os.clock", "SysTime", "CurTime", "SyncedTimestamp")
-        net.Receive("SyncTest",function(len)
 
+        net.Receive("SyncTest", function(len)
             local network1 = net.ReadDouble()
             local network2 = net.ReadDouble()
             local network3 = net.ReadDouble()
@@ -130,12 +113,9 @@ if TEST_SYNC == true then
             local diff2 = cl2 - network2
             local diff3 = cl3 - network3
             local diff4 = cl4 - network4
-
             DbgPrint("SV", network1, network2, network3, network4)
             DbgPrint("CL", cl1, cl2, cl3, cl4)
             DbgPrint("Diff", diff1, diff2, diff3, diff4)
-
         end)
-
     end
 end

@@ -1,4 +1,3 @@
-
 local CurTime = CurTime
 local IsValid = IsValid
 
@@ -12,17 +11,13 @@ function GM:TrackWeapon(wep)
 end
 
 function GM:WeaponTrackingThink()
-
     local curTime = CurTime()
-
-    if self.NextWeaponCheck == nil or self.NextWeaponCheck < curTime then
-        return
-    end
-
+    if self.NextWeaponCheck == nil or self.NextWeaponCheck < curTime then return end
     local ownerlessCount = 0
 
     for k = #self.TrackedWeapons, 1, -1 do
         local wep = self.TrackedWeapons[k]
+
         if not IsValid(wep) then
             table.remove(self.TrackedWeapons, k)
             continue
@@ -41,5 +36,4 @@ function GM:WeaponTrackingThink()
     end
 
     self.NextWeaponCheck = curTime + 0.1
-
 end
