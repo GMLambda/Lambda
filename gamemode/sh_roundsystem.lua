@@ -422,10 +422,16 @@ function GM:PreCleanupMap()
 
     if SERVER then
 
+        -- Disable all overlays.
+        for _,v in pairs(ents.FindByClass("env_screenoverlay")) do
+            v:Input("StopOverlays")
+        end
+
+        -- Reset player state.
         for _,v in pairs(player.GetAll()) do
-            v:KillSilent()
             v:LockPosition(false)
             v:Freeze(false)
+            v:KillSilent()
         end
 
         -- Prevent recursions.
