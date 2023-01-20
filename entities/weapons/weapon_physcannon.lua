@@ -4,8 +4,6 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("physcannon")
-local math_tan = math.tan
-local math_pi = math.pi
 local EyeAngles = EyeAngles
 local EyePos = EyePos
 local IsValid = IsValid
@@ -370,7 +368,7 @@ end
 
 function SWEP:PrimaryAttack()
     DbgPrint(self, "PrimaryAttack")
-    local owner = self.Owner
+    local owner = self:GetOwner()
     if IsValid(owner) ~= true then return end
     self:SetNextPrimaryFire(CurTime() + 0.5)
     local controller = self:GetMotionController()
@@ -470,7 +468,7 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:CanSecondaryAttack()
-    local owner = self.Owner
+    local owner = self:GetOwner()
 
     if IsValid(owner) ~= true then
         DbgPrint("Invalid owner")
@@ -554,7 +552,7 @@ function SWEP:FindObjectInCone(start, fwd, coneSize)
             start = start,
             endpos = v:WorldSpaceCenter(),
             mask = TraceMask,
-            filter = self.Owner
+            filter = self:GetOwner()
         })
 
         if tr.Entity == v then
@@ -599,7 +597,7 @@ function SWEP:FindObjectInConeMega(start, fwd, coneSize, ballCone, onlyCombineBa
             start = start,
             endpos = v:WorldSpaceCenter(),
             mask = TraceMask,
-            filter = self.Owner
+            filter = self:GetOwner()
         })
 
         if tr.Entity == v then
@@ -723,7 +721,7 @@ function SWEP:GetPullForce()
 end
 
 function SWEP:FindObject()
-    local owner = self.Owner
+    local owner = self:GetOwner()
     if IsValid(owner) ~= true then return end
     local tr = self:FindObjectTrace(owner)
     local ent
@@ -807,7 +805,7 @@ function SWEP:GetAttachedObject()
 end
 
 function SWEP:UpdateObject()
-    local owner = self.Owner
+    local owner = self:GetOwner()
     if IsValid(owner) ~= true then return false end
     local controller = self:GetMotionController()
     if controller:IsObjectAttached() == false then return end
@@ -1165,7 +1163,7 @@ end
 
 function SWEP:AttachObject(ent, tr)
     DbgPrint(self, "AttachObject", ent)
-    local owner = self.Owner
+    local owner = self:GetOwner()
     if IsValid(owner) ~= true then return end
     local useGrabPos = false
     local grabPos = tr.HitPos
@@ -1359,10 +1357,9 @@ function SWEP:DryFire()
 end
 
 function SWEP:PrimaryFireEffect()
-    local owner = self.Owner
+    local owner = self:GetOwner()
     if IsValid(owner) ~= true then return end
     owner:ViewPunch(Angle(-6, util.SharedRandom("physcannonfire", -2, 2), 0))
-    if SERVER then end --TODO: Screen fadein
     self:EmitSound("Weapon_PhysCannon.Launch")
 end
 
@@ -1406,8 +1403,6 @@ function SWEP:ApplyVelocityBasedForce(ent, fwd)
     if IsValid(phys) ~= true then return end
     local maxForce = physcannon_maxforce:GetFloat()
     local force = maxForce
-    local mass = phys:GetMass()
-    if mass > 100 then end
     local vVel = fwd * force
 
     --local aVel = tr.HitPos
@@ -1434,7 +1429,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 
     if SERVER then
         local dmgInfo = DamageInfo()
-        dmgInfo:SetAttacker(self.Owner)
+        dmgInfo:SetAttacker(self:GetOwner())
         dmgInfo:SetInflictor(self)
         dmgInfo:SetDamage(0)
         dmgInfo:SetDamageType(DMG_PHYSGUN)
@@ -1507,7 +1502,7 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
 
     if SERVER then
         local dmgInfo = DamageInfo()
-        dmgInfo:SetAttacker(self.Owner)
+        dmgInfo:SetAttacker(self:GetOwner())
         dmgInfo:SetInflictor(self)
         dmgInfo:SetDamage(0)
         dmgInfo:SetDamageType(DMG_PHYSGUN)
@@ -1726,7 +1721,6 @@ function SWEP:DoEffectLaunch(pos)
     end
 
     shotDir:Normalize()
-    local corePos, _ = self:GetCorePos(owner)
     local ef = EffectData()
     ef:SetOrigin(endPos)
     ef:SetEntity(self)
@@ -1893,7 +1887,7 @@ function SWEP:FormatViewModelAttachment(vOrigin, bFrom)
     local vRight = aEyesRot:Right()
     local vUp = aEyesRot:Up()
 
-    if not (bFrom) then
+    if not bFrom then
         local nFactor = nWorldX / nViewX
         vRight:Mul(vRight:Dot(vOffset) * nFactor)
         vUp:Mul(vUp:Dot(vOffset) * nFactor)

@@ -3,7 +3,6 @@ local PANEL = {}
 -- TODO: Make those shared.
 local SUIT_DEVICE_BREATHER = 1
 local SUIT_DEVICE_SPRINT = 2
-local SUIT_DEVICE_FLASHLIGHT = 3
 
 local function GetTextColor()
     local col = util.StringToType(lambda_hud_text_color:GetString(), "vector")
@@ -140,10 +139,8 @@ function PANEL:Paint(width, height)
     self.LastPower = suitPower
     local chunkCount = util.ScreenScaleH(self.BarWidth) / (util.ScreenScaleH(self.BarChunkWidth) + util.ScreenScaleH(self.BarChunkGap))
     local enabledChunks = math.ceil(chunkCount * (suitPower * 1.0 / 100.0))
-    local lowPower = false
     local textColor = GetTextColor()
     local density = 0.3 + ((suitPower / 100.0) * 0.5)
-    local red = ((enabledChunks / chunkCount) * 1.2) * 208
     self:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a * self.Alpha)
     local xpos = util.ScreenScaleH(self.BarInsetX)
     local ypos = util.ScreenScaleH(self.BarInsetY)

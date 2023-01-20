@@ -1,4 +1,3 @@
-local DbgPrint = GetLogging("Trigger")
 ENT.Base = "lambda_trigger"
 ENT.Type = "brush"
 DEFINE_BASECLASS("lambda_trigger")

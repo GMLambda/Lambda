@@ -37,9 +37,10 @@ if SERVER then
         if oldState ~= state and state == true then
             self:SetNoCollideWithTeammates(state)
             self:CollisionRulesChanged()
-        else
+        --[[ else
             -- Players can temporarily intersect, we don't disable it here.
             -- This is handled in sh_lambda_player:CheckPlayerCollision
+        ]]
         end
 
         self.NextPlayerCollideTest = CurTime() + 2
@@ -94,7 +95,6 @@ if SERVER then
             self:SetNWAngle("LockedViewAngles", viewdata)
         elseif viewlock == VIEWLOCK_NPC then
             self:SetNWEntity("LockedViewEntity", viewdata)
-        elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
         end
 
         -- Dealt within sh_lambda_player:PlayerThink

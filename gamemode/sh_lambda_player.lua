@@ -1,3 +1,5 @@
+local util = util
+
 if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaPlayerSettings")
@@ -10,7 +12,6 @@ local DbgPrint = GetLogging("Player")
 local DbgPrintDmg = GetLogging("Damage")
 local CurTime = CurTime
 local Vector = Vector
-local util = util
 local math = math
 local ents = ents
 local player = player
@@ -19,7 +20,6 @@ local table = table
 DEFINE_BASECLASS("gamemode_base")
 local SUIT_DEVICE_BREATHER = 1
 local SUIT_DEVICE_SPRINT = 2
-local SUIT_DEVICE_FLASHLIGHT = 3
 local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 -- We use this constant for kickback from the back.
 local HITGROUP_HEAD_BACK = 100
@@ -126,9 +126,7 @@ if SERVER then
         -- Remove from queue.
         self:RemovePlayerFromRespawnQueue(ply)
 
-        if ply.LambdaPlayerData then
-            --PLAYER_ROLES_TAKEN[ply.LambdaPlayerData.Id] = nil
-        else
+        if ply.LambdaPlayerData == nil then
             DbgPrint("Disconnected without LambdaPlayerData assigned, bug?")
         end
 
@@ -148,7 +146,6 @@ if SERVER then
         self:IncludePlayerInRound(ply)
         self:SendPlayerModelList(ply)
         local model = "models/player/riot.mdl"
-        local name = "!player" -- Some stuff will fail if this is not set, not everything is ported.
         ply.LambdaLastModel = model
         local transitionData = self:GetPlayerTransitionData(ply)
 
@@ -414,7 +411,6 @@ if SERVER then
     function GM:GetNextBestWeapon(ply)
         local currentWeight = -1
         local bestWeight = -1
-        local bestDamage = 0
         local bestWep = nil
         local currentWep = ply:GetActiveWeapon()
 
@@ -796,7 +792,6 @@ if SERVER then
             v:Remove()
         end
 
-        local dmg = dmgInfo:GetDamage()
         local dmgForce = dmgInfo:GetDamageForce() * 0.1
 
         -- Apply the velocity to all weapons, when dropped they have zero.
@@ -816,8 +811,6 @@ if SERVER then
         local vel2D = ply:GetVelocity():Length2D()
 
         if enableGore == true then
-            local damageForceLen = dmgForce:Length2D()
-
             --print(damageForceLen, dmg)
             if dmgInfo:IsDamageType(DMG_BLAST) and damgeDist < 150 then
                 -- Exploded
@@ -1175,11 +1168,9 @@ function GM:UpdateGeigerCounter(ply, mv)
 end
 
 local SUIT_SPRINT_DRAIN = 20.0
-local SUIT_FLASHLIGHT_DRAIN = 2.222
 local SUIT_BREATH_DRAIN = 6.7
 local SUIT_CHARGE_RATE = 12.5
 local SUIT_CHARGE_DELAY = 1.5
-local SUIT_ENERGY_CHARGE_RATE = 12.5
 
 local function PlayerHasSuitEnergy(ply)
     return ply:GetLambdaSuitPower() > 0
@@ -1476,7 +1467,6 @@ end
 function GM:ShouldChargeSuitPower(ply)
     local sprinting = ply:GetLambdaSprinting()
     local inWater = ply:WaterLevel() >= 3
-    local flashlightOn = ply:FlashlightIsOn()
     local powerDrain = sprinting or inWater --[[ or flashlightOn ]]
     if powerDrain == true then return false end -- Something is draning power.
     local power = ply:GetLambdaSuitPower()
@@ -1764,8 +1754,7 @@ local FLINCH_SEQUENCE = {
 local FLESH_IMPACT_SOUNDS = {"lambda/physics/flesh/flesh_impact_bullet1.wav", "lambda/physics/flesh/flesh_impact_bullet2.wav", "lambda/physics/flesh/flesh_impact_bullet3.wav", "lambda/physics/flesh/flesh_impact_bullet4.wav", "lambda/physics/flesh/flesh_impact_bullet5.wav"}
 
 function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
-    local DbgPrint = DbgPrintDmg
-    DbgPrint("ScalePlayerDamage", ply, hitgroup)
+    DbgPrintDmg("ScalePlayerDamage", ply, hitgroup)
     -- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
     self:ApplyCorrectedDamage(dmginfo)
     local attacker = dmginfo:GetAttacker()
@@ -1776,7 +1765,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
 
     -- First scale hitgroups.
     local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
-    DbgPrint("Hitgroup Scale", npc, scale)
+    DbgPrintDmg("Hitgroup Scale", npc, scale)
     dmginfo:ScaleDamage(scale)
     -- Scale by difficulty.
     local scaleType = 0
@@ -1791,13 +1780,13 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         scale = self:GetDifficultyDamageScale(scaleType)
 
         if scale ~= nil then
-            DbgPrint("Scaling difficulty damage: " .. tostring(scale))
+            DbgPrintDmg("Scaling difficulty damage: " .. tostring(scale))
             dmginfo:ScaleDamage(scale)
         end
     end
 
     if SERVER and dmginfo:GetDamage() > 0 then
-        --DbgPrint("ScalePlayerDamage: " .. tostring(ply))
+        --DbgPrintDmg("ScalePlayerDamage: " .. tostring(ply))
         self:EmitPlayerHurt(dmginfo:GetDamage(), ply, hitgroup)
     end
 
@@ -1866,7 +1855,7 @@ function GM:PlayerApplyViewPunch(ply, viewPunch)
     local alpha = 1.0
 
     if ply.NextViewPunchTime ~= nil then
-        local alpha = ply.NextViewPunchTime - CurTime()
+        alpha = ply.NextViewPunchTime - CurTime()
 
         if alpha < 0 then
             alpha = 0

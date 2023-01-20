@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 GAMETYPE.Name = "Half-Life 2 Deathmatch"
 GAMETYPE.BaseGameType = "lambda_base"

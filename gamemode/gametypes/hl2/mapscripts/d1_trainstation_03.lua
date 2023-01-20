@@ -84,7 +84,7 @@ function MAPSCRIPT:PostInit()
         door_bracer_trigger:SetupTrigger(Vector(-4995, -4848, 512), Angle(0, 0, 0), Vector(-200, -80, 0), Vector(110, 110, 130))
         door_bracer_trigger:SetKeyValue("teamwait", "1")
 
-        door_bracer_trigger.OnTrigger = function(self)
+        door_bracer_trigger.OnTrigger = function(e)
             DbgPrint("All players inside trigger, closing door, swapping spawnpoint.")
 
             -- Everyone is inside, we can close the door.

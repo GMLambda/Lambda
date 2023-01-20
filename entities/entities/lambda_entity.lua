@@ -22,18 +22,6 @@ local DTVAR_TO_TYPE = {
     end
 }
 
-local DTVAR_TO_STRING = {
-    ["string"] = function(val) return val end,
-    ["bool"] = function(val) return val and "1" or "0" end,
-    ["float"] = function(val) return util.TypeToString(val) end,
-    ["int"] = function(val) return util.TypeToString(val) end,
-    ["angle"] = function(val) return util.TypeToString(val) end,
-    ["vector"] = function(val) return util.TypeToString(val) end,
-    ["entity"] = function(val)
-        error("Can not use entity as key value")
-    end
-}
-
 local DTVAR_SET
 
 if NW2_VARS == true then
@@ -291,8 +279,8 @@ function ENT:AddSpawnFlags(flags)
         error("Can not add nil as spawn flag")
     end
 
-    local flags = bit.bor(self:GetSpawnFlags(), flags)
-    self:SetKeyValue("spawnflags", tostring(flags))
+    local newFlags = bit.bor(self:GetSpawnFlags(), flags)
+    self:SetKeyValue("spawnflags", tostring(newFlags))
 end
 
 function ENT:SetupOutput(name)
@@ -364,14 +352,14 @@ function ENT:SetOutputsTable(outputs)
 end
 
 function ENT:FireOutputs(name, param, activator, caller)
-    local caller = caller or self
-    local activator = activator or self
+    local actualCaller = caller or self
+    local actualActivator = activator or self
     local outputs = self.OutputsTable[name] or {}
     if #outputs == 0 then return end
 
     util.EnqueueOutput(function()
         DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")
-        util.TriggerOutputs(outputs, activator, caller, param, self)
+        util.TriggerOutputs(outputs, actualActivator, actualCaller, param, self)
     end)
 end
 

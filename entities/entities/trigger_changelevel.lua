@@ -71,8 +71,6 @@ if SERVER then
         local touchingObjects = self:GetTouchingObjects()
 
         if self.Landmark ~= nil and self.Landmark ~= "" then
-            local tmp = {}
-
             for _, landmark in pairs(ents.FindByName(self.Landmark)) do
                 if landmark:GetClass() == "trigger_transition" and landmark.GetTouching ~= nil then
                     for _, v in pairs(landmark:GetTouching()) do

@@ -26,8 +26,7 @@ end
 
 if SERVER then
     function GM:ScaleNPCDamage(npc, hitgroup, dmginfo)
-        local DbgPrint = DbgPrintDmg
-        DbgPrint("ScaleNPCDamage", npc, hitgroup)
+        DbgPrintDmg("ScaleNPCDamage", npc, hitgroup)
         -- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
         self:ApplyCorrectedDamage(dmginfo)
         local attacker = dmginfo:GetAttacker()
@@ -38,7 +37,7 @@ if SERVER then
 
         -- First scale hitgroups.
         local hitgroupScale = self:GetDifficultyNPCHitgroupDamageScale(hitgroup)
-        DbgPrint("Hitgroup Scale", npc, hitgroupScale)
+        DbgPrintDmg("Hitgroup Scale", npc, hitgroupScale)
         dmginfo:ScaleDamage(hitgroupScale)
         -- Scale by difficulty.
         local scaleType = 0
@@ -53,12 +52,12 @@ if SERVER then
             local difficultyScale = self:GetDifficultyDamageScale(scaleType)
 
             if difficultyScale ~= nil then
-                DbgPrint("Scaling difficulty damage: " .. tostring(difficultyScale))
+                DbgPrintDmg("Scaling difficulty damage: " .. tostring(difficultyScale))
                 dmginfo:ScaleDamage(difficultyScale)
             end
         end
 
-        DbgPrint("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
+        DbgPrintDmg("ScaleNPCDamage -> Applying " .. dmginfo:GetDamage() .. " damage to: " .. tostring(npc))
     end
 
     local NPC_TYPE_ENEMY = 0

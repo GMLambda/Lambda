@@ -41,7 +41,7 @@ local function ReadEntities(header, f)
 
     for s in string.gmatch(data, "%{.-%}") do
         -- We can not use util.KeyValuesToTable because of multiple keys with same name.
-        local entData = util.KeyValuesToTablePreserveOrder('"xd"\r\n' .. s)
+        local entData = util.KeyValuesToTablePreserveOrder("\"xd\"\r\n" .. s)
         -- Lets create a more efficient table.
         local newData = {}
 

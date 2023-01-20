@@ -86,7 +86,6 @@ function GM:DrawDynamicCrosshair(inRT)
     local centerX = (scrW / 2)
     local centerY = (scrH / 2)
     local sizeH = size / 2
-    local widthH = width / 2
 
     if lambda_crosshair_outline:GetBool() == true then
         surface.SetDrawColor(0, 0, 0, alpha)

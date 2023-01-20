@@ -1,7 +1,6 @@
 local PANEL = {}
 local W = 375
 local H = 440
-local isadmin = false
 PANEL.Tabs = {{"Info", "info"}, {"Vote", "poll"}, {"Player", "player_settings"}, {"Settings", "settings"}}
 
 function PANEL:Init()

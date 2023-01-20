@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -57,15 +56,14 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- -956.561707 820.578613 960.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-956.561707, 820.578613, 960.031250), Angle(0, 0, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-709.431885, 820.863708, 960.031250), Angle(0, 0, 0), Vector(-400, -300, -10), Vector(500, 130, 250))
-        checkpointTrigger1:SetKeyValue("teamwait", "1")
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-956.561707, 820.578613, 960.031250), Angle(0, 0, 0))
+        local checkpointTrigger3 = ents.Create("trigger_once")
+        checkpointTrigger3:SetupTrigger(Vector(-709.431885, 820.863708, 960.031250), Angle(0, 0, 0), Vector(-400, -300, -10), Vector(500, 130, 250))
+        checkpointTrigger3:SetKeyValue("teamwait", "1")
+        checkpointTrigger3.OnTrigger = function(_, activator)
             triggerPoint1 = true
             TriggerOutputs({{"brush_bigdoor_ALYXClip_1", "Enable", 0, ""}, {"trigger_teleport01", "Enable", 0, ""}})
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
 
         ents.WaitForEntityByName("trigger_teleport01", function(ent)
@@ -100,10 +98,9 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("lcs_np_teleport04", function(ent)
             ent:Remove()
-
-            ents.WaitForEntityByName("lcs_np_teleport05", function(ent)
-                ent:SetName("lcs_np_teleport04")
-                ent:Fire("AddOutput", "OnTrigger1")
+            ents.WaitForEntityByName("lcs_np_teleport05", function(ent2)
+                ent2:SetName("lcs_np_teleport04")
+                ent2:Fire("AddOutput", "OnTrigger1")
             end)
         end)
 

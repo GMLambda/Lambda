@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("NPCExt")
 local ents = ents
 local IsValid = IsValid
 local Vector = Vector

@@ -170,13 +170,11 @@ function GM:UpdateCheckoints()
     local plys = {}
     local centerPos = Vector(0, 0, 0)
     local bestPos
-    local bestTr
 
     for _, v in pairs(util.GetAllPlayers()) do
         local ply = v
         if ply:Alive() == false then continue end
         local pos
-        local groundEnt
         local vehicle = ply:GetVehicle()
         local filter
         local checkpointMins
@@ -203,6 +201,11 @@ function GM:UpdateCheckoints()
 
         if isSlime == true then
             DbgPrint("On slime, can't use checkpoint.")
+            continue
+        end
+
+        if isWater == true then
+            DbgPrint("On water, can't use checkpoint.")
             continue
         end
 

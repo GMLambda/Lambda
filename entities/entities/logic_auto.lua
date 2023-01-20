@@ -2,7 +2,6 @@
 local DbgPrint = GetLogging("LogicAuto")
 -- Spawnflags.
 local SF_AUTO_FIREONCE = 0x0001
-local SF_AUTO_FIREONRELOAD = 0x0002
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
 DEFINE_BASECLASS("lambda_entity")

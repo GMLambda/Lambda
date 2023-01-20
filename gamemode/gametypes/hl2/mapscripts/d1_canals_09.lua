@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -24,11 +23,9 @@ MAPSCRIPT.EntityFilterByName = {
 }
 
 function MAPSCRIPT:PostInit()
-    if SERVER then end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-    --DbgPrint("PostPlayerSpawn")
 end
 
 return MAPSCRIPT

@@ -287,10 +287,9 @@ function GM:CalcMainActivity(ply, velocity)
     ply.CalcSeqOverride = -1
     velocity = GetPlayerVelocity(ply, velocity)
     self:HandlePlayerLanding(ply, velocity, ply.m_bWasOnGround)
+    local isHandled = self:HandlePlayerNoClipping(ply, velocity) or self:HandlePlayerDriving(ply) or self:HandlePlayerVaulting(ply, velocity) or self:HandlePlayerJumping(ply, velocity) or self:HandlePlayerSwimming(ply, velocity) or self:HandlePlayerDucking(ply, velocity)
 
-    if (self:HandlePlayerNoClipping(ply, velocity) or self:HandlePlayerDriving(ply) or self:HandlePlayerVaulting(ply, velocity) or self:HandlePlayerJumping(ply, velocity) or self:HandlePlayerSwimming(ply, velocity) or self:HandlePlayerDucking(ply, velocity)) then
-        -- Handled.
-    else
+    if not isHandled then
         local len2d = velocity:Length2DSqr()
 
         if len2d > 22500 then

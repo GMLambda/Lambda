@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("Roach")
 local CurTime = CurTime
 local Vector = Vector
 local util = util
@@ -27,16 +26,6 @@ local MODE_SMELL_FOOD = 3
 local MODE_SCARED_BY_ENT = 4
 local MODE_SCARED_BY_LIGHT = 5
 local COCKROACH_MDL = "models/decay/cockroach.mdl"
-
-local MODES = {
-    [MODE_IDLE] = "MODE_IDLE",
-    [MODE_EAT] = "MODE_EAT",
-    [MODE_BORED] = "MODE_BORED",
-    [MODE_SMELL_FOOD] = "MODE_SMELL_FOOD",
-    [MODE_SCARED_BY_ENT] = "MODE_SCARED_BY_ENT",
-    [MODE_SCARED_BY_LIGHT] = "MODE_SCARED_BY_LIGHT"
-}
-
 local LOOK_DISTANCE = 100
 
 local FOOD_MODELS = {

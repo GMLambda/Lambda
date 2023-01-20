@@ -66,8 +66,10 @@ function GameTypes:Add(name, tbl)
 end
 
 function GameTypes:Get(name)
+    if name == nil then
+        return nil
+    end
     local mappedName = name:lower()
-
     return self.Registered[mappedName]
 end
 
@@ -128,6 +130,8 @@ function GM:GetGameTypeData(name)
     return nil
 end
 
+local gmod_language = GetConVar("gmod_language")
+
 function GM:SetGameType(gametype, isFallback)
     DbgPrint("SetGameType: " .. tostring(gametype))
 
@@ -146,7 +150,7 @@ function GM:SetGameType(gametype, isFallback)
     local gametypeData = GameTypes:Get(gametype)
 
     if gametypeData == nil then
-        error("Unable to find gametype: " .. gametype)
+        print("Unable to find gametype: " .. (gametype or "unknown"))
 
         if isFallback ~= true then
             DbgPrint("Fallback: hl2")
@@ -164,7 +168,7 @@ function GM:SetGameType(gametype, isFallback)
 
     if CLIENT and gametypeData.LoadLocalisation ~= nil then
         local lang = "english"
-        local gmodLang = GetConVarString("gmod_language")
+        local gmodLang = gmod_language:GetString() or "en"
 
         if gmodLang == "en" then
             lang = "english"

@@ -28,7 +28,7 @@ if SERVER then
     function ENT:GetTouching()
         local trList = {}
 
-        local tr = util.TraceEntity({
+        util.TraceEntity({
             start = self:GetPos(),
             endpos = self:GetPos(),
             mask = MASK_ALL,

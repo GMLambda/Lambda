@@ -9,7 +9,7 @@ MAPSCRIPT.DefaultLoadout = {
     Weapons = {},
     Ammo = {},
     Armor = 0,
-    HEV = false
+    HEV = true
 }
 
 MAPSCRIPT.InputFilters = {}
@@ -17,18 +17,14 @@ MAPSCRIPT.EntityFilterByClass = {} --["env_global"] = true,
 MAPSCRIPT.EntityFilterByName = {} --["spawnitems_template"] = true,
 
 function MAPSCRIPT:Init()
+    --TEST_DbgPrint("-- Mapscript: Template loaded --")
 end
 
 function MAPSCRIPT:PostInit()
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-    -- Failsafe: Make sure players are in the train
-    ents.WaitForEntityByName("train", function(ent)
-        local pos = ent:LocalToWorld(Vector(50, 40, 8))
-        local ang = ent:LocalToWorldAngles(Angle(0, 0, 0))
-        ply:TeleportPlayer(pos, ang)
-    end)
+    ----TEST_DbgPrint("PostPlayerSpawn")
 end
 
 return MAPSCRIPT

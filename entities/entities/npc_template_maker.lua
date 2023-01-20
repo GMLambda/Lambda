@@ -8,7 +8,6 @@ DEFINE_BASECLASS("lambda_npcmaker")
 ENT.Base = "lambda_npcmaker"
 ENT.Type = "point"
 local TS_YN_YES = 0
-local TS_YN_NO = 1
 local TS_YN_DONT_CARE = 2
 local TS_DIST_NEAREST = 0
 local TS_DIST_FARTHEST = 1
@@ -453,7 +452,7 @@ function ENT:PlaceNPCInLine(npc)
     local dest = tr.HitPos
 
     for i = 0, 10 do
-        local tr = util.TraceHull({
+        tr = util.TraceHull({
             start = dest,
             endpos = dest + Vector(0, 0, 10),
             mins = mins,

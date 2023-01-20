@@ -599,8 +599,8 @@ function SKIN:PaintTreeNodeButton(panel, w, h)
     if not panel.m_bSelected then return end
     -- Don't worry this isn't working out the size every render
     -- it just gets the cached value from inside the Label
-    local w, _ = panel:GetTextSize()
-    self.tex.Selection(38, 0, w + 6, h)
+    local w2, _ = panel:GetTextSize()
+    self.tex.Selection(38, 0, w2 + 6, h)
 end
 
 function SKIN:PaintSelection(panel, w, h)

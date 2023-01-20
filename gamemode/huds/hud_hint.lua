@@ -77,7 +77,6 @@ function GM:HUDDrawHintHistory()
     lastHintHistoryUpdate = curSysTime
     local x, y = ScrW() - 10, ScrH() * 0.8
     local tall = 0
-    local wide = 0
     local shouldUpdate = false
 
     for k, v in pairs(self.HintHistory) do
@@ -110,7 +109,6 @@ function GM:HUDDrawHintHistory()
         local ry = math.Round(v.y - (v.height / 2) - 4)
         local rw = math.Round(v.width)
         local rh = math.Round(v.height)
-        local bordersize = 8
         self:DrawHintHistory(rx, ry, rw, rh, v, alpha)
         y = y + (v.height + 2)
         tall = tall + v.height + 18

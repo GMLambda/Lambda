@@ -1,5 +1,4 @@
 local PANEL = {}
-local outpadding = 14
 local padding = 5
 local stripeW = 5
 local MAT_FAILED = Material("lambda/failed.png")
@@ -75,9 +74,7 @@ function PANEL:Think()
 end
 
 function PANEL:Paint(w, h)
-    local text
     local textW, textH = 0, 0
-    local padding = 5
     local paddingChoice = 10
     local x, y = 10, 5
     local maxW = 10

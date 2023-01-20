@@ -10,8 +10,6 @@ local IsValid = IsValid
 local table = table
 --local DbgPrint = GetLogging("EntityExt")
 local ENTITY_META = FindMetaTable("Entity")
-local male_bbox = Vector(22.291288, 20.596443, 72.959808)
-local female_bbox = Vector(21.857199, 20.744711, 71.528900)
 
 -- Credits to CapsAdmin
 local function EstimateModelCategory(ent)

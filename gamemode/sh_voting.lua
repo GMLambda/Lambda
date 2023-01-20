@@ -94,8 +94,6 @@ if SERVER then
                 continue
             end
 
-            if table.Count(v.results) >= plyCount then end --self:VoteCompleted(v) --currentVotes[k] = nil 
-
             for steamid, _ in pairs(v.results) do
                 local ply = player.GetBySteamID(steamid)
 
@@ -129,7 +127,6 @@ if SERVER then
     function GM:FinishVote(vote, timeout)
         local winningOption = 0
         local failed = false
-        local randomResult = false
 
         if vote.params.mustComplete == true then
             timeout = false

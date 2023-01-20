@@ -82,7 +82,7 @@ local function ComputeEntries(info)
     local maxCols = 4
 
     for _, v in pairs(info) do
-        local colW, colH = GetColSpaceRequired(v)
+        local colW, _ = GetColSpaceRequired(v)
 
         if colSpaceUsed + colW > maxRowWidth then
             table.insert(rows, cols)
@@ -329,6 +329,7 @@ end
 
 function SB_PANEL:Paint(w, h)
     local _, y = self.Scores:GetPos()
+    local x = 0
     -- this was the best way to get an image in here... screw u dimage and power of 2
     --
     local sizeInfo = #self.InfoEntries * 25
@@ -336,15 +337,10 @@ function SB_PANEL:Paint(w, h)
     surface.SetMaterial(lambda_logo)
     surface.SetDrawColor(white)
     surface.DrawTexturedRect(94, -160, 512, 512)
-    local scoreboardInfo = GetScoreboardInfo()
-    local numEntries = table.Count(scoreboardInfo)
-    local maxCols = math.min(2, numEntries)
-    local numRows = math.ceil(numEntries / maxCols)
     DrawHostName(x, y, w, h)
 
     for _, cols in pairs(self.InfoEntries) do
         local n = 700 / #cols
-        local x = 0
 
         for _, col in pairs(cols) do
             DrawBar(x, y, n - 1, col.name, col.value)

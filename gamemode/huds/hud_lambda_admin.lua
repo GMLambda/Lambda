@@ -83,7 +83,7 @@ function PANEL:AddIntOption(x, y, id, setting)
         pnl.ht:SetVisible(true)
     end
 
-    pnl.OnValueChanged = function(self, v)
+    pnl.OnValueChanged = function(this, v)
         GAMEMODE:ChangeAdminConfiguration(id, v)
     end
 
@@ -108,7 +108,7 @@ function PANEL:AddComboOption(x, y, id, setting)
         pnl:AddChoice(v, k, isSelected)
     end
 
-    pnl.OnSelect = function(self, index, value, data)
+    pnl.OnSelect = function(this, index, value, data)
         GAMEMODE:ChangeAdminConfiguration(id, data)
     end
 
@@ -122,7 +122,7 @@ function PANEL:AddCheckOption(x, y, id, setting)
     pnl:SizeToContents()
     pnl:SetValue(setting:GetValue())
 
-    pnl.OnChange = function(self, val)
+    pnl.OnChange = function(this, val)
         if val then
             val = "1"
         else

@@ -7,8 +7,6 @@ local DbgPrint = GetLogging("EnvZoom")
 local CurTime = CurTime
 local player = player
 local IsValid = IsValid
--- Spawnflags
-local ENV_ZOOM_OVERRIDE = 1
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
 DEFINE_BASECLASS("lambda_entity")

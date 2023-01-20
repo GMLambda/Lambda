@@ -31,7 +31,7 @@ local msg = [[
 
 	Stay tuned, there is more to come.
 ]]
-local width, height
+local width
 local startW, startH = 15, 10
 local wOffset = 17
 
@@ -91,8 +91,8 @@ function PANEL_ABOUT:Init()
         btnPnls[b]:SetText(string.upper(b))
         btnPnls[b]:SetTextColor(colWHITE)
 
-        btnPnls[b].DoClick = function(self)
-            local option = DermaMenu(self)
+        btnPnls[b].DoClick = function(this)
+            local option = DermaMenu(this)
 
             option:AddOption("Open", function()
                 gui.OpenURL(l)
@@ -133,8 +133,8 @@ function PANEL_CLOG:Init()
     clog:SetValue(changelogText)
     clog:SetVerticalScrollbarEnabled(true)
     clog:SetEnabled(false)
-    clog:SetDrawBackground(false)
-    clog.AllowInput = function(self, stringValue) return true end
+    clog:SetPaintBackground(false)
+    clog.AllowInput = function(this, stringValue) return true end
 end
 
 vgui.Register("LambdaChangelogPanel", PANEL_CLOG, "DPanel")

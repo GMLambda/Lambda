@@ -319,7 +319,6 @@ if SERVER then
                 -- We normally dont want this, but its possible to spawn two of them at the same spot.
                 -- TODO: Create a convar and let the server owner decide.
                 return false
-            elseif v:IsPlayer() then
             end
             -- The box is somewhat big, we should deal with players standing directly in the way.
         end

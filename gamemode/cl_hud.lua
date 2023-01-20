@@ -127,8 +127,10 @@ function GM:HUDShouldDraw(hudName)
     return true
 end
 
+local cl_drawhud = GetConVar("cl_drawhud")
+
 function GM:HUDPaint()
-    if GetConVarNumber("cl_drawhud") == 0 then return end
+    if cl_drawhud:GetBool() == false then return end
     hook.Run("HUDDrawPickupHistory")
     hook.Run("HUDDrawHintHistory")
     hook.Run("DrawDeathNotice")

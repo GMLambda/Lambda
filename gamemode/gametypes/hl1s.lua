@@ -200,5 +200,3 @@ end
 hook.Add("LambdaLoadGameTypes", "HL1SGameType", function(gametypes)
     gametypes:Add("hl1s", GAMETYPE)
 end)
-
-if CLIENT then end

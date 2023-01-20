@@ -1,10 +1,11 @@
+local util = util
+
 if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaRoundInfo")
 end
 
 local DbgPrint = GetLogging("RoundLogic")
-local util = util
 local ents = ents
 local IsValid = IsValid
 local table = table
@@ -449,10 +450,9 @@ function GM:SetupRoundRelevantObjects()
         -- Remove duplicate ones
         for _, v in pairs(ents.FindByClass("env_message")) do
             local keyvalues = v:GetKeyValues()
-            local message = ""
-
-            if keyvalues ~= nil and keyvalues["message"] ~= nil and msg == keyvalues["message"] then
-                print("Removing duplicate env_message : " .. msg)
+            local message = keyvalues["message"]
+            if keyvalues ~= nil and message ~= nil and msg == message then
+                DbgPrint("Removing duplicate env_message : " .. msg)
                 v:Remove()
             end
         end

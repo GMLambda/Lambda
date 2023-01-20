@@ -144,7 +144,7 @@ local function DropPod(tracktrain)
     effectdata:SetMagnitude(5)
     effectdata:SetScale(1)
     util.Effect("ManhackSparks", effectdata)
-    local effectdata = EffectData()
+    effectdata = EffectData()
     effectdata:SetOrigin(tracktrain:GetPos())
     effectdata:SetMagnitude(5)
     effectdata:SetScale(1)
@@ -163,7 +163,7 @@ function MAPSCRIPT:PostInit()
             ent:Fire("Enable")
             ent:SetKeyValue("spawnflags", "33")
 
-            ent.StartTouch = function(ent, other)
+            ent.StartTouch = function(ent2, other)
                 if other:IsPlayer() then
                     other:LockPosition(false)
                 end

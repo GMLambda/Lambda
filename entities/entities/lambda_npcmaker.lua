@@ -209,9 +209,7 @@ function ENT:Toggle()
 end
 
 function ENT:Enable()
-    if self:IsDepleted() then end --DbgPrint("Can not enable because entity is depleted!") --return
     self:SetNWVar("Disabled", false)
-    --self.Disabled = false
     self.Think = self.MakerThink
     self:NextThink(CurTime())
 end

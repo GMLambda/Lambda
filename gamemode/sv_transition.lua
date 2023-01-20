@@ -226,10 +226,6 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
                 DbgPrint("Player is not in changelevel trigger")
                 transition = false
             end
-        else
-            --if obj.CoopPlayer ~= nil then
-            --transition = false -- Player is not inside so give him a new one.
-            --end
         end
     end
 
@@ -565,8 +561,6 @@ function GM:InTransitionVolume(volumes, obj)
         -- FIXME: This is currently inaccurate, but theres no way to do it properly.
         if pos:WithinAABox(volMins, volMaxs) == false then
             return false
-        else
-            -- We have no collision test that would apply to the model.
         end
     end
 
@@ -1022,7 +1016,6 @@ function GM:CreateTransitionObjects()
                 GAMEMODE:EntityKeyValue(ent, "additionalequipment", data.ActiveWeapon)
             end
 
-            if data.KeyValues ~= nil and data.KeyValues["spawnflags"] ~= nil then end --ent:SetKeyValue("spawnflags", data.KeyValues["spawnflags"]) --GAMEMODE:EntityKeyValue(ent, "spawnflags", data.KeyValues["spawnflags"])
         elseif data.Type == ENT_TYPE_VEHICLE then
             if data.EnableGun == true then
                 ent:SetKeyValue("EnableGun", "1")

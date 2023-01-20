@@ -1,4 +1,3 @@
-local DbgPrint = GetLogging("NPC")
 local CurTime = CurTime
 
 if SERVER then

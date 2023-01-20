@@ -41,7 +41,6 @@ include("sv_votefuncs.lua")
 include("sv_damage.lua")
 util.AddNetworkString("LambdaDeathEvent")
 local DbgPrint = GetLogging("Server")
-local DbgPrintDmg = GetLogging("Damage")
 local IsValid = IsValid
 local table = table
 

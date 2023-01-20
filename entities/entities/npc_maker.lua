@@ -48,10 +48,14 @@ if SERVER then
         if self:CanMakeNPC() == false then return end
         DbgPrint("Creating NPC: " .. self.NPCType)
         local ent = ents.Create(self.NPCType)
-        if not IsValid(ent) then return end --DbgPrint(self, "Unable to create NPC!")
+
+        if not IsValid(ent) then
+            DbgPrint(self, "Failed to create NPC: " .. self.NPCType)
+
+            return
+        end
+
         ent:SetKeyValue("Relationship", self.Relationship)
-        local self = self
-        local ent = ent
         ent:SetPos(self:GetPos())
         local ang = self:GetAngles()
         ang.x = 0

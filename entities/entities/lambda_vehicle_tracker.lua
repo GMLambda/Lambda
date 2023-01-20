@@ -62,7 +62,6 @@ if SERVER then
         return true
     end
 elseif CLIENT then
-    local pixVis = util.GetPixelVisibleHandle()
     local LocalPlayer = LocalPlayer
     local EyePos = EyePos
     local EyeAngles = EyeAngles
@@ -102,14 +101,6 @@ elseif CLIENT then
         outline = false
     })
 
-    local function IsVehicleVisible(vehicle)
-        local localPly = LocalPlayer()
-        if localPly:IsLineOfSightClear(vehicle:EyePos()) then return true end
-        local visibility = util.PixelVisible(vehicle:GetPos(), 0, pixVis)
-
-        return visibility > 0
-    end
-
     local function IsVehicleBehind(vehicle)
         local dir = (vehicle:GetPos() - EyePos()):GetNormal()
         local dot = dir:Dot(EyeAngles():Forward())
@@ -137,7 +128,6 @@ elseif CLIENT then
         render.SuppressEngineLighting(true)
         local offset = Vector(0, 0, 100 + (math.sin(self:EntIndex() + (CurTime() * 5)) * 10))
         local pos = vehicle:GetPos() + offset
-        local ang = EyeAngles()
         local ang = (pos - EyePos()):Angle()
         local signsize = 24
         local colorBg = GetBGColor()

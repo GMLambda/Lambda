@@ -380,8 +380,6 @@ function SWEP:UpdateCharging()
     self:SetNextSecondaryFire(CurTime() + STEP_TIME)
 end
 
-local ZAP_SOUNDS = {"weapons/stunstick/spark1.wav", "weapons/stunstick/spark2.wav", "weapons/stunstick/spark3.wav"}
-
 sound.Add({
     name = "lambda_player_revive",
     channel = CHAN_STATIC,
@@ -411,7 +409,7 @@ function SWEP:ReleaseCharge()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     local owner = self:GetOwner()
     owner:SetAnimation(PLAYER_ATTACK1)
-    local owner = ragdoll:GetOwner()
+    local ragdollOwner = ragdoll:GetOwner()
 
     if SERVER then
         local respawnTime = 2.0
@@ -419,12 +417,12 @@ function SWEP:ReleaseCharge()
         local respawnPos = self:FindGroundPosition(ragdoll)
         local respawnAng = ragdoll:GetAngles()
         -- We set the position of the player to the current ragdoll position.
-        owner:SetPos(respawnPos)
-        owner:SetAngles(respawnAng)
+        ragdollOwner:SetPos(respawnPos)
+        ragdollOwner:SetAngles(respawnAng)
         -- NOTE: The reason we do this is to make the player emit a hurt sound.
         --       If the health is <= 0 it wouldn't do anything.
-        owner:SetHealth(2)
-        owner:TakeDamage(1, self, self)
+        ragdollOwner:SetHealth(2)
+        ragdollOwner:TakeDamage(1, self, self)
         ragdoll:EmitSound("lambda_player_revive")
 
         for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
@@ -437,18 +435,18 @@ function SWEP:ReleaseCharge()
 
         -- Now we interpolate the ragdoll towards the player.
         hook.Add("Think", ragdoll, function(rag)
-            local owner = rag:GetOwner()
+            local ply = rag:GetOwner()
 
-            if not IsValid(owner) then
+            if not IsValid(ply) then
                 hook.Remove("Think", rag)
 
                 return
             end
 
-            owner:SetPos(respawnPos)
-            owner:SetAngles(respawnAng)
-            owner:SetAnimation(PLAYER_WALK)
-            owner:AnimRestartMainSequence()
+            ply:SetPos(respawnPos)
+            ply:SetAngles(respawnAng)
+            ply:SetAnimation(PLAYER_WALK)
+            ply:AnimRestartMainSequence()
             local curTime = CurTime()
             local left = ragdoll.RespawnTime - curTime
 
@@ -456,15 +454,12 @@ function SWEP:ReleaseCharge()
                 left = 0
             end
 
-            local alpha = (left / respawnTime)
-            local invAlpha = 1 - alpha
-
             for i = 0, rag:GetPhysicsObjectCount() - 1 do
                 local bone = rag:GetPhysicsObjectNum(i)
 
                 if IsValid(bone) then
                     local boneId = rag:TranslatePhysBoneToBone(i)
-                    local bp, ba = owner:GetBonePosition(boneId)
+                    local bp, ba = ply:GetBonePosition(boneId)
 
                     if bp and ba then
                         local deltaPos = bp - bone:GetPos()
@@ -479,7 +474,7 @@ function SWEP:ReleaseCharge()
             rag:StopSound("lambda_player_revive")
             -- No longer need this hook.
             hook.Remove("Think", rag)
-            owner:Revive(respawnPos, respawnAng, 30)
+            ply:Revive(respawnPos, respawnAng, 30)
         end)
     end
 end

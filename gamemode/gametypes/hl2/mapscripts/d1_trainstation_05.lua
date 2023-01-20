@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -32,9 +31,9 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("teamwait", "1")
 
             ent.OnTrigger = function(e)
-                ents.WaitForEntityByName("kleiner_teleport_lift_1", function(ent)
+                ents.WaitForEntityByName("kleiner_teleport_lift_1", function(e2)
                     local cpLift = GAMEMODE:CreateCheckpoint(Vector(-7185.238770, -1185.304810, 6.031250), Angle(0, -90, 0))
-                    cpLift:SetParent(ent)
+                    cpLift:SetParent(e2)
                     GAMEMODE:SetPlayerCheckpoint(cpLift)
                 end)
             end

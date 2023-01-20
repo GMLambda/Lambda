@@ -27,12 +27,12 @@ function PANEL:Init()
         icon:SetSize(64, 64)
         icon:SetTooltip(name)
 
-        icon.PaintOver = function(self, w, h)
-            if self.OverlayFade > 0 then
-                boxHover(0, 0, w, h, Color(255, 255, 255, self.OverlayFade))
+        icon.PaintOver = function(this, w, h)
+            if this.OverlayFade > 0 then
+                boxHover(0, 0, w, h, Color(255, 255, 255, this.OverlayFade))
             end
 
-            self:DrawSelections()
+            this:DrawSelections()
         end
 
         self:AddPanel(icon, {

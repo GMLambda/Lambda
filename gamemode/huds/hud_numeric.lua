@@ -122,7 +122,7 @@ function PANEL:SetIsTime(state)
     self.IsTime = state
 end
 
-function PANEL:SetDrawBackground(state)
+function PANEL:SetPaintBackground(state)
     self.ShouldDrawBackground = state
 end
 
@@ -131,9 +131,7 @@ function PANEL:PaintNumbers(font, x, y, val)
     local text
 
     if self.IsTime then
-        local mins = val / 60
-        local secs = val - mins * 60
-        -- Whatever.
+        DbgPrint("Not implemented")
     else
         text = tostring(val)
     end

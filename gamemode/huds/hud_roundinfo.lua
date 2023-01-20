@@ -59,7 +59,6 @@ end
 
 function PANEL:PaintInfoPlayerRespawn()
     local text
-    local x, y
     local w = ScrW()
     local h = BAR_HEIGHT
     local startTime = self.Parameters["StartTime"]
@@ -76,18 +75,18 @@ function PANEL:PaintInfoPlayerRespawn()
 
         if remain > 0 then
             text = string.upper("Time remaining until respawn")
-            x, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
+            local _, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
             text = string.format("%0.2f", remain)
             self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
             self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
         else
             if spawnBlocked == true then
                 text = "Spawn currently blocked, waiting..."
-                x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+                self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
             else
                 local keyName = input.LookupBinding("+jump", true)
                 text = string.format("Press <%s> to respawn", keyName)
-                x, y = self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
+                self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
             end
         end
     end
@@ -129,7 +128,7 @@ function PANEL:PaintInfoRoundRestart()
         ["$pp_colour_addg"] = 0,
         ["$pp_colour_addb"] = 0,
         ["$pp_colour_brightness"] = brightness,
-        ["$pp_colour_contrast"] = (1 - ralpha * 0.2),
+        ["$pp_colour_contrast"] = 1 - (ralpha * 0.2),
         ["$pp_colour_colour"] = 0.8 - (ralpha * 0.5),
         ["$pp_colour_mulr"] = ralpha * 3,
         ["$pp_colour_mulg"] = 0,

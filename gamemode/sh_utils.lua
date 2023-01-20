@@ -28,7 +28,7 @@ if SERVER then
         end
     end
 
-    function util.TriggerOutputs(outputs, activator, caller, parameter, self)
+    function util.TriggerOutputs(outputs, activator, caller, parameter, this)
         local count = table.Count(outputs)
 
         if count > 0 then
@@ -72,7 +72,7 @@ if SERVER then
                 elseif entname == "!caller" then
                     targetents = {caller}
                 elseif entname == "!self" then
-                    targetents = {self}
+                    targetents = {this}
                 elseif entname == "!player" or entname == "player" then
                     targetents = player.GetAll()
                 elseif entname == "!pvsplayer" then
@@ -155,7 +155,9 @@ if SERVER then
                         DbgPrint("Firing " .. tostring(ent) .. "(" .. entname .. ") -> Cmd: " .. cmd .. ", Delay: " .. tostring(delay) .. ", Param: " .. param .. ", Times: " .. tostring(times) .. ")")
                         ent:Input(cmd, activator, caller, param)
                     else
-                        --DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
+                        if false then
+                            DbgPrint("Firing Output: Ent (" .. tostring(entname) .. ") is invalid, can not trigger output!")
+                        end
                     end
                 end
             end, CurTime() + delay)

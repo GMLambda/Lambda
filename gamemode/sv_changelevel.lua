@@ -134,7 +134,6 @@ function GM:RequestChangeLevel(activator, map, landmark, playersInTrigger, resta
     self.ChangingLevel = true
     DbgPrint("Changing to level: " .. map)
     self:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
-    local nextMap = map
 
     if g_debug_transitions:GetBool() ~= true then
         local changeLevelDelay = self:GetSetting("changelevel_delay", 0)

@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -65,7 +64,7 @@ function MAPSCRIPT:PostInit()
             local originalAng = util.StringToType(data["angles"], "Angle")
             local centerPos = Vector(10211.183594, 8695.581055, -191.968750)
 
-            hook.Add("Tick", ent, function(ent)
+            hook.Add("Tick", ent, function(e2)
                 local pos = ent:GetPos()
                 local reset = false
 
@@ -75,7 +74,7 @@ function MAPSCRIPT:PostInit()
                 end
 
                 -- Check positions that are unreachable
-                local vel = ent:GetVelocity()
+                local vel = e2:GetVelocity()
 
                 if vel:Length() <= 0.01 then
                     local zDistance = pos.z - centerPos.z
@@ -86,9 +85,9 @@ function MAPSCRIPT:PostInit()
                 end
 
                 if reset == true and pos:Distance(originalPos) > 20 then
-                    ent:SetVelocity(Vector(0, 0, 0))
-                    ent:SetPos(originalPos)
-                    ent:SetAngles(originalAng)
+                    e2:SetVelocity(Vector(0, 0, 0))
+                    e2:SetPos(originalPos)
+                    e2:SetAngles(originalAng)
                 end
             end)
         end

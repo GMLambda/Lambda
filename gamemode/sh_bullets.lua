@@ -1,3 +1,5 @@
+local util = util
+
 if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaWaterBullet")
@@ -6,7 +8,6 @@ end
 local DbgPrint = GetLogging("Bullets")
 local CurTime = CurTime
 local Vector = Vector
-local util = util
 local math = math
 local IsValid = IsValid
 local table = table
@@ -167,7 +168,6 @@ function GM:HandleShotImpactingWater(ent, attacker, tr, dmginfo, data)
     local timestamp = CurTime()
     --print(dmginfo:GetDamageForce())
     ent.NextBulletCheck = ent.NextBulletCheck or timestamp
-    if timestamp > ent.NextBulletCheck then end --return
     ent.NextBulletCheck = timestamp + 0.1
 
     if ent:IsPlayer() then

@@ -421,8 +421,6 @@ if SERVER then
                         self:CmdShowTeamWaiting(nil, false, 0)
                         self.NextTimeout = 0
                     end
-                else
-                    --DbgPrint(self, "Logic disabled!")
                 end
             else
                 if self.IsWaiting == true then
@@ -462,8 +460,6 @@ if SERVER then
         if self:GetNWVar("WaitForTeam") == true then
             --DbgPrint("Waiting")
             if self.TeamInside == false then
-                local timeout = self:GetTimeout()
-
                 if self.NextTimeout == 0 then
                     -- Wait for all players without timeout.
                     return
@@ -721,7 +717,11 @@ if SERVER then
         if self:HasSpawnFlags(SF_TRIGGER_ALLOW_ALL) or (self:HasSpawnFlags(SF_TRIGGER_ALLOW_CLIENTS) and ent:IsPlayer()) or (self:HasSpawnFlags(SF_TRIGGER_ALLOW_NPCS) and ent:IsNPC()) or (self:HasSpawnFlags(SF_TRIGGER_ALLOW_PUSHABLES) and ent:GetClass() == "func_pushable") or (self:HasSpawnFlags(SF_TRIGGER_ALLOW_PHYSICS) and ent:GetMoveType() == MOVETYPE_VPHYSICS) then
             if ent:IsNPC() then
                 if self:HasSpawnFlags(SF_TRIGGER_ONLY_PLAYER_ALLY_NPCS) and IsFriendEntityName(ent:GetClass()) == false then return false end
-                if self:HasSpawnFlags(SF_TRIGGER_ONLY_NPCS_IN_VEHICLES) then end -- TODO: There is no way to tell if a NPC is inside a vehicle, figure out if we can obtain it via savetable.
+
+                if self:HasSpawnFlags(SF_TRIGGER_ONLY_NPCS_IN_VEHICLES) then
+                    -- TODO: There is no way to tell if a NPC is inside a vehicle, figure out if we can obtain it via savetable.
+                    DbgPrint("Not implemented")
+                end
             end
 
             if self:HasSpawnFlags(SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES) and ent:IsPlayer() then
@@ -885,7 +885,8 @@ else -- CLIENT
             local obbMins = net.ReadVector()
             local obbMaxs = net.ReadVector()
             local messagePos = net.ReadVector()
-            DbgPrint(self, "Trigger(" .. entIndex .. ") waiting for team, timeout: " .. timeout)
+            local trigger = Entity(entIndex)
+            DbgPrint(trigger, "Trigger(" .. entIndex .. ") waiting for team, timeout: " .. timeout)
             LAMBDA_TRIGGERS[entIndex].Timeout = timeout
             LAMBDA_TRIGGERS[entIndex].Pos = pos
             LAMBDA_TRIGGERS[entIndex].Center = center
@@ -1018,7 +1019,6 @@ else -- CLIENT
         local activePlayers = data.ActivePlayers
         local scheduledTime = data.Timeout
         local pos = data.Pos + data.Center
-        local ang = Angle(0, 0, 0)
         local realPos = data.Pos
         local obbMins = data.Mins
         local obbMaxs = data.Maxs
@@ -1083,7 +1083,7 @@ else -- CLIENT
             showRunner = false
         end
 
-        local w, h = 0, 0
+        local _, h = 0, 0
         local text = ""
         local remaining = scheduledTime - GetSyncedTimestamp()
 
@@ -1135,7 +1135,6 @@ else -- CLIENT
 
         if cachedMesh == nil then
             cachedMesh = Mesh(MAT_BLOCKED)
-            local bounds = data.Maxs - data.Mins
             local meshData = table.Copy(data.MeshData)
             local texture_w = 48
 

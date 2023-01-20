@@ -238,8 +238,6 @@ function GM:HUDAmmoPickedUp(itemname, amount)
     self:UpdatePickupHistory()
 end
 
-local blur = Material("pp/blurscreen")
-
 local function DrawBlurRect(x, y, w, h, alpha)
     local colBg = GetBGColor()
     draw.NoTexture()
@@ -272,7 +270,6 @@ function GM:HUDDrawPickupHistory()
             local delta = v.holdtime - v.elapsed
             delta = delta / v.holdtime
             local alpha = 255
-            local colordelta = math.Clamp(delta, 0.6, 0.7)
 
             -- Fade in/out
             if (delta > 1 - v.fadein) then
@@ -286,7 +283,6 @@ function GM:HUDDrawPickupHistory()
             local ry = math.Round(v.y - (v.height / 2) - 4)
             local rw = math.Round(self.PickupHistoryWide + 19)
             local rh = math.Round(v.height)
-            local bordersize = 8
             DrawBlurRect(rx, ry, rw, rh, alpha)
             local offsetX = 0
             local col = GetTextColor()

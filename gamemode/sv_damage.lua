@@ -61,7 +61,6 @@ end
 function GM:EntityTakeDamage(target, dmginfo)
     local attacker = dmginfo:GetAttacker()
     local inflictor = dmginfo:GetInflictor()
-    local targetClass = target:GetClass()
     local dmgText = GetDamageTypeText(dmginfo)
     local attackerIsPlayer = false
 
