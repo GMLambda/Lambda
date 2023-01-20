@@ -70,13 +70,40 @@ if SERVER then
     function GM:GetNextSpectateTarget(ply, ent)
         local targets = GAMEMODE:GetSpectatorTargets()
 
-        return table.FindNext(targets, ent)
+        for k, v in pairs(targets) do
+            if v == ent then
+                k, v = next(targets, k)
+
+                if k == nil then
+                    -- Return beginning.
+                    v = targets[1]
+
+                    return v
+                else
+                    return v
+                end
+            end
+        end
+
+        return nil
     end
 
     function GM:GetPrevSpectateTarget(ply, ent)
         local targets = GAMEMODE:GetSpectatorTargets()
+        local prev = nil
 
-        return table.FindPrev(targets, ent)
+        for _, v in pairs(targets) do
+            if v == ent then
+                if prev == nil then
+                    -- Return last.
+                    prev = targets[#targets]
+                end
+
+                return prev
+            end
+
+            prev = v
+        end
     end
 
     local function IsValidTarget(ply, ent)
