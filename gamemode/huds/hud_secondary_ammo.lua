@@ -1,31 +1,20 @@
 include("hud_numeric.lua")
-
 local PANEL = {}
 
 function PANEL:Init()
-
     self:SetShouldDisplaySecondaryValue(false)
     self:SetSize(util.ScreenScaleH(80), util.ScreenScaleH(37))
-
-    self:SetLabelText(Localize("#Valve_Hud_AMMO_ALT") )
+    self:SetLabelText(Localize("#Valve_Hud_AMMO_ALT"))
     self.LastClip1 = 0
     self.LastClip2 = 0
     self.LerpValues = false
-
     self.AnimateValueChanged = Derma_Anim("AmmoChanged", self, self.AnimValueChanged)
-
-    self.Animations =
-    {
-        self.AnimateValueChanged,
-    }
-
+    self.Animations = {self.AnimateValueChanged}
 end
 
 function PANEL:Reset()
-
     self.LastClip1 = 0
     self.LastClip2 = 0
-
 end
 
 function PANEL:AnimValueChanged(anim, delta, data)
@@ -35,30 +24,25 @@ function PANEL:AnimValueChanged(anim, delta, data)
 end
 
 function PANEL:StopAnimations()
-    for _,v in pairs(self.Animations) do
+    for _, v in pairs(self.Animations) do
         v:Stop()
     end
 end
 
 function PANEL:Think()
-
     local ply = LocalPlayer()
-    if not IsValid(ply) then
-        return
-    end
-
+    if not IsValid(ply) then return end
     local wep = ply:GetActiveWeapon()
-    if not IsValid(wep) then
-        return
-    end
+    if not IsValid(wep) then return end
 
-    for _,v in pairs(self.Animations) do
+    for _, v in pairs(self.Animations) do
         if v:Active() then
             v:Run()
         end
     end
 
     local altAmmo = 0
+
     if wep.Ammo2 ~= nil and isfunction(wep.Ammo2) then
         altAmmo = wep:Ammo2()
     else
@@ -71,7 +55,6 @@ function PANEL:Think()
     end
 
     self:SetDisplayValue(altAmmo)
-
 end
 
-vgui.Register( "HudSecondaryAmmo", PANEL, "HudNumeric" )
+vgui.Register("HudSecondaryAmmo", PANEL, "HudNumeric")

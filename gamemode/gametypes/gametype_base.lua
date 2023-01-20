@@ -325,7 +325,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 150,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 1, Max = 1000 },
+        Clamp = {
+            Min = 1,
+            Max = 1000
+        }
     })
 
     GAMEMODE:AddSetting("normspeed", {
@@ -335,7 +338,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 190,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 1, Max = 1000 },
+        Clamp = {
+            Min = 1,
+            Max = 1000
+        }
     })
 
     GAMEMODE:AddSetting("sprintspeed", {
@@ -345,7 +351,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 320,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 1, Max = 1000 },
+        Clamp = {
+            Min = 1,
+            Max = 1000
+        }
     })
 
     GAMEMODE:AddSetting("connect_timeout", {
@@ -355,7 +364,9 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 120,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Max = 60 * 3 },
+        Clamp = {
+            Max = 60 * 3
+        }
     })
 
     GAMEMODE:AddSetting("playercollision", {
@@ -364,7 +375,7 @@ function GAMETYPE:InitSettings()
         Description = "Player collision",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("friendlyfire", {
@@ -373,7 +384,7 @@ function GAMETYPE:InitSettings()
         Description = "Friendly fire",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("prevent_item_move", {
@@ -382,7 +393,7 @@ function GAMETYPE:InitSettings()
         Description = "Prevent item moving",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("limit_default_ammo", {
@@ -391,7 +402,7 @@ function GAMETYPE:InitSettings()
         Description = "Limit default ammo",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("allow_auto_jump", {
@@ -400,7 +411,7 @@ function GAMETYPE:InitSettings()
         Description = "Auto jump",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("max_respawn_timeout", {
@@ -410,7 +421,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = -1,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = -1, Max = 600 },
+        Clamp = {
+            Min = -1,
+            Max = 600
+        }
     })
 
     GAMEMODE:AddSetting("map_restart_timeout", {
@@ -420,7 +434,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 20,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 600 },
+        Clamp = {
+            Min = 0,
+            Max = 600
+        }
     })
 
     GAMEMODE:AddSetting("map_change_timeout", {
@@ -430,7 +447,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 600 },
+        Clamp = {
+            Min = 0,
+            Max = 600
+        }
     })
 
     GAMEMODE:AddSetting("checkpoint_timeout", {
@@ -441,7 +461,10 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 600 },
+        Clamp = {
+            Min = 0,
+            Max = 600
+        }
     })
 
     GAMEMODE:AddSetting("player_god", {
@@ -450,7 +473,7 @@ function GAMETYPE:InitSettings()
         Description = "Player god mode",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("pickup_delay", {
@@ -460,7 +483,7 @@ function GAMETYPE:InitSettings()
         Type = "float",
         Default = 0.5,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        maxv = 10,
+        maxv = 10
     })
 
     GAMEMODE:AddSetting("difficulty_metrics", {
@@ -470,7 +493,7 @@ function GAMETYPE:InitSettings()
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_REPLICATED),
-        maxv = 1,
+        maxv = 1
     })
 
     GAMEMODE:AddSetting("weapondropmode", {
@@ -482,8 +505,12 @@ function GAMETYPE:InitSettings()
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
         Extra = {
             Type = "combo",
-            Choices = { [0] = "Nothing", [1] = "Active", [2] = "Everything" },
-        },
+            Choices = {
+                [0] = "Nothing",
+                [1] = "Active",
+                [2] = "Everything"
+            }
+        }
     })
 
     GAMEMODE:AddSetting("abh", {
@@ -492,7 +519,7 @@ function GAMETYPE:InitSettings()
         Description = "Accelerated backhopping",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("changelevel_delay", {
@@ -502,9 +529,11 @@ function GAMETYPE:InitSettings()
         Type = "int",
         Default = 6,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
-        Clamp = { Min = 0, Max = 600 },
+        Clamp = {
+            Min = 0,
+            Max = 600
+        }
     })
-
 end
 
 function GAMETYPE:GetScoreboardInfo()

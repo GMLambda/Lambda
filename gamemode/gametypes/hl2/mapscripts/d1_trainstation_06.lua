@@ -1,41 +1,36 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
+
+MAPSCRIPT.DefaultLoadout = {
     Weapons = {},
     Ammo = {},
     Armor = 30,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-    ["station_cop_2"] = { "Kill" },
-    ["station_cop_1"] = { "Kill" },
-    ["station_cop_4"] = { "Kill" },
-    ["rappeller_cop_2_maker"] = { "Spawn" },
-    ["rappeller_cop_2_maker_2"] = { "Spawn" },
+MAPSCRIPT.InputFilters = {
+    ["station_cop_2"] = {"Kill"},
+    ["station_cop_1"] = {"Kill"},
+    ["station_cop_4"] = {"Kill"},
+    ["rappeller_cop_2_maker"] = {"Spawn"},
+    ["rappeller_cop_2_maker_2"] = {"Spawn"}
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByName =
-{
-    ["player_spawn_items"] = true,
+MAPSCRIPT.EntityFilterByName = {
+    ["player_spawn_items"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         -- Make sure the door is there and lock it.
         local transition_door = ents.FindFirstByName("transition_door")
+
         if not IsValid(transition_door) then
             transition_door = ents.Create("prop_door_rotating")
             transition_door:SetPos(Vector(-9943.000000, -3970.000000, 374.000000))
@@ -45,19 +40,19 @@ function MAPSCRIPT:PostInit()
             transition_door:Spawn()
             transition_door:Activate()
         end
+
         transition_door:Fire("close")
         transition_door:Fire("lock")
-
         -- Fix barney beeing strict about standing infront of him
         local scriptCond_seeBarney = ents.FindFirstByName("scriptCond_seeBarney")
         scriptCond_seeBarney:SetKeyValue("PlayerActorFOV", "-1")
         scriptCond_seeBarney:SetKeyValue("PlayerTargetLOS", "3")
-
         -- Lets lift up the spawn a little, theres some invisible object that gets players stuck inside.
         local spawns = ents.FindByClass("info_player_start")
-        for k,v in pairs(spawns) do
+
+        for k, v in pairs(spawns) do
             local pos = v:GetPos()
-            v:SetPos(pos + Vector(0,0,5))
+            v:SetPos(pos + Vector(0, 0, 5))
         end
 
         -- Lets automatically scale some enemies.
@@ -72,7 +67,6 @@ function MAPSCRIPT:PostInit()
         maker1:SetKeyValue("SpawnFrequency", "0.2")
         maker1:SetKeyValue("Radius", "800")
         maker1:Spawn()
-
         -- -8038.701660 -2541.850098 -63.968746
         local maker2 = ents.Create("npc_template_maker")
         maker2:SetPos(Vector(-8038.701660, -2541.850098, -63.968746))
@@ -84,7 +78,6 @@ function MAPSCRIPT:PostInit()
         maker2:SetKeyValue("SpawnFrequency", "0.2")
         maker2:SetKeyValue("Radius", "800")
         maker2:Spawn()
-
         local maker3 = ents.Create("npc_template_maker")
         maker3:SetPos(Vector(-6699.455078, -1714.247314, -63.968750))
         maker3:SetKeyValue("spawnflags", SF_NPCMAKER_HIDEFROMPLAYER + SF_NPCMAKER_ALWAYSUSERADIUS)
@@ -95,15 +88,10 @@ function MAPSCRIPT:PostInit()
         maker3:SetKeyValue("SpawnFrequency", "0.2")
         maker3:SetKeyValue("Radius", "800")
         maker3:Spawn()
-
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8169.935059, -3181.270508, 192.031250), Angle(0, 0, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(-8169.935059, -3181.270508, 192.031250),
-            Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 70)
-        )
+        checkpointTrigger1:SetupTrigger(Vector(-8169.935059, -3181.270508, 192.031250), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 70))
+
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             maker1:Fire("Enable")
@@ -113,6 +101,7 @@ function MAPSCRIPT:PostInit()
 
         local inputEnt = ents.Create("lambda_entity")
         inputEnt:SetName("lambda_crowbar")
+
         inputEnt.AcceptInput = function(s, input, caller, activator, param)
             if input == "AddCrowbar" then
                 local loadout = GAMEMODE:GetMapScript().DefaultLoadout
@@ -122,6 +111,7 @@ function MAPSCRIPT:PostInit()
                 s:Remove()
             end
         end
+
         inputEnt:Spawn()
 
         ents.WaitForEntityByName("lcs_crowbar_intro", function(ent)
@@ -135,7 +125,6 @@ function MAPSCRIPT:PostInit()
         headcrabMaker:SetKeyValue("StartDisabled", "1")
         headcrabMaker:SetName("lambda_headcrab_maker")
         headcrabMaker:Spawn()
-
         local crate = ents.Create("prop_physics")
         crate:SetPos(Vector(-9627.166992, -3429.462891, 340.428101))
         crate:SetAngles(Angle(0, 100, 0))
@@ -143,9 +132,11 @@ function MAPSCRIPT:PostInit()
         crate:Spawn()
         crate:SetHealth(100)
         local physObj = crate:GetPhysicsObject()
+
         if IsValid(physObj) then
             physObj:SetMass(500)
         end
+
         crate:CallOnRemove("Broke", function()
             headcrabMaker:SetPos(crate:GetPos())
             headcrabMaker:SetAngles(crate:GetAngles())
@@ -156,15 +147,11 @@ function MAPSCRIPT:PostInit()
         medkit:SetPos(Vector(-8176.953613, -3195.601563, 233.364426))
         medkit:SetAngles(Angle(0, -148.108, 0))
         medkit:Spawn()
-
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

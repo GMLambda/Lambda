@@ -1,15 +1,15 @@
+local util = util
+
 if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaRoundInfo")
 end
 
 local DbgPrint = GetLogging("RoundLogic")
-local util = util
 local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
-
 local STATE_NONE = -3
 local STATE_BOOTING = -2
 local STATE_IDLE = -1
@@ -18,7 +18,6 @@ local STATE_RESTARTING = 1
 local STATE_RUNNING = 2
 local STATE_FINISHED = 3
 local STATE_CHANGING_LEVEL = 4
-
 ROUND_INFO_NONE = 0
 ROUND_INFO_PLAYERRESPAWN = 1
 ROUND_INFO_ROUNDRESTART = 2
@@ -29,39 +28,29 @@ ROUND_INFO_CHANGELEVEL = 6
 
 function GM:ShouldWaitForPlayers()
     local res = self:GetGameTypeData("WaitForPlayers")
-    if res == nil then
-        return false
-    end
+    if res == nil then return false end
+
     return res
 end
 
 function GM:InitializeRoundSystem()
-
     DbgPrint("GM:InitializeRoundSystem")
-
-    if not SERVER then
-        return
-    end
-
+    if not SERVER then return end
     self:SetRoundState(STATE_IDLE)
     self:SetRoundStartTime(GetSyncedTimestamp())
-
     self.WaitingForRoundStart = self:ShouldWaitForPlayers()
     self.RoundStartTimeout = GetSyncedTimestamp() + self:GetSetting("connect_timeout")
-
 end
 
 function GM:GetRoundState()
-    if SERVER then
-        return self.RoundState
-    end
+    if SERVER then return self.RoundState end
+
     return GetGlobalInt("LambdaRoundState", STATE_IDLE)
 end
 
 function GM:GetRoundStartTime()
-    if SERVER then
-        return self.RoundStartTime
-    end
+    if SERVER then return self.RoundStartTime end
+
     return GetGlobalFloat("LambdaRoundStartTime", 0)
 end
 
@@ -70,7 +59,6 @@ function GM:RoundElapsedTime()
 end
 
 if SERVER then
-
     function GM:SetRoundState(state)
         -- Clients.
         SetGlobalInt("LambdaRoundState", state)
@@ -87,11 +75,7 @@ if SERVER then
 
     function GM:NotifyRoundStateChanged(receivers, infoType, params)
         DbgPrint("GM:NotifyRoundStateChanged")
-
-        if istable(receivers) and #receivers == 0 then
-            return
-        end
-
+        if istable(receivers) and #receivers == 0 then return end
         net.Start("LambdaRoundInfo")
         net.WriteUInt(infoType, 4)
         net.WriteTable(params)
@@ -99,24 +83,18 @@ if SERVER then
     end
 
     function GM:NotifyPlayerListChanged()
-
-        if self.WaitingForRoundStart ~= true then
-            return
-        end
-
+        if self.WaitingForRoundStart ~= true then return end
         DbgPrint("GM:NotifyPlayerListChanged")
 
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_WAITING_FOR_PLAYER, {
             StartTime = self.ServerStartupTime,
             Timeout = self:GetSetting("connect_timeout"),
             FullyConnected = self:GetFullyConnectedCount(),
-            Connecting = self:GetConnectingCount(),
+            Connecting = self:GetConnectingCount()
         })
-
     end
 
     function GM:SetRoundBootingComplete()
-
         DbgPrint("GM:SetRoundBootingComplete")
 
         if self.RoundState == STATE_BOOTING then
@@ -127,43 +105,38 @@ if SERVER then
         if player.GetCount() == 0 then
             self.RequiresRoundRestart = true
         end
-
     end
 
     function GM:IncludePlayerInRound(ply)
-
         DbgPrint("GM:IncludePlayerInRound(" .. tostring(ply) .. ")")
         self:NotifyPlayerListChanged()
-
     end
 
     function GM:RestartRound(reason)
-
         DbgPrint("Requested restart")
-
         local restartTime = self:GetSetting("map_restart_timeout")
         restartTime = math.Clamp(restartTime, 0, 127)
 
         if self.RoundState ~= STATE_RUNNING then
             DbgPrint("Attempted to restart while restart is pending")
+
             return
         end
 
         self:SetRoundState(STATE_RESTART_REQUESTED)
-
         self.RestartStartTime = GetSyncedTimestamp()
         self.ScheduledRestartTime = self.RestartStartTime + restartTime
         self.RealTimeScale = game.GetTimeScale()
 
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_ROUNDRESTART, {
             StartTime = self.RestartStartTime,
-            Timeout = restartTime,
+            Timeout = restartTime
         })
 
         if restartTime > 0 then
-
             if reason ~= nil then
                 reason = self.FailureMessages[reason]
+
                 if IsValid(reason) then
                     reason:Fire("ShowMessage")
                 end
@@ -171,9 +144,8 @@ if SERVER then
 
             -- FIXME: This only works on listen server, we should setup a new message
             --        and run this on the client only.
-
             -- Stop all the current playing sounds.
-            for k,v in pairs(player.GetAll()) do
+            for k, v in pairs(player.GetAll()) do
                 v:ConCommand("stopsoundscape")
                 v:ConCommand("stopsound")
                 v:SetDSP(0, true)
@@ -183,32 +155,23 @@ if SERVER then
             util.RunNextFrame(function()
                 local filter = RecipientFilter()
                 filter:AddAllPlayers()
-
                 local snd = CreateSound(game.GetWorld(), "lambda/roundover.mp3", filter)
                 snd:SetSoundLevel(0)
                 snd:Play()
             end)
-
         end
-
     end
 
     function GM:CleanUpMap()
-
         DbgPrint("GM:CleanUpMap")
-
         -- Make sure nothing is going to create new things now
         self:SetRoundState(STATE_RESTARTING)
-
         -- Remove vehicles
         self:CleanUpVehicles()
-
         -- Check what we have to cleanup
         local filter = {}
         hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
-
         game.CleanUpMap(false, filter)
-
     end
 
     function GM:RoundStateBooting()
@@ -216,7 +179,6 @@ if SERVER then
     end
 
     function GM:RoundStateIdle()
-
         local playerCount = player.GetCount()
 
         if self.WaitingForRoundStart == true and (self:GetConnectingCount() > 0 or playerCount == 0) then
@@ -231,11 +193,9 @@ if SERVER then
         elseif self.WaitingForRoundStart == false then
             self:StartRound()
         end
-
     end
 
     function GM:RoundStateRestartRequested()
-
         local curTime = GetSyncedTimestamp()
 
         if curTime > self.ScheduledRestartTime then
@@ -246,43 +206,36 @@ if SERVER then
             local timescale = 0.7 - ((curTime / self.ScheduledRestartTime) * 0.5)
             game.SetTimeScale(timescale)
         end
-
     end
 
     function GM:RoundStateRestarting()
     end
 
     function GM:RoundStateRunning()
-
         local elapsed = self:RoundElapsedTime()
 
         if self:CallGameTypeFunc("ShouldRestartRound", elapsed) == true then
             DbgPrint("All players are dead, restart required")
             self:RestartRound("GAMEOVER_STUCK")
             self:RegisterRoundLost()
-        elseif self:CallGameTypeFunc("ShouldEndRound", elapsed) == true then 
+        elseif self:CallGameTypeFunc("ShouldEndRound", elapsed) == true then
             DbgPrint("Round end")
             self:FinishRound()
         end
-
     end
 
     function GM:RoundStateFinished()
     end
 
     function GM:RoundStateChangingLevel()
-        if GetSyncedTimestamp() < self.ChangeLevelTime then
-            return
-        end
+        if GetSyncedTimestamp() < self.ChangeLevelTime then return end
         -- Avoid coming back here and avoid notifying the client.
-        self.RoundState = STATE_NONE 
-
+        self.RoundState = STATE_NONE
         -- Invoke a changelevel command to actually change the map.
         self:ChangeLevel(self.ChangeLevelMap)
     end
 
-    local ROUND_STATE_LOGIC =
-    {
+    local ROUND_STATE_LOGIC = {
         [STATE_NONE] = function() end,
         [STATE_BOOTING] = GM.RoundStateBooting,
         [STATE_IDLE] = GM.RoundStateIdle,
@@ -290,26 +243,24 @@ if SERVER then
         [STATE_RESTARTING] = GM.RoundStateRestarting,
         [STATE_RUNNING] = GM.RoundStateRunning,
         [STATE_FINISHED] = GM.RoundStateFinished,
-        [STATE_CHANGING_LEVEL] = GM.RoundStateChangingLevel,
+        [STATE_CHANGING_LEVEL] = GM.RoundStateChangingLevel
     }
 
     function GM:RoundThink()
-
         local state = self:GetRoundState()
         local fn = ROUND_STATE_LOGIC[state]
+
         if fn ~= nil then
             fn(self)
         else
             error("Missing round state handler: " .. tostring(state))
         end
-
     end
 
     function GM:SetRoundChangingLevel(nextMap, delay)
-
         self:SetRoundState(STATE_CHANGING_LEVEL)
 
-        for _,v in pairs(player.GetAll()) do
+        for _, v in pairs(player.GetAll()) do
             v:Freeze(true)
         end
 
@@ -318,38 +269,38 @@ if SERVER then
 
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_CHANGELEVEL, {
             NextMap = nextMap,
-            ChangeLevelTime = self.ChangeLevelTime,
+            ChangeLevelTime = self.ChangeLevelTime
         })
-
     end
 
     function GM:FinishRound()
-
         self:SetRoundState(STATE_FINISHED)
 
-        for _,v in pairs(player.GetAll()) do
+        for _, v in pairs(player.GetAll()) do
             v:Freeze(true)
         end
 
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_FINISHED, {
-        })
+        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_FINISHED, {})
 
         if self:GetGameTypeData("PostRoundMapVote") == true then
             local gameType = self:GetGameType()
             local mapOptions = table.Copy(gameType.MapList)
-            for k,v in pairs(mapOptions) do
+
+            for k, v in pairs(mapOptions) do
                 local r = math.random(1, #mapOptions)
                 mapOptions[k] = mapOptions[r]
                 mapOptions[r] = string.lower(v)
             end
 
             local prevMap = self:GetPreviousMap()
+
             if prevMap ~= nil then
                 prevMap = string.lower(prevMap)
                 table.RemoveByValue(mapOptions, prevMap)
             end
 
             local curMap = self:GetCurrentMap()
+
             if curMap ~= nil then
                 curMap = string.lower(curMap)
                 table.RemoveByValue(mapOptions, curMap)
@@ -361,17 +312,16 @@ if SERVER then
             end
 
             timer.Simple(5, function()
-                self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, { mustComplete = true }, mapOptions, {}, function(vote, failed, timeout, winningOption)
+                self:StartVote(nil, VOTE_TYPE_NEXT_MAP, 10, {
+                    mustComplete = true
+                }, mapOptions, {}, function(vote, failed, timeout, winningOption)
                     local picked = mapOptions[winningOption]
                     self:RequestChangeLevel(nil, picked, nil, {})
                 end)
             end)
         end
-
     end
-
 else -- CLIENT
-
     function GM:HandleRoundInfoStarted(infoType, params)
     end
 
@@ -388,7 +338,6 @@ else -- CLIENT
     end
 
     function GM:HandleRoundInfoChange(infoType, params)
-
         if infoType == ROUND_INFO_FINISHED then
             self:HandleRoundInfoFinished(infoType, params)
         elseif infoType == ROUND_INFO_CHANGELEVEL then
@@ -398,95 +347,78 @@ else -- CLIENT
         else
             self:SetRoundDisplayInfo(infoType, params)
         end
-
     end
 
     net.Receive("LambdaRoundInfo", function(len)
-
         local infoType = net.ReadUInt(4)
         local params = net.ReadTable()
-
         DbgPrint("Received round state info: " .. tostring(infoType))
-
         GAMEMODE:HandleRoundInfoChange(infoType, params)
-
     end)
-
 end
 
 function GM:PreCleanupMap()
     DbgPrint("GM:PreCleanupMap")
-
     -- Because of reload testing.
     self.ChangingLevel = false
 
     if SERVER then
-
         -- Disable all overlays.
-        for _,v in pairs(ents.FindByClass("env_screenoverlay")) do
+        for _, v in pairs(ents.FindByClass("env_screenoverlay")) do
             v:Input("StopOverlays")
         end
 
         -- Reset player state.
-        for _,v in pairs(player.GetAll()) do
+        for _, v in pairs(player.GetAll()) do
             v:LockPosition(false)
             v:Freeze(false)
             v:KillSilent()
         end
 
         -- Prevent recursions.
-        for _,v in pairs(ents.GetAll()) do
+        for _, v in pairs(ents.GetAll()) do
             v:EnableRespawn(false)
         end
 
         -- NOTE: Sometimes scripted scenes can play after map cleanup.
         --       So we cancel everything before that.
         do
-            for _,v in pairs(ents.FindByClass("logic_choreographed_scene")) do
+            for _, v in pairs(ents.FindByClass("logic_choreographed_scene")) do
                 -- Cancel all scenes.
                 DbgPrint("Cancel scene " .. tostring(v))
                 v:Fire("Cancel")
             end
 
-            for _,v in pairs(ents.FindByClass("npc_*")) do
+            for _, v in pairs(ents.FindByClass("npc_*")) do
                 DbgPrint("Cancel scripting " .. tostring(v))
                 v:Fire("StopScripting")
             end
         end
 
         -- FIX: Stop screen shaking, they are not cleaned up.
-        for _,v in pairs(ents.FindByClass("env_shake")) do
+        for _, v in pairs(ents.FindByClass("env_shake")) do
             v:Input("StopShake")
         end
 
         -- Cleanup the input/output system.
         self:SetRoundState(STATE_RESTARTING)
-
         self:ResetInputOutput()
         self:ResetVehicleCheckpoint()
         self:ResetCheckpoints()
         self:ResetSceneCheck()
         self:ClearLevelDesignerPlacedObjects()
-
         -- Reset all queued functions.
         util.ResetFunctionQueue()
-
     end
 end
 
 function GM:PostCleanupMap()
-
     DbgPrint("GM:PostCleanupMap")
-
     -- Make sure there are no builtin outputs
     RunConsoleCommand("ent_cancelpendingentfires")
-
     -- Make sure no lambda outputs are created during restart.
     util.ResetOutputQueue()
-
-    if self:GetRoundState() ~= STATE_RESTARTING then
-        return
-    end
+    if self:GetRoundState() ~= STATE_RESTARTING then return end
 
     util.RunNextFrame(function()
         -- Create/Replace things for the map.
@@ -496,43 +428,31 @@ function GM:PostCleanupMap()
 
         self:StartRound(true)
     end)
-
 end
 
 function GM:IsRoundRestarting()
-
     local state = self:GetRoundState()
-    if state == STATE_RESTART_REQUESTED or
-       state == STATE_RESTARTING
-    then
-        return true
-    end
+    if state == STATE_RESTART_REQUESTED or state == STATE_RESTARTING then return true end
 
     return false
-
 end
 
 function GM:GetMapLoadType()
-
     -- Because changelevel is used instead of changelevel2 it would always return "newgame"
     -- http://wiki.garrysmod.com/page/game/MapLoadType
-    if self.IsChangeLevel == true then
-        return "transition"
-    end
-    return game.MapLoadType()
+    if self.IsChangeLevel == true then return "transition" end
 
+    return game.MapLoadType()
 end
 
 function GM:SetupRoundRelevantObjects()
-
     local function CreateEnvMessage(msg)
-
         -- Remove duplicate ones
-        for _,v in pairs(ents.FindByClass("env_message")) do
+        for _, v in pairs(ents.FindByClass("env_message")) do
             local keyvalues = v:GetKeyValues()
-            local message = ""
-            if keyvalues ~= nil and keyvalues["message"] ~= nil and msg == keyvalues["message"] then
-                print("Removing duplicate env_message : " .. msg)
+            local message = keyvalues["message"]
+            if keyvalues ~= nil and message ~= nil and msg == message then
+                DbgPrint("Removing duplicate env_message : " .. msg)
                 v:Remove()
             end
         end
@@ -547,7 +467,7 @@ function GM:SetupRoundRelevantObjects()
         return envMsg
     end
 
-    for _,v in pairs(self.FailureMessages or {}) do
+    for _, v in pairs(self.FailureMessages or {}) do
         if IsValid(v) then
             v:Remove()
         end
@@ -558,26 +478,28 @@ function GM:SetupRoundRelevantObjects()
     self.FailureMessages["GAMEOVER_TIMER"] = CreateEnvMessage("GAMEOVER_TIMER")
     self.FailureMessages["GAMEOVER_OBJECT"] = CreateEnvMessage("GAMEOVER_OBJECT")
     self.FailureMessages["GAMEOVER_STUCK"] = CreateEnvMessage("GAMEOVER_STUCK")
-
     local roachManager = ents.Create("lambda_cockroach_manager")
     roachManager:Spawn()
     self.LambdaRoachManager = roachManager
-
     local mapData = game.GetMapData()
+
     if mapData ~= nil and mapData.Entities ~= nil then
         local worldData = mapData.Entities[1]
-        if worldData ~= nil and worldData["chaptertitle"] ~= nil then
 
+        if worldData ~= nil and worldData["chaptertitle"] ~= nil then
             local chapterText = worldData["chaptertitle"]
             local dupe = false
+
             -- Lets not do it if it already exists in env_message.
-            for _,v in pairs(ents.FindByClass("env_message")) do
+            for _, v in pairs(ents.FindByClass("env_message")) do
                 local keyvalues = v:GetKeyValues()
+
                 if keyvalues ~= nil and keyvalues["message"] ~= nil and keyvalues["message"]:iequals(chapterText) then
                     dupe = true
                     break
                 end
             end
+
             -- Garry's Mod never shows the chapter title, but it is identical to env_message.
             if dupe == false then
                 local chapterMessage = ents.Create("env_message")
@@ -590,12 +512,10 @@ function GM:SetupRoundRelevantObjects()
             end
         end
     end
-
 end
 
 -- Called as soon players are ready to play or a new round has begun.
 function GM:OnNewGame()
-
     DbgPrint("GM:OnNewGame")
 
     if self.WaitingForRoundStart == true then
@@ -603,23 +523,22 @@ function GM:OnNewGame()
     end
 
     if SERVER then
-
         local function SetDefaultGlobals()
             local defaultGlobals = self:GetGameTypeData("DefaultGlobalState")
+
             if defaultGlobals ~= nil then
-                for k,v in pairs(defaultGlobals) do
+                for k, v in pairs(defaultGlobals) do
                     game.SetGlobalState(k, v)
                 end
             end
         end
 
         SetDefaultGlobals()
-
         self:ResetGlobalStates()
-
         local mapscriptGlobals = self.MapScript.GlobalStates
+
         if mapscriptGlobals ~= nil then
-            for k,v in pairs(mapscriptGlobals) do
+            for k, v in pairs(mapscriptGlobals) do
                 game.SetGlobalState(k, v)
             end
         else
@@ -636,43 +555,38 @@ function GM:OnNewGame()
 
         -- Notify clients.
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
-
         self:SetupRoundRelevantObjects()
 
         util.RunNextFrame(function()
             GAMEMODE:PostRoundSetup()
         end)
-
     end
-
 end
 
 function GM:PostRoundSetup()
-
     DbgPrint("PostRoundSetup")
-
     self:SetRoundState(STATE_RUNNING)
     self:SetRoundStartTime(GetSyncedTimestamp())
 
     self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_STARTED, {
         -- Is this required? GetRoundStartTime is networked, but as an event, why not?
-        StartTime = self:GetRoundStartTime(),
+        StartTime = self:GetRoundStartTime()
     })
 
     self:ResetPlayerRespawnQueue()
-
     DbgPrint("Spawning players")
-    for _,v in pairs(player.GetAll()) do
+
+    for _, v in pairs(player.GetAll()) do
         v.TransitionData = self:GetPlayerTransitionData(v)
         v:Spawn()
     end
 
     -- GoldSrc support.
-    for _,v in pairs(ents.FindByClass("trigger_auto")) do
+    for _, v in pairs(ents.FindByClass("trigger_auto")) do
         v:Fire("Enable")
     end
 
-    for _,v in pairs(ents.FindByClass("logic_auto")) do
+    for _, v in pairs(ents.FindByClass("logic_auto")) do
         v:Fire("Enable")
     end
 
@@ -707,35 +621,31 @@ function GM:PostRoundSetup()
             self.LambdaChapterMessage:Fire("ShowMessage")
         end
     end, CurTime() + 1)
-
 end
 
 function GM:StartRound(cleaned, force)
-
     -- Initialize map script.
     DbgPrint("GM:StartRound")
 
     if CLIENT then
         hook.Remove("HUDPaint", "LambdaRoundRestart")
         hook.Remove("Think", "LambdaRoundRestart")
-
         self:SetSoundSuppressed(false)
     end
 
     if SERVER then
-
         -- NOTE: If NPCs existed before players joined they often wander off.
         -- This compensates by simply resetting the map when every player is available.
         if self.RequiresRoundRestart == true and cleaned ~= true then
             self.RequiresRoundRestart = nil
             self:CleanUpMap()
+
             return
         end
 
         self:InitializeGlobalSpeechContext()
         self:InitializeWeaponTracking()
         self:ResetMetrics()
-
         game.SetTimeScale(1)
 
         if self.InitPostEntityDone ~= true then
@@ -749,7 +659,6 @@ function GM:StartRound(cleaned, force)
 
         --self.RoundState = STATE_RESTARTING
         self:SetRoundState(STATE_RESTARTING)
-
     end
 
     self.WaitingForRoundStart = false
@@ -770,20 +679,24 @@ function GM:StartRound(cleaned, force)
 
     if SERVER and self.MapScript and self.MapScript.InputFilters then
         local count = 0
-        for k,t in pairs(self.MapScript.InputFilters) do
-            for _,v in pairs(t) do
+
+        for k, t in pairs(self.MapScript.InputFilters) do
+            for _, v in pairs(t) do
                 self:FilterEntityInput(k, v)
                 count = count + 1
             end
         end
+
         DbgPrint("Loaded " .. tostring(count) .. " input filter for current map")
     end
 
     if SERVER then
         local ignoreLandmark = false
+
         if self.MapScript ~= nil and self.MapScript.IgnoreLandmark ~= nil then
             ignoreLandmark = self.MapScript.IgnoreLandmark
         end
+
         self:DisablePreviousMap(ignoreLandmark)
     end
 
@@ -799,7 +712,6 @@ function GM:StartRound(cleaned, force)
             self:NotifyPlayerListChanged()
         end
     end
-
 end
 
 function GM:IsRoundRunning()

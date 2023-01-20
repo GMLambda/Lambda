@@ -1,4 +1,6 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("EntsExt")
 local Vector = Vector
@@ -8,7 +10,6 @@ local IsValid = IsValid
 local table = table
 
 if SERVER then
-
     local persistantremovals = {}
     local delayedcallbacks = {}
     local delayedcallbacksIndex = {}
@@ -20,46 +21,43 @@ if SERVER then
     end)
 
     hook.Add("OnEntityCreated", "LambdaEntityCreation", function(ent)
-
         -- Do this the next frame.
         util.RunNextFrame(function()
-
-            if not IsValid(ent) then
-                --DbgPrint("Entity " .. tostring(ent) .. " no longer valid")
-                return
-            end
-
+            if not IsValid(ent) then return end --DbgPrint("Entity " .. tostring(ent) .. " no longer valid")
             local name = ent:GetName()
-            if persistantremovals[name] then
 
+            if persistantremovals[name] then
                 DbgPrint("Persistant removal of entity " .. tostring(ent))
                 SafeRemoveEntityDelayed(ent, 0.1)
-
             end
 
             local cbs = delayedcallbacks[name]
+
             if cbs ~= nil then
-                for k,v in pairs(cbs) do
+                for k, v in pairs(cbs) do
                     v.cb(ent)
+
                     if v.multiple == false then
                         delayedcallbacks[name][k] = nil
                     end
                 end
             end
         end)
-
     end)
 
     function ents.WaitForEntityByName(name, cb, multiple)
+        if multiple == nil then
+            multiple = false
+        end
 
-        if multiple == nil then multiple = false end
         local found = ents.FindByName(name)
 
-        for _,v in pairs(found) do
+        for _, v in pairs(found) do
             cb(v)
         end
 
         local data = {}
+
         if found == nil or #found == 0 then
             DbgPrint("Entity " .. tostring(name) .. " not found yet, waiting for creation")
             delayedcallbacks[name] = delayedcallbacks[name] or {}
@@ -67,23 +65,25 @@ if SERVER then
             data.multiple = multiple
             table.insert(delayedcallbacks[name], data)
         end
-
     end
 
     function ents.WaitForEntityByIndex(index, cb)
         local ent = Entity(index)
+
         if IsValid(ent) then
             cb(ent)
+
             return
         end
+
         delayedcallbacksIndex[index] = delayedcallbacksIndex[index] or {}
         table.insert(delayedcallbacksIndex[index], cb)
     end
 
     function ents.RemoveByClass(class, pos)
-
         local found = ents.FindByClass(class)
-        for _,v in pairs(found) do
+
+        for _, v in pairs(found) do
             if pos ~= nil then
                 if v:GetPos() == pos then
                     v:Remove()
@@ -92,55 +92,56 @@ if SERVER then
                 v:Remove()
             end
         end
-
     end
 
     function ents.RemoveByName(name, persistant)
-
         local found = ents.FindByName(name)
-        for _,v in pairs(found) do
+
+        for _, v in pairs(found) do
             v:Remove()
         end
 
         if persistant then
-
             persistantremovals[name] = true
-
         end
-
     end
 
     function ents.FindByGlobalName(globalname)
-        for _,v in pairs(ents.GetAll()) do
-            if v:GetInternalVariable("globalname") == globalname or v:GetNWString("GlobalName") == globalname then
-                return v
-            end
+        for _, v in pairs(ents.GetAll()) do
+            if v:GetInternalVariable("globalname") == globalname or v:GetNWString("GlobalName") == globalname then return v end
         end
+
         return nil
     end
 
     function ents.CreateSimple(class, data)
-
         local ent = ents.Create(class)
         ent:SetPos(data.Pos or Vector(0, 0, 0))
+
         if data.SpawnFlags then
             ent:SetKeyValue("spawnflags", tostring(data.SpawnFlags))
         end
+
         if data.KeyValues ~= nil then
-            for k,v in pairs(data.KeyValues) do
+            for k, v in pairs(data.KeyValues) do
                 ent:SetKeyValue(k, v)
             end
         end
+
         ent:SetAngles(data.Ang or Angle(0, 0, 0))
+
         if data.Model ~= nil then
             ent:SetModel(data.Model)
         end
+
         if data.MoveType ~= nil then
             ent:SetMoveType(data.MoveType)
         end
+
         if data.UnFreezable ~= nil then
             ent:SetUnFreezable(data.UnFreezable)
         end
+
         if data.Flags ~= nil then
             ent:AddFlags(data.Flags)
         end
@@ -149,6 +150,7 @@ if SERVER then
 
         if data.Freeze == true then
             local phys = ent:GetPhysicsObject()
+
             if IsValid(phys) then
                 phys:EnableMotion(false)
             end
@@ -158,18 +160,16 @@ if SERVER then
     end
 
     function ents.CreateFromData(entData)
-        if entData == nil then
-            return nil
-        end
-
+        if entData == nil then return nil end
         local classname = entData["classname"]
+
         if classname == nil or classname == "" then
             Error("Data has no classname")
         end
 
         local ent = ents.Create(classname)
 
-        for k,v in pairs(entData) do
+        for k, v in pairs(entData) do
             if istable(v) then
                 for _, v2 in pairs(v) do
                     ent:SetKeyValue(k, v2)
@@ -185,54 +185,37 @@ if SERVER then
 
         return ent
     end
-
 end
 
 function ents.FindFirstByName(name)
-
     local f = ents.FindByName(name)
-    if f == nil then
-        return nil
-    end
+    if f == nil then return nil end
 
     return f[1]
-
 end
 
 function ents.FindByPos(pos, class, name)
-
     local tolerance = Vector(1, 1, 1)
     local found = ents.FindInBox(pos - tolerance, pos + tolerance)
     local res = {}
 
-    for _,v in pairs(found) do
-
+    for _, v in pairs(found) do
         if class ~= nil and name ~= nil then
-
             if v:GetClass() == class and v:GetName() == name then
                 table.insert(res, v)
             end
-
         elseif class ~= nil and name == nil then
-
             if v:GetClass() == class then
                 table.insert(res, v)
             end
-
         elseif class == nil and name ~= nil then
-
             if v:GetName() == name then
                 table.insert(res, v)
             end
-
         else
-
             table.insert(res, v)
-
         end
-
     end
 
     return res
-
 end

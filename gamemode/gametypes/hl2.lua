@@ -10,78 +10,7 @@ GAMETYPE.MapScript = {}
 GAMETYPE.PlayerSpawnClass = "info_player_start"
 GAMETYPE.UsingCheckpoints = true
 GAMETYPE.WaitForPlayers = true
-GAMETYPE.MapList = {
-    "d1_trainstation_01",
-    "d1_trainstation_02",
-    "d1_trainstation_03",
-    "d1_trainstation_04",
-    "d1_trainstation_05",
-    "d1_trainstation_06",
-    "d1_canals_01",
-    "d1_canals_01a",
-    "d1_canals_02",
-    "d1_canals_03",
-    "d1_canals_05",
-    "d1_canals_06",
-    "d1_canals_07",
-    "d1_canals_08",
-    "d1_canals_09",
-    "d1_canals_10",
-    "d1_canals_11",
-    "d1_canals_12",
-    "d1_canals_13",
-    "d1_eli_01",
-    "d1_eli_02",
-    "d1_town_01",
-    "d1_town_01a",
-    "d1_town_02",
-    "d1_town_03",
-    "d1_town_02",
-    "d1_town_02a",
-    "d1_town_04",
-    "d1_town_05",
-    "d2_coast_01",
-    "d2_coast_03",
-    "d2_coast_04",
-    "d2_coast_05",
-    "d2_coast_07",
-    "d2_coast_08",
-    "d2_coast_07",
-    "d2_coast_09",
-    "d2_coast_10",
-    "d2_coast_11",
-    "d2_coast_12",
-    "d2_prison_01",
-    "d2_prison_02",
-    "d2_prison_03",
-    "d2_prison_04",
-    "d2_prison_05",
-    "d2_prison_06",
-    "d2_prison_07",
-    "d2_prison_08",
-    "d3_c17_01",
-    "d3_c17_02",
-    "d3_c17_03",
-    "d3_c17_04",
-    "d3_c17_05",
-    "d3_c17_06a",
-    "d3_c17_06b",
-    "d3_c17_07",
-    "d3_c17_08",
-    "d3_c17_09",
-    "d3_c17_10a",
-    "d3_c17_10b",
-    "d3_c17_11",
-    "d3_c17_12",
-    "d3_c17_12b",
-    "d3_c17_13",
-    "d3_citadel_01",
-    "d3_citadel_02",
-    "d3_citadel_03",
-    "d3_citadel_04",
-    "d3_citadel_05",
-    "d3_breen_01",
-}
+GAMETYPE.MapList = {"d1_trainstation_01", "d1_trainstation_02", "d1_trainstation_03", "d1_trainstation_04", "d1_trainstation_05", "d1_trainstation_06", "d1_canals_01", "d1_canals_01a", "d1_canals_02", "d1_canals_03", "d1_canals_05", "d1_canals_06", "d1_canals_07", "d1_canals_08", "d1_canals_09", "d1_canals_10", "d1_canals_11", "d1_canals_12", "d1_canals_13", "d1_eli_01", "d1_eli_02", "d1_town_01", "d1_town_01a", "d1_town_02", "d1_town_03", "d1_town_02", "d1_town_02a", "d1_town_04", "d1_town_05", "d2_coast_01", "d2_coast_03", "d2_coast_04", "d2_coast_05", "d2_coast_07", "d2_coast_08", "d2_coast_07", "d2_coast_09", "d2_coast_10", "d2_coast_11", "d2_coast_12", "d2_prison_01", "d2_prison_02", "d2_prison_03", "d2_prison_04", "d2_prison_05", "d2_prison_06", "d2_prison_07", "d2_prison_08", "d3_c17_01", "d3_c17_02", "d3_c17_03", "d3_c17_04", "d3_c17_05", "d3_c17_06a", "d3_c17_06b", "d3_c17_07", "d3_c17_08", "d3_c17_09", "d3_c17_10a", "d3_c17_10b", "d3_c17_11", "d3_c17_12", "d3_c17_12b", "d3_c17_13", "d3_citadel_01", "d3_citadel_02", "d3_citadel_03", "d3_citadel_04", "d3_citadel_05", "d3_breen_01"}
 
 GAMETYPE.ClassesEnemyNPC = {
     ["npc_metropolice"] = true,
@@ -186,9 +115,7 @@ GAMETYPE.Settings = {}
 
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
-    if timeout == -1 then
-        return timeout
-    end
+    if timeout == -1 then return timeout end
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
 
@@ -256,12 +183,9 @@ function GAMETYPE:GetItemRespawnTime()
 end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
-    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then 
-        return false 
-    end
-    if ent.ShouldRespawnWeapon ~= nil and ent:ShouldRespawnWeapon() == false then
-        return false
-    end
+    if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then return false end
+    if ent.ShouldRespawnWeapon ~= nil and ent:ShouldRespawnWeapon() == false then return false end
+
     return true
 end
 
@@ -332,7 +256,6 @@ function GAMETYPE:AllowPlayerTracking()
 end
 
 function GAMETYPE:InitSettings()
-    
     self.Base:InitSettings()
 
     GAMEMODE:AddSetting("dynamic_checkpoints", {
@@ -341,7 +264,7 @@ function GAMETYPE:InitSettings()
         Description = "Dynamic checkpoints",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("allow_npcdmg", {
@@ -350,7 +273,7 @@ function GAMETYPE:InitSettings()
         Description = "Friendly NPC damage",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("player_tracker", {
@@ -359,7 +282,7 @@ function GAMETYPE:InitSettings()
         Description = "Player tracking",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("friendly_antlion_collision", {
@@ -368,7 +291,7 @@ function GAMETYPE:InitSettings()
         Description = "Friendly Antlion collision",
         Type = "bool",
         Default = false,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("player_speech", {
@@ -377,7 +300,7 @@ function GAMETYPE:InitSettings()
         Description = "Player Speech, talks based on surroundings",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
     GAMEMODE:AddSetting("player_damage_speech", {
@@ -386,9 +309,8 @@ function GAMETYPE:InitSettings()
         Description = "Player damage speech",
         Type = "bool",
         Default = true,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
-
 end
 
 function GAMETYPE:GetCampaignName(map)

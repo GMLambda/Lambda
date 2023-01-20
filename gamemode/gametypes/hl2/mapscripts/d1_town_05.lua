@@ -1,66 +1,49 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-        "weapon_physcannon",
-        "weapon_frag",
-        "weapon_shotgun",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun"},
+    Ammo = {
         ["Pistol"] = 20,
         ["SMG1"] = 45,
         ["357"] = 3,
         ["Grenade"] = 1,
-        ["Buckshot"] = 12,
+        ["Buckshot"] = 12
     },
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-    ["warehouse_citizen"] = { "Kill" },
-    ["warehouse_citizen_jacobs"] = { "Kill" },
-    ["winston"] = { "Kill" },
-    ["citizen_warehouse_door_1"] = { "Close", "Lock" },
+MAPSCRIPT.InputFilters = {
+    ["warehouse_citizen"] = {"Kill"},
+    ["warehouse_citizen_jacobs"] = {"Kill"},
+    ["winston"] = {"Kill"},
+    ["citizen_warehouse_door_1"] = {"Close", "Lock"}
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["player_spawn_items"] = true,
     ["trigger_changelevel"] = true, -- We use a better one.
-    ["invulnerable"] = true, -- Why not.
+    ["invulnerable"] = true -- Why not.
 }
 
-MAPSCRIPT.ImportantPlayerNPCNames =
-{
+MAPSCRIPT.ImportantPlayerNPCNames = {
     ["warehouse_citizen_jacobs"] = true,
     ["warehouse_citizen"] = true,
     ["warehouse_citizen_leon"] = true,
     ["warehouse_nurse"] = true,
-    ["winston"] = true,
+    ["winston"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         ents.WaitForEntityByName("warehouse_citizen_jacobs", function(ent)
             ent:SetHealth(100)
         end)
@@ -90,12 +73,8 @@ function MAPSCRIPT:PostInit()
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6533.443848, 8131.516602, 896.031250), Angle(0, 0, 0))
         checkpoint1:SetVisiblePos(Vector(-6447.585449, 8024.932129, 896.031250))
         local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(-6381.103027, 8103.064453, 896.031250),
-            Angle(0, 0, 0),
-            Vector(-100, -300, 0),
-            Vector(100, 300, 170)
-        )
+        checkpointTrigger1:SetupTrigger(Vector(-6381.103027, 8103.064453, 896.031250), Angle(0, 0, 0), Vector(-100, -300, 0), Vector(100, 300, 170))
+
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
@@ -107,7 +86,7 @@ function MAPSCRIPT:PostInit()
 
         -- Because those npcs are created via point_template, this is a good hooking spot to correct the output.
         GAMEMODE:WaitForInput("lcs_winston", "Start", function(ent)
-            for _,v in pairs(ents.FindByName("warehouse_soldier")) do
+            for _, v in pairs(ents.FindByName("warehouse_soldier")) do
                 v:Fire("AddOutput", "OnDeath lambda_warehouse_deadcombine_counter,Add,1")
             end
         end)
@@ -142,26 +121,18 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("MaxNPCCount", "2")
             ent:SetKeyValue("SpawnFrequency", "0")
             ent:SetKeyValue("Radius", 328)
-            --ent:Fire("AddOutput", "OnAllSpawnedDead lambda_warehouse_deadcombine_counter,Add,1")
         end)
 
+        --ent:Fire("AddOutput", "OnAllSpawnedDead lambda_warehouse_deadcombine_counter,Add,1")
         -- -3500.986816 7756.634766 896.031250
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-4065.605957, 7748.239258, 896.032776), Angle(3.366, 19.338, 0.000))
         checkpoint2:SetVisiblePos(Vector(-3477.525879, 7750.378906, 896.031250))
         local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
-            Vector(-3500.986816, 7756.634766, 896.031250),
-            Angle(0, 0, 0),
-            Vector(-25, -100, 0),
-            Vector(25, 100, 170)
-        )
+        checkpointTrigger2:SetupTrigger(Vector(-3500.986816, 7756.634766, 896.031250), Angle(0, 0, 0), Vector(-25, -100, 0), Vector(25, 100, 170))
+
         checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-            TriggerOutputs({
-                {"lambda_end_soldier_1_maker", "Enable", 0, ""},
-                {"lambda_end_soldier_2_maker", "Enable", 0, ""},
-                {"lambda_end_soldier_3_maker", "Enable", 0, ""},
-            })
+            TriggerOutputs({{"lambda_end_soldier_1_maker", "Enable", 0, ""}, {"lambda_end_soldier_2_maker", "Enable", 0, ""}, {"lambda_end_soldier_3_maker", "Enable", 0, ""}})
         end
 
         ents.WaitForEntityByName("end_soldier_4_maker", function(ent)
@@ -174,6 +145,7 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("Radius", 60)
             ent:Fire("AddOutput", "OnAllSpawnedDead lambda_warehouse_deadcombine_counter,Add,1")
         end)
+
         GAMEMODE:WaitForInput("end_soldier_4_maker", "Spawn", function(ent)
             ent:Fire("Enable")
         end)
@@ -201,12 +173,8 @@ function MAPSCRIPT:PostInit()
         -- -1123.785400 10358.985352 896.031250
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1098.884766, 10457.261719, 896.031250), Angle(0, -180, 0.000))
         local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(
-            Vector(-1123.785400, 10358.985352, 896.031250),
-            Angle(0, 0, 0),
-            Vector(-100, -25, 0),
-            Vector(100, 25, 170)
-        )
+        checkpointTrigger3:SetupTrigger(Vector(-1123.785400, 10358.985352, 896.031250), Angle(0, 0, 0), Vector(-100, -25, 0), Vector(100, 25, 170))
+
         checkpointTrigger3.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
@@ -216,22 +184,18 @@ function MAPSCRIPT:PostInit()
             Pos = Vector(-1680, 10970, 952),
             Ang = Angle(0, 0, 0),
             Model = "*40",
-            KeyValues =
-            {
+            KeyValues = {
                 ["map"] = "d2_coast_01",
-                ["landmark"] = "d1_town-coast",
+                ["landmark"] = "d1_town-coast"
             }
-         })
-         changelevelTrigger:Spawn()
+        })
 
+        changelevelTrigger:Spawn()
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

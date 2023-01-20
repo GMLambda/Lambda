@@ -8,9 +8,7 @@ local math = math
 
 function GM:InitSettings()
     DbgPrint("GM:InitSettings")
-
     self.Settings = {}
-
     local gameType = self:GetGameType()
     gameType:InitSettings()
 end
@@ -23,36 +21,44 @@ end
 local function GetValueIntClampMinMax(s)
     return math.Clamp(s.CVar:GetInt(), s.Clamp.Min, s.Clamp.Max)
 end
+
 local function GetValueIntClampMin(s)
     return math.max(s.CVar:GetInt(), s.Clamp.Min)
 end
+
 local function GetValueIntClampMax(s)
     return math.min(s.CVar:GetInt(), s.Clamp.Max)
 end
+
 local function GetValueInt(s)
     return s.CVar:GetInt()
 end
+
 local function GetValueFloatClampMinMax(s)
     return math.Clamp(s.CVar:GetFloat(), s.Clamp.Min, s.Clamp.Max)
 end
+
 local function GetValueFloatClampMin(s)
     return math.max(s.CVar:GetFloat(), s.Clamp.Min)
 end
+
 local function GetValueFloatClampMax(s)
     return math.min(s.CVar:GetFloat(), s.Clamp.Max)
 end
+
 local function GetValueFloat(s)
     return s.CVar:GetFloat()
 end
+
 local function GetValueBool(s)
     return s.CVar:GetBool()
 end
+
 local function GetValueString(s)
     return s.CVar:GetString()
 end
 
 function GM:AddSetting(id, option, fn)
-
     DbgPrint("GM:AddSetting(", id, option, fn, ")")
 
     local function GetCVarValue(cvar)
@@ -85,6 +91,7 @@ function GM:AddSetting(id, option, fn)
     if storedVal ~= nil then
         defaultValue = storedVal
     end
+
     DbgPrint("Default value for " .. id .. ": " .. tostring(defaultValue))
 
     if option.Type == "int" or option.Type == "float" then
@@ -104,15 +111,19 @@ function GM:AddSetting(id, option, fn)
     setting.Type = option.Type
     setting.Flags = option.flags
     setting.CVar = GetConVar(actualName)
+
     if setting.CVar == nil then
         setting.CVar = CreateConVar(actualName, tostring(defaultValue), flags, option.info)
     end
+
     if option.Extra ~= nil then
         setting.Extra = table.Copy(option.Extra)
     end
+
     if option.Clamp ~= nil then
         setting.Clamp = table.Copy(option.Clamp)
     end
+
     if fn ~= nil and isfunction(fn) then
         setting.fn = fn
     end
@@ -151,10 +162,12 @@ end
 function GM:GetSetting(setting, default)
     local res = self.Settings[setting]
     if res == nil then return default end
+
     return res:GetValue()
 end
 
 function GM:GetSettingData(setting)
     local res = self.Settings[setting]
+
     return res
 end

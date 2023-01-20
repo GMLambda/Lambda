@@ -1,27 +1,24 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("Player")
 local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
-
 local PLAYER_META = FindMetaTable("Player")
-
 -- Ensure autoreload will not screw this up.
 _PLAYER_META_GIVE = _PLAYER_META_GIVE or PLAYER_META.Give
-
 VIEWLOCK_NONE = 0
 VIEWLOCK_ANGLE = 1
 VIEWLOCK_NPC = 2
 VIEWLOCK_PLAYER = 3
 VIEWLOCK_SETTINGS_ON = 4
 VIEWLOCK_SETTINGS_RELEASE = 5
-
 VIEWLOCK_RELEASE_TIME = 1.0 -- Seconds
 
 if SERVER then
-
     function PLAYER_META:TeleportPlayer(pos, ang, vel)
         local data = {}
         data.vel = vel or self:GetVelocity()
@@ -36,15 +33,18 @@ if SERVER then
     function PLAYER_META:DisablePlayerCollide(state)
         local oldState = self:GetNWBool("DisablePlayerCollide", false)
         self:SetNWBool("DisablePlayerCollide", state)
+
         if oldState ~= state and state == true then
             self:SetNoCollideWithTeammates(state)
             self:CollisionRulesChanged()
-        else
+        --[[ else
             -- Players can temporarily intersect, we don't disable it here.
             -- This is handled in sh_lambda_player:CheckPlayerCollision
+        ]]
         end
 
         self.NextPlayerCollideTest = CurTime() + 2
+
         if oldState ~= state then
             DbgPrint(self, "DisablePlayerCollide", tostring(state))
         end
@@ -65,16 +65,11 @@ if SERVER then
     function PLAYER_META:ClearZoomOwner()
         self:SetFOVOwner(NULL)
     end
-        
+
     function PLAYER_META:LockPosition(poslock, viewlock, viewdata)
-
-        if not self:Alive() then
-            return
-        end
-
+        if not self:Alive() then return end
         poslock = poslock or false
         viewlock = viewlock or VIEWLOCK_NONE
-
         self.PositionLocked = self.PositionLocked or false
         self.ViewLocked = self.ViewLocked or false
 
@@ -87,7 +82,6 @@ if SERVER then
 
         local prevPositionLock = self.PositionLocked
         local prevViewLocked = self.ViewLocked
-
         self.PositionLocked = poslock
         self.ViewLock = viewlock
         self.LockedViewAngles = viewdata
@@ -101,50 +95,45 @@ if SERVER then
             self:SetNWAngle("LockedViewAngles", viewdata)
         elseif viewlock == VIEWLOCK_NPC then
             self:SetNWEntity("LockedViewEntity", viewdata)
-        elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
-            -- Dealt within sh_lambda_player:PlayerThink
         end
 
+        -- Dealt within sh_lambda_player:PlayerThink
         if self.PositionLocked ~= prevPositionLock or self.ViewLock ~= prevViewLocked then
             hook.Call("Lambda_PlayerLockChanged", GAMEMODE, poslock, viewlock, viewdata)
         end
-
     end
 
     function PLAYER_META:Give(class, noAmmo)
-        if self:Alive() == false then
-            return nil
-        end
-
+        if self:Alive() == false then return nil end
         local e = ents.Create(class)
-        if not IsValid(e) then
-            return nil
-        end
-
+        if not IsValid(e) then return nil end
         -- Slightly offset the pos, in some cases using EyePos() doesn't work if players stand in each other.
         e:SetPos(self:EyePos() + Vector(0, 0, 20))
-
         local SF_NORESPAWN = 0x40000000
         e:AddSpawnFlags(SF_NORESPAWN)
         e.CreatedForPlayer = self
         e:Spawn()
-
         local resetAmmo = false
         local primaryAmmo = -1
         local secondaryAmmo = -1
         local primaryType = -1
         local secondaryType = -1
+
         if noAmmo == true and e:IsWeapon() == true then
             e:SetClip1(0)
             e:SetClip2(0)
             primaryType = e:GetPrimaryAmmoType()
+
             if primaryType ~= -1 then
                 primaryAmmo = self:GetAmmoCount(primaryType)
             end
+
             secondaryType = e:GetSecondaryAmmoType()
+
             if secondaryType ~= -1 then
                 secondaryAmmo = self:GetAmmoCount(secondaryType)
             end
+
             resetAmmo = true
         end
 
@@ -155,6 +144,7 @@ if SERVER then
             if primaryType ~= -1 then
                 self:SetAmmo(primaryAmmo, primaryType)
             end
+
             if secondaryType ~= -1 then
                 self:SetAmmo(secondaryAmmo, secondaryType)
             end
@@ -163,7 +153,6 @@ if SERVER then
         if self:HasWeapon(e:GetClass()) == false then
             -- FALLBACK: In some rare cases this isnt working, use the original give.
             e:Remove()
-
             self.InsideGive = true
             e = _PLAYER_META_GIVE(self, class, noAmmo)
             e.CreatedForPlayer = self
@@ -200,9 +189,9 @@ if SERVER then
     function PLAYER_META:CleanScreenOverlayOwner()
         self:SetScreenOverlayOwner(NULL)
     end
+end
 
-end -- SERVER
-
+-- SERVER
 function PLAYER_META:GetRagdollManager()
     return self:GetNWEntity("LambdaRagdollManager")
 end
@@ -212,14 +201,13 @@ function PLAYER_META:IsSpawningBlocked()
 end
 
 function PLAYER_META:IsPositionLocked()
-
     if SERVER then
         self.PositionLocked = self.PositionLocked or false
+
         return self.PositionLocked
     end
 
     return self:GetNWBool("PositionLocked", false)
-
 end
 
 function PLAYER_META:GetViewLockTime()
@@ -227,14 +215,13 @@ function PLAYER_META:GetViewLockTime()
 end
 
 function PLAYER_META:GetViewLock()
-
     if SERVER then
         self.ViewLock = self.ViewLock or VIEWLOCK_NONE
+
         return self.ViewLock
     end
 
     return self:GetNWInt("ViewLock", VIEWLOCK_NONE)
-
 end
 
 function PLAYER_META:GetNearestRadiationRange()
@@ -242,7 +229,6 @@ function PLAYER_META:GetNearestRadiationRange()
 end
 
 function PLAYER_META:SetNearestRadiationRange(range, override)
-
     local current = self:GetNearestRadiationRange()
 
     if override == true then
@@ -254,7 +240,6 @@ function PLAYER_META:SetNearestRadiationRange(range, override)
     end
 
     self:SetNWInt("LambdaRadiationRange", current)
-
 end
 
 function PLAYER_META:SetGeigerRange(range)
@@ -277,16 +262,17 @@ end
 
 function PLAYER_META:GetSuitDevices()
     self.SuitDevices = self.SuitDevices or {}
+
     return table.Copy(self.SuitDevices)
 end
 
 function PLAYER_META:UsingSuitDevice(device)
     self.SuitDevices = self.SuitDevices or {}
+
     return self.SuitDevices[device] or false
 end
 
 function PLAYER_META:GetFlexIndexByName(name)
-
     self.LastModelName = self.LastModelName or ""
     self.FlexIndexCache = self.FlexIndexCache or {}
     local mdl = self:GetModel()
@@ -304,7 +290,6 @@ function PLAYER_META:GetFlexIndexByName(name)
     end
 
     return self.FlexIndexCache[name]
-
 end
 
 function PLAYER_META:GetSpawnTime()
@@ -321,6 +306,7 @@ end
 
 function PLAYER_META:SetInactive(state)
     self:SetNWBool("Inactive", state)
+
     if state == true then
         self:AddFlags(FL_NOTARGET)
     else
@@ -365,8 +351,8 @@ function PLAYER_META:BodyDirection2D()
     local ang = self:EyeAngles()
     local vec = ang:Forward()
     vec.z = 0
-
     local len2d = vec:Length2D()
+
     if len2d ~= 0.0 then
         vec.x = vec.x / len2d
         vec.y = vec.y / len2d
@@ -374,16 +360,17 @@ function PLAYER_META:BodyDirection2D()
         vec.x = 0
         vec.y = 0
     end
+
     return vec
 end
 
 function PLAYER_META:InsideViewCone(other, tolerance)
-
     if tolerance == nil then
         tolerance = self:GetInternalVariable("m_flFieldOfView")
     end
 
     local otherPos
+
     if IsEntity(other) then
         if other:IsPlayer() then
             otherPos = other:EyePos()
@@ -399,18 +386,15 @@ function PLAYER_META:InsideViewCone(other, tolerance)
     local los = otherPos - self:EyePos()
     los.z = 0
     los:Normalize()
-
     local facingDir = self:BodyDirection2D()
     local dot = los:Dot(facingDir)
 
     return dot > tolerance
-
 end
 
 function PLAYER_META:GetButtons()
-    if self.LastUserCmdButtons ~= nil then
-        return self.LastUserCmdButtons
-    end
+    if self.LastUserCmdButtons ~= nil then return self.LastUserCmdButtons end
+
     return 0
 end
 

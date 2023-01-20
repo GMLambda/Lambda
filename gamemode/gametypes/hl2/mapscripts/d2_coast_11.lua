@@ -1,27 +1,14 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-        "weapon_physcannon",
-        "weapon_frag",
-        "weapon_shotgun",
-        "weapon_ar2",
-        "weapon_rpg",
-        "weapon_crossbow",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow"},
+    Ammo = {
         ["Pistol"] = 20,
         ["SMG1"] = 45,
         ["357"] = 6,
@@ -30,48 +17,35 @@ MAPSCRIPT.DefaultLoadout =
         ["AR2"] = 50,
         ["RPG_Round"] = 8,
         ["SMG1_Grenade"] = 3,
-        ["XBowBolt"] = 4,
+        ["XBowBolt"] = 4
     },
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-}
+MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
-
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_ammo"] = true,
     ["fall_trigger"] = true,
-    ["mc_both_in"] = true,
+    ["mc_both_in"] = true
 }
 
-MAPSCRIPT.ImportantPlayerNPCNames =
-{
-    ["vortigaunt_bugbait"] = true,
+MAPSCRIPT.ImportantPlayerNPCNames = {
+    ["vortigaunt_bugbait"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     -- -6397.890625 4632.765625 512.031250
     if SERVER then
-
         -- 8222.646484 1799.084961 960.000000
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(1391.161987, -4552.412598, 1201.034180), Angle(0, 45, 0))
         local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(
-            Vector(1639.652832, -4384.989746, 1124.123779),
-            Angle(0, 45, 0),
-            Vector(-100, -250, 0),
-            Vector(100, 250, 200)
-        )
+        checkpointTrigger1:SetupTrigger(Vector(1639.652832, -4384.989746, 1124.123779), Angle(0, 45, 0), Vector(-100, -250, 0), Vector(100, 250, 200))
+
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
@@ -79,12 +53,8 @@ function MAPSCRIPT:PostInit()
         -- 4805.734863 -293.060852 544.752808
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(4805.734863, -293.060852, 544.752808), Angle(0, 106, 0))
         local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
-            Vector(4805.734863, -293.060852, 544.752808),
-            Angle(0, 0, 0),
-            Vector(-150, -150, 0),
-            Vector(150, 150, 200)
-        )
+        checkpointTrigger2:SetupTrigger(Vector(4805.734863, -293.060852, 544.752808), Angle(0, 0, 0), Vector(-150, -150, 0), Vector(150, 150, 200))
+
         checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
@@ -92,12 +62,8 @@ function MAPSCRIPT:PostInit()
         -- 4194.318848 3518.950195 371.710144
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(3319.693848, 3064.873535, 567.830078), Angle(0, 90, 0))
         local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(
-            Vector(4151.009277, 2739.715820, 377.123840),
-            Angle(0, 0, 0),
-            Vector(-1700, -150, -300),
-            Vector(2400, 150, 600)
-        )
+        checkpointTrigger3:SetupTrigger(Vector(4151.009277, 2739.715820, 377.123840), Angle(0, 0, 0), Vector(-1700, -150, -300), Vector(2400, 150, 600))
+
         checkpointTrigger3.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
@@ -110,45 +76,38 @@ function MAPSCRIPT:PostInit()
         -- 4646.223145 6915.463867 447.677368
         local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(4646.223145, 6915.463867, 447.677368), Angle(0, 90, 0))
         local checkpointTrigger4 = ents.Create("trigger_once")
-        checkpointTrigger4:SetupTrigger(
-            Vector(4646.223145, 6915.463867, 447.677368),
-            Angle(0, 0, 0),
-            Vector(-420, -220, -200),
-            Vector(220, 420, 100)
-        )
+        checkpointTrigger4:SetupTrigger(Vector(4646.223145, 6915.463867, 447.677368), Angle(0, 0, 0), Vector(-420, -220, -200), Vector(220, 420, 100))
+
         checkpointTrigger4.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
 
         local allowGuard = false
+
         GAMEMODE:WaitForInput("citizen_ambush_guard", "Unburrow", function(ent)
             if allowGuard == false then
                 DbgPrint("Filtering antlion guard")
+
                 return true
             end
         end)
+
         GAMEMODE:WaitForInput("music_antlionguard_2", "PlaySound", function(ent)
             if allowGuard == false then
                 DbgPrint("Filtering antlion guard")
+
                 return true
             end
         end)
 
         -- Create a better trigger for all players.
         local guardTrigger = ents.Create("trigger_once")
-        guardTrigger:SetupTrigger(
-            Vector(5680.671875, 8944.449219, 107.807495),
-            Angle(0, 0, 0),
-            Vector(-1500, -2000, -100),
-            Vector(1600, 1900, 180)
-        )
+        guardTrigger:SetupTrigger(Vector(5680.671875, 8944.449219, 107.807495), Angle(0, 0, 0), Vector(-1500, -2000, -100), Vector(1600, 1900, 180))
         guardTrigger:SetKeyValue("teamwait", "1")
+
         guardTrigger.OnTrigger = function(ent)
             allowGuard = true
-            TriggerOutputs({
-                {"citizen_ambush_guard", "Unburrow", 0, ""},
-                {"music_antlionguard_2", "PlaySound", 0, ""},
-            })
+            TriggerOutputs({{"citizen_ambush_guard", "Unburrow", 0, ""}, {"music_antlionguard_2", "PlaySound", 0, ""}})
         end
 
         ents.WaitForEntityByName("vortigaunt_bugbait", function(ent)
@@ -164,7 +123,7 @@ function MAPSCRIPT:PostInit()
         end)
 
         -- Give everyone weapon_bugbait just in case
-        GAMEMODE:WaitForInput("leadgoal_vortigaunt", "OnSuccess", function(ent) 
+        GAMEMODE:WaitForInput("leadgoal_vortigaunt", "OnSuccess", function(ent)
             for _, ply in pairs(player.GetAll()) do
                 DbgPrint("Giving all players bugbait")
                 ply:Give("weapon_bugbait")
@@ -179,19 +138,12 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("WaitDistance", "3000")
         end)
 
-        GAMEMODE:WaitForInput("antlion_cage_door", "Close", function(ent)
-            return true -- dont close.
-        end)
-
+        GAMEMODE:WaitForInput("antlion_cage_door", "Close", function(ent) return true end) -- dont close.
         -- 5166.699219 9918.750977 162.514114
         local checkpoint5 = GAMEMODE:CreateCheckpoint(Vector(5166.699219, 9918.750977, 162.514114), Angle(0, 180, 0))
         local checkpointTrigger5 = ents.Create("trigger_once")
-        checkpointTrigger5:SetupTrigger(
-            Vector(5166.699219, 9918.750977, 162.514114),
-            Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 100)
-        )
+        checkpointTrigger5:SetupTrigger(Vector(5166.699219, 9918.750977, 162.514114), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 100))
+
         checkpointTrigger5.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
@@ -200,24 +152,16 @@ function MAPSCRIPT:PostInit()
         -- 799.167236 11539.323242 499.299133
         local checkpoint6 = GAMEMODE:CreateCheckpoint(Vector(799.167236, 11539.323242, 499.299133), Angle(0, 180, 0))
         local checkpointTrigger6 = ents.Create("trigger_once")
-        checkpointTrigger6:SetupTrigger(
-            Vector(799.167236, 11539.323242, 499.299133),
-            Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 100)
-        )
+        checkpointTrigger6:SetupTrigger(Vector(799.167236, 11539.323242, 499.299133), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 100))
+
         checkpointTrigger6.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint6, activator)
         end
-
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT

@@ -1,34 +1,28 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        --"weapon_physcannon",
-    },
-    Ammo =
-    {
-    },
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {},
+    --"weapon_physcannon",
+    Ammo = {},
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-    ["pod"] = { "EnterVehicleImmediate" }
+MAPSCRIPT.InputFilters = {
+    ["pod"] = {"EnterVehicleImmediate"}
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-    ["env_fade"] = true,
+MAPSCRIPT.EntityFilterByClass = {
+    ["env_fade"] = true
 }
 
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["sprite_breen_blast_1"] = true, -- Visible thru walls.
     ["citadel_template_combinewall_start1"] = true,
     ["blackout"] = true,
@@ -36,20 +30,16 @@ MAPSCRIPT.EntityFilterByName =
     ["teleport_breen_blast_1"] = true,
     ["trigger_gameover_toplevelfallmessage"] = true,
     ["trigger_gameover_toplevelfallhurt"] = true,
-    ["relay_riftcleanup"] = true,
+    ["relay_riftcleanup"] = true
 }
 
-MAPSCRIPT.GlobalStates =
-{
-    ["super_phys_gun"] = GLOBAL_ON,
+MAPSCRIPT.GlobalStates = {
+    ["super_phys_gun"] = GLOBAL_ON
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         DbgPrint("Startup")
-
         self.AllowPhyscannon = false
         self.SpawnInPod = true
         self.Pods = {}
@@ -61,12 +51,14 @@ function MAPSCRIPT:PostInit()
         end)
 
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1965.112183, 24.634741, 578.822021), Angle(0, -90, 0))
+
         ents.WaitForEntityByName("Train_lift", function(ent)
             checkpoint1:SetParent(ent)
         end)
 
         ents.WaitForEntityByName("trigger_player_Breenelevator", function(ent)
             ent:SetKeyValue("teamwait", "1")
+
             ent.OnTrigger = function(_, activator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             end
@@ -74,6 +66,7 @@ function MAPSCRIPT:PostInit()
 
         local inputEnt = ents.Create("lambda_entity")
         inputEnt:SetName("lambda_physcannon")
+
         inputEnt.AcceptInput = function(s, input, caller, activator, param)
             if input == "AddPhyscannon" then
                 DbgPrint("Adding physcannon")
@@ -82,6 +75,7 @@ function MAPSCRIPT:PostInit()
                 s.AcceptInput = function() end
             end
         end
+
         inputEnt:Spawn()
 
         ents.WaitForEntityByName("w_physgun", function(ent)
@@ -89,6 +83,7 @@ function MAPSCRIPT:PostInit()
         end)
 
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1059.245605, 455.159790, 1302.171143), Angle(0, -90, 0))
+
         ents.WaitForEntityByName("Train_lift_TP", function(ent)
             checkpoint2:SetParent(ent)
         end)
@@ -96,48 +91,40 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("Trigger_lift_control", function(ent)
             local trigger = ents.Create("trigger_once")
             trigger:SetKeyValue("teamwait", "1")
-            trigger:SetupTrigger(
-                Vector(-1056.175659, 490.913574, 1271.527832),
-                Angle(0, 0, 0),
-                Vector(-80, -80, 0),
-                Vector(80, 50, 200)
-            )
+            trigger:SetupTrigger(Vector(-1056.175659, 490.913574, 1271.527832), Angle(0, 0, 0), Vector(-80, -80, 0), Vector(80, 50, 200))
             trigger:Disable()
             trigger:CloneOutputs(ent)
             trigger:SetName("Trigger_lift_control")
+
             trigger.OnTrigger = function(_, activator)
                 GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
                 self.AllowPhyscannon = true
             end
+
             ent:Remove()
         end)
 
         ents.WaitForEntityByName("pod", function(ent)
-
             local podParent = ent:GetParent()
             local parentAttachment = ent:GetParentAttachment()
             DbgPrint("Pod parent: " .. tostring(podParent))
             local pos = ent:GetPos()
             local ang = ent:GetAngles()
             local mdl = ent:GetModel()
-
             table.insert(self.Pods, ent)
 
             -- Insert the ones we transitioned.
-            for _,v in pairs(ents.FindByName("lambda_pod_*")) do
+            for _, v in pairs(ents.FindByName("lambda_pod_*")) do
                 DbgPrint("Merging pod " .. tostring(v) .. " with " .. tostring(ent))
-
                 v:SetPos(ent:GetPos())
                 v:SetAngles(ent:GetAngles())
                 v:SetParent(ent)
                 v:SetName("pod")
-
                 table.insert(self.Pods, v)
             end
 
             -- Create pods for empty player slots.
             for i = 1, game.MaxPlayers() do
-                
                 local pod = ents.Create(ent:GetClass())
                 pod:SetNotSolid(true)
                 pod:SetPos(pos)
@@ -152,10 +139,8 @@ function MAPSCRIPT:PostInit()
                 pod:SetMoveType(MOVETYPE_NONE)
                 pod:Spawn()
                 pod:Activate()
-
                 table.insert(self.Pods, pod)
             end
-
         end)
 
         local podExitTeleport = ents.Create("point_teleport")
@@ -191,7 +176,6 @@ function MAPSCRIPT:PostInit()
         end)
 
         ents.RemoveByClass("npc_combine_s", Vector(-2298.000000, 334.000000, 576.031250))
-
         local changeLevel = ents.Create("trigger_changelevel")
         changeLevel:SetKeyValue("map", "d1_trainstation_01")
         changeLevel:SetKeyValue("StartDisabled", "1")
@@ -203,30 +187,25 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("credits", function(ent)
             ent:Fire("AddOutput", "OnCreditsDone lambda_changelevel,ChangeLevel,,10,-1")
         end)
-
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     if self.AllowPhyscannon == true then
         ply:Give("weapon_physcannon")
     end
 
     if self.SpawnInPod == true and IsValid(ply:GetVehicle()) == false then
-
         DbgPrint("Player " .. tostring(ply) .. " has no vehicle, setting into empty pod...")
-        for _,v in pairs(self.Pods) do
+
+        for _, v in pairs(self.Pods) do
             if IsValid(v:GetDriver()) == false then
                 DbgPrint("Putting player into vehicle " .. tostring(v))
                 ply:EnterVehicle(v)
                 break
             end
         end
-
     end
-
 end
 
 return MAPSCRIPT

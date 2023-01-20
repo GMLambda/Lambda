@@ -1,44 +1,34 @@
 if SERVER then
+    ENT.Base = "lambda_entity"
+    ENT.Type = "point"
+    DEFINE_BASECLASS("lambda_entity")
 
-ENT.Base = "lambda_entity"
-ENT.Type = "point"
+    function ENT:PreInitialize()
+        BaseClass.PreInitialize(self)
+        self:SetInputFunction("Reload", self.InputReload)
+        self:SetInputFunction("RestartRound", self.InputRestartRound)
+    end
 
-DEFINE_BASECLASS( "lambda_entity" )
+    function ENT:Initialize()
+        BaseClass.Initialize(self)
+    end
 
-function ENT:PreInitialize()
+    function ENT:KeyValue(key, val)
+        BaseClass.KeyValue(self, key, val)
+    end
 
-    BaseClass.PreInitialize(self)
-    self:SetInputFunction("Reload", self.InputReload)
-    self:SetInputFunction("RestartRound", self.InputRestartRound)
+    function ENT:InputReload(data, activator, caller)
+        --GAMEMODE:RestartRound()
+        return true
+    end
 
-end
+    function ENT:InputRestartRound(data, activator, caller)
+        GAMEMODE:RestartRound(data)
 
-function ENT:Initialize()
+        return true
+    end
 
-    BaseClass.Initialize(self)
-
-end
-
-function ENT:KeyValue(key, val)
-
-    BaseClass.KeyValue(self, key, val)
-
-end
-
-function ENT:InputReload(data, activator, caller)
-    --GAMEMODE:RestartRound()
-    return true
-end
-
-function ENT:InputRestartRound(data, activator, caller)
-    GAMEMODE:RestartRound(data)
-    return true
-end
-
-function ENT:UpdateTransmitState()
-
-    return TRANSMIT_NEVER
-
-end
-
+    function ENT:UpdateTransmitState()
+        return TRANSMIT_NEVER
+    end
 end

@@ -4,10 +4,8 @@ local DbgPrint = GetLogging("Trigger")
 local util = util
 local ents = ents
 local player = player
-
 ENT.Base = "base_point"
 ENT.Type = "point"
-
 SF_TELEPORT_LAMBDA_CHECKPOINT = 8192
 
 function ENT:Initialize()
@@ -19,35 +17,34 @@ function ENT:Initialize()
 end
 
 function ENT:AcceptInput(inputName, activator, called, data)
-
     DbgPrint("point_teleport:AcceptInput(" .. tostring(inputName) .. ", " .. tostring(activator) .. ", " .. tostring(called) .. ", " .. tostring(data) .. ")")
 
     if inputName == "Teleport" then
-
         -- We gonna teleport all players, kinda nasty work-around to replicate this entity type.
         if self.Target == "!player" or self.Target == "!players" then
             local pos = self:GetPos()
             local ang = self:GetAngles()
 
-            for _,v in pairs(player.GetAll()) do
+            for _, v in pairs(player.GetAll()) do
                 DbgPrint("[" .. self:GetName() .. "] Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
                 v:TeleportPlayer(pos, ang)
             end
 
             if self:HasSpawnFlags(SF_TELEPORT_LAMBDA_CHECKPOINT) == true then
-                GAMEMODE:SetPlayerCheckpoint({ Pos = pos, Ang = ang })
+                GAMEMODE:SetPlayerCheckpoint({
+                    Pos = pos,
+                    Ang = ang
+                })
             end
-            
+
             return true
         else
             -- We have to find them.
             local entryPos = self:GetPos()
             local teleportPos = entryPos
 
-            for _,v in pairs(ents.FindByName(self.Target)) do
-
+            for _, v in pairs(ents.FindByName(self.Target)) do
                 DbgPrint("Teleporting target: " .. self.Target .. " to: " .. tostring(teleportPos))
-
                 v:SetPos(teleportPos)
                 v:SetAngles(self:GetAngles())
 
@@ -62,11 +59,10 @@ function ENT:AcceptInput(inputName, activator, called, data)
     else
         DbgPrint("Unhandled input: " .. tostring(inputName))
     end
-
     --return false
 end
 
-function ENT:KeyValue( key, value )
+function ENT:KeyValue(key, value)
     DbgPrint("point_teleport:KeyValue(" .. key .. ", " .. value .. ")")
 
     if key == "target" then
@@ -78,7 +74,6 @@ function ENT:KeyValue( key, value )
     elseif key == "stacklength" then
         self.StackLength = tonumber(value)
     end
-
 end
 
 function ENT:Think()

@@ -1,28 +1,14 @@
-AddCSLuaFile()
+if SERVER then
+    AddCSLuaFile()
+end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.PlayersLocked = false
-MAPSCRIPT.DefaultLoadout =
-{
-    Weapons =
-    {
-        "weapon_lambda_medkit",
-        "weapon_crowbar",
-        "weapon_pistol",
-        "weapon_smg1",
-        "weapon_357",
-        "weapon_physcannon",
-        "weapon_frag",
-        "weapon_shotgun",
-        "weapon_ar2",
-        "weapon_rpg",
-        "weapon_crossbow",
-        "weapon_bugbait",
-    },
-    Ammo =
-    {
+
+MAPSCRIPT.DefaultLoadout = {
+    Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
+    Ammo = {
         ["Pistol"] = 20,
         ["SMG1"] = 45,
         ["357"] = 6,
@@ -31,45 +17,37 @@ MAPSCRIPT.DefaultLoadout =
         ["AR2"] = 50,
         ["RPG_Round"] = 8,
         ["SMG1_Grenade"] = 3,
-        ["XBowBolt"] = 4,
+        ["XBowBolt"] = 4
     },
     Armor = 60,
-    HEV = true,
+    HEV = true
 }
 
-MAPSCRIPT.InputFilters =
-{
-    ["door_controlroom_1"] = { "Close", "Lock" },
-    ["door_room1_gate"] = { "Close" },
+MAPSCRIPT.InputFilters = {
+    ["door_controlroom_1"] = {"Close", "Lock"},
+    ["door_room1_gate"] = {"Close"}
 }
 
-MAPSCRIPT.EntityFilterByClass =
-{
-}
+MAPSCRIPT.EntityFilterByClass = {}
 
-MAPSCRIPT.EntityFilterByName =
-{
+MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_ammo"] = true,
-    
     ["relationship_turret_vs_combine_hate"] = true,
     ["relationship_turret_vs_alyx_like"] = true,
     ["relationship_turret_vs_manhack_hate"] = true,
     ["relationship_combine_vs_turret_hate"] = true,
     ["relationship_alyx_vs_turret_like"] = true,
-    ["relationship_turret_vs_player_like"] = true,
+    ["relationship_turret_vs_player_like"] = true
 }
 
 function MAPSCRIPT:PostInit()
-
     if SERVER then
-
         local allowClose = false
+
         GAMEMODE:WaitForInput("door_croom2_gate", "Close", function(ent)
-            if allowClose == false then
-                return true
-            end
+            if allowClose == false then return true end
         end)
 
         ents.WaitForEntityByName("turret_buddy", function(ent)
@@ -83,30 +61,22 @@ function MAPSCRIPT:PostInit()
         pclip1:SetName("lambda_pclip1")
         pclip1:Spawn()
         pclip1:AddDebugOverlays(bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT))
-
         local pclip2 = ents.Create("func_brush")
         pclip2:SetModel("*17")
         pclip2:SetPos(Vector(-423.9, -3681, 185.21))
         pclip2:SetName("lambda_pclip2")
         pclip2:Spawn()
         pclip2:AddDebugOverlays(bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT))
-
         -- -122.634003 -2595.938477 -239.968750
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-440.542938, -2845.282227, -239.968750), Angle(0, -90, 0))
         checkpoint1:SetVisiblePos(Vector(-422.728180, -3322.500244, -167.968750))
         local checkpointTrigger1 = ents.Create("trigger_multiple")
-        checkpointTrigger1:SetupTrigger(
-            Vector(-122.634003, -2595.938477, -239.968750),
-            Angle(0,0,0),
-            Vector(-500, -300, 0),
-            Vector(500, 200, 200)
-        )
+        checkpointTrigger1:SetupTrigger(Vector(-122.634003, -2595.938477, -239.968750), Angle(0, 0, 0), Vector(-500, -300, 0), Vector(500, 200, 200))
+
         checkpointTrigger1.OnEndTouchAll = function(trigger)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)
             allowClose = true
-            TriggerOutputs({
-                {"door_croom2_gate", "Close", 0, ""},
-            })
+            TriggerOutputs({{"door_croom2_gate", "Close", 0, ""}})
             trigger:Remove()
             DbgPrint("All players left")
         end
@@ -119,12 +89,8 @@ function MAPSCRIPT:PostInit()
         -- 1680.254639 -3440.008301 -679.968750
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(1680.254639, -3440.008301, -679.968750), Angle(0, -90, 0))
         local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(
-            Vector(1680.254639, -3440.008301, -679.968750),
-            Angle(0, 0, 0),
-            Vector(-50, -50, 0),
-            Vector(50, 50, 100)
-        )
+        checkpointTrigger3:SetupTrigger(Vector(1680.254639, -3440.008301, -679.968750), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 100))
+
         checkpointTrigger3.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
@@ -133,12 +99,8 @@ function MAPSCRIPT:PostInit()
         local checkpoint5 = GAMEMODE:CreateCheckpoint(Vector(4779.625488, -4233.572266, -543.968750), Angle(0, 180, 0))
         checkpoint5:SetVisiblePos(Vector(4137.396973, -3976.567871, -543.968750))
         local checkpointTrigger5 = ents.Create("trigger_once")
-        checkpointTrigger5:SetupTrigger(
-            Vector(4161.470215, -3967.863525, -543.968750),
-            Angle(0, 0, 0),
-            Vector(-180, -100, 0),
-            Vector(180, 100, 100)
-        )
+        checkpointTrigger5:SetupTrigger(Vector(4161.470215, -3967.863525, -543.968750), Angle(0, 0, 0), Vector(-180, -100, 0), Vector(180, 100, 100))
+
         checkpointTrigger5.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint5, activator)
         end
@@ -149,17 +111,11 @@ function MAPSCRIPT:PostInit()
         end)
 
         local checkpointTrigger6 = ents.Create("trigger_once")
-        checkpointTrigger6:SetupTrigger(
-            Vector(4143.243164, -4192.229980, -531.423218),
-            Angle(0, 0, 0),
-            Vector(-500, -700, -30),
-            Vector(700, 420, 100)
-        )
+        checkpointTrigger6:SetupTrigger(Vector(4143.243164, -4192.229980, -531.423218), Angle(0, 0, 0), Vector(-500, -700, -30), Vector(700, 420, 100))
         checkpointTrigger6:SetKeyValue("teamwait", "1")
+
         checkpointTrigger6.OnTrigger = function(ent)
-            TriggerOutputs({
-                {"math_room5_count_turrets", "Add", 0, "1"},
-            })
+            TriggerOutputs({{"math_room5_count_turrets", "Add", 0, "1"}})
         end
 
         -- Make sure that alyx will get there.
@@ -167,24 +123,20 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnCompletion logic_room5_assault_finished,Trigger,,10,-1")
             ent:Fire("AddOutput", "OnCompletion logic_room5_assault_finished,Kill,,10.1,-1")
         end)
-
     end
 end
 
 function MAPSCRIPT:PreChangelevel(map, landmark)
-
     -- Make sure alyx is within the volume .
     local alyx = ents.FindFirstByName("alyx")
+
     if IsValid(alyx) then
         alyx:SetPos(Vector(4459.584961, -4338.886230, -695.906250))
     end
-
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-
     --DbgPrint("PostPlayerSpawn")
-
 end
 
 return MAPSCRIPT
