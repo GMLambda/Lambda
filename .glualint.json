@@ -25,7 +25,7 @@
     "lint_ignoreFiles": [],
     "lint_spaceBeforeComma": false,
     "lint_spaceAfterComma": false,
-    "lint_maxLineLength": 120,
+    "lint_maxLineLength": 0,
 
     "prettyprint_spaceBetweenParens": false,
     "prettyprint_spaceBetweenBrackets": false,
