@@ -38,6 +38,18 @@ function MAPSCRIPT:PostInit()
             ent:SetPos(Vector(-3082.781738, -3532.943115, 384.031250))
         end)
 
+        ents.WaitForEntityByName("street_cop_1", function(ent)
+            ent:SetName("lambda_street_cop_1")
+        end)
+
+        ents.WaitForEntityByName("street_cop_2", function(ent)
+            ent:SetName("lambda_street_cop_2")
+        end)
+
+        ents.WaitForEntityByName("street_cop_3", function(ent)
+            ent:SetName("lambda_street_cop_3")
+        end)
+
         local supressKickdownEvent = true
 
         GAMEMODE:WaitForInput("kickdown_relay", "Trigger", function()
