@@ -8,12 +8,6 @@ local util = util
 local math = math
 local ents = ents
 local player = player
-local IsValid = IsValid
-ENT.Base = "base_ai"
-ENT.Type = "ai"
-ENT.Spawnable = true
-ENT.AutomaticFrameAdvance = true
-ENT.m_fMaxYawSpeed = 500 -- Max turning speed
 local COND_SEE_HATE = 7
 local COND_SEE_DISLIKE = 9
 local COND_SEE_ENEMY = 10
@@ -30,6 +24,11 @@ local LOOK_DISTANCE = 100
 local THINK_MAX_TIME = 0.3
 local THINK_DISTRIBUTION = 300
 local DEBUG_COCKROACH = false
+ENT.Base = "base_ai"
+ENT.Type = "ai"
+ENT.Spawnable = true
+ENT.AutomaticFrameAdvance = true
+ENT.m_fMaxYawSpeed = 500 -- Max turning speed
 
 local MODE_TO_STRING = {
     [MODE_IDLE] = "idle",
@@ -127,18 +126,8 @@ function ENT:Initialize()
         self:SetMovementActivity(ACT_IDLE)
         self:SetTrigger(true)
     end
-    
-    self:SetMoveCollide(MOVECOLLIDE_FLY_CUSTOM)
-    self:SetCollisionGroup(COLLISION_GROUP_NONE)
-    self:EnableCustomCollisions(false)
 
-    local phys = self:GetPhysicsObject()
-
-    if IsValid(phys) then
-        print("Set mass")
-        phys:SetMass(1)
-    end
-
+    self:SetCollisionGroup(COLLISION_GROUP_WORLD)
     self.IsCurrentlyMoving = false
     self:InitializeData()
 end
@@ -467,7 +456,13 @@ local vec_zero = Vector(0, 0, 0)
 
 function ENT:Touch(ent)
     if ent.LambdaCockroach == true then return end
-    if ent:GetVelocity() == vec_zero or (ent:IsPlayer() == false and ent:IsNPC() == false) then return end
+    if ent:IsPlayer() then
+        if ent:GetVelocity() == vec_zero then return end
+    elseif ent:IsNPC() then
+        if ent:GetMoveVelocity() == vec_zero then return end
+    else
+        return
+    end
     self:TakeDamage(self:Health(), ent, ent)
 end
 
