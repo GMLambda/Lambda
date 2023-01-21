@@ -4,6 +4,7 @@
 - Improved: Scoreboard UI tweaks, allows to show more information provided by game type.
 - Improved: d1_trainstation_05: Move alyx a bit further back for the introduction scene.
 - Improved: Cockroaches have better performance and better behavior.
+- Fixed: d1_trainstation_04: Don't despawn metropolice on street.
 - Fixed: ep1_citadel_00: Dog intro scene not working correctly.
 - Fixed: Screen overlays can get stuck when the map restarts while overlays are active.
 - Fixed: NPCs stepping on cockroaches did nothing.
