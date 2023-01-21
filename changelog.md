@@ -3,6 +3,7 @@
 - Improved: Setting lambda_gametype to "auto" will detect the right gametype based on the loaded map.
 - Improved: Scoreboard UI tweaks, allows to show more information provided by game type.
 - Improved: d1_trainstation_05: Move alyx a bit further back for the introduction scene.
+- Improved: Cockroaches have better performance and better behavior.
 - Fixed: ep1_citadel_00: Dog intro scene not working correctly.
 - Fixed: Screen overlays can get stuck when the map restarts while overlays are active.
 - Changed: Scoreboard will now show at the end of each map, this can be controlled by 'lambda_changelevel_delay'.
