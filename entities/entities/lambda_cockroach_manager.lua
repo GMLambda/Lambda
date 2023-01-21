@@ -28,7 +28,7 @@ local HIDING_MODELS = {
     ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true
 }
 
-local MAX_COCKROACHES = 20
+local MAX_COCKROACHES = 60
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
