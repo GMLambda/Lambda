@@ -3,7 +3,6 @@ local DbgPrint = GetLogging("RoachManager")
 local CurTime = CurTime
 local util = util
 local ents = ents
-local player = player
 local IsValid = IsValid
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
@@ -29,6 +28,9 @@ local HIDING_MODELS = {
 }
 
 local MAX_COCKROACHES = 60
+local MAX_IN_GROUP = 4
+local SAFE_ZONE_MINS = Vector(-256, -256, -64)
+local SAFE_ZONE_MAXS = Vector(256, 256, 64)
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
@@ -51,34 +53,42 @@ function ENT:Initialize()
     self:NextThink(CurTime() + 1)
 end
 
-function ENT:SpawnRoach()
-    local spawnPos = nil
-    local plys = player.GetHumans()
-    local attempts = 0
+local function IsSuitableSpawnPos(pos)
+    local nearbyEnts = ents.FindInBox(pos + SAFE_ZONE_MINS, pos + SAFE_ZONE_MAXS)
+    local groupCount = 0
 
-    while attempts < 3 do
-        attempts = attempts + 1
-        local picked = table.Random(self.HidingSpots)
-        if not IsValid(picked) then continue end
-        local pos = picked:GetPos()
-        local tooClose = false
+    for _, v in pairs(nearbyEnts) do
+        if v:IsPlayer() and v:Alive() then return false end
 
-        for _, v in pairs(plys) do
-            local dist = pos:Distance(v:GetPos())
-
-            if dist < 512 then
-                tooClose = true
-                break
+        if v:IsNPC() then
+            if v.LambdaCockroach ~= nil then
+                groupCount = groupCount + 1
+            elseif v:Health() > 0 then
+                return false
             end
         end
-
-        if tooClose == true then continue end
-        local contents = util.PointContents(pos)
-        if bit.band(contents, CONTENTS_WATER) ~= 0 or bit.band(contents, CONTENTS_SLIME) ~= 0 then continue end
-        spawnPos = pos
     end
 
-    if spawnPos == nil then return end
+    if groupCount >= MAX_IN_GROUP then return false end
+
+    return true
+end
+
+local function FindSpawnPos(hidingSpots)
+    local picked = table.Random(hidingSpots)
+    if not IsValid(picked) then return nil end
+    local pos = picked:GetPos()
+    if IsSuitableSpawnPos(pos) == false then return nil end
+    local contents = util.PointContents(pos)
+    if bit.band(contents, CONTENTS_WATER) ~= 0 or bit.band(contents, CONTENTS_SLIME) ~= 0 then return nil end
+    if util.IsInWorld(pos) == false then return nil end
+
+    return pos
+end
+
+function ENT:SpawnRoach()
+    local spawnPos = FindSpawnPos(self.HidingSpots)
+    if spawnPos == nil then return false end
     local roach = ents.Create("npc_lambda_cockroach")
     roach:SetPos(spawnPos)
     roach:Spawn()
@@ -89,6 +99,8 @@ function ENT:SpawnRoach()
 
     table.insert(self.Roaches, roach)
     DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. MAX_COCKROACHES)
+
+    return true
 end
 
 function ENT:FindHidingSpots()
@@ -125,8 +137,16 @@ function ENT:MaintainHidingSpots()
     end
 end
 
+function ENT:AttemptSpawnRoach()
+    for i = 1, 3 do
+        if self:SpawnRoach() == true then return true end
+    end
+
+    return false
+end
+
 function ENT:Think()
-    self:NextThink(CurTime() + 1)
+    self:NextThink(CurTime() + 0.2)
 
     if self.InitialThink == nil then
         -- Ignore the first time.
@@ -139,7 +159,7 @@ function ENT:Think()
     self:MaintainHidingSpots()
 
     if #self.Roaches < MAX_COCKROACHES then
-        self:SpawnRoach()
+        self:AttemptSpawnRoach()
     end
 
     return true
