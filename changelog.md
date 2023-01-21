@@ -6,6 +6,7 @@
 - Improved: Cockroaches have better performance and better behavior.
 - Fixed: ep1_citadel_00: Dog intro scene not working correctly.
 - Fixed: Screen overlays can get stuck when the map restarts while overlays are active.
+- Fixed: NPCs stepping on cockroaches did nothing.
 - Changed: Scoreboard will now show at the end of each map, this can be controlled by 'lambda_changelevel_delay'.
 
 0.9.15
