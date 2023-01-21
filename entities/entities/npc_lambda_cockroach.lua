@@ -193,6 +193,7 @@ function ENT:Look(lookDistance)
 
         if v:IsNPC() == false and v:IsPlayer() == false then continue end
         if v:GetClass() == "npc_furniture" then continue end
+        if self:Visible(v) == false then continue end
         local relation = self:GetRelationship(v)
 
         if relation == D_FR then
@@ -274,13 +275,14 @@ function ENT:SetNextMode(mode)
         local hidingSpot = self:GetClosestHidingSpot()
 
         if hidingSpot ~= nil and dangerDistance > 128 then
-            vecDest = hidingSpot
+            local randOffset = VectorRand() * 5
+            randOffset.z = 0
+            vecDest = hidingSpot + randOffset
         else
             -- Try to just run away in the opposite direction.
             local dir = (curPos - self.DangerPosition):GetNormal()
-            dir.x = dir.x + (-0.6 + (math.random() * 1.2))
-            dir.y = dir.y + (-0.6 + (math.random() * 1.2))
-            --DbgPrint("Direction", dir)
+            dir.x = dir.x + (-0.75 + (math.random() * 1.75))
+            dir.y = dir.y + (-0.75 + (math.random() * 1.75))
             vecDest = curPos + (dir * 64)
             useTrace = false
         end
@@ -379,9 +381,10 @@ end
 
 function ENT:NPCThink(dt)
     if DEBUG_COCKROACH then
+        local debugTime = self:GetThinkDelay()
         local modeText = MODE_TO_STRING[self.Mode]
-        debugoverlay.Text(self:GetPos() + Vector(0, 0, 5), "Mode: " .. modeText, 0.2)
-        debugoverlay.Cross(self.TargetPosition + Vector(0, 1, 1), 3, 0.5, true)
+        debugoverlay.Text(self:GetPos() + Vector(0, 0, 5), "Mode: " .. modeText, debugTime + 0.01)
+        debugoverlay.Cross(self.TargetPosition + Vector(0, 1, 1), 3, debugTime + 0.01, true)
     end
 
     self:Look(LOOK_DISTANCE)
@@ -456,6 +459,7 @@ local vec_zero = Vector(0, 0, 0)
 
 function ENT:Touch(ent)
     if ent.LambdaCockroach == true then return end
+
     if ent:IsPlayer() then
         if ent:GetVelocity() == vec_zero then return end
     elseif ent:IsNPC() then
@@ -463,6 +467,7 @@ function ENT:Touch(ent)
     else
         return
     end
+
     self:TakeDamage(self:Health(), ent, ent)
 end
 
