@@ -110,29 +110,32 @@ end
 
 function ENT:Initialize()
     self.LambdaCockroach = true
+    self:UseClientSideAnimation(true)
+    self:SetPlaybackRate(10.0)
+    self:SetModel(COCKROACH_MDL)
+    self:AddEffects(EF_NOSHADOW)
+    self:SetModelScale(0.5, 0)
+    self:AddFlags(FL_NOTARGET)
 
     if SERVER then
-        self:SetSolid(SOLID_BBOX)
+        self:SetSolid(SOLID_NONE)
         self:SetMoveType(MOVETYPE_STEP)
         self:SetHullType(HULL_TINY_CENTERED)
-        self:AddSolidFlags(FSOLID_NOT_STANDABLE + FSOLID_TRIGGER + FSOLID_NOT_SOLID)
+        self:AddSolidFlags(FSOLID_TRIGGER + FSOLID_NOT_SOLID + FSOLID_USE_TRIGGER_BOUNDS)
         self:CapabilitiesAdd(CAP_MOVE_GROUND + CAP_MOVE_CRAWL + CAP_ANIMATEDFACE + CAP_TURN_HEAD)
         self:SetHealth(1)
         self:SetMovementActivity(ACT_IDLE)
         self:SetTrigger(true)
     end
+    
+    self:SetMoveCollide(MOVECOLLIDE_FLY_CUSTOM)
+    self:SetCollisionGroup(COLLISION_GROUP_NONE)
+    self:EnableCustomCollisions(false)
 
-    self:SetCollisionGroup(COLLISION_GROUP_WORLD)
-    self:UseClientSideAnimation(true)
-    self:SetPlaybackRate(10.0)
-    self:SetModel(COCKROACH_MDL)
-    self:SetCollisionBounds(Vector(-1.2, -1.2, 0), Vector(1.2, 1.2, 0.1))
-    self:AddEffects(EF_NOSHADOW)
-    self:SetModelScale(0.5, 0)
-    self:AddFlags(FL_NOTARGET)
     local phys = self:GetPhysicsObject()
 
     if IsValid(phys) then
+        print("Set mass")
         phys:SetMass(1)
     end
 
