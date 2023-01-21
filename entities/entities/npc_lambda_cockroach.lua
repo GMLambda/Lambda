@@ -465,7 +465,15 @@ function ENT:Touch(ent)
     elseif ent:IsNPC() then
         if ent:GetMoveVelocity() == vec_zero then return end
     else
-        return
+        local phys = ent:GetPhysicsObject()
+        if not IsValid(phys) then
+            return
+        end
+        local vel = phys:GetVelocity()
+        local velLen = vel:LengthSqr()
+        if velLen < 20000 then
+            return
+        end
     end
 
     self:TakeDamage(self:Health(), ent, ent)
