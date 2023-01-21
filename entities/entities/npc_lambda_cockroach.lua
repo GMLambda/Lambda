@@ -27,6 +27,18 @@ local MODE_SCARED_BY_ENT = 4
 local MODE_SCARED_BY_LIGHT = 5
 local COCKROACH_MDL = "models/decay/cockroach.mdl"
 local LOOK_DISTANCE = 100
+local THINK_MAX_TIME = 0.3
+local THINK_DISTRIBUTION = 300
+local DEBUG_COCKROACH = false
+
+local MODE_TO_STRING = {
+    [MODE_IDLE] = "idle",
+    [MODE_EAT] = "eat",
+    [MODE_BORED] = "bored",
+    [MODE_SMELL_FOOD] = "smell_food",
+    [MODE_SCARED_BY_ENT] = "scared_by_ent",
+    [MODE_SCARED_BY_LIGHT] = "scared_by_light"
+}
 
 local FOOD_MODELS = {
     ["models/props_junk/garbage_glassbottle001a.mdl"] = true,
@@ -83,26 +95,6 @@ util.PrecacheSound("Roach.Walk")
 util.PrecacheSound("Roach.Die")
 util.PrecacheSound("Roach.Smash")
 
-local NON_BLOCKING_CLASSES = {
-    ["prop_physics"] = true,
-    ["prop_door_rotating"] = true,
-    ["func_door"] = true,
-    ["func_physbox"] = true
-}
-
-hook.Add("ShouldCollide", "CockroachCollision", function(ent1, ent2)
-    if ent2.LambdaCockroach == true then
-        local tmp = ent2
-        ent2 = ent1
-        ent1 = tmp
-    end
-
-    if ent1.LambdaCockroach == true then
-        local class = ent2:GetClass()
-        if NON_BLOCKING_CLASSES[class] == true then return false end
-    end
-end)
-
 function ENT:InitializeData()
     if SERVER then
         self.Mode = MODE_IDLE
@@ -123,18 +115,18 @@ function ENT:Initialize()
         self:SetSolid(SOLID_BBOX)
         self:SetMoveType(MOVETYPE_STEP)
         self:SetHullType(HULL_TINY_CENTERED)
+        self:AddSolidFlags(FSOLID_NOT_STANDABLE + FSOLID_TRIGGER + FSOLID_NOT_SOLID)
         self:CapabilitiesAdd(CAP_MOVE_GROUND + CAP_MOVE_CRAWL + CAP_ANIMATEDFACE + CAP_TURN_HEAD)
         self:SetHealth(1)
-        self:SetCollisionGroup(COLLISION_GROUP_PLAYER)
         self:SetMovementActivity(ACT_IDLE)
-        self.IsCurrentlyMoving = false
+        self:SetTrigger(true)
     end
 
-    self:SetCustomCollisionCheck(true)
+    self:SetCollisionGroup(COLLISION_GROUP_WORLD)
     self:UseClientSideAnimation(true)
     self:SetPlaybackRate(10.0)
     self:SetModel(COCKROACH_MDL)
-    self:SetCollisionBounds(Vector(-1.2, -1.2, 0), Vector(1.2, 1.2, 0.2))
+    self:SetCollisionBounds(Vector(-1.2, -1.2, 0), Vector(1.2, 1.2, 0.1))
     self:AddEffects(EF_NOSHADOW)
     self:SetModelScale(0.5, 0)
     self:AddFlags(FL_NOTARGET)
@@ -144,6 +136,7 @@ function ENT:Initialize()
         phys:SetMass(1)
     end
 
+    self.IsCurrentlyMoving = false
     self:InitializeData()
 end
 
@@ -344,16 +337,21 @@ function ENT:SetNextMode(mode)
     self.IsCurrentlyMoving = true
 
     if math.random(0, 9) == 1 then
-        self:EmitSound("roach/rch_walk.wav", 50, 100, 1)
+        self:EmitSound("roach/rch_walk.wav", 75, 100, 0.3)
     end
 end
 
 function ENT:Move(dt)
-    debugoverlay.Cross(self.TargetPosition + Vector(0, 0, 1), 3, 0.5, true)
-    local dist = self.TargetPosition:Distance(self:GetPos())
+    local curPos = self:GetPos()
+    local dist = self.TargetPosition:Distance(curPos)
     --DbgPrint(dist)
     self:SetArrivalSpeed(100)
     self:SetArrivalDistance(0)
+    local curAng = self:GetAngles()
+    local destAng = (self.TargetPosition - curPos):Angle()
+    local interp = dt * 130
+    local newAng = Angle(0, math.Approach(curAng.y, destAng.y, interp), 0)
+    self:SetAngles(newAng)
 
     -- Randomly switch direction if we are not scared.
     if math.random(0, 20) == 1 and self.Mode ~= MODE_SCARED_BY_ENT then
@@ -388,6 +386,12 @@ function ENT:Move(dt)
 end
 
 function ENT:NPCThink(dt)
+    if DEBUG_COCKROACH then
+        local modeText = MODE_TO_STRING[self.Mode]
+        debugoverlay.Text(self:GetPos() + Vector(0, 0, 5), "Mode: " .. modeText, 0.2)
+        debugoverlay.Cross(self.TargetPosition + Vector(0, 1, 1), 3, 0.5, true)
+    end
+
     self:Look(LOOK_DISTANCE)
 
     if self.Mode == MODE_IDLE or self.Mode == MODE_EAT then
@@ -426,6 +430,13 @@ end
 function ENT:ClientThink(dt)
 end
 
+function ENT:GetThinkDelay()
+    -- Better distribution, if all of them think at the same frame its a bit horrible.
+    local idx = self:EntIndex() % THINK_DISTRIBUTION
+
+    return (idx / THINK_DISTRIBUTION) * THINK_MAX_TIME
+end
+
 function ENT:Think()
     local curTime = CurTime()
     local dt = curTime - (self.LastThinkTime or curTime)
@@ -438,10 +449,12 @@ function ENT:Think()
         self:ClientThink(dt)
     end
 
+    local thinkDelay = self:GetThinkDelay()
+
     if SERVER then
-        self:NextThink(CurTime() + 0.2)
+        self:NextThink(CurTime() + thinkDelay)
     else
-        self:SetNextClientThink(CurTime() + 0.2)
+        self:SetNextClientThink(CurTime() + thinkDelay)
     end
 
     return true
@@ -488,7 +501,7 @@ function TestRoach()
     end
 
     for k, v in pairs(player.GetAll()) do
-        for i = 1, 10 do
+        for i = 1, 60 do
             local r = ents.Create("npc_lambda_cockroach")
             r:SetPos(v:GetEyeTrace().HitPos)
             r:Spawn()
