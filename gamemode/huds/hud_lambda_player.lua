@@ -164,7 +164,6 @@ function PANEL:Init()
                 bgList:AddItem(bgsldr)
                 HighlightTab(true)
             end
-            sheetPanel.tabScroller:InvalidateLayout()
         end)
     end
 
