@@ -91,6 +91,8 @@ if SERVER then
     net.Receive("LambdaPlayerSettingsChanged", function(len, ply)
         GAMEMODE:PlayerSetColors(ply)
         GAMEMODE:PlayerSetModel(ply)
+        GAMEMODE:PlayerSetSkin(ply)
+        GAMEMODE:PlayerSetBodyGroup(ply)
     end)
 
     function GM:ResetPlayerRespawnQueue()
@@ -288,6 +290,20 @@ if SERVER then
         end
 
         ply:SetupHands()
+    end
+
+    function GM:PlayerSetSkin(ply)
+        local skin = ply:GetInfoNum("lambda_playermdl_skin", 0)
+        ply:SetSkin(skin)
+    end
+
+    function GM:PlayerSetBodyGroup(ply)
+        local bg = ply:GetInfo("lambda_playermdl_bodygroup")
+        if bg == nil then bg = "" end
+        bg = string.Explode(" ", bg)
+        for k = 0, ply:GetNumBodyGroups() - 1 do
+            ply:SetBodygroup(k, tonumber(bg[k + 1]) or 0)
+        end
     end
 
     function GM:PlayerSetColors(ply)
@@ -489,6 +505,8 @@ if SERVER then
         -- If we managed to spawn somehow else.
         self:RemovePlayerFromRespawnQueue(ply)
         self:PlayerSetModel(ply)
+        self:PlayerSetSkin(ply)
+        self:PlayerSetBodyGroup(ply)
         self:InitializePlayerPickup(ply)
         self:InitializePlayerSpeech(ply)
         self:PlayerSetColors(ply)
