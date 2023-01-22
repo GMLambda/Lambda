@@ -2,7 +2,7 @@ local PANEL = {}
 local colWHITE = Color(255, 255, 255, 235)
 local colGRAY = Color(155, 155, 155, 175)
 local changelogText = "Unable to read changelog."
-local f = file.Open("gamemodes/lambda/changelog.md", "r", "GAME")
+local f = file.Open("gamemodes/lambda/changelog.txt", "r", "GAME")
 
 if f ~= nil then
     changelogText = f:Read(f:Size())
