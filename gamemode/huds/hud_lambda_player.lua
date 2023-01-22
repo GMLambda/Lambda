@@ -32,7 +32,7 @@ function PANEL:Init()
     searchBar:DockMargin(0, 0, 0, 8)
     searchBar:SetUpdateOnType(true)
     searchBar:SetPlaceholderText("Search for model")
-    searchBar:SetPlaceholderColor(Color(255, 255, 255, 255))
+    searchBar:SetPlaceholderColor(Color(140, 140, 140, 255))
 
     local mdlListPanel = mdlPanel:Add("DPanelSelect")
     mdlListPanel:Dock(FILL)
@@ -73,7 +73,27 @@ function PANEL:Init()
     bgList:Dock(FILL)
     bgList:EnableVerticalScrollbar(true)
 
+    local nobgLabel = bgPanel:Add("DLabel")
+    nobgLabel:Dock(TOP)
+    nobgLabel:SetText("NO OPTIONS FOR THIS MODEL")
+    nobgLabel:SetTextColor(Color(255, 255, 255, 255))
+    nobgLabel:SetFont("TargetIDSmall")
+    nobgLabel:SizeToContents()
+    nobgLabel:DockMargin(0, 5, 0, 0)
+    nobgLabel:SetContentAlignment(5)
+    nobgLabel:SetVisible(false)
+
     local bgTab = sheetPanel:AddSheet("BODYGROUPS", bgPanel)
+
+    local function HighlightTab(state)
+        if state then
+            bgTab.Tab:SetTextColor(Color(248, 128, 0, 255))
+            nobgLabel:SetVisible(false)
+        else
+            bgTab.Tab:SetTextColor(Color(140, 140, 140, 255))
+            nobgLabel:SetVisible(true)
+        end
+    end
 
     local function SetMdlChanges(pnl, val)
         if pnl.type == "skin" then
@@ -93,10 +113,9 @@ function PANEL:Init()
 
     local function RebuildBgPnl()
         bgList:Clear()
+        HighlightTab(false)
         -- Slight delay to make sure model is set on entity
         timer.Simple(0.1, function()
-            bgTab.Tab:SetVisible(false)
-
             local ply = LocalPlayer()
             local mdlStr = player_manager.TranslatePlayerModel(lambda_playermdl:GetString())
             local numSkins = NumModelSkins(mdlStr) - 1
@@ -118,7 +137,7 @@ function PANEL:Init()
                 slider.OnValueChanged = SetMdlChanges
 
                 bgList:AddItem(slider)
-                bgTab.Tab:SetVisible(true)
+                HighlightTab(true)
             end
 
             local bgroups = string.Explode(" ", lambda_playermdl_bodygroup:GetString())
@@ -143,7 +162,7 @@ function PANEL:Init()
                 bgsldr.OnValueChanged = SetMdlChanges
 
                 bgList:AddItem(bgsldr)
-                bgTab.Tab:SetVisible(true)
+                HighlightTab(true)
             end
             sheetPanel.tabScroller:InvalidateLayout()
         end)
