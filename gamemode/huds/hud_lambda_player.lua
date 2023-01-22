@@ -27,6 +27,13 @@ function PANEL:Init()
     local mdlPanel = sheetPanel:Add("DPanel")
     mdlPanel:Dock(FILL)
 
+    local searchBar = mdlPanel:Add("DTextEntry")
+    searchBar:Dock(TOP)
+    searchBar:DockMargin(0, 0, 0, 8)
+    searchBar:SetUpdateOnType(true)
+    searchBar:SetPlaceholderText("Search for model")
+    searchBar:SetPlaceholderColor(Color(255, 255, 255, 255))
+
     local mdlListPanel = mdlPanel:Add("DPanelSelect")
     mdlListPanel:Dock(FILL)
 
@@ -36,6 +43,8 @@ function PANEL:Init()
         item:SetModel(v)
         item:SetSize(64, 64)
         item:SetTooltip(name)
+        item.plymdl = name
+        item.mdlPath = player_manager.TranslatePlayerModel(name)
         item.PaintOver = function(this, w, h)
             if this.OverlayFade > 0 then
                 boxHover(0, 0, w, h, Color(255, 255, 255, this.OverlayFade))
@@ -43,6 +52,17 @@ function PANEL:Init()
             this:DrawSelections()
         end
         mdlListPanel:AddPanel(item, {lambda_playermdl = name})
+    end
+
+    searchBar.OnValueChange = function(s, str)
+        for i, pnl in pairs(mdlListPanel:GetItems()) do
+            if not pnl.plymdl:find(str, 1, true) and not pnl.mdlPath:find(str, 1, true) then
+                pnl:SetVisible(false)
+            else
+                pnl:SetVisible(true)
+            end
+        end
+        mdlListPanel:InvalidateLayout()
     end
 
     sheetPanel:AddSheet("MODEL", mdlPanel)
