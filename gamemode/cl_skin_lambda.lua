@@ -624,7 +624,7 @@ local function PaintNotches(x, y, w, h, num)
 end
 
 function SKIN:PaintNumSlider(panel, w, h)
-    surface.SetDrawColor(Color(0, 0, 0, 100))
+    surface.SetDrawColor(Color(255, 255, 255, 255))
     surface.DrawRect(8, h / 2 - 1, w - 15, 1)
     PaintNotches(8, h / 2 - 1, w - 16, 1, panel.m_iNotches)
 end

@@ -9,6 +9,7 @@
 - Fixed: Screen overlays can get stuck when the map restarts while overlays are active.
 - Fixed: NPCs stepping on cockroaches did nothing.
 - Changed: Scoreboard will now show at the end of each map, this can be controlled by 'lambda_changelevel_delay'.
+- Added: Support for skins and bodygroups on playermodels.
 
 0.9.15
 - Fixed: Incorrect addon structure causing custom content to not load for clients. [Regression]
