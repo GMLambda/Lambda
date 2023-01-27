@@ -1,3 +1,5 @@
+0.9.17 (in development)
+
 0.9.16
 - Improved: Major performance improvements with lots of players on the server.
 - Improved: Setting lambda_gametype to "auto" will detect the right gametype based on the loaded map.
