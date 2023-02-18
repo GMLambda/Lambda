@@ -1,4 +1,5 @@
 0.9.17 (in development)
+- Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
 
 0.9.16
 - Improved: Major performance improvements with lots of players on the server.
