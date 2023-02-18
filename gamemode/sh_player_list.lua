@@ -6,11 +6,20 @@ local DbgPrint = GetLogging("PlayerList")
 local util = util
 local table = table
 
+LAMBDA_PLAYER_LIST = LAMBDA_PLAYER_LIST or {
+    Players = {},
+    Connecting = {},
+    Connected = {}
+}
+
 function GM:InitializePlayerList()
     DbgPrint("InitializePlayerList")
-    self.Players = {}
-    self.Connecting = {}
-    self.Connected = {}
+
+    LAMBDA_PLAYER_LIST = {
+        Players = {},
+        Connecting = {},
+        Connected = {}
+    }
 end
 
 if SERVER then
@@ -21,7 +30,7 @@ if SERVER then
             -- Changelevel does not signal a new connect, so we take players from the transition data instead.
             for _, data in pairs(self.TransitionData.Players) do
                 local userId = tonumber(data["UserID"])
-                local playerData = self.Players[userId] or {}
+                local playerData = LAMBDA_PLAYER_LIST.Players[userId] or {}
                 local timeout = self:GetSetting("connect_timeout")
                 playerData.ConnectTime = GetSyncedTimestamp()
                 playerData.TimeoutTime = GetSyncedTimestamp() + timeout
@@ -31,12 +40,12 @@ if SERVER then
                 playerData.Connecting = true
                 playerData.Bot = false -- Cant be done.
                 DbgPrint("Connect timeout for " .. tostring(playerData.Nick) .. ": " .. timeout)
-                self.Players[userId] = playerData
-                self.Connecting[userId] = playerData
+                LAMBDA_PLAYER_LIST.Players[userId] = playerData
+                LAMBDA_PLAYER_LIST.Connecting[userId] = playerData
             end
 
             --PrintTable(self.Connecting)
-            for k, _ in pairs(self.Connecting) do
+            for k, _ in pairs(LAMBDA_PLAYER_LIST.Connecting) do
                 hook.Call("NotifyPlayerListChanged", GAMEMODE, k)
             end
         end
@@ -59,12 +68,12 @@ if SERVER then
 
         local getPlayerData = function()
             if isValidSteamID(steamid) then
-                for _, v in pairs(self.Players) do
+                for _, v in pairs(LAMBDA_PLAYER_LIST.Players) do
                     if v.SteamID == steamid then return v end
                 end
             end
 
-            return self.Players[userid]
+            return LAMBDA_PLAYER_LIST.Players[userid]
         end
 
         local playerData = getPlayerData()
@@ -75,7 +84,7 @@ if SERVER then
 
             if playerData.UserID ~= userid then
                 -- UserID changed over session, remove old one.
-                self.Connecting[playerData.UserID] = nil
+                LAMBDA_PLAYER_LIST.Connecting[playerData.UserID] = nil
                 playerData.UserID = userid
             end
         else
@@ -90,26 +99,26 @@ if SERVER then
         end
 
         playerData.TimeoutTime = GetSyncedTimestamp() + self:GetSetting("connect_timeout")
-        self.Players[userid] = playerData
+        LAMBDA_PLAYER_LIST.Players[userid] = playerData
 
         if playerData.Connecting == true then
-            self.Connecting[userid] = playerData
+            LAMBDA_PLAYER_LIST.Connecting[userid] = playerData
         end
     end
 
     function GM:HandlePlayerDisconnect(steamid, nick, reason, bot, userid)
         DbgPrint("HandlePlayerDisconnect", steamid, nick, reason, bot, userid)
-        local playerData = self.Players[userid]
+        local playerData = LAMBDA_PLAYER_LIST.Players[userid]
         if playerData == nil then return end
         playerData.Connecting = false -- Just in case of references.
-        self.Connecting[userid] = nil
-        self.Players[userid] = nil
+        LAMBDA_PLAYER_LIST.Connecting[userid] = nil
+        LAMBDA_PLAYER_LIST.Players[userid] = nil
     end
 
     function GM:HandlePlayerReadyState(ply)
         DbgPrint("[NET] Player fully connected: " .. tostring(ply))
         local userId = ply:UserID()
-        local playerData = self.Connecting[userId]
+        local playerData = LAMBDA_PLAYER_LIST.Connecting[userId]
 
         if playerData == nil then
             --DbgError("ERROR: User never signaled a connect: " .. userid)
@@ -123,8 +132,8 @@ if SERVER then
         end
 
         playerData.Connecting = false
-        self.Connecting[userId] = nil
-        self.Connected[userId] = playerData
+        LAMBDA_PLAYER_LIST.Connecting[userId] = nil
+        LAMBDA_PLAYER_LIST.Connected[userId] = playerData
         hook.Call("NotifyPlayerListChanged", GAMEMODE, userId)
     end
 
@@ -133,22 +142,22 @@ if SERVER then
         if self.LastTimeoutCheck ~= nil and timestamp - self.LastTimeoutCheck < 0.2 then return end
         self.LastTimeoutCheck = timestamp
 
-        for k, v in pairs(self.Connecting) do
+        for k, v in pairs(LAMBDA_PLAYER_LIST.Connecting) do
             if timestamp >= v.TimeoutTime then
                 DbgPrint("Player " .. v.Nick .. " timed out, timeout: " .. v.TimeoutTime)
                 v.Connecting = false
-                self.Connecting[k] = nil
+                LAMBDA_PLAYER_LIST.Connecting[k] = nil
                 continue
             end
         end
     end
 
     function GM:GetPlayerCount()
-        return table.Count(self.Players)
+        return table.Count(LAMBDA_PLAYER_LIST.Players)
     end
 
     function GM:GetFullyConnectedCount()
-        return table.Count(self.Connected)
+        return table.Count(LAMBDA_PLAYER_LIST.Connected)
     end
 
     gameevent.Listen("player_connect")
@@ -191,5 +200,5 @@ else -- CLIENT
 end
 
 function GM:GetConnectingCount()
-    return table.Count(self.Connecting) + 0
+    return table.Count(LAMBDA_PLAYER_LIST.Connecting) + 0
 end

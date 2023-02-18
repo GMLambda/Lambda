@@ -48,7 +48,87 @@ local util = util
 local ents = ents
 local IsValid = IsValid
 
+function GM:ConflictRecovery()
+    local conflicts = nil
+
+    if self.OnGamemodeLoadedCompleted ~= true then
+        conflicts = conflicts or {}
+        table.insert(conflicts, "OnGamemodeLoaded")
+        self:OnGamemodeLoaded()
+    end
+
+    if self.InitializeCompleted ~= true then
+        conflicts = conflicts or {}
+        table.insert(conflicts, "Initialize")
+        self:Initialize()
+    end
+
+    if conflicts == nil then return end
+    local msg = "Warning! There are one or more addon conflicts with Lambda,\nLambda will try to recover but may not work correctly.\nDetected following conflicting hooks:\n"
+
+    for _, v in pairs(conflicts) do
+        msg = msg .. " - Hook: " .. v .. "\n"
+    end
+
+    msg = msg .. ""
+    ErrorNoHalt(msg)
+end
+
+-- First function called when the game mode is loaded.
+function GM:OnGamemodeLoaded()
+    DbgPrint("GM:OnGamemodeLoaded")
+    self.ServerStartupTime = GetSyncedTimestamp()
+    self:LoadGameTypes()
+    self:SetGameType(lambda_gametype:GetString())
+    self:InitSettings()
+    self:MountRequiredContent()
+    self.OnGamemodeLoadedCompleted = true
+end
+
+function GM:Initialize()
+    DbgPrint("GM:Initialize")
+    DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
+    self:InitializeDifficulty()
+    self:InitializePlayerList()
+    self:InitializeRoundSystem()
+
+    if SERVER then
+        self:ResetSceneCheck()
+        self:ResetPlayerRespawnQueue()
+        self:InitializeItemRespawn()
+        self:InitializeGlobalSpeechContext()
+        self:InitializeWeaponTracking()
+        self:InitializeGlobalStates()
+        self:InitializePlayerModels()
+
+        if self.InitializeSkybox then
+            self:InitializeSkybox()
+        end
+
+        self:InitializeCurrentLevel()
+        self:TransferPlayers()
+        self:InitializeResources()
+    end
+
+    self.InitializeCompleted = true
+end
+
+function GM:OnReloaded()
+    DbgPrint("GM:OnReloaded")
+
+    if CLIENT then
+        self:HUDInit(true)
+    end
+
+    self:LoadGameTypes()
+    self:SetGameType(lambda_gametype:GetString())
+    self:InitSettings()
+    self:InitializeDifficulty()
+end
+
 function GM:Tick()
+    self:ConflictRecovery()
+
     if CLIENT then
         self:HUDTick()
     else
@@ -156,28 +236,6 @@ function GM:CheckStuckScenes()
     end
 end
 
-function GM:OnGamemodeLoaded()
-    DbgPrint("GM:OnGamemodeLoaded")
-    self.ServerStartupTime = GetSyncedTimestamp()
-    self:LoadGameTypes()
-    self:SetGameType(lambda_gametype:GetString())
-    self:InitSettings()
-    self:MountRequiredContent()
-end
-
-function GM:OnReloaded()
-    DbgPrint("GM:OnReloaded")
-
-    if CLIENT then
-        self:HUDInit(true)
-    end
-
-    self:LoadGameTypes()
-    self:SetGameType(lambda_gametype:GetString())
-    self:InitSettings()
-    self:InitializeDifficulty()
-end
-
 function GM:MountRequiredContent()
     local gametype = self:GetGameType()
     local filename = "lambda_mount_" .. gametype.GameType .. ".dat"
@@ -216,32 +274,6 @@ function GM:MountRequiredContent()
     DbgPrint("Mounted content!")
 end
 
-function GM:Initialize()
-    DbgPrint("GM:Initialize")
-    DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
-    self:InitializeDifficulty()
-    self:InitializePlayerList()
-    self:InitializeRoundSystem()
-
-    if SERVER then
-        self:ResetSceneCheck()
-        self:ResetPlayerRespawnQueue()
-        self:InitializeItemRespawn()
-        self:InitializeGlobalSpeechContext()
-        self:InitializeWeaponTracking()
-        self:InitializeGlobalStates()
-        self:InitializePlayerModels()
-
-        if self.InitializeSkybox then
-            self:InitializeSkybox()
-        end
-
-        self:InitializeCurrentLevel()
-        self:TransferPlayers()
-        self:InitializeResources()
-    end
-end
-
 function GM:ResetSceneCheck()
     self.LogicChoreographedScenes = {}
     self.LastStuckScenesCheck = CurTime()
@@ -249,6 +281,7 @@ end
 
 function GM:InitPostEntity()
     DbgPrint("GM:InitPostEntity")
+    self:ConflictRecovery()
 
     if SERVER then
         self:ResetGlobalStates()
@@ -364,6 +397,8 @@ local ENTITY_PROCESSORS = {
 }
 
 function GM:OnEntityCreated(ent)
+    self:ConflictRecovery()
+
     if SERVER then
         local class = ent:GetClass()
         local entityProcessor = ENTITY_PROCESSORS[class]
@@ -443,6 +478,8 @@ local function ReplaceFuncTankVolume(ent, volname)
 end
 
 function GM:EntityKeyValue(ent, key, val)
+    self:ConflictRecovery()
+
     if self.MapScript then
         -- Monitor scripts that we have filtered by class name.
         if key:iequals("classname") == true then
