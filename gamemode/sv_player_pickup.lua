@@ -6,6 +6,12 @@ local IsValid = IsValid
 local table = table
 local CurTime = CurTime
 
+LAMBDA_OBJECT_RESPAWN_QUEUE = LAMBDA_OBJECT_RESPAWN_QUEUE or {}
+
+function GM:InitializeItemRespawn()
+    LAMBDA_OBJECT_RESPAWN_QUEUE = {}
+end
+
 function GM:InitializePlayerPickup(ply)
     ply.ObjectPickupTable = {}
 end
@@ -13,10 +19,6 @@ end
 function GM:RegisterPlayerItemPickup(ply, item)
     item.UniqueEntityId = item.UniqueEntityId or self:GetNextUniqueEntityId()
     ply.ObjectPickupTable[item.UniqueEntityId] = true
-end
-
-function GM:InitializeItemRespawn()
-    self.RespawnQueue = {}
 end
 
 local function respawnItem(gm, data)
@@ -66,10 +68,10 @@ end
 function GM:UpdateItemRespawn()
     local curTime = CurTime()
 
-    for k, v in pairs(self.RespawnQueue) do
+    for k, v in pairs(LAMBDA_OBJECT_RESPAWN_QUEUE) do
         if curTime >= v.respawnTime then
             respawnItem(self, v)
-            table.remove(self.RespawnQueue, k)
+            table.remove(LAMBDA_OBJECT_RESPAWN_QUEUE, k)
         end
     end
 end
@@ -84,7 +86,7 @@ function GM:RespawnObject(obj, options)
 
     DbgPrintPickup("Respawning object " .. tostring(obj) .. " in " .. tostring(options.delay) .. " seconds")
 
-    for _, v in pairs(self.RespawnQueue) do
+    for _, v in pairs(LAMBDA_OBJECT_RESPAWN_QUEUE) do
         if v.item == obj then
             -- Only update time.
             DbgPrintPickup("Updating respawn of " .. tostring(obj))
@@ -115,7 +117,7 @@ function GM:RespawnObject(obj, options)
     data.uniqueId = obj.UniqueEntityId
     data.respawnTime = CurTime() + options.delay
     data.item = obj
-    table.insert(self.RespawnQueue, data)
+    table.insert(LAMBDA_OBJECT_RESPAWN_QUEUE, data)
 end
 
 local AMMO_LIKE_WEAPONS = {
