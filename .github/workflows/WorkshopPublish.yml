@@ -18,6 +18,7 @@ jobs:
     env:
       STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
       STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+      STEAM_TFASEED : ${{ secrets.STEAM_TFASEED }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -25,11 +26,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install dotnet6
-    - name: Fetch gmodws
-      run: |
-        wget https://github.com/Meachamp/gmodws/releases/download/v1.5/gmodws.zip
-        unzip gmodws.zip -d tools
-        chmod +x ./tools/gmodws
     - name: Fetch DepotDownloader
       run: |
         wget https://github.com/SteamRE/DepotDownloader/releases/download/DepotDownloader_2.4.7/depotdownloader-2.4.7.zip
@@ -37,7 +33,7 @@ jobs:
     - name: Fetch GMAD
       run: |
         echo "bin/gmad_linux" > gmad_files.txt
-        dotnet ./tools/DepotDownloader.dll -app 4000 -depot 4003 -username $STEAM_USERNAME -password $STEAM_PASSWORD -filelist gmad_files.txt -dir gmod
+        dotnet ./tools/DepotDownloader.dll -app 4020 -depot 4023 -filelist gmad_files.txt -dir gmod
         chmod +x ./gmod/bin/gmad_linux
     - name: Prepare package
       run: |
@@ -58,8 +54,12 @@ jobs:
         cat publish/gamemodes/lambda/gamemode/sh_lambda_build.lua
     - name: Create GMA
       run: |
-        ./gmod/bin/gmad_linux create -folder publish -out lambda.gma
+        mkdir dist
+        ./gmod/bin/gmad_linux create -folder publish -out dist/lambda.gma
     - name: Upload to Workshop
-      run: |
-        echo "Updating workshop entry ${{ inputs.workshop-id }}"
-        ./tools/gmodws "$STEAM_USERNAME" ${{ inputs.workshop-id }} lambda.gma "List of changes: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}/changelog.md"
+      uses: ZehMatt/steam-workshop-upload@569de82c2fdf3042af8491379fb698829ba63a9d
+      with: 
+        appid: 4000
+        itemid: ${{ inputs.workshop-id }}
+        changenote: "List of changes: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}/changelog.md"
+        path: 'dist'
