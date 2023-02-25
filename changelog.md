@@ -1,4 +1,4 @@
-0.9.17 (in development)
+0.9.17
 - Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
 
 0.9.16
