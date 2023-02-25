@@ -47,47 +47,71 @@ local CurTime = CurTime
 local util = util
 local ents = ents
 local IsValid = IsValid
+local TestConflictHooks = false
+
+if TestConflictHooks then
+    -- Test to ensure when those hooks block the GAMEMODE it will still work.
+    hook.Add("OnGamemodeLoaded", "test", function() return false end)
+    hook.Add("Initialize", "test", function() return false end)
+end
 
 function GM:ConflictRecovery()
     local conflicts = nil
 
-    if self.OnGamemodeLoadedCompleted ~= true then
+    if self.OnGamemodeLoadedCalled ~= true then
         conflicts = conflicts or {}
         table.insert(conflicts, "OnGamemodeLoaded")
-        self:OnGamemodeLoaded()
     end
 
-    if self.InitializeCompleted ~= true then
+    if self.InitializeCalled ~= true then
         conflicts = conflicts or {}
         table.insert(conflicts, "Initialize")
-        self:Initialize()
     end
 
     if conflicts == nil then return end
     local msg = "Warning! There are one or more addon conflicts with Lambda,\nLambda will try to recover but may not work correctly.\nDetected following conflicting hooks:\n"
+    local hookTable = hook.GetTable()
 
     for _, v in pairs(conflicts) do
         msg = msg .. " - Hook: " .. v .. "\n"
+        local installedHooks = hookTable[v]
+
+        if installedHooks ~= nil then
+            for hookName, _ in pairs(installedHooks) do
+                msg = msg .. "   > " .. hookName .. "\n"
+            end
+        end
     end
 
     msg = msg .. ""
     ErrorNoHalt(msg)
+
+    -- Run the missing calls.
+    for _, v in pairs(conflicts) do
+        local fn = self[v]
+
+        if fn ~= nil then
+            fn(self)
+        end
+    end
 end
 
 -- First function called when the game mode is loaded.
 function GM:OnGamemodeLoaded()
     DbgPrint("GM:OnGamemodeLoaded")
+    self.OnGamemodeLoadedCalled = true
     self.ServerStartupTime = GetSyncedTimestamp()
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()
     self:MountRequiredContent()
-    self.OnGamemodeLoadedCompleted = true
 end
 
 function GM:Initialize()
     DbgPrint("GM:Initialize")
     DbgPrint("Synced Timestamp: " .. GetSyncedTimestamp())
+    self.InitializeCalled = true
+    self:ConflictRecovery()
     self:InitializeDifficulty()
     self:InitializePlayerList()
     self:InitializeRoundSystem()
@@ -109,8 +133,6 @@ function GM:Initialize()
         self:TransferPlayers()
         self:InitializeResources()
     end
-
-    self.InitializeCompleted = true
 end
 
 function GM:OnReloaded()
