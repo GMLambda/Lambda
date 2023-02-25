@@ -225,8 +225,11 @@ function MAPSCRIPT:PostInit()
             self.Van = van
             if ent.VanSeats ~= nil then return end
             local seats = {}
+            local maxPlayers = game.MaxPlayers()
 
-            for _, v in pairs(VAN_SEATS) do
+            for i = 0, maxPlayers + 1 do
+                local idx = 1 + (i % #VAN_SEATS)
+                local v = VAN_SEATS[idx]
                 local seat = CreateVanSeat(van, v, seats)
                 table.insert(seats, seat)
             end
@@ -261,6 +264,14 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger3.OnTrigger = function(_, activator)
             self.PlacePlayerInVan = false
             GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
+        end
+
+        local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(-6672.511230, 5903.196777, -22.662888), Angle(0, 0, 0))
+        local checkpointTrigger4 = ents.Create("trigger_once")
+        checkpointTrigger4:SetupTrigger(Vector(-6431.318848, 6006.155273, -100.239578), Angle(0, 0, 0), Vector(-350, -350, 0), Vector(350, 350, 200))
+
+        checkpointTrigger4.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
         end
     end
 end
