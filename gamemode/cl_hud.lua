@@ -62,8 +62,7 @@ function GM:HUDInit(reloaded)
         end
 
         local keyBind = input.LookupBinding("gm_showhelp")
-
-        if keyBind == "no value" then
+        if keyBind == nil or keyBind == "no value" then
             keyBind = "UNBOUND:gm_showhelp"
         end
 
