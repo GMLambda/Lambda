@@ -32,6 +32,27 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
     ["Mossman2"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(3792, 11592, 4741),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(3792, 11592, 4741),
+            Mins = Vector(-40, -20, 0),
+            Maxs = Vector(40, 20, 50)
+        }
+    },
+    {
+        Pos = Vector(1098, 12810, 5318),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(1376, 12816, 5364),
+            Mins = Vector(-80, -80, -80),
+            Maxs = Vector(80, 80, 80)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         local multipleTrigger = ents.FindByPos(Vector(424, 12164, 5408), "trigger_multiple")
@@ -88,14 +109,6 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3792, 11592, 4741))
-        checkpoint1Trigger = ents.Create("trigger_once")
-        checkpoint1Trigger:SetupTrigger(Vector(3792, 11592, 4741), Angle(0, 0, 0), Vector(-40, -20, 0), Vector(40, 20, 50))
-
-        checkpoint1Trigger.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
         local multipleTrigger2 = ents.FindByPos(Vector(1876.97, 10580.9, 5532), "trigger_multiple")
 
         for k, v in pairs(multipleTrigger2) do
@@ -118,14 +131,6 @@ function MAPSCRIPT:PostInit()
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1857.5, 10507.5, 4988))
             checkpoint:SetParent(tracktrain_elevator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(1098, 12810, 5318), Angle(0, 0, 0))
-        local checkpoint2Trigger = ents.Create("trigger_once")
-        checkpoint2Trigger:SetupTrigger(Vector(1376, 12816, 5364), Angle(0, 0, 0), Vector(-80, -80, -80), Vector(80, 80, 80))
-
-        checkpoint2Trigger.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         local elevator_exit

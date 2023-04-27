@@ -18,6 +18,36 @@ MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {}
 MAPSCRIPT.Scenes = {"lcs_ep1_intro_01", "lcs_ep1_intro_02", "lcs_ep1_intro_03", "lcs_ep1_intro_03b", "lcs_ep1_intro_04b", "lcs_ep1_intro_05", "lcs_ep1_intro_07", "lcs_ep1_intro_06", "lcs_ep1_intro_04", "lcs_ep1_intro_08", "lcs_al_vanride_end02", "lcs_al_vanride_end01"}
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-7916.693359, 5424.519531, -95.968750),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-7916.693359, 5424.519531, -95.968750),
+            Mins = Vector(-150, -50, 0),
+            Maxs = Vector(200, 50, 100),
+        }
+    },
+    {
+        Pos = Vector(4649.159180, 3903.150635, -6343.968750),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(4649.159180, 3903.150635, -6343.968750),
+            Mins = Vector(-100, -250, 0),
+            Maxs = Vector(100, 250, 100),
+        }
+    },
+    {
+        Pos = Vector(-6672.511230, 5903.196777, -22.662888),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(-6431.318848, 6006.155273, -100.239578),
+            Mins = Vector(-350, -350, 0),
+            Maxs = Vector(350, 350, 200),
+        }
+    },
+}
+
 function MAPSCRIPT:Init()
     DbgPrint("MapScript EP1")
 end
@@ -162,8 +192,6 @@ function MAPSCRIPT:PostInit()
             end
         end
 
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
-
         GAMEMODE:WaitForInput("vehicle_blackout", "EnterVehicle", function(ent)
             for k, v in pairs(player.GetAll()) do
                 if v:Alive() == false then continue end
@@ -174,7 +202,8 @@ function MAPSCRIPT:PostInit()
                 end
             end
 
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1)
+            local cp = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
+            GAMEMODE:SetPlayerCheckpoint(cp)
 
             return true -- Suppress this.
         end)
@@ -248,31 +277,6 @@ function MAPSCRIPT:PostInit()
             TriggerOutputs({{"counter_alyx_van", "Add", 0.0, "1"}})
         end
 
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-7916.693359, 5424.519531, -95.968750), Angle(0, 0, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-7916.693359, 5424.519531, -95.968750), Angle(0, 0, 0), Vector(-150, -50, 0), Vector(200, 50, 100))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        -- 4649.159180 3903.150635 -6343.968750
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(4649.159180, 3903.150635, -6343.968750), Angle(0, 45, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(4649.159180, 3903.150635, -6343.968750), Angle(0, 0, 0), Vector(-100, -250, 0), Vector(100, 250, 100))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            self.PlacePlayerInVan = false
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
-        local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(-6672.511230, 5903.196777, -22.662888), Angle(0, 0, 0))
-        local checkpointTrigger4 = ents.Create("trigger_once")
-        checkpointTrigger4:SetupTrigger(Vector(-6431.318848, 6006.155273, -100.239578), Angle(0, 0, 0), Vector(-350, -350, 0), Vector(350, 350, 200))
-
-        checkpointTrigger4.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
-        end
     end
 end
 

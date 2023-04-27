@@ -23,16 +23,20 @@ MAPSCRIPT.GlobalStates = {
     ["super_phys_gun"] = GLOBAL_ON
 }
 
-function MAPSCRIPT:PostInit()
-    if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1657, 947, 821), Angle(0, 0, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-2008, 960, 852), Angle(0, 0, 0), Vector(-128, -40, -52), Vector(128, 40, 52))
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-1657, 947, 821),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-2008, 960, 852),
+            Mins = Vector(-128, -40, -52),
+            Maxs = Vector(128, 40, 52)
+        }
+    },
+}
 
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-    end
+function MAPSCRIPT:PostInit()
+    if SERVER then end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)

@@ -23,6 +23,27 @@ MAPSCRIPT.EntityFilterByName = {
     ["trigger_start_rollertraining"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-4860.789063, 3407.795166, 2592.708008),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(-4860.789063, 3407.795166, 2592.708008),
+            Mins = Vector(-100, -250, 0),
+            Maxs = Vector(100, 250, 100),
+        }
+    },
+    {
+        Pos = Vector(-4892, 1488, 2471),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-4856, 1491.14, 2494.08),
+            Mins = Vector(-174, -140, -60),
+            Maxs = Vector(174, 140, 60),
+        }
+    },
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         local alyxStopFollow = ents.Create("trigger_once")
@@ -46,7 +67,6 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger1:Fire("AddOutput", "OnTrigger follow_alyx,Deactivate,,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger counter_rollerdoor_close,Add,1,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger alyx,StartScripting,,0.01,-1")
-
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(Vector(-4721.599121, 7732.462891, 2520.031250), activator)
         end
@@ -56,23 +76,6 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("spawnflags", "10")
             ent:SetKeyValue("filtername", "filter_rollermine")
         end)
-
-        -- -4860.789063 3407.795166 2592.708008
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-4860.789063, 3407.795166, 2592.708008), Angle(0, 45, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-4860.789063, 3407.795166, 2592.708008), Angle(0, 0, 0), Vector(-100, -250, 0), Vector(100, 250, 100))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-4892, 1488, 2471), Angle(0, 0, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(-4856, 1491.14, 2494.08), Angle(0, 0, 0), Vector(-174, -140, -60), Vector(174, 140, 60))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
 
         GAMEMODE:WaitForInput("logic_weapon_strip_physcannon_end1", "Trigger", function(ent)
             for k, v in pairs(ents.FindByClass("weapon_physcannon")) do

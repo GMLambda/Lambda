@@ -22,6 +22,18 @@ MAPSCRIPT.GlobalStates = {
     ["super_phys_gun"] = GLOBAL_ON
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(3570, 4648, -6715),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(3570, 4648, -6715),
+            Mins = Vector(-50, -50, 0),
+            Maxs = Vector(50, 50, 0)
+        }
+    },
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         local tracktrain_elevator
@@ -52,14 +64,6 @@ function MAPSCRIPT:PostInit()
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(3264, 4648, 2510))
             checkpoint:SetParent(tracktrain_elevator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(3570, 4648, -6715))
-        local checkpoint2Trigger = ents.Create("trigger_once")
-        checkpoint2Trigger:SetupTrigger(Vector(3570, 4648, -6715), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 0))
-
-        checkpoint2Trigger.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
         ents.WaitForEntityByName("kill_phys_objects_trigger", function(ent)
