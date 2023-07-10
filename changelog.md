@@ -1,4 +1,7 @@
 0.9.18 (in development)
+- Improved: env_screenoverlay now works like behavior from HL2.
+- Fixed: env_screenoverlay causing error on some unexpected cases.
+- Fixed: Open settings menu and close it too fast will leave a slider bar at top of screen.
 
 0.9.17
 - Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
