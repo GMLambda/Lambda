@@ -30,7 +30,7 @@ MAPSCRIPT.Checkpoints = {
         Trigger = {
             Pos = Vector(-4860.789063, 3407.795166, 2592.708008),
             Mins = Vector(-100, -250, 0),
-            Maxs = Vector(100, 250, 100),
+            Maxs = Vector(100, 250, 100)
         }
     },
     {
@@ -39,9 +39,9 @@ MAPSCRIPT.Checkpoints = {
         Trigger = {
             Pos = Vector(-4856, 1491.14, 2494.08),
             Mins = Vector(-174, -140, -60),
-            Maxs = Vector(174, 140, 60),
+            Maxs = Vector(174, 140, 60)
         }
-    },
+    }
 }
 
 function MAPSCRIPT:PostInit()
@@ -67,6 +67,7 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger1:Fire("AddOutput", "OnTrigger follow_alyx,Deactivate,,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger counter_rollerdoor_close,Add,1,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger alyx,StartScripting,,0.01,-1")
+
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(Vector(-4721.599121, 7732.462891, 2520.031250), activator)
         end

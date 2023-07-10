@@ -32,7 +32,7 @@ MAPSCRIPT.Checkpoints = {
             Mins = Vector(-128, -40, -52),
             Maxs = Vector(128, 40, 52)
         }
-    },
+    }
 }
 
 function MAPSCRIPT:PostInit()

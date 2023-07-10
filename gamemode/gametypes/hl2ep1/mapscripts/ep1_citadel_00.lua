@@ -25,7 +25,7 @@ MAPSCRIPT.Checkpoints = {
         Trigger = {
             Pos = Vector(-7916.693359, 5424.519531, -95.968750),
             Mins = Vector(-150, -50, 0),
-            Maxs = Vector(200, 50, 100),
+            Maxs = Vector(200, 50, 100)
         }
     },
     {
@@ -34,7 +34,7 @@ MAPSCRIPT.Checkpoints = {
         Trigger = {
             Pos = Vector(4649.159180, 3903.150635, -6343.968750),
             Mins = Vector(-100, -250, 0),
-            Maxs = Vector(100, 250, 100),
+            Maxs = Vector(100, 250, 100)
         }
     },
     {
@@ -43,9 +43,9 @@ MAPSCRIPT.Checkpoints = {
         Trigger = {
             Pos = Vector(-6431.318848, 6006.155273, -100.239578),
             Mins = Vector(-350, -350, 0),
-            Maxs = Vector(350, 350, 200),
+            Maxs = Vector(350, 350, 200)
         }
-    },
+    }
 }
 
 function MAPSCRIPT:Init()
@@ -276,7 +276,6 @@ function MAPSCRIPT:PostInit()
             self.PlacePlayerInVan = true
             TriggerOutputs({{"counter_alyx_van", "Add", 0.0, "1"}})
         end
-
     end
 end
 
