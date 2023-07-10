@@ -19,6 +19,7 @@ function ENT:PreInitialize()
     self.OverlayTable = {}
     self.Activator = nil
     self.NextSwitch = 0
+    self.ShouldStop = false
     self:PopulateTable()
 end
 
@@ -66,8 +67,11 @@ function ENT:StartOverlays(data, activator, caller)
     DbgPrint(self, "StartOverlays", activator, caller)
     self.Active = true
 
-    if self.OverlayTable["OverlayTime1"] ~= OVERLAY_LOOP then
-        self.NextSwitch = CurTime() + tonumber(self.OverlayTable["OverlayTime1"])
+    local OverlayName = self.OverlayTable["OverlayName1"]
+    local OverlayTime = self.OverlayTable["OverlayTime1"]
+
+    if OverlayTime ~= OVERLAY_LOOP then
+        self.NextSwitch = CurTime() + tonumber(OverlayTime)
     else
         self.NextSwitch = 0
     end
@@ -77,10 +81,10 @@ function ENT:StartOverlays(data, activator, caller)
     if IsValid(ply) and ply:IsPlayer() then
         DbgPrint("Propagated Activator:", ply)
         self.Activator = ply
-        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"], ply)
+        GAMEMODE:StartScreenOverlay(OverlayName, ply)
         ply:SetScreenOverlayOwner(self)
     elseif ply ~= activator then
-        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName1"])
+        GAMEMODE:StartScreenOverlay(OverlayName)
     end
 
     return true
@@ -89,22 +93,42 @@ end
 function ENT:SwitchOverlay()
     DbgPrint(self, "SwitchOverlay", self.Activator, self.ActiveNum)
 
-    if self.Activator then
-        GAMEMODE:StopScreenOverlay(self.Activator)
-    else
-        GAMEMODE:StopScreenOverlay()
+    if self.ShouldStop then
+        -- Timed out, we'll help player disable the overlay.
+        self:StopOverlays(nil, self.Activator, self)
+        return
     end
 
-    if self.Activator then
-        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName" .. self.ActiveNum], self.Activator)
-    else
-        GAMEMODE:StartScreenOverlay(self.OverlayTable["OverlayName" .. self.ActiveNum])
-    end
+    if self.ActiveNum <= 10 then
+        local OverlayName = self.OverlayTable["OverlayName" .. self.ActiveNum]
+        local OverlayTime = self.OverlayTable["OverlayTime" .. self.ActiveNum]
 
-    if self.OverlayTable["OverlayTime" .. self.ActiveNum] == OVERLAY_LOOP then
-        self.NextSwitch = false
+        if OverlayName ~= "" then
+            if self.Activator then
+                GAMEMODE:StopScreenOverlay(self.Activator)
+            else
+                GAMEMODE:StopScreenOverlay()
+            end
+
+            if self.Activator then
+                GAMEMODE:StartScreenOverlay(OverlayName, self.Activator)
+            else
+                GAMEMODE:StartScreenOverlay(OverlayName)
+            end
+
+            if OverlayTime == OVERLAY_LOOP then
+                self.NextSwitch = false
+            else
+                self.NextSwitch = CurTime() + tonumber(OverlayTime)
+            end
+        else
+            -- Keep showing the overlay just like original behavior, but with 20 sec timeout.
+            self.ShouldStop = true
+            self.NextSwitch = CurTime() + 20
+        end
     else
-        self.NextSwitch = CurTime() + tonumber(self.OverlayTable["OverlayTime" .. self.ActiveNum])
+        self.ShouldStop = true
+        self.NextSwitch = CurTime() + 20
     end
 end
 
@@ -120,10 +144,12 @@ function ENT:StopOverlays(data, activator, caller)
         self.Activator = nil
         self.Active = false
         self.ActiveNum = 1
+        self.ShouldStop = false
     elseif self.Activator ~= activator or self.Activator == nil then
         GAMEMODE:StopScreenOverlay()
         self.Active = false
         self.ActiveNum = 1
+        self.ShouldStop = false
     end
 
     return true
