@@ -116,6 +116,7 @@ function PANEL:Init()
         HighlightTab(false)
         -- Slight delay to make sure model is set on entity
         timer.Simple(0.1, function()
+            if not nobgLabel:IsValid() then return end
             local ply = LocalPlayer()
             local mdlStr = player_manager.TranslatePlayerModel(lambda_playermdl:GetString())
             local numSkins = NumModelSkins(mdlStr) - 1
