@@ -32,7 +32,7 @@ function MAPSCRIPT:PostInit()
         end
 
         GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(logic_strip)
-            util.RunDelayed(3.8, function()
+            util.RunDelayed(function()
                 local ply = nil
                 for _, v in ipairs(player.GetAll()) do
                     if v:Alive() then
