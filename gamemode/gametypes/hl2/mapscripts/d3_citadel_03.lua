@@ -32,7 +32,7 @@ function MAPSCRIPT:PostInit()
         end
 
         GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(logic_strip)
-            timer.Simple(3.8, function()
+            util.RunDelayed(3.8, function()
                 local ply = nil
                 for _, v in ipairs(player.GetAll()) do
                     if v:Alive() then
@@ -56,7 +56,7 @@ function MAPSCRIPT:PostInit()
                         end)
                     end)
                 end
-            end)
+            end, CurTime() + 3.8)
         end)
 
         -- 7724.114746 -1358.596924 2112.031250
