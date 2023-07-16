@@ -31,7 +31,7 @@ function MAPSCRIPT:PostInit()
             end
         end
 
-        GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(ent)
+        GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(logic_strip)
             timer.Simple(3.8, function()
                 local ply = nil
                 for _, v in ipairs(player.GetAll()) do
