@@ -31,24 +31,49 @@ function MAPSCRIPT:PostInit()
             end
         end
 
-        -- 7724.114746 -1358.596924 2112.031250
-        local weaponTrigger = ents.Create("trigger_multiple")
-        weaponTrigger:SetupTrigger(Vector(7724.114746, -1358.596924, 2112.031250), Angle(0, 0, 0), Vector(-160, -260, 0), Vector(160, 260, 100))
-
-        weaponTrigger.OnTrigger = function(ent)
-            local plys = ent:GetTouchingObjects()
-            table.sort(plys, function(a, b) return a:EntIndex() < b:EntIndex() end)
-            local firstPly = false
-
-            for k, v in pairs(plys) do
-                if firstPly == false then
-                    firstPly = true
-                    continue
+        GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(ent)
+            timer.Simple(3.8, function()
+                local ply = nil
+                for _, v in ipairs(player.GetAll()) do
+                    if v:Alive() then
+                        if not IsValid(ply) and v:HasWeapon("weapon_physcannon") then
+                            ply = v
+                        else
+                            v:StripWeapons()
+                        end
+                    end
                 end
 
-                if v:HasWeapon("weapon_physcannon") then
-                    DbgPrint("Stripping on player: " .. tostring(v))
-                    v:StripWeapon("weapon_physcannon")
+                -- Softlock? Too sad.
+                if not IsValid(ply) then
+                    local physcannon = ents.Create("weapon_physcannon")
+                    physcannon:SetPos(Vector(7680, -995, 2125))
+                    physcannon:Spawn()
+
+                    util.RunNextFrame(function()
+                        ents.WaitForEntityByName("logic_weapon_strip_physcannon_start", function(ent)
+                            ent:Fire("Trigger")
+                        end)
+                    end)
+                end
+            end)
+        end)
+
+        -- 7724.114746 -1358.596924 2112.031250
+        local weaponTrigger = ents.Create("trigger_multiple")
+        weaponTrigger:SetupTrigger(Vector(7724.114746, -1358.596924, 2112.031250), Angle(0, 0, 0), Vector(-160, -260, 0), Vector(160, 260, 100), true, SF_TRIGGER_ALLOW_PHYSICS)
+
+        weaponTrigger.OnTrigger = function(ent)
+            local props = ent:GetTouchingObjects()
+            local cannon = nil
+
+            for _, v in pairs(props) do
+                if v:GetClass() == "weapon_physcannon" then
+                    if not IsValid(cannon) then
+                        cannon = v
+                    else
+                        v:Remove()
+                    end
                 end
             end
         end
