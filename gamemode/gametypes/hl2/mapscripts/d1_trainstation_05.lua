@@ -155,6 +155,27 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("mark_alyx_intro", function(ent)
             ent:SetPos(Vector(-6491.843262, -876.207031, 64.031250))
         end)
+
+        -- Breen cutscene
+        local data =
+        {
+            SpawnFlags = 64,
+            Pos = Vector(-13410, -40, 55),
+            KeyValues =
+            {
+                targetname = "Breen_Cutscene",
+                m_iszEntity = "Breen",
+                m_iszEntry = "sit_startle",
+                m_iszPlay = "get_up",
+                m_iszPostIdle = "at_console"
+            }
+        }
+
+        ents.CreateSimple("scripted_sequence", data)
+
+        ents.WaitForEntityByName("t4_breen_destination_rl", function(ent)
+            ent:Fire("AddOutput", "OnTrigger Breen_Cutscene,BeginSequence,,1,1")
+        end)
     end
 end
 

@@ -104,6 +104,19 @@ function MAPSCRIPT:PostInit()
             ent:Remove()
         end)
 
+        local breenchair = ents.FindByModel("models/props_combine/breenchair.mdl")
+
+        for _, v in ipairs(breenchair) do
+            v:SetPos(Vector(-1972.93, 836.43, 591.45))
+            v:SetAngles(Angle(0.04, -89.85, 0.04))
+
+            -- Make sure it's asleep.
+            local phys = v:GetPhysicsObject()
+            if IsValid(phys) then
+                phys:Sleep()
+            end
+        end
+
         ents.WaitForEntityByName("pod", function(ent)
             local podParent = ent:GetParent()
             local parentAttachment = ent:GetParentAttachment()

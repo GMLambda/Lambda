@@ -79,6 +79,8 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetSpawnPlayerVehicles(false)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
             TriggerOutputs({{"garage_exit_trigger", "Enable", 0, ""}, {"greeter_conditions", "Disable", 0, ""}, {"greeter_car_nag_timer", "Kill", 0, ""}, {"garage_door", "Close", 0, ""}, {"greeter_briefing_conditions", "Enable", 0, ""}, {"greeter_wave_timer", "Disable", 0, ""}, {"look_at_player", "Resume", 0, ""}})
+
+            ents.RemoveByClass("prop_vehicle_jeep")
         end
 
         -- 8222.646484 1799.084961 960.000000
