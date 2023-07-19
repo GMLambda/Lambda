@@ -24,7 +24,8 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {
-    ["s_room_panelswitch"] = {"Lock"} -- Prevent it from locking the button.
+    ["s_room_panelswitch"] = {"Lock"}, -- Prevent it from locking the button.
+    ["lobby_combinedoor_portalbrush"] = {"Enable"}
 }
 
 MAPSCRIPT.EntityFilterByClass = {}
@@ -43,6 +44,10 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
+
+        GAMEMODE:WaitForInput("lobby_combinedoor", "SetAnimation", function()
+            GAMEMODE:FilterEntityInput("lobby_combinedoor", "SetAnimation") -- Don't close the door once it's opened.
+        end)
 
         -- Add another logic relay that disables all turrets once the button is pressed.
         local turretsOffRelay = ents.Create("logic_relay")
