@@ -117,6 +117,14 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnTrigger s_room_turret_8,Disable,,0,-1")
             ent:Fire("AddOutput", "OnTrigger s_room_doors,Open,,0,-1")
         end)
+
+        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(2405, 865, 260), Angle(0, 0, 0))
+        local checkpointTrigger3 = ents.Create("trigger_once")
+        checkpointTrigger3:SetupTrigger(Vector(2565, 865, 260), Angle(0, 0, 0), Vector(-10, -70, -80), Vector(10, 70, 80))
+
+        checkpointTrigger3.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
+        end
     end
 end
 
