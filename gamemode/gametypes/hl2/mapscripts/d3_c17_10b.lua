@@ -24,14 +24,14 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {
-    ["s_room_panelswitch"] = {"Lock"}, -- Prevent it from locking the button.
-    ["lobby_combinedoor_portalbrush"] = {"Enable"}
+    ["s_room_panelswitch"] = {"Lock"} -- Prevent it from locking the button.
 }
 
 MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
-    ["player_spawn_items"] = true
+    ["player_spawn_items"] = true,
+    ["lobby_combinedoor_portalbrush"] = true
 }
 
 function MAPSCRIPT:PostInit()
@@ -45,8 +45,18 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
+        -- Don't close the door once it's opened.
         GAMEMODE:WaitForInput("lobby_combinedoor", "SetAnimation", function()
-            GAMEMODE:FilterEntityInput("lobby_combinedoor", "SetAnimation") -- Don't close the door once it's opened.
+            GAMEMODE:FilterEntityInput("lobby_combinedoor", "SetAnimation")
+        end)
+
+        for _, v in pairs(ents.FindByPos(Vector(2768, 1136, 832), "trigger_once")) do
+            v:ClearOutputs()
+            v:Fire("AddOutput", "OnTrigger roof_soldiersquad_soldier_makers,Disable,,0,-1")
+        end
+
+        ents.WaitForEntityByName("lcs_barney_h4x_pows", function(ent)
+            ent:Fire("AddOutput", "OnCompletion npc_citizen,SetSquad,player_squad,7,-1")
         end)
 
         -- Add another logic relay that disables all turrets once the button is pressed.
