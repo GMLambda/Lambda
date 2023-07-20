@@ -7,6 +7,7 @@
 - Fixed: d2_coast_10: Vehicle not being removed after parking it in the warehouse.
 - Fixed: d3_citadel_03: A lua error at the beginning of the round and a rare potential soft-lock.
 - Fixed: d3_breen_01: Breen can get stuck on the chair making the cutscene a bit slower.
+- Fixed: Default difficulty is now "Normal" rather than "Very easy"
 
 0.9.17
 - Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
