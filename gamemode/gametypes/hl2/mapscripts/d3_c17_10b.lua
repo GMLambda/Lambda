@@ -59,28 +59,64 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnCompletion npc_citizen,SetSquad,player_squad,7,-1")
         end)
 
-        -- Add another logic relay that disables all turrets once the button is pressed.
-        local turretsOffRelay = ents.Create("logic_relay")
-        turretsOffRelay:SetKeyValue("targetname", "s_room_off_relay")
-        turretsOffRelay:SetKeyValue("StartDisabled", "0")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_1,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_2,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_3,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_4,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_5,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_6,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_7,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_turret_8,Disable,,0,-1")
-        turretsOffRelay:SetKeyValue("OnTrigger", "s_room_doors,Open,,0,-1")
-        turretsOffRelay:Spawn()
-        -- 2657.141357 1033.785645 256.031250
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(2657.141357, 1033.785645, 256.031250), Angle(0, 0, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(2657.141357, 1033.785645, 256.031250), Angle(0, 0, 0), Vector(-60, -60, 0), Vector(60, 60, 100))
+        ents.WaitForEntityByName("lcs_barney_h4x", function(ent)
+            ent:Fire("AddOutput", "OnCompletion s_room_doors,Close,,10,-1")
+            ent:Fire("AddOutput", "OnCompletion n_room_trapdoor_1a,Close,,10,-1")
+            ent:Fire("AddOutput", "OnCompletion n_room_trapdoor_1b,Close,,10,-1")
+            ent:Fire("AddOutput", "OnCompletion n_room_camera_2,Disable,,10,-1")
+        end)
 
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+        for _, v in ipairs(ents.FindByModel("*147")) do
+            v:Remove()
         end
+
+        local triggersdoor = ents.Create("trigger_once")
+        triggersdoor:SetupTrigger(Vector(3235, -1504, 592), Angle(0, 0, 0), Vector(-200, -65, -80), Vector(200, 65, 80))
+        triggersdoor:SetKeyValue("teamwait", "1")
+
+        triggersdoor.OnTrigger = function(ent)
+            GAMEMODE:FilterEntityInput("s_room_doors", "Close")
+
+            TriggerOutputs({{"barney_laseroom_lcs", "Start", 0.5, ""}})
+            for _, v in pairs(ents.FindByPos(Vector(3168, -1564, 576), "func_door")) do
+                v:Fire("Open")
+            end
+        end
+
+        ents.WaitForEntityByName("n_room_trigger_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger n_room_doors2_close_relay,Trigger,,0,-1")
+        end)
+
+        ents.WaitForEntityByName("n_room_trigger_1", function(ent)
+            ent:Remove()
+        end)
+
+        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(3175, 1155, 530), Angle(0, 0, 0))
+
+        local triggernroom = ents.Create("trigger_once")
+        triggernroom:SetupTrigger(Vector(3072, 900, 552), Angle(0, 0, 0), Vector(-497, -341, -33), Vector(297, 341, 33))
+        triggernroom:SetKeyValue("teamwait", "1")
+
+        triggernroom.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+
+            ents.WaitForEntityByName("n_room_trigger_relay", function(ent)
+                ent:Fire("Trigger")
+            end)
+        end
+
+        -- If player failed to stealth, but success press the button, then disable all turrets and open the door.
+        ents.WaitForEntityByName("s_room_off_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_1,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_2,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_3,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_4,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_5,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_6,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_7,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_8,Disable,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_doors,Open,,0,-1")
+        end)
     end
 end
 
