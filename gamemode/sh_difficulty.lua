@@ -55,7 +55,7 @@ function GM:InitDifficultySettings()
         NiceName = "#GM_DIFFICULTY",
         Description = "Difficulty",
         Type = "int",
-        Default = 0,
+        Default = 2, -- Normal, TODO: Allow the game type to specify the default.
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
         Extra = {
             Type = "combo",
