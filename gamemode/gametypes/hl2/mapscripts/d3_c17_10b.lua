@@ -24,7 +24,8 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {
-    ["s_room_panelswitch"] = {"Lock"} -- Prevent it from locking the button.
+    ["s_room_panelswitch"] = {"Lock"}, -- Prevent it from locking the button.
+    ["n_room_camera_2"] = {"Toggle"}
 }
 
 MAPSCRIPT.EntityFilterByClass = {}
