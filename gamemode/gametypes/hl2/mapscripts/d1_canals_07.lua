@@ -33,6 +33,12 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
+        -- Tell metrocop use the turret.
+        ents.WaitForEntityByName("logic_room7_spawn_functank_cop", function(ent)
+            ent:Fire("AddOutput", "OnTrigger turret_1,ForceNPCOff,,0.12,-1")
+            ent:Fire("AddOutput", "OnTrigger turret_1,FindNPCToManTank,copturret_1,0.15,-1")
+        end)
+
         -- Subtile rush blocking.
         ents.CreateSimple("prop_physics", {
             Model = "models/props_wasteland/laundry_washer003.mdl",
