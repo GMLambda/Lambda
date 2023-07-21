@@ -71,6 +71,13 @@ function MAPSCRIPT:PostInit()
             v:Remove()
         end
 
+        -- Disable all the turrets as soon as player press the button at stealth laser room.
+        -- This will allow player continue to progress even if they failed to stealth.
+        ents.WaitForEntityByName("s_room_off_relay", function(ent)
+            ent:Fire("AddOutput", "OnTrigger s_room_doors,Open,,0,-1")
+            ent:Fire("AddOutput", "OnTrigger s_room_turret_*,Disable,,0,-1")
+        end)
+
         local triggersdoor = ents.Create("trigger_once")
         triggersdoor:SetupTrigger(Vector(3235, -1504, 592), Angle(0, 0, 0), Vector(-200, -65, -80), Vector(200, 65, 80))
         triggersdoor:SetKeyValue("teamwait", "1")
@@ -105,19 +112,6 @@ function MAPSCRIPT:PostInit()
                 ent:Fire("Trigger")
             end)
         end
-
-        -- If player failed to stealth, but success press the button, then disable all turrets and open the door.
-        ents.WaitForEntityByName("s_room_off_relay", function(ent)
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_1,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_2,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_3,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_4,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_5,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_6,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_7,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_turret_8,Disable,,0,-1")
-            ent:Fire("AddOutput", "OnTrigger s_room_doors,Open,,0,-1")
-        end)
 
         local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(2405, 865, 260), Angle(0, 0, 0))
         local checkpointTrigger3 = ents.Create("trigger_once")
