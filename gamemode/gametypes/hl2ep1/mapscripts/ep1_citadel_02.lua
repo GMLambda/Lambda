@@ -3,7 +3,6 @@ if SERVER then
 end
 
 local MAPSCRIPT = {}
-
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_physcannon"},
     Ammo = {},
@@ -13,7 +12,6 @@ MAPSCRIPT.DefaultLoadout = {
 
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
-
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_suit"] = true,
     ["global_newgame_spawner_physcannon"] = true
@@ -36,7 +34,6 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    if SERVER then end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)

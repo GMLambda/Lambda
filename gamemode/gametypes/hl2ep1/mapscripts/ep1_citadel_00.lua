@@ -4,7 +4,6 @@ end
 
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
-
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {},
     Ammo = {},
@@ -17,7 +16,6 @@ MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {}
 MAPSCRIPT.Scenes = {"lcs_ep1_intro_01", "lcs_ep1_intro_02", "lcs_ep1_intro_03", "lcs_ep1_intro_03b", "lcs_ep1_intro_04b", "lcs_ep1_intro_05", "lcs_ep1_intro_07", "lcs_ep1_intro_06", "lcs_ep1_intro_04", "lcs_ep1_intro_08", "lcs_al_vanride_end02", "lcs_al_vanride_end01"}
-
 MAPSCRIPT.Checkpoints = {
     {
         Pos = Vector(-7916.693359, 5424.519531, -95.968750),
@@ -120,53 +118,73 @@ end
 function MAPSCRIPT:PostInit()
     if SERVER then
         self.Van = nil
-
         -- Freeze player also.
-        ents.WaitForEntityByName("viewcontrol_black", function(ent)
-            ent:SetKeyValue("spawnflags", "396")
-        end)
+        ents.WaitForEntityByName(
+            "viewcontrol_black",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "396")
+            end
+        )
 
-        ents.WaitForEntityByName("point_viewcontrol_01", function(ent)
-            ent:SetKeyValue("spawnflags", "412")
-        end)
+        ents.WaitForEntityByName(
+            "point_viewcontrol_01",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "412")
+            end
+        )
 
-        ents.WaitForEntityByName("viewcontrol_final", function(ent)
-            ent:SetKeyValue("spawnflags", "398")
-        end)
+        ents.WaitForEntityByName(
+            "viewcontrol_final",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "398")
+            end
+        )
 
-        ents.WaitForEntityByName("pvc_intro_start", function(ent)
-            ent:SetKeyValue("spawnflags", "412")
-        end)
+        ents.WaitForEntityByName(
+            "pvc_intro_start",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "412")
+            end
+        )
 
-        ents.WaitForEntityByName("pvc_intro", function(ent)
-            ent:SetKeyValue("spawnflags", "412")
-        end)
+        ents.WaitForEntityByName(
+            "pvc_intro",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "412")
+            end
+        )
 
         -- Prevent scenes to stop when somebody dies
         for _, scenes in pairs(self.Scenes) do
-            ents.WaitForEntityByName(scenes, function(ent)
-                ent:SetKeyValue("onplayerdeath", "0")
-            end)
+            ents.WaitForEntityByName(
+                scenes,
+                function(ent)
+                    ent:SetKeyValue("onplayerdeath", "0")
+                end
+            )
         end
 
         -- Let alyx hug everyone.
-        ents.WaitForEntityByName("vehicle_blackout", function(ent)
-            for i = 1, game.MaxPlayers() do
-                local vehicle = ents.Create("prop_vehicle_choreo_generic")
-                vehicle:SetKeyValue("vehiclescript", "scripts/vehicles/choreo_vehicle_ep1_dogintro.txt")
-                vehicle:SetKeyValue("VehicleLocked", "1")
-                vehicle:SetName("vehicle_blackout_" .. tostring(i))
-                vehicle:SetModel(ent:GetModel())
-                vehicle:SetPos(ent:GetPos())
-                vehicle:SetAngles(ent:GetAngles())
-                vehicle:SetParent(ent)
-                vehicle:Fire("AddOutput", "PlayerOff ghostanim_DogIntro,Kill,,0.0,-1")
-                vehicle:Fire("AddOutput", "PlayerOff !self,Kill,,1.0,-1")
-                vehicle:Fire("AddOutput", "PlayerOn !activator,DisableDraw,,0.0,-1")
-                vehicle:Fire("AddOutput", "PlayerOff !activator,EnableDraw,,0.0,-1")
-                vehicle:Spawn()
+        ents.WaitForEntityByName(
+            "vehicle_blackout",
+            function(ent)
+                for i = 1, game.MaxPlayers() do
+                    local vehicle = ents.Create("prop_vehicle_choreo_generic")
+                    vehicle:SetKeyValue("vehiclescript", "scripts/vehicles/choreo_vehicle_ep1_dogintro.txt")
+                    vehicle:SetKeyValue("VehicleLocked", "1")
+                    vehicle:SetName("vehicle_blackout_" .. tostring(i))
+                    vehicle:SetModel(ent:GetModel())
+                    vehicle:SetPos(ent:GetPos())
+                    vehicle:SetAngles(ent:GetAngles())
+                    vehicle:SetParent(ent)
+                    vehicle:Fire("AddOutput", "PlayerOff ghostanim_DogIntro,Kill,,0.0,-1")
+                    vehicle:Fire("AddOutput", "PlayerOff !self,Kill,,1.0,-1")
+                    vehicle:Fire("AddOutput", "PlayerOn !activator,DisableDraw,,0.0,-1")
+                    vehicle:Fire("AddOutput", "PlayerOff !activator,EnableDraw,,0.0,-1")
+                    vehicle:Spawn()
+                end
             end
-        end)
+        )
 
         -- Let everyone exit.
         local exitTP = ents.Create("point_teleport")
@@ -175,44 +193,53 @@ function MAPSCRIPT:PostInit()
         exitTP:SetKeyValue("target", "!players")
         exitTP:SetName("vehicle_blackoutexit_tp")
         exitTP:Spawn()
-
-        ents.WaitForEntityByName("ss_DogIntro", function(ent)
-            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,Unlock,,0.0,-1")
-            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,ExitVehicle,,0.01,-1")
-            ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackoutexit_tp,Teleport,,0.05,-1")
-            ent:Fire("AddOutput", "OnScriptEvent01 maker_template_gravgun,SetParent,!player,0.1,-1")
-        end)
+        ents.WaitForEntityByName(
+            "ss_DogIntro",
+            function(ent)
+                ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,Unlock,,0.0,-1")
+                ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackout*,ExitVehicle,,0.01,-1")
+                ent:Fire("AddOutput", "OnScriptEvent01 vehicle_blackoutexit_tp,Teleport,,0.05,-1")
+                ent:Fire("AddOutput", "OnScriptEvent01 maker_template_gravgun,SetParent,!player,0.1,-1")
+            end
+        )
 
         local function GetNextVehicle()
             local vehicles = ents.FindByName("vehicle_blackout_*")
-
             for _, v in pairs(vehicles) do
                 local driver = v:GetInternalVariable("m_hPlayer")
                 if IsValid(driver) == false then return v end
             end
         end
 
-        GAMEMODE:WaitForInput("vehicle_blackout", "EnterVehicle", function(ent)
-            for k, v in pairs(player.GetAll()) do
-                if v:Alive() == false then continue end
-                local vehicle = GetNextVehicle()
-
-                if IsValid(vehicle) then
-                    v:EnterVehicle(vehicle)
+        GAMEMODE:WaitForInput(
+            "vehicle_blackout",
+            "EnterVehicle",
+            function(ent)
+                for k, v in pairs(player.GetAll()) do
+                    if v:Alive() == false then continue end
+                    local vehicle = GetNextVehicle()
+                    if IsValid(vehicle) then
+                        v:EnterVehicle(vehicle)
+                    end
                 end
+
+                local cp = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
+                GAMEMODE:SetPlayerCheckpoint(cp)
+
+                return true
             end
+        )
 
-            local cp = GAMEMODE:CreateCheckpoint(Vector(-8778.361328, 5711.103516, -146.155045), Angle(0, 0, 0))
-            GAMEMODE:SetPlayerCheckpoint(cp)
-
-            return true -- Suppress this.
-        end)
-
+        -- Suppress this.
         -- Give gravity gun by default once picked up
-        GAMEMODE:WaitForInput("maker_template_gravgun", "ForceSpawn", function(ent)
-            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
-            table.insert(loadout.Weapons, "weapon_physcannon")
-        end)
+        GAMEMODE:WaitForInput(
+            "maker_template_gravgun",
+            "ForceSpawn",
+            function(ent)
+                local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+                table.insert(loadout.Weapons, "weapon_physcannon")
+            end
+        )
 
         -- Make sure no player is left behind.
         for _, v in pairs(ents.FindByPos(Vector(-7920, 5444, 84), "trigger_once")) do
@@ -223,17 +250,22 @@ function MAPSCRIPT:PostInit()
         triggerDogEscape:SetupTrigger(Vector(-8560.031250, 5826.152832, -63.710419), Angle(0, 0, 0), Vector(-600, -350, -100), Vector(800, 400, 500))
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll ss_dog_gunship_down,BeginSequence,,0.0,-1")
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll pclip_gunship_2,Enable,,0.0,-1")
-
-        ents.WaitForEntityByName("counter_alyx_van", function(ent)
-            -- Increase from 3 to 4 so we can have our trigger have the final say.
-            ent:SetKeyValue("max", "4")
-        end)
+        ents.WaitForEntityByName(
+            "counter_alyx_van",
+            function(ent)
+                -- Increase from 3 to 4 so we can have our trigger have the final say.
+                ent:SetKeyValue("max", "4")
+            end
+        )
 
         -- Let the vehicle fall once everyone is out of there.
-        ents.WaitForEntityByName("counter_vanride_end01_resume", function(ent)
-            -- Increase by one.
-            ent:SetKeyValue("max", "3")
-        end)
+        ents.WaitForEntityByName(
+            "counter_vanride_end01_resume",
+            function(ent)
+                -- Increase by one.
+                ent:SetKeyValue("max", "3")
+            end
+        )
 
         local fallTrigger = ents.Create("trigger_once")
         fallTrigger:SetupTrigger(Vector(4799.591309, 4057.289551, -6326.972656), Angle(0, 0, 0), Vector(-1350, -1940, -70), Vector(670, 440, 220))
@@ -242,36 +274,39 @@ function MAPSCRIPT:PostInit()
         fallTrigger:SetKeyValue("showwait", "0")
         fallTrigger:Fire("AddOutput", "OnTrigger counter_vanride_end01_resume,Add,1,0.0,-1")
         fallTrigger:SetName("lambda_falltrigger")
-
         -- Unlock van seats after the sequence not only the van.
-        ents.WaitForEntityByName("relay_vanride_endcrash_1", function(ent)
-            -- Unlock after.
-            ent:Fire("AddOutput", "OnTrigger VanSeat,Unlock,,0.01,-1")
-        end)
-
-        ents.WaitForEntityByName("Van", function(ent)
-            local van = ent
-            self.Van = van
-            if ent.VanSeats ~= nil then return end
-            local seats = {}
-            local maxPlayers = game.MaxPlayers()
-
-            for i = 0, maxPlayers + 1 do
-                local idx = 1 + (i % #VAN_SEATS)
-                local v = VAN_SEATS[idx]
-                local seat = CreateVanSeat(van, v, seats)
-                table.insert(seats, seat)
+        ents.WaitForEntityByName(
+            "relay_vanride_endcrash_1",
+            function(ent)
+                -- Unlock after.
+                ent:Fire("AddOutput", "OnTrigger VanSeat,Unlock,,0.01,-1")
             end
+        )
 
-            van.VanSeats = seats
-        end)
+        ents.WaitForEntityByName(
+            "Van",
+            function(ent)
+                local van = ent
+                self.Van = van
+                if ent.VanSeats ~= nil then return end
+                local seats = {}
+                local maxPlayers = game.MaxPlayers()
+                for i = 0, maxPlayers + 1 do
+                    local idx = 1 + (i % #VAN_SEATS)
+                    local v = VAN_SEATS[idx]
+                    local seat = CreateVanSeat(van, v, seats)
+                    table.insert(seats, seat)
+                end
+
+                van.VanSeats = seats
+            end
+        )
 
         -- -6431.318848 6006.155273 -33.239578
         local carTrigger = ents.Create("trigger_once")
         carTrigger:SetupTrigger(Vector(-6431.318848, 6006.155273, -100.239578), Angle(0, 0, 0), Vector(-150, -150, 0), Vector(150, 150, 200))
         carTrigger:SetKeyValue("spawnflags", tostring(SF_TRIGGER_ALLOW_CLIENTS + SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES))
         carTrigger:SetKeyValue("teamwait", "1")
-
         carTrigger.OnTrigger = function(trigger)
             self.PlacePlayerInVan = true
             TriggerOutputs({{"counter_alyx_van", "Add", 0.0, "1"}})
@@ -281,12 +316,10 @@ end
 
 function MAPSCRIPT:FindUseEntity(ply, engineEnt)
     local van = self.Van
-
     if engineEnt == van and IsValid(van) then
         local saveTable = van:GetSaveTable()
         local driver = saveTable.m_hPlayer
         if not IsValid(driver) then return nil end
-
         for _, v in pairs(van.VanSeats) do
             if not IsValid(v:GetDriver()) then
                 DbgPrint("Giving different seat: " .. tostring(v))
