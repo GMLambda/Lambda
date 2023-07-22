@@ -32,6 +32,12 @@ MAPSCRIPT.EntityFilterByName = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
+        -- This NPC should not can be killed by player.
+        ents.WaitForEntityByName("citizen_2_ct_mkr", function(ent)
+            ent:ClearOutputs()
+            ent:Fire("AddOutput", "OnSpawnNPC citizen_2_ct_aiss_1,StartSchedule,,0.1,1")
+        end)
+
         -- 2894.431396 1052.031250 64.031250
         local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(2843.645508, 1058.373169, 64.031250), Angle(0, 0, 0))
         checkpoint1:SetVisiblePos(Vector(2904.702881, 1060.976196, 64.031250))

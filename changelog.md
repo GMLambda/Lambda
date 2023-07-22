@@ -2,12 +2,16 @@
 - Improved: env_screenoverlay now works like behavior from HL2.
 - Improved: d1_trainstation_05: Breen now plays the expected cutscene.
 - Improved: d3_citadel_03: Reworked confiscation field area to make it process faster.
+- Improved: d3_c17_10b map script.
 - Fixed: env_screenoverlay causing error on some unexpected cases.
 - Fixed: Open settings menu and close it too fast will leave a slider bar at top of screen.
 - Fixed: d2_coast_10: Vehicle not being removed after parking it in the warehouse.
 - Fixed: d3_citadel_03: A lua error at the beginning of the round and a rare potential soft-lock.
 - Fixed: d3_breen_01: Breen can get stuck on the chair making the cutscene a bit slower.
 - Fixed: Default difficulty is now "Normal" rather than "Very easy"
+- Fixed: d1_canals_07: Metrocop didn't use the turret.
+- Fixed: d3_c17_06b: Player can kill a friendly NPC and probability trigger a soft-lock.
+- Fixed: d3_c17_10b: Player died in laser room, make the map unable to proceed.
 
 0.9.17
 - Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
