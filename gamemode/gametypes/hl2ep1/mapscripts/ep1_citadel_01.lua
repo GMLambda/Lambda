@@ -3,7 +3,6 @@ if SERVER then
 end
 
 local MAPSCRIPT = {}
-
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_physcannon"},
     Ammo = {},
@@ -17,10 +16,30 @@ MAPSCRIPT.InputFilters = {
 }
 
 MAPSCRIPT.EntityFilterByClass = {}
-
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
     ["trigger_start_rollertraining"] = true
+}
+
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-4860.789063, 3407.795166, 2592.708008),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(-4860.789063, 3407.795166, 2592.708008),
+            Mins = Vector(-100, -250, 0),
+            Maxs = Vector(100, 250, 100)
+        }
+    },
+    {
+        Pos = Vector(-4892, 1488, 2471),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-4856, 1491.14, 2494.08),
+            Mins = Vector(-174, -140, -60),
+            Maxs = Vector(174, 140, 60)
+        }
+    }
 }
 
 function MAPSCRIPT:PostInit()
@@ -32,10 +51,12 @@ function MAPSCRIPT:PostInit()
         alyxStopFollow:SetKeyValue("spawnflags", "3")
         alyxStopFollow:Fire("AddOutput", "OnTrigger follow_alyx,Deactivate,,0.0,-1")
         alyxStopFollow:Fire("AddOutput", "OnTrigger lambda_start_rollertraining,Enable,,0.0,-1")
-
-        ents.WaitForEntityByName("counter_rollerdoor_close", function(ent)
-            ent:SetKeyValue("max", "3")
-        end)
+        ents.WaitForEntityByName(
+            "counter_rollerdoor_close",
+            function(ent)
+                ent:SetKeyValue("max", "3")
+            end
+        )
 
         local checkpointTrigger1 = ents.Create("trigger_once")
         checkpointTrigger1:SetupTrigger(Vector(-4727.891113, 7711.114258, 2520.031250), Angle(0, 0, 0), Vector(-240, -200, 0), Vector(200, 200, 180))
@@ -46,73 +67,86 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger1:Fire("AddOutput", "OnTrigger follow_alyx,Deactivate,,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger counter_rollerdoor_close,Add,1,0.0,-1")
         checkpointTrigger1:Fire("AddOutput", "OnTrigger alyx,StartScripting,,0.01,-1")
-
         checkpointTrigger1.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(Vector(-4721.599121, 7732.462891, 2520.031250), activator)
         end
 
         -- Not sure why players should activate this.
-        ents.WaitForEntityByName("trigger_player_holdmine", function(ent)
-            ent:SetKeyValue("spawnflags", "10")
-            ent:SetKeyValue("filtername", "filter_rollermine")
-        end)
-
-        -- -4860.789063 3407.795166 2592.708008
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-4860.789063, 3407.795166, 2592.708008), Angle(0, 45, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-4860.789063, 3407.795166, 2592.708008), Angle(0, 0, 0), Vector(-100, -250, 0), Vector(100, 250, 100))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-4892, 1488, 2471), Angle(0, 0, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(-4856, 1491.14, 2494.08), Angle(0, 0, 0), Vector(-174, -140, -60), Vector(174, 140, 60))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
-        GAMEMODE:WaitForInput("logic_weapon_strip_physcannon_end1", "Trigger", function(ent)
-            for k, v in pairs(ents.FindByClass("weapon_physcannon")) do
-                v:Supercharge()
+        ents.WaitForEntityByName(
+            "trigger_player_holdmine",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "10")
+                ent:SetKeyValue("filtername", "filter_rollermine")
             end
-        end)
+        )
+
+        GAMEMODE:WaitForInput(
+            "logic_weapon_strip_physcannon_end1",
+            "Trigger",
+            function(ent)
+                for k, v in pairs(ents.FindByClass("weapon_physcannon")) do
+                    v:Supercharge()
+                end
+            end
+        )
 
         -- Try to ignore the player so they all fall off.
-        ents.WaitForEntityByName("soldier_assault1_soldier1", function(ent)
-            ent:SetKeyValue("spawnflags", "17940")
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_soldier1",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "17940")
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_soldier2", function(ent)
-            ent:SetKeyValue("spawnflags", "17940")
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_soldier2",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "17940")
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_soldier3", function(ent)
-            ent:SetKeyValue("spawnflags", "17940")
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_soldier3",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "17940")
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_soldier4", function(ent)
-            ent:SetKeyValue("spawnflags", "17940")
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_soldier4",
+            function(ent)
+                ent:SetKeyValue("spawnflags", "17940")
+            end
+        )
 
         -- Move slightly away from player
-        ents.WaitForEntityByName("soldier_assault1_assault1", function(ent)
-            ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_assault1",
+            function(ent)
+                ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_assault2", function(ent)
-            ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_assault2",
+            function(ent)
+                ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_assault3", function(ent)
-            ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_assault3",
+            function(ent)
+                ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
+            end
+        )
 
-        ents.WaitForEntityByName("soldier_assault1_assault4", function(ent)
-            ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
-        end)
+        ents.WaitForEntityByName(
+            "soldier_assault1_assault4",
+            function(ent)
+                ent:SetPos(Vector(-4846.420410, 4386.058594, 2605.789307))
+            end
+        )
 
         -- Unnamed trigger.
         for _, stripTrigger in pairs(ents.FindByPos(Vector(-2658, 1377, 2576.86), "trigger_once")) do
@@ -121,17 +155,20 @@ function MAPSCRIPT:PostInit()
         end
 
         -- We have to take away all physcannons except one.
-        GAMEMODE:WaitForInput("weapon_strip1", "Enable", function(ent)
-            local lastPly = nil
+        GAMEMODE:WaitForInput(
+            "weapon_strip1",
+            "Enable",
+            function(ent)
+                local lastPly = nil
+                for _, v in pairs(player.GetAll()) do
+                    if lastPly ~= nil then
+                        lastPly:StripWeapon("weapon_physcannon")
+                    end
 
-            for _, v in pairs(player.GetAll()) do
-                if lastPly ~= nil then
-                    lastPly:StripWeapon("weapon_physcannon")
+                    lastPly = v
                 end
-
-                lastPly = v
             end
-        end)
+        )
 
         for _, v in pairs(ents.FindByPos(Vector(-2408, 1332, 2560), "func_brush", "clip_combineshieldwall3")) do
             v:SetName("clip_combineshieldwall3_exit")
@@ -145,10 +182,13 @@ function MAPSCRIPT:PostInit()
             v:SetName("model_combineshieldwall3_exit")
         end
 
-        ents.WaitForEntityByName("relay_combineshieldwall2_off1", function(ent)
-            ent:Fire("AddOutput", "OnTrigger clip_combineshieldwall3_exit,Disable,,0.0,-1")
-            ent:Fire("AddOutput", "OnTrigger model_combineshieldwall3_exit,Skin,1,0.0,-1")
-        end)
+        ents.WaitForEntityByName(
+            "relay_combineshieldwall2_off1",
+            function(ent)
+                ent:Fire("AddOutput", "OnTrigger clip_combineshieldwall3_exit,Disable,,0.0,-1")
+                ent:Fire("AddOutput", "OnTrigger model_combineshieldwall3_exit,Skin,1,0.0,-1")
+            end
+        )
 
         local stripTrigger = ents.Create("trigger_once")
         stripTrigger:SetupTrigger(Vector(-2684.712891, 1377.693115, 2464.031250), Angle(0, 0, 0), Vector(-200, -100, 0), Vector(230, 100, 180))

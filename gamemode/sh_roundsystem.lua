@@ -553,6 +553,10 @@ function GM:OnNewGame()
             self.MapScript:PostInit()
         end
 
+        if self.MapScript.Checkpoints ~= nil then
+            self:CreateCheckpointsFromData(self.MapScript.Checkpoints)
+        end
+
         -- Notify clients.
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
         self:SetupRoundRelevantObjects()

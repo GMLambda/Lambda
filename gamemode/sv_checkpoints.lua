@@ -93,6 +93,52 @@ function GM:CreateCheckpoint(pos, ang, dynamic)
     return cp
 end
 
+local function CreateCheckpointWithTrigger(data)
+    if data == nil then
+        error("Input is nil")
+    end
+
+    if data.Pos == nil then
+        error("Missing Pos in data")
+    end
+
+    if data.Ang == nil then
+        error("Missing Ang in data")
+    end
+
+    local triggerData = data.Trigger
+
+    if triggerData == nil then
+        error("Missing Trigger data")
+    end
+
+    if triggerData.Pos == nil then
+        error("Missing Trigger.Pos in data")
+    end
+
+    if triggerData.Mins == nil then
+        error("Missing Trigger.Mins in data")
+    end
+
+    if triggerData.Maxs == nil then
+        error("Missing Trigger.Maxs in data")
+    end
+
+    local checkpoint = GAMEMODE:CreateCheckpoint(data.Pos, data.Ang)
+    local checkpointTrigger = ents.Create("trigger_once")
+    checkpointTrigger:SetupTrigger(triggerData.Pos, triggerData.Ang or Angle(0, 0, 0), triggerData.Mins, triggerData.Maxs)
+
+    checkpointTrigger.OnTrigger = function(_, activator)
+        GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
+    end
+end
+
+function GM:CreateCheckpointsFromData(data)
+    for _, cp in pairs(data) do
+        CreateCheckpointWithTrigger(cp)
+    end
+end
+
 function GM:SetPlayerCheckpoint(checkpoint, activator, gridData)
     local gameType = self:GetGameType()
     if gameType.UsingCheckpoints == false then return end
