@@ -12,6 +12,7 @@
 - Fixed: d1_canals_07: Metrocop didn't use the turret.
 - Fixed: d3_c17_06b: Player can kill a friendly NPC and probability trigger a soft-lock.
 - Fixed: d3_c17_10b: Player died in laser room, make the map unable to proceed.
+- Fixed: Gravity gun animation doesn't properly works when breaking a ammo crate.
 
 0.9.17
 - Improved: Addon compatibility, Lambda will attempt to recover if there are conflicts and warns about it.
