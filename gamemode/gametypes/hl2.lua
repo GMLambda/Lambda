@@ -152,6 +152,10 @@ function GAMETYPE:ShouldRestartRound()
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
+    if wep:IsFlagSet(FL_DISSOLVING) then
+        return false -- Do not let player E pick a dissolving weapon.
+    end
+
     local class = wep:GetClass()
 
     if class == "weapon_frag" then
