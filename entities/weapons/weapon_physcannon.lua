@@ -1441,12 +1441,12 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
 
         owner:SimulateGravGunPickup(ent, true)
         local phys = ent:GetPhysicsObjectNum(0)
-        if IsValid(phys) ~= true then return end
-
-        if phys:HasGameFlag(FVPHYSICS_CONSTRAINT_STATIC) and ent:IsVehicle() then
-            fwd.x = 0
-            fwd.y = 0
-            fwd.z = 0
+        if IsValid(phys) then
+            if phys:HasGameFlag(FVPHYSICS_CONSTRAINT_STATIC) and ent:IsVehicle() then
+                fwd.x = 0
+                fwd.y = 0
+                fwd.z = 0
+            end
         end
 
         -- if ( !Pickup_ShouldPuntUseLaunchForces( pEntity, PHYSGUN_FORCE_PUNTED ) )
