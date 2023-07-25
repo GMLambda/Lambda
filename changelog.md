@@ -1,3 +1,5 @@
+0.9.19 (in development)
+
 0.9.18
 - Improved: env_screenoverlay now works like behavior from HL2.
 - Improved: d1_trainstation_05: Breen now plays the expected cutscene.
