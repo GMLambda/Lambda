@@ -1080,16 +1080,6 @@ if SERVER then
             net.Send(ply)
         end
     end
-else -- CLIENT
-    function GM:CalcView(ply, pos, angles, fov)
-        local view = {}
-        view.origin = pos
-        view.angles = angles
-        view.fov = fov
-        view.drawviewer = false
-
-        return view
-    end
 end
 
 local GEIGER_DELAY = 0.25
