@@ -201,7 +201,6 @@ function GM:CalcViewModelView(wep, vm, oldPos, oldAng, vm_origin, vm_angles)
     end
 
     if not IsValid(wep) then return end
-
     -- Controls the position of all viewmodels
     local func = wep.GetViewModelPosition
     if func ~= nil and isfunction(func) then
@@ -218,11 +217,7 @@ function GM:CalcViewModelView(wep, vm, oldPos, oldAng, vm_origin, vm_angles)
         vm_angles = ang or vm_angles
     end
 
-    if wep:IsScripted() then 
-        -- Skip applying view bob/lag for scripted weapon.
-        return vm_origin, vm_angles
-    end
-    
+    if wep:IsScripted() then return vm_origin, vm_angles end -- Skip applying view bob/lag for scripted weapon.
     local newPos = oldPos
     local newAng = oldAng
     newPos, newAng = self:CalcViewModelBob(wep, vm, newPos, newAng, vm_origin, vm_angles)
@@ -319,8 +314,8 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
             return hook.Run("CalcVehicleView", vehicle, ply, view)
         elseif IsValid(wep) and wep.CalcView ~= nil and isfunction(wep.CalcView) then
-            local origin, angles, fov = wep:CalcView(ply, Vector(view.origin), Angle(view.angles), view.fov)
-            view.origin, view.angles, view.fov = origin or view.origin, angles or view.angles, fov or view.fov
+            local origin, angles, fov2 = wep:CalcView(ply, Vector(view.origin), Angle(view.angles), view.fov)
+            view.origin, view.angles, view.fov = origin or view.origin, angles or view.angles, fov2 or view.fov
         end
     end
 
