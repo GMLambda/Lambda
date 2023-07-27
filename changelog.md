@@ -1,4 +1,6 @@
 0.9.19 (in development)
+- Fixed: SWEPs that use custom CalcView not working correctly.
+- Fixed: Hide the builtin crosshair when SWEPs have custom ones.
 
 0.9.18
 - Improved: env_screenoverlay now works like behavior from HL2.

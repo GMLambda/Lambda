@@ -69,6 +69,13 @@ function GM:DrawDynamicCrosshair(inRT)
     local ply = LocalPlayer()
     local movementRecoil = 0
 
+    local wep = ply:GetActiveWeapon()
+    if IsValid(wep) then
+        if wep.DrawCrosshair == false then
+            return
+        end
+    end
+
     if dynamic == true and IsValid(ply) then
         if inRT == true then
             local t = CurTime() * 2
