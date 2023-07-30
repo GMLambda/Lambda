@@ -4,7 +4,6 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
-
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon"},
     Ammo = {
@@ -18,40 +17,46 @@ MAPSCRIPT.DefaultLoadout = {
 
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
-
 MAPSCRIPT.EntityFilterByName = {
     ["player_spawn_template"] = true
+}
+
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(2643.776611, -1465.673584, -3839.968750),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(3007.881836, -1393.500732, -3783.968750),
+            Ang = Angle(0, 0, 0),
+            Mins = Vector(-50, -50, 0),
+            Maxs = Vector(50, 50, 70),
+        }
+    },
+    {
+        Pos = Vector(2018.717896, -1513.990112, -3839.968750),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(2029.538086, -1425.406128, -3839.968750),
+            Ang = Angle(0, 0, 0),
+            Mins = Vector(-90, -100, 0),
+            Maxs = Vector(70, 200, 50),
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
     if SERVER then
         -- 2849.690674 -1397.864624 -3839.968750
-        ents.WaitForEntityByName("null_filter", function(ent)
-            ent:Remove()
-        end)
-
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(2643.776611, -1465.673584, -3839.968750), Angle(0, 90, 0))
-        checkpoint1:SetVisiblePos(Vector(3005.009521, -1394.904053, -3783.968750))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(3007.881836, -1393.500732, -3783.968750), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 70))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(2018.717896, -1513.990112, -3839.968750), Angle(0, 90, 0))
-        checkpoint2:SetVisiblePos(Vector(2029.538086, -1425.406128, -3839.968750))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(2029.538086, -1425.406128, -3839.968750), Angle(0, 0, 0), Vector(-90, -100, 0), Vector(70, 200, 50))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
+        ents.WaitForEntityByName(
+            "null_filter",
+            function(ent)
+                ent:Remove()
+            end
+        )
     end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-    --DbgPrint("PostPlayerSpawn")
 end
 
 return MAPSCRIPT

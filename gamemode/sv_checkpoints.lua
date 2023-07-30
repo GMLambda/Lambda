@@ -20,7 +20,6 @@ local VEHICLE_HULL_Z = 100
 local CHECKPOINT_VEHICLE_MINS = Vector(-(VEHICLE_HULL_X / 2), -(VEHICLE_HULL_Y / 2), 0)
 local CHECKPOINT_VEHICLE_MAXS = Vector(VEHICLE_HULL_X / 2, VEHICLE_HULL_Y / 2, VEHICLE_HULL_Z)
 local MAP_MAX = 16000
-
 function GM:GetGridData(x, y, z)
     local posX = math.floor(x / GRID_SIZE) * GRID_SIZE
     local posY = math.floor(y / GRID_SIZE) * GRID_SIZE
@@ -33,7 +32,6 @@ function GM:GetGridData(x, y, z)
     local gridZ = math.floor(z / GRID_SIZE_Z)
     self.GridData = self.GridData or {}
     local mapZ = self.GridData[gridZ]
-
     if mapZ == nil then
         mapZ = {}
         self.GridData[gridZ] = mapZ
@@ -42,7 +40,6 @@ function GM:GetGridData(x, y, z)
     local key = bit.bor(bit.lshift(gridX, 16), gridY)
     --print(gridX, gridY, gridZ, key)
     local data = mapZ[key]
-
     if data == nil then
         data = {}
         data.gridX = gridX
@@ -107,7 +104,6 @@ local function CreateCheckpointWithTrigger(data)
     end
 
     local triggerData = data.Trigger
-
     if triggerData == nil then
         error("Missing Trigger data")
     end
@@ -125,9 +121,12 @@ local function CreateCheckpointWithTrigger(data)
     end
 
     local checkpoint = GAMEMODE:CreateCheckpoint(data.Pos, data.Ang)
+    if data.VisiblePos ~= nil then
+        checkpoint:SetVisiblePos(data.VisiblePos)
+    end
+
     local checkpointTrigger = ents.Create("trigger_once")
     checkpointTrigger:SetupTrigger(triggerData.Pos, triggerData.Ang or Angle(0, 0, 0), triggerData.Mins, triggerData.Maxs)
-
     checkpointTrigger.OnTrigger = function(_, activator)
         GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
     end
@@ -142,13 +141,14 @@ end
 function GM:SetPlayerCheckpoint(checkpoint, activator, gridData)
     local gameType = self:GetGameType()
     if gameType.UsingCheckpoints == false then return end
-
     if istable(checkpoint) then
         checkpoint = self:CreatePlayerCheckpoint(checkpoint)
     elseif isvector(checkpoint) then
-        checkpoint = self:CreatePlayerCheckpoint({
-            Pos = checkpoint
-        })
+        checkpoint = self:CreatePlayerCheckpoint(
+            {
+                Pos = checkpoint
+            }
+        )
     end
 
     DbgPrint("Assigned new checkpoint to: " .. tostring(checkpoint))
@@ -157,11 +157,9 @@ function GM:SetPlayerCheckpoint(checkpoint, activator, gridData)
     self.CurrentCheckpointPos = cpPos
     gridData = gridData or self:GetGridData(cpPos.x, cpPos.y, cpPos.z)
     gridData.checkpoint = true
-
     if IsValid(checkpoint) and checkpoint:GetClass() == "lambda_checkpoint" then
         checkpoint:SetActivated()
         self:ResetPlayerRespawnQueue()
-
         if IsValid(activator) and activator:IsPlayer() then
             self:AddHint("Checkpoint activated", 10, activator)
         end
@@ -174,7 +172,6 @@ end
 
 function GM:UpdateQueuedVehicleCheckpoints()
     self.VehicleCheckpointQueue = self.VehicleCheckpointQueue or {}
-
     while #self.VehicleCheckpointQueue > 0 do
         self.VehicleCheckpoint = self.VehicleCheckpointQueue[1]
         DbgPrint("Assigned vehicle checkpoint (Queued)")
@@ -193,14 +190,16 @@ local ENEMY_CLASS_WHITELIST = {
 }
 
 local function checkDirectionalSpot(pos, offset, filter)
-    local tr = util.TraceHull({
-        start = pos,
-        endpos = pos + offset,
-        filter = filter,
-        mins = CHECKPOINT_PLAYER_MINS,
-        maxs = CHECKPOINT_PLAYER_MAXS,
-        mask = MASK_SOLID
-    })
+    local tr = util.TraceHull(
+        {
+            start = pos,
+            endpos = pos + offset,
+            filter = filter,
+            mins = CHECKPOINT_PLAYER_MINS,
+            maxs = CHECKPOINT_PLAYER_MAXS,
+            mask = MASK_SOLID
+        }
+    )
     --debugoverlay.Box(pos + offset, CHECKPOINT_PLAYER_MINS, CHECKPOINT_PLAYER_MAXS, 5, Color( 255, 255, 255, 50 ))
 
     return tr.Fraction == 1
@@ -216,7 +215,6 @@ function GM:UpdateCheckoints()
     local plys = {}
     local centerPos = Vector(0, 0, 0)
     local bestPos
-
     for _, v in pairs(util.GetAllPlayers()) do
         local ply = v
         if ply:Alive() == false then continue end
@@ -225,7 +223,6 @@ function GM:UpdateCheckoints()
         local filter
         local checkpointMins
         local checkpointMaxs
-
         if not IsValid(vehicle) then
             if v:OnGround() == false then continue end
             local groundEnt = ply:GetGroundEntity()
@@ -244,7 +241,6 @@ function GM:UpdateCheckoints()
         local contents = util.PointContents(pos - Vector(0, 0, 0))
         local isSlime = bit.band(contents, CONTENTS_SLIME) ~= 0
         local isWater = bit.band(contents, CONTENTS_WATER) ~= 0
-
         if isSlime == true then
             DbgPrint("On slime, can't use checkpoint.")
             continue
@@ -257,28 +253,30 @@ function GM:UpdateCheckoints()
 
         centerPos = centerPos + pos
         local trPos = pos -- We add the max step height
-
-        local tr = util.TraceHull({
-            start = trPos + Vector(0, 0, 1),
-            endpos = trPos,
-            filter = filter,
-            mins = checkpointMins,
-            maxs = checkpointMaxs,
-            mask = MASK_SOLID
-        })
+        local tr = util.TraceHull(
+            {
+                start = trPos + Vector(0, 0, 1),
+                endpos = trPos,
+                filter = filter,
+                mins = checkpointMins,
+                maxs = checkpointMaxs,
+                mask = MASK_SOLID
+            }
+        )
 
         --debugoverlay.Box(tr.HitPos, checkpointMins, checkpointMaxs, 5, Color( 255, 0, 0, 100 ))
         if tr.Fraction == 1 and tr.HitSky == false and tr.HitWorld == false then
-            tr = util.TraceLine({
-                start = pos,
-                endpos = pos - Vector(0, 0, 128),
-                filter = filter,
-                mask = MASK_SOLID
-            })
+            tr = util.TraceLine(
+                {
+                    start = pos,
+                    endpos = pos - Vector(0, 0, 128),
+                    filter = filter,
+                    mask = MASK_SOLID
+                }
+            )
 
             --debugoverlay.Box(tr.HitPos, Vector(-1, -1, -1), Vector(1, 1, 1), 5, Color( 255, 255, 255, 100 ))
             local dist = pos:Distance(tr.HitPos)
-
             if tr.HitWorld == true and dist <= 45 then
                 table.insert(plys, v)
             end
@@ -295,11 +293,9 @@ function GM:UpdateCheckoints()
     -- See which player is closest to the center.
     local nearestCenter = 999999
     local selectedPlayer = nil
-
     for _, v in pairs(plys) do
         local pos = v:GetPos()
         local dist = pos:Distance(centerPos)
-
         if dist < nearestCenter then
             bestPos = pos
             nearestCenter = dist
@@ -308,7 +304,6 @@ function GM:UpdateCheckoints()
     end
 
     local data = self:GetGridData(bestPos.x, bestPos.y, bestPos.z)
-
     if data.checkpoint == true then
         DbgPrint("Map section already has checkpoint.")
 
@@ -318,7 +313,6 @@ function GM:UpdateCheckoints()
     -- Only update if players have enough distance to the previous checkpoint.
     if IsValid(self.CurrentCheckpoint) then
         local dist = self.CurrentCheckpoint:GetPos():Distance(bestPos)
-
         if dist < MIN_CHECKPOINT_DISTANCE then
             DbgPrint("Checkpoint distance condition not met", dist)
 
@@ -329,13 +323,11 @@ function GM:UpdateCheckoints()
     -- Make sure we don't have a spawnpoint in enemy terrority.
     local entsInGrid = ents.FindInSphere(bestPos, MIN_ENEMY_DISTANCE)
     local enemyNearby = false
-
     for _, v in pairs(entsInGrid) do
         local entPos = v:GetPos()
         if entPos:Distance(bestPos) >= MIN_ENEMY_DISTANCE then continue end
         local entClass = v:GetClass()
         local npcClass = nil
-
         if v:IsNPC() == true then
             npcClass = entClass
         end
@@ -361,7 +353,6 @@ function GM:UpdateCheckoints()
         local vehicle = selectedPlayer:GetVehicle()
         local ang = Angle(0, 0, 0)
         local vehiclePos = nil
-
         if IsValid(vehicle) and vehicle.AllowVehicleCheckpoint == true then
             -- Check if we can place it right
             local plyRight = vehicle:GetRight()
@@ -370,7 +361,6 @@ function GM:UpdateCheckoints()
             local vehicleAng = vehicle:GetAngles()
             local len = 80
             vehiclePos = vehicle:GetPos() + Vector(0, 0, 10)
-
             -- NOTE: Order was handpicked, do not change it, having players infront should be the last resort.
             if checkDirectionalSpot(vehiclePos, plyRight * -len, filter) == true then
                 bestPos = vehiclePos + plyRight * -len
@@ -390,7 +380,6 @@ function GM:UpdateCheckoints()
         end
 
         ang = selectedPlayer:GetAngles()
-
         if vehiclePos ~= nil then
             ang = (vehiclePos - bestPos):Angle()
         end
@@ -403,15 +392,12 @@ end
 
 function GM:SetVehicleCheckpoint(pos, ang)
     local delaySwitch = false
-
     if self.LastSelectedSpawnPoint ~= nil and IsValid(self.LastSelectedSpawnPoint) then
         local checkpointPos = self.LastSelectedSpawnPoint:GetPos()
-
         for _, v in pairs(util.GetAllPlayers()) do
             if v:Alive() == false or v:InVehicle() == true then continue end
             local plyPos = v:GetPos()
             local dist = plyPos:Distance(checkpointPos)
-
             if dist < 500 then
                 delaySwitch = true
                 break

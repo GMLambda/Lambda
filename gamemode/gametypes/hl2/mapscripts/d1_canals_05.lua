@@ -23,26 +23,31 @@ MAPSCRIPT.EntityFilterByName = {
     ["relay_rockfall_start"] = true -- Don't do that, its trivial.
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(4149.820313, 3446.334229, -466.530853),
+        Ang = Angle(0, -66, 0),
+        VisiblePos = Vector(4240.543945, 3220.031982, -473.430939),
+        Trigger = {
+            Pos = Vector(4236.846191, 3261.946289, -474.814972),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180),
+        }
+    },
+    {
+        Pos = Vector(7352.527344, 1597.768555, -447.968750),
+        Ang = Angle(0, -90, 0),
+        VisiblePos = Vector(6758.199219, 1572.104248, -447.968750),
+        Trigger = {
+            Pos = Vector(6770.862793, 1569.191040, -447.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180),
+        }
+    },
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(4149.820313, 3446.334229, -466.530853), Angle(0, -66, 0))
-        checkpoint1:SetVisiblePos(Vector(4240.543945, 3220.031982, -473.430939))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(4236.846191, 3261.946289, -474.814972), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(7352.527344, 1597.768555, -447.968750), Angle(0, -90, 0))
-        checkpoint2:SetVisiblePos(Vector(6758.199219, 1572.104248, -447.968750))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(6770.862793, 1569.191040, -447.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
         ents.WaitForEntityByName("rotate_guncave_exit_wheel", function(ent)
             ent:Fire("Unlock")
             ent:Fire("AddOutput", "OnPressed relay_airboat_gateopen,Trigger")

@@ -5,7 +5,6 @@ end
 local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
-
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol"},
     Ammo = {
@@ -17,37 +16,42 @@ MAPSCRIPT.DefaultLoadout = {
 
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
-
 MAPSCRIPT.EntityFilterByName = {
     ["spawnitems_template"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-1183.380615, 6344.419922, -59.326172),
+        Ang = Angle(0, -180, 0),
+        Trigger = {
+            Pos = Vector(-1183.380615, 6344.419922, 6.326172),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    {
+        Pos = Vector(-3002.406494, 7870.711426, 12.031250),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-3002.406494, 7870.711426, 48.031250),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    {
+        Pos = Vector(2104.908447, 5759.881348, -95.968750),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(2104.908447, 5759.881348, -95.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1183.380615, 6344.419922, -59.326172), Angle(0, -180, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-1183.380615, 6344.419922, 6.326172), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-3002.406494, 7870.711426, 12.031250), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-3002.406494, 7870.711426, 48.031250), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(2104.908447, 5759.881348, -95.968750), Angle(0, 45, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(2104.908447, 5759.881348, -95.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
         local npcMaker1 = ents.Create("npc_maker")
         npcMaker1:SetPos(Vector(-2174.593262, 9086.971680, 288.031250))
         npcMaker1:SetAngles(Angle(0, 180, 0))
@@ -71,45 +75,52 @@ function MAPSCRIPT:PostInit()
         npcMaker2:SetKeyValue("Radius", "200")
         npcMaker2:SetName("lambda_npc_maker2")
         npcMaker2:Spawn()
-
         -- gallery_destgroup_1
-        ents.WaitForEntityByName("gallery_destgroup_1", function(ent)
-            ent:SetPos(Vector(-47.880901, 6160.045898, -58.842937))
-        end, true)
+        ents.WaitForEntityByName(
+            "gallery_destgroup_1",
+            function(ent)
+                ent:SetPos(Vector(-47.880901, 6160.045898, -58.842937))
+            end, true
+        )
 
         -- room3_cop
         -- Lets not wait for the explosion, thats boring.
-        ents.WaitForEntityByName("room3_cop", function(ent)
-            ent:Fire("AddOutput", "OnDeath gallerycop_maker2,Enable")
-            ent:Fire("AddOutput", "OnDeath gallerycop_maker3,Enable")
-        end)
+        ents.WaitForEntityByName(
+            "room3_cop",
+            function(ent)
+                ent:Fire("AddOutput", "OnDeath gallerycop_maker2,Enable")
+                ent:Fire("AddOutput", "OnDeath gallerycop_maker3,Enable")
+            end
+        )
 
-        ents.WaitForEntityByName("massacre_initiate_trigger", function(ent)
-            ent:Fire("AddOutput", "OnTrigger gallery_start_relay,Trigger,,0.0")
-            ent:Fire("AddOutput", "OnTrigger gallerycop_maker1,Enable,,0.0")
-            ent:Fire("AddOutput", "OnTrigger lambda_npc_maker2,Enable,,0.0")
-        end)
+        ents.WaitForEntityByName(
+            "massacre_initiate_trigger",
+            function(ent)
+                ent:Fire("AddOutput", "OnTrigger gallery_start_relay,Trigger,,0.0")
+                ent:Fire("AddOutput", "OnTrigger gallerycop_maker1,Enable,,0.0")
+                ent:Fire("AddOutput", "OnTrigger lambda_npc_maker2,Enable,,0.0")
+            end
+        )
 
         -- -2849.247314 8805.366211 47.039879
         local trigger2 = ents.Create("trigger_once")
         trigger2:SetupTrigger(Vector(-2849.247314, 8805.366211, 47.039879), Angle(0, 0, 0), Vector(-150, -150, 0), Vector(150, 150, 180))
-
         trigger2.OnTrigger = function()
             npcMaker1:Fire("Enable")
             npcMaker2:Fire("Enable")
         end
 
         local BridgePositions = {Vector(-2809.293701, 6795.291992, 144.031250), Vector(-2875.369141, 6793.270996, 144.031250), Vector(-2960.664307, 6790.913574, 144.031250), Vector(-3056.151855, 6790.148438, 144.031250), Vector(-3138.704102, 6790.096191, 144.031250)}
-
         local function SendNPCToBridge(npc)
             local bridgePos = table.Random(BridgePositions)
-
-            util.RunDelayed(function()
-                if not IsValid(npc) then return end
-                npc:SetLastPosition(bridgePos)
-                npc:SetSchedule(SCHED_FORCED_GO_RUN)
-                DbgPrint("Sending NPC to Bridge")
-            end, CurTime() + 1)
+            util.RunDelayed(
+                function()
+                    if not IsValid(npc) then return end
+                    npc:SetLastPosition(bridgePos)
+                    npc:SetSchedule(SCHED_FORCED_GO_RUN)
+                    DbgPrint("Sending NPC to Bridge")
+                end, CurTime() + 1
+            )
         end
 
         -- -2956.739746 6570.918945 -95.968781
@@ -126,7 +137,6 @@ function MAPSCRIPT:PostInit()
         --npcMaker4:SetKeyValue("Radius", "300")
         npcMaker3:SetName("lambda_npc_maker3")
         npcMaker3:Spawn()
-
         npcMaker3.OnSpawnNPC = function(s, ent)
             SendNPCToBridge(ent)
         end
@@ -145,7 +155,6 @@ function MAPSCRIPT:PostInit()
         --npcMaker5:SetKeyValue("Radius", "300")
         npcMaker4:SetName("lambda_npc_maker4")
         npcMaker4:Spawn()
-
         npcMaker4.OnSpawnNPC = function(s, ent)
             SendNPCToBridge(ent)
         end
@@ -156,11 +165,9 @@ function MAPSCRIPT:PostInit()
         bridgeKillTrigger:SetKeyValue("targetname", "lambda_bridge_killbox")
         bridgeKillTrigger:SetKeyValue("StartDisabled", "1")
         bridgeKillTrigger:SetKeyValue("spawnflags", SF_TRIGGER_ALLOW_NPCS)
-
         bridgeKillTrigger.OnTrigger = function(ent)
             DbgPrint("Killing all bridge NPCs")
             local t = ent:GetTouchingObjects()
-
             for _, v in pairs(t) do
                 DbgPrint("Killing: " .. tostring(v))
                 local world = game.GetWorld()
@@ -178,7 +185,6 @@ function MAPSCRIPT:PostInit()
             prop:AddEffects(EF_NODRAW)
             prop:Spawn()
             local phys = prop:GetPhysicsObject()
-
             if IsValid(phys) then
                 phys:EnableMotion(false)
             end
@@ -187,25 +193,30 @@ function MAPSCRIPT:PostInit()
         -- -2620.882813 5306.772949 -45.723671
         local trigger3 = ents.Create("trigger_once")
         trigger3:SetupTrigger(Vector(-2620.882813, 5306.772949, -45.723671), Angle(0, 0, 0), Vector(-150, -150, 0), Vector(150, 150, 180))
-
         trigger3.OnTrigger = function()
             npcMaker3:Fire("Enable")
             npcMaker4:Fire("Enable")
         end
 
-        ents.WaitForEntityByName("mud_bridge_collapse_relay", function(ent)
-            ent:Fire("AddOutput", "OnTrigger lambda_bridge_killbox,Enable,,0")
-        end)
+        ents.WaitForEntityByName(
+            "mud_bridge_collapse_relay",
+            function(ent)
+                ent:Fire("AddOutput", "OnTrigger lambda_bridge_killbox,Enable,,0")
+            end
+        )
 
-        ents.WaitForEntityByName("mud_bridge_barrels", function(ent)
-            ent:Fire("AddOutput", "OnBreak lambda_npc_maker3,Kill,,0")
-            ent:Fire("AddOutput", "OnBreak lambda_npc_maker4,Kill,,0")
-        end)
+        ents.WaitForEntityByName(
+            "mud_bridge_barrels",
+            function(ent)
+                ent:Fire("AddOutput", "OnBreak lambda_npc_maker3,Kill,,0")
+                ent:Fire("AddOutput", "OnBreak lambda_npc_maker4,Kill,,0")
+            end
+        )
     end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
-    --DbgPrint("PostPlayerSpawn")
 end
 
 return MAPSCRIPT
+--DbgPrint("PostPlayerSpawn")
