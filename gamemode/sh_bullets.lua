@@ -235,6 +235,15 @@ function GM:EntityFireBullets(ent, data)
             class = self.AITranslatedGameWeapons[class] or class
 
             if ent:IsPlayer() then
+                -- Let bullet pass through other players if "Player collision" and "Friendly fire" is both off.
+                if not self:GetSetting("friendlyfire") and not self:GetSetting("playercollision") then
+                    local trace = ent:GetEyeTrace() -- Cheap way, should work in most cases.
+                    local target = trace.Entity
+                    if IsValid(target) and target:IsPlayer() then
+                        data.IgnoreEntity = target -- We can only ignore 1 player max.
+                    end
+                end
+
                 local primaryAmmo = ent:GetAmmoCount(wep:GetPrimaryAmmoType())
                 local secondaryAmmo = ent:GetAmmoCount(wep:GetSecondaryAmmoType())
                 local clip1 = wep:Clip1()
