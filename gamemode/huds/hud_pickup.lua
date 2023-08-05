@@ -7,9 +7,9 @@ GM.PickupHistoryTop = 0
 
 GM.SymbolLookupTable = {
     ["Pistol"] = "p",
-    ["SMG1"] = "\x72",
-    ["SMG1_Grenade"] = "\x5F",
-    ["357"] = "\x71",
+    ["SMG1"] = "r",
+    ["SMG1_Grenade"] = "t",
+    ["357"] = "q",
     ["AR2"] = "u",
     ["AR2AltFire"] = "z",
     ["Buckshot"] = "s",
