@@ -543,3 +543,18 @@ end
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
     gametypes:Add("lambda_base", GAMETYPE)
 end)
+
+if CLIENT then
+    language.Add("World", "Cruel World")
+    language.Add("base_ai", "Creature")
+    language.Add("Valve_Hint_EnterVan", "%+use% ENTER VAN")
+    language.Add("Valve_Hint_ExitVan", "%+use% EXIT VAN")
+    language.Add("Valve_Hint_Crouch", "%+duck% CROUCH")
+    language.Add("Valve_Hint_Sprint", "%+speed% SPRINT")
+    language.Add("Valve_Hint_PushButton", "%+use% PUSH BUTTON")
+    language.Add("Valve_Hint_PicKUp", "%+use% PICK UP")
+    language.Add("Valve_Hint_Interact", "%+use% INTERACT")
+    language.Add("Valve_Hint_GravGun", "%+attack% PUNT OBJECT %+attack2% PULL OBJECT")
+    language.Add("Valve_Hint_CarryTurret", "%+use% OR GRAVITY GUN TO PICK UP TURRET")
+    language.Add("Valve_Hint_CROSSBOW", "%+attack2% CROSSBOW ZOOM")
+end

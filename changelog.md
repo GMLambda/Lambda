@@ -1,4 +1,7 @@
 0.9.20 (in development)
+- Improved: When "Friendly Fire" and "Player Collision" both disabled, bullet can pass through other players.
+- Improved: Lambda no longer override the localization already existing in the game.
+- Fixed: Pickup SMG grenade showing wrong icon.
 
 0.9.19
 - Fixed: SWEPs that use custom CalcView not working correctly.
