@@ -20,7 +20,10 @@ MAPSCRIPT.DefaultLoadout = {
     HEV = true
 }
 
-MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.InputFilters = {
+    ["fog"] = {"SetStartDist"}
+}
+
 MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
