@@ -41,6 +41,19 @@ function MAPSCRIPT:PostInit()
         checkpointTrigger2.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
+
+        -- Remove default elevator player entry trigger
+        ents.WaitForEntityByName("trigger_elevator_player", function(ent)
+            ent:Remove()
+        end)
+
+        -- Add a new one with a teamwait value
+        local elevTrigger = ents.Create("trigger_once")
+        elevTrigger:SetupTrigger(Vector(4644, 3584, 481.5), Angle(0, 0, 0), Vector(-100, -100, -50), Vector(100, 100, 50))
+        elevTrigger:SetKeyValue("teamwait", "1")
+        elevTrigger.OnTrigger = function(trigger)
+            TriggerOutputs({{"counter_elevator", "Add", 0.0, "1"}})
+        end
     end
 end
 
