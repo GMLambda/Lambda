@@ -27,22 +27,42 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
-    /* PLACEHOLDER EXAMPLE CHECKPOINT
     {
-        Pos = Vector(4352, -4260, -119),
+        Pos = Vector(2828, -1360, 68),
         Ang = Angle(0, 90, 0),
         Trigger = {
-            Pos = Vector(4292, -4130, -119),
-            Mins = Vector(-25, -25, 0),
-            Maxs = Vector(25, 25, 100)
+            Pos = Vector(2828, -1360, 68),
+            Mins = Vector(-75, -75, -44),
+            Maxs = Vector(75, 75, 44)
         }
     },
-    */
+    {
+        Pos = Vector(-848, 160, 64),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-848, 160, 64),
+            Mins = Vector(-105, -105, -65),
+            Maxs = Vector(105, 105, 65)
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-        -- do something
+
+        -- Remove counter that closes dowmn the combine wall. Maybe improve this later to close when everyone is here
+        ents.WaitForEntityByName("Crushing_wall_counter", function(ent)
+            ent:Remove()
+        end)
+
+        -- Create checkpoint after turning off gas
+        ents.WaitForEntityByName("relay_hellskitchen_stop", function(ent)
+            ent.OnTrigger = function()
+                local hellscheckpoint = GAMEMODE:CreateCheckpoint(Vector(1568, 1782, 60), Angle(0, 90, 0))
+                GAMEMODE:SetPlayerCheckpoint(hellscheckpoint)
+            end
+        end)
+
     end
 end
 
