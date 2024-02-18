@@ -17,7 +17,6 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
-    ["global_newgame_template_base_items"] = true,
     ["global_newgame_spawner_suit"] = true,
     ["global_newgame_spawner_physcannon"] = true,
     ["global_newgame_spawner_shotgun"] = true,
