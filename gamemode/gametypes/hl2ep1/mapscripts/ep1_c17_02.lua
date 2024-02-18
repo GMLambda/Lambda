@@ -17,10 +17,13 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
-    ["door_blocker"] = true,
-    ["suit"] = true,
-    ["physcannon"] = true,
-    ["weapons"] = true
+    ["global_newgame_template_base_items"] = true,
+    ["global_newgame_spawner_suit"] = true,
+    ["global_newgame_spawner_physcannon"] = true,
+    ["global_newgame_spawner_shotgun"] = true,
+    ["global_newgame_spawner_smg"] = true,
+    ["global_newgame_template_ammo"] = true,
+    ["global_newgame_spawner_ammo"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -28,23 +31,18 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
-    /* PLACEHOLDER EXAMPLE CHECKPOINT
     {
-        Pos = Vector(4352, -4260, -119),
+        Pos = Vector(698, 38, 150),
         Ang = Angle(0, 90, 0),
         Trigger = {
-            Pos = Vector(4292, -4130, -119),
-            Mins = Vector(-25, -25, 0),
-            Maxs = Vector(25, 25, 100)
+            Pos = Vector(698, 38, 200),
+            Mins = Vector(-62, -86, -56),
+            Maxs = Vector(62, 86, 56)
         }
     },
-    */
 }
 
 function MAPSCRIPT:PostInit()
-    if SERVER then
-        -- do stuff
-    end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
