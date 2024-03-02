@@ -20,12 +20,17 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {}
-MAPSCRIPT.EntityFilterByClass = {}
+MAPSCRIPT.EntityFilterByClass = {
+    ["weapon_pistol"] = true -- The weapon is not a part of any spawner template so we have to remove it here
+}
 MAPSCRIPT.EntityFilterByName = {
-    ["door_blocker"] = true,
-    ["suit"] = true,
-    ["physcannon"] = true,
-    ["weapons"] = true
+    ["global_newgame_spawner_suit"] = true,
+    ["global_newgame_spawner_physcannon"] = true,
+    ["global_newgame_spawner_shotgun"] = true,
+    ["global_newgame_spawner_smg"] = true,
+    ["global_newgame_spawner_ar2"] = true,
+    ["global_newgame_template_ammo"] = true,
+    ["global_newgame_spawner_ammo"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -33,23 +38,36 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
-    /* PLACEHOLDER EXAMPLE CHECKPOINT
     {
-        Pos = Vector(4352, -4260, -119),
+        Pos = Vector(1130, 1845, -247),
         Ang = Angle(0, 90, 0),
         Trigger = {
-            Pos = Vector(4292, -4130, -119),
-            Mins = Vector(-25, -25, 0),
-            Maxs = Vector(25, 25, 100)
+            Pos = Vector(1088.5, 1806.5, -195.49),
+            Mins = Vector(-112, -140, -60),
+            Maxs = Vector(112, 140, 60)
         }
     },
-    */
+    {
+        Pos = Vector(1203, 1911, 141),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(1311, 1844, 192),
+            Mins = Vector(-30, -180, -60),
+            Maxs = Vector(30, 180, 60)
+        }
+    },
+    {
+        Pos = Vector(569, 2776, 265),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(586, 2776, 312),
+            Mins = Vector(-111, -87, -48),
+            Maxs = Vector(111, 87, 48)
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
-    if SERVER then
-        -- do stuff
-    end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)

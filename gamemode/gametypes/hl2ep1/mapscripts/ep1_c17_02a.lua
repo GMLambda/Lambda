@@ -22,10 +22,14 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
-    ["door_blocker"] = true,
-    ["suit"] = true,
-    ["physcannon"] = true,
-    ["weapons"] = true
+    ["global_newgame_spawner_suit"] = true,
+    ["global_newgame_spawner_physcannon"] = true,
+    ["global_newgame_spawner_shotgun"] = true,
+    ["global_newgame_spawner_smg"] = true,
+    ["global_newgame_spawner_pistol"] = true,
+    ["global_newgame_spawner_crowbar"] = true,
+    ["global_newgame_template_ammo"] = true,
+    ["global_newgame_spawner_ammo"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -33,22 +37,36 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
-    /* PLACEHOLDER EXAMPLE CHECKPOINT
     {
-        Pos = Vector(4352, -4260, -119),
+        Pos = Vector(2015, 7469, -2539),
         Ang = Angle(0, 90, 0),
         Trigger = {
-            Pos = Vector(4292, -4130, -119),
-            Mins = Vector(-25, -25, 0),
-            Maxs = Vector(25, 25, 100)
+            Pos = Vector(2002, 7463, -2484),
+            Mins = Vector(-106, -111, -64),
+            Maxs = Vector(106, 111, 64)
         }
     },
-    */
+    {
+        Pos = Vector(-514, 7612, -2556),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-413, 7602, -2406),
+            Mins = Vector(-117, -98, -64),
+            Maxs = Vector(117, 98, 64)
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-        -- do stuff
+
+        -- Create a checkpoint after gunship battle
+        ents.WaitForEntityByName("relay_gunship_killed", function(ent)
+            ent.OnTrigger = function()
+                local gunshipdowncp = GAMEMODE:CreateCheckpoint(Vector(2030, 8320, -2551), Angle(0, 90, 0))
+                GAMEMODE:SetPlayerCheckpoint(gunshipdowncp)
+            end
+        end)
     end
 end
 

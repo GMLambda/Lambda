@@ -15,7 +15,9 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {}
-MAPSCRIPT.EntityFilterByClass = {}
+MAPSCRIPT.EntityFilterByClass = {
+    ["weapon_pistol"] = true -- The weapon is not a part of any spawner template so we have to remove it here
+}
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_suit"] = true,
     ["global_newgame_spawner_physcannon"] = true,
@@ -39,6 +41,15 @@ MAPSCRIPT.Checkpoints = {
             Maxs = Vector(62, 86, 56)
         }
     },
+    {
+        Pos = Vector(-1803, 2079, -119),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-1788, 2068, -86),
+            Mins = Vector(-180, -150, -50),
+            Maxs = Vector(180, 150, 50)
+        }
+    }
 }
 
 function MAPSCRIPT:PostInit()
