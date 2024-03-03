@@ -4,7 +4,7 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
-    Weapons = {"weapon_crowbar", "weapon_physcannon", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_frag", "weapon_ar2", "weapon_crossbow"},
+    Weapons = {"weapon_physcannon", "weapon_pistol", "weapon_smg1", "weapon_shotgun", "weapon_frag", "weapon_ar2"},
     Ammo = {
         ["Pistol"] = 18,
         ["SMG1"] = 45,
@@ -13,7 +13,6 @@ MAPSCRIPT.DefaultLoadout = {
         ["Grenade"] = 3,
         ["AR2"] = 50,
         ["SMG1_Grenade"] = 1,
-        ["XBowBolt"] = 4
     },
     Armor = 0,
     HEV = true

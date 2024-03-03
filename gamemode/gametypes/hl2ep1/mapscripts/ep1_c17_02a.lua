@@ -59,13 +59,8 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-
-        -- Create a checkpoint after gunship battle
-        ents.WaitForEntityByName("relay_gunship_killed", function(ent)
-            ent.OnTrigger = function()
-                local gunshipdowncp = GAMEMODE:CreateCheckpoint(Vector(2030, 8320, -2551), Angle(0, 90, 0))
-                GAMEMODE:SetPlayerCheckpoint(gunshipdowncp)
-            end
+        ents.WaitForEntityByName("trigger_shotgun", function(ent)
+            ent:Fire("AddOutput", "OnTrigger lcs_hos_enterance,Start,5,0")
         end)
     end
 end
