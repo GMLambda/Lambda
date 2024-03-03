@@ -38,10 +38,15 @@ MAPSCRIPT.GlobalStates = {
     ["super_phys_gun"] = GLOBAL_OFF
 }
 
-MAPSCRIPT.Checkpoints = {
-}
-
+MAPSCRIPT.Checkpoints = {}
 function MAPSCRIPT:PostInit()
+    -- Force the NPCs to follow the player. Squads in Garry's Mod are a bit broken, the replacement
+    -- lambda_player_follow entity is a bit more reliable but also quite hacky.
+    local playerFollow = ents.Create("lambda_player_follow")
+    playerFollow:SetName("lambda_follow_player")
+    playerFollow:SetKeyValue("actor", "citizen_refugees*")
+    playerFollow:Spawn()
+    playerFollow:Activate()
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
