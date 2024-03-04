@@ -42,6 +42,19 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
         end
 
+        -- Prevent door from closing when entering the elevator waiting room
+        ents.WaitForEntityByName("math_count_door", function(ent)
+            ent:Remove()
+        end)
+
+        -- Add checkpoint in elevator wait room
+        ents.WaitForEntityByName("trigger_door_close", function(ent)
+            ent.OnStartTouch = function()
+                local elevfightcp = GAMEMODE:CreateCheckpoint(Vector(4436, 3578, 414), Angle(0, 90, 0))
+                GAMEMODE:SetPlayerCheckpoint(elevfightcp)
+            end
+        end)
+
         -- Remove default elevator player entry trigger
         ents.WaitForEntityByName("trigger_elevator_player", function(ent)
             ent:Remove()
