@@ -4,7 +4,7 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
-    Weapons = {"weapon_crowbar", "weapon_physcannon", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_frag", "weapon_ar2", "weapon_crossbow"},
+    Weapons = {"weapon_crowbar", "weapon_physcannon", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_frag", "weapon_ar2", "weapon_crossbow, weapon_rpg"},
     Ammo = {
         ["Pistol"] = 18,
         ["SMG1"] = 45,
@@ -47,6 +47,25 @@ function MAPSCRIPT:PostInit()
     playerFollow:SetKeyValue("actor", "citizen_refugees*")
     playerFollow:Spawn()
     playerFollow:Activate()
+
+    -- Alyx should wait for everyone at the end before closing
+    ents.WaitForEntityByName("counter_everyone_in_place_for_barney_goodbye", function(ent)
+        ent:SetKeyValue("max", "6")
+    end)
+
+    -- Make the doors at the end close when we are ready
+    local trainCheckpoint = ents.Create("trigger_once")
+    trainCheckpoint:SetupTrigger(Vector(9876, 9628, -680), Angle(0, 0, 0), Vector(-236, -220, -60), Vector(236, 220, 60))
+    trainCheckpoint:SetKeyValue("teamwait", "1")
+    trainCheckpoint:SetKeyValue("showwait", "0")
+    trainCheckpoint.OnTrigger = function(trigger)
+        local push = ents.Create("trigger_push")
+        push:SetupTrigger(Vector(9648, 9784, -661), Angle(0, 0, 0), Vector(-20, -60, -80), Vector(20, 60, 80))
+        push:SetKeyValue("spawnflags", "1")
+        push:SetKeyValue("pushdir", "358 357 0")
+        push:SetKeyValue("speed","50")
+        TriggerOutputs({{"counter_everyone_in_place_for_barney_goodbye", "Add", 2.0, "1"}})
+    end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
