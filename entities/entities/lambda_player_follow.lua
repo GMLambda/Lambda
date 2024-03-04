@@ -44,7 +44,7 @@ function ENT:Think()
     for _, v in pairs(actors) do
         if not v:IsNPC() then continue end
         local currentPos = v:GetPos()
-        local closestPly = GetClosestPlayer(pos)
+        local closestPly = GetClosestPlayer(currentPos)
         if closestPly == nil then continue end
         -- Set the goal position infront of the player.
         local targetPos = closestPly:GetPos() + (closestPly:GetForward() * 72)
