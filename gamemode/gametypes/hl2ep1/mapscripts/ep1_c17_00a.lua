@@ -26,22 +26,20 @@ MAPSCRIPT.GlobalStates = {
     ["super_phys_gun"] = GLOBAL_OFF
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(1161.264038, 4318.854980, 628.031250),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(1161.264038, 4318.854980, 628.031250),
+            Mins = Vector(-25, -25, 0),
+            Maxs = Vector(25, 25, 100)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(4352, -4260, -119), Angle(0, 90, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(4292, -4130, -119), Angle(0, 0, 0), Vector(-25, -25, 0), Vector(25, 25, 100))
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(1161.264038, 4318.854980, 628.031250), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(1161.264038, 4318.854980, 628.031250), Angle(0, 0, 0), Vector(-25, -25, 0), Vector(25, 25, 100))
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
         -- Prevent door from closing when entering the elevator waiting room
         ents.WaitForEntityByName("math_count_door", function(ent)
             ent:Remove()
