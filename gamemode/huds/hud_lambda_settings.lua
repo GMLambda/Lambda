@@ -188,14 +188,14 @@ function PANEL_FX:Init()
     physcannon_glow:SetSortItems(false)
     physcannon_glow:SetTextColor(Color(255, 255, 255))
     physcannon_glow:SetPos(5, 45)
-    local selectedGlow = cvars.Number("physcannon_glow")
+    local selectedGlow = cvars.Number("lambda_physcannon_glow")
     for k, v in pairs(GLOW_CHOICES) do
         physcannon_glow:AddChoice(v, k, selectedGlow == k)
     end
     physcannon_glow.OnSelect = function(_, index, value, data)
         physcannon_glow:SetValue(value)
         -- TODO: Refactor me, we have to do this because the cvar might not exist earlier on.
-        local physcannon_glow_cvar = GetConVar("physcannon_glow")
+        local physcannon_glow_cvar = GetConVar("lambda_physcannon_glow")
         physcannon_glow_cvar:SetInt(data)
     end
     local label = self:Add("DLabel")

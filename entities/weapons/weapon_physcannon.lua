@@ -96,10 +96,10 @@ local physcannon_mega_pullforce = CreateConVar("physcannon_mega_pullforce", "800
 local physcannon_ball_cone = CreateConVar("physcannon_ball_cone", "0.997", bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED))
 local physcannon_glow_mode = 0
 if CLIENT then
-    local physcannon_glow = CreateConVar("physcannon_glow", "1", bit.bor(FCVAR_ARCHIVE))
+    local physcannon_glow = CreateConVar("lambda_physcannon_glow", "2", bit.bor(FCVAR_ARCHIVE))
     physcannon_glow_mode = physcannon_glow:GetInt()
     cvars.AddChangeCallback(
-        "physcannon_glow",
+        "lambda_physcannon_glow",
         function(convar_name, value_old, value_new)
             physcannon_glow_mode = tonumber(value_new)
             EffectsInvalidated = true
@@ -1001,7 +1001,7 @@ function SWEP:EmitLight(glowMode, pos, brightness, color)
             dlight.b = color.b
             dlight.brightness = brightness
             dlight.decay = 1
-            dlight.size = 64
+            dlight.size = 82
             dlight.minlight = 0.1
             dlight.nomodel = false
             dlight.dietime = CurTime() + 0.1
