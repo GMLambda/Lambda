@@ -963,6 +963,12 @@ function SWEP:EmitLight(glowMode, pos, brightness, color)
     local projectedTextureEnabled = glowMode == 1 or glowMode == 2
     local dynamicLightEnabled = glowMode == 1 or glowMode == 3
     local owner = self:GetOwner()
+    if not IsValid(owner) then
+        -- Disable the light effects without a owner, save a bit of performance.
+        projectedTextureEnabled = false
+        dynamicLightEnabled = false
+    end
+
     if projectedTextureEnabled then
         local pt = self.ProjectedTexture
         if pt == nil then
@@ -1009,40 +1015,52 @@ function SWEP:EmitLight(glowMode, pos, brightness, color)
     end
 end
 
-function SWEP:UpdateGlow()
-    if self:IsEffectActive(EF_NODRAW) == true then return end
-    local glowMode = physcannon_glow_mode
-    if glowMode == 0 then return end
-    local curTime = CurTime()
-    if curTime < self.NextGlowUpdate then return end
-    local entPos = self:GetPos()
+function SWEP:GetLightPosition()
     local owner = self:GetOwner()
+    local pos
     if self:ShouldDrawUsingViewModel() == true then
         if IsValid(owner) == true then
             local vm = owner:GetViewModel()
             local attachmentData = vm:GetAttachment(1)
             if attachmentData == nil then return end
             local fwd = attachmentData.Ang:Forward()
-            entPos = self:FormatViewModelAttachment(attachmentData.Pos, true) - (fwd * 60)
-            entPos = entPos + (attachmentData.Ang:Up() * 5)
+            pos = self:FormatViewModelAttachment(attachmentData.Pos, true) - (fwd * 60)
+            pos = pos + (attachmentData.Ang:Up() * 5)
         end
     else
         local attachment = self:GetAttachment(1)
         if attachment == nil then return end
-        entPos = attachment.Pos + (attachment.Ang:Forward() * 4.5)
+        pos = attachment.Pos + (attachment.Ang:Forward() * 4.5)
     end
 
-    local wepColor = self:GetWeaponColor()
-    local currentColor = self.CurrentWeaponColor
-    currentColor.r = wepColor.r * 255
-    currentColor.g = wepColor.g * 255
-    currentColor.b = wepColor.b * 255
-    local brightness = 0.5
+    return pos
+end
+
+function SWEP:GetLightBrightness()
+    local brightness
     if self:IsMegaPhysCannon() == true then
-        brightness = 1
+        brightness = 1.3
+    else
+        brightness = 0.5
     end
 
-    self:EmitLight(glowMode, entPos, brightness * 0.5, currentColor)
+    if self:GetEffectState() == EFFECT_HOLDING then
+        brightness = brightness * (2.5 + (math.sin(CurTime() * 100) * 0.12))
+    end
+
+    return brightness
+end
+
+function SWEP:UpdateGlow()
+    if self:IsEffectActive(EF_NODRAW) == true then return end
+    local glowMode = physcannon_glow_mode
+    if glowMode == 0 then return end
+    local curTime = CurTime()
+    if curTime < self.NextGlowUpdate then return end
+    local lightPos = self:GetLightPosition()
+    local wepColor = self:GetWeaponColor()
+    local brightness = self:GetLightBrightness()
+    self:EmitLight(glowMode, lightPos, brightness, wepColor)
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 end
 
@@ -1067,7 +1085,7 @@ function SWEP:Think()
             controller:ManagePredictedObject()
         end
 
-        local effectState = self:GetEffectState(EFFECT_READY)
+        local effectState = self:GetEffectState()
         if effectState ~= self.OldEffectState then
             self:DoEffect(effectState)
         end
@@ -1698,7 +1716,7 @@ function SWEP:DrawWorldModel()
         self:DoEffect(effectState)
     end
 
-    local wepColor = self:GetWeaponColor()
+    local wepColor = self:GetWeaponColor(true)
     MAT_WORLDMDL:SetVector("$selfillumtint", wepColor)
     self:UpdateElementPosition()
     self:DrawModel()
@@ -1891,13 +1909,17 @@ function SWEP:DrawBeam(startPos, endPos, width, color)
             elseif i == BEAM_SEGMENTS - 1 then
                 pos = endPos
             else
-                local t = CurTime() * 5
+                local t = CurTime() * 15
                 local p = (t + (n * n)) + (i / BEAM_SEGMENTS - 1) * math.pi
-                offset = Vector(1, 1, 1) * math.sin(p) + (VectorRand() * ((n / BEAM_GROUPS) - 0.5))
+                local randVec = Vector(1, 1, 1)
+                randVec.x = randVec.x * util.SharedRandom("beam_posx" .. tostring(i), -0.1, 0.1)
+                randVec.y = randVec.y * util.SharedRandom("beam_posy" .. tostring(i), -0.1, 0.1)
+                randVec.z = randVec.z * util.SharedRandom("beam_posz" .. tostring(i), -0.1, 0.1)
+                offset = Vector(1, 1, 1) * math.sin(p) + (randVec * ((n / BEAM_GROUPS) - 0.5))
                 pos = startPos + (i * split) + offset
             end
 
-            local texcoord = util.RandomFloat(0, 1)
+            local texcoord = util.SharedRandom("beam_tex" .. tostring(i), 0.5, 1)
             render.AddBeam(pos, width, texcoord, color)
         end
 
@@ -1940,23 +1962,16 @@ function SWEP:DrawCoreBeams(owner, vm)
 
     local curTime = CurTime()
     local corePos, maxEndCap = self:GetCorePos(owner, vm)
-    local colorScale = 0.6
-    local isMegaPhysCannon = self:IsMegaPhysCannon()
-    if isMegaPhysCannon == true then
-        colorScale = 1
-    end
-
-    local wepColor = self:GetWeaponColor() * colorScale
-    local color = Color(wepColor.x * 255, wepColor.y * 255, wepColor.z * 255, 255)
+    local wepColor = self:GetWeaponColor()
     local beamDrawn = false
     local endPos
     local beamParameters = self.BeamParameters
     local effectParameters = self.EffectParameters
     -- Swirl around the core.
     local coreDist = 1.0
-    local corePosX = math.sin(CurTime()) * coreDist
-    local corePosY = math.cos(CurTime() + corePosX) * coreDist
-    local corePosZ = math.cos(CurTime() + corePosY) * coreDist
+    local corePosX = math.sin(curTime) * coreDist
+    local corePosY = math.cos(curTime + corePosX) * coreDist
+    local corePosZ = math.cos(curTime + corePosY) * coreDist
     render.SetMaterial(MAT_PHYSBEAM)
     for i = PHYSCANNON_ENDCAP1, maxEndCap do
         local beamdata = beamParameters[i]
@@ -1982,19 +1997,16 @@ function SWEP:DrawCoreBeams(owner, vm)
             endPos = attachmentData.Pos
         end
 
-        local width = (5 + util.RandomFloat(1, 15)) * beamdata.Scale:Interp(curTime)
+        local width = (5 + util.SharedRandom("beam" .. tostring(i), 1, 15)) * beamdata.Scale:Interp(curTime)
         if width <= 0.0 then continue end
-        self:DrawBeam(endPos, corePos + Vector(corePosX, corePosY, corePosZ), width, color)
+        self:DrawBeam(endPos, corePos + Vector(corePosX, corePosY, corePosZ), width, wepColor)
         beamDrawn = true
     end
 
-    if beamDrawn == true and physcannon_glow_mode == 1 and curTime >= self.NextBeamGlow then
-        local brightness = 0.5
-        if isMegaPhysCannon == true then
-            brightness = 1
-        end
-
-        self:EmitLight(physcannon_glow_mode, corePos, brightness, color)
+    if beamDrawn == true and physcannon_glow_mode > 0 and curTime >= self.NextBeamGlow then
+        local brightness = self:GetLightBrightness()
+        local lightPos = self:GetLightPosition()
+        self:EmitLight(physcannon_glow_mode, lightPos, brightness, wepColor)
         self.NextBeamGlow = curTime + GLOW_UPDATE_DT
     end
 end
@@ -2203,7 +2215,7 @@ function SWEP:StopEffects(stopSound)
     end
 end
 
-function SWEP:GetWeaponColor()
+function SWEP:GetWeaponColor(asVector)
     local owner = self:GetOwner()
     local wepColor
     if IsValid(owner) == true and owner:IsPlayer() == true then
@@ -2212,7 +2224,9 @@ function SWEP:GetWeaponColor()
         wepColor = self:GetLastWeaponColor()
     end
 
-    return wepColor
+    if asVector then return wepColor end
+
+    return Color(wepColor.x * 255, wepColor.y * 255, wepColor.z * 255)
 end
 
 function SWEP:UpdateEffects()
@@ -2229,16 +2243,8 @@ function SWEP:UpdateEffects()
 
     self:StartEffects()
     self:UpdateGlow()
-    local colorMax = 128
     local isMegaPhysCannon = self:IsMegaPhysCannon()
-    if isMegaPhysCannon == true then
-        colorMax = 255
-    end
-
     local wepColor = self:GetWeaponColor()
-    local r = wepColor.x * colorMax
-    local g = wepColor.y * colorMax
-    local b = wepColor.z * colorMax
     local pulseScale = 2
     if self:GetEffectState() == EFFECT_READY then
         pulseScale = 7
@@ -2262,16 +2268,8 @@ function SWEP:UpdateEffects()
         data.Alpha:SetAbsolute(util.RandomFloat(200, 255))
     end
 
-    local colorScale = 0.7
-    if self:IsMegaPhysCannon() then
-        colorScale = 1
-    end
-
     for i, data in pairs(effectParameters) do
-        local color = data.Col
-        color.r = r * colorScale
-        color.g = g * colorScale
-        color.b = b * colorScale
+        data.Col = wepColor
     end
 
     if CLIENT and (isMegaPhysCannon == true or self.CurrentEffect == EFFECT_PULLING) then
@@ -2282,25 +2280,16 @@ function SWEP:UpdateEffects()
 
         local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
         local beamdata = self.BeamParameters[i]
-        if self.CurrentEffect ~= EFFECT_HOLDING and self:IsObjectAttached() ~= true and math.random(0, 400) == 0 then
+        if self.CurrentEffect ~= EFFECT_HOLDING and self:IsObjectAttached() ~= true and math.random(0, 200) == 0 then
             self:EmitSound("Weapon_MegaPhysCannon.ChargeZap")
             beamdata.Scale:InitFromCurrent(0.5, 0.1)
             beamdata.Lifetime = 0.05 + (math.random() * 0.1)
             if physcannon_glow_mode > 0 then
                 local params = self.EffectParameters[i]
                 if params == nil then return end
-                local attachmentData = self:GetAttachment(params.Attachment)
-                if attachmentData == nil then return end
-                local color = self:GetWeaponColor()
-                color.r = color.r * 255
-                color.g = color.g * 255
-                color.b = color.b * 255
-                local brightness = 0.5
-                if isMegaPhysCannon == true then
-                    brightness = 1
-                end
-
-                --self:EmitLight(physcannon_glow_mode, attachmentData.Pos, brightness, color)
+                local lightPos = self:GetLightPosition()
+                local brightness = self:GetLightBrightness() + 1.5
+                self:EmitLight(physcannon_glow_mode, lightPos, brightness, wepColor)
                 self.NextBeamGlow = CurTime() + GLOW_UPDATE_DT
             end
         end
