@@ -44,6 +44,19 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
+
+    -- Make the door after the barnacle area open and ignore player interaction
+    ents.WaitForEntityByName("barnacle_exit_door", function(ent)
+        ent:RemoveSpawnFlags(8192)
+        ent:AddSpawnFlags(32768)
+        ent:Fire("Open")
+    end)
+
+    -- Also remove the playerclip behind the door
+    ents.WaitForEntityByName("barnacle_exit_door_clip", function(ent)
+        ent:Remove()
+    end)
+
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
