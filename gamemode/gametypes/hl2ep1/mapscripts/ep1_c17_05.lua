@@ -47,25 +47,42 @@ function MAPSCRIPT:PostInit()
     playerFollow:SetKeyValue("actor", "citizen_refugees*")
     playerFollow:Spawn()
     playerFollow:Activate()
-
     -- Alyx should wait for everyone at the end before closing
-    ents.WaitForEntityByName("counter_everyone_in_place_for_barney_goodbye", function(ent)
-        ent:SetKeyValue("max", "6")
-    end)
+    ents.WaitForEntityByName(
+        "counter_everyone_in_place_for_barney_goodbye",
+        function(ent)
+            ent:SetKeyValue("max", "6")
+        end
+    )
 
     -- Make the doors at the end close when we are ready
     local trainCheckpoint = ents.Create("trigger_once")
-    trainCheckpoint:SetupTrigger(Vector(9876, 9628, -680), Angle(0, 0, 0), Vector(-236, -220, -60), Vector(236, 220, 60))
+    trainCheckpoint:SetupTrigger(Vector(9876, 9628, -680), Angle(0, 0, 0), Vector(-190, -220, -60), Vector(236, 220, 60))
     trainCheckpoint:SetKeyValue("teamwait", "1")
-    trainCheckpoint:SetKeyValue("showwait", "0")
-    trainCheckpoint.OnTrigger = function(trigger)
-        local push = ents.Create("trigger_push")
-        push:SetupTrigger(Vector(9648, 9784, -661), Angle(0, 0, 0), Vector(-20, -60, -80), Vector(20, 60, 80))
-        push:SetKeyValue("spawnflags", "1")
-        push:SetKeyValue("pushdir", "358 357 0")
-        push:SetKeyValue("speed","50")
-        TriggerOutputs({{"counter_everyone_in_place_for_barney_goodbye", "Add", 2.0, "1"}})
-    end
+    trainCheckpoint:SetKeyValue("showwait", "1")
+    trainCheckpoint:SetKeyValue("StartDisabled", "1")
+    trainCheckpoint:SetName("lambda_close_doors")
+    trainCheckpoint:AddOutput("OnTrigger", "counter_everyone_in_place_for_barney_goodbye", "Add", "1", 0.0, "1")
+    -- Place another train infront of the existing one.
+    local propTrain = ents.Create("prop_dynamic")
+    propTrain:SetModel("models/props_trainstation/train_outro_car01.mdl")
+    propTrain:SetPos(Vector(9405.219727, 9196.559570, -727.476013))
+    propTrain:SetAngles(Angle(0, -90, 0))
+    propTrain:Spawn()
+    ents.WaitForEntityByName(
+        "rallypoint_barney_lasttrain",
+        function(ent)
+            ent:Fire("AddOutput", "OnArrival lambda_close_doors,Enable,,0,-1", "0.0")
+        end
+    )
+
+    -- Disallow shoving the NPC near the door out of the way.
+    ents.WaitForEntityByName(
+        "citizen_blocker",
+        function(ent)
+            ent:SetKeyValue("spawnflags", "1458180")
+        end
+    )
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
