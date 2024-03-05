@@ -63,12 +63,7 @@ function MAPSCRIPT:PostInit()
     trainCheckpoint:SetKeyValue("StartDisabled", "1")
     trainCheckpoint:SetName("lambda_close_doors")
     trainCheckpoint:AddOutput("OnTrigger", "counter_everyone_in_place_for_barney_goodbye", "Add", "1", 0.0, "1")
-    -- Place another train infront of the existing one.
-    local propTrain = ents.Create("prop_dynamic")
-    propTrain:SetModel("models/props_trainstation/train_outro_car01.mdl")
-    propTrain:SetPos(Vector(9405.219727, 9196.559570, -727.476013))
-    propTrain:SetAngles(Angle(0, -90, 0))
-    propTrain:Spawn()
+    -- When barney arrives add to the counter so alyx will start closing the door.
     ents.WaitForEntityByName(
         "rallypoint_barney_lasttrain",
         function(ent)
@@ -83,6 +78,13 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("spawnflags", "1458180")
         end
     )
+
+    -- Place another train infront of the existing one.
+    local propTrain = ents.Create("prop_dynamic")
+    propTrain:SetModel("models/props_trainstation/train_outro_car01.mdl")
+    propTrain:SetPos(Vector(9405.219727, 9196.559570, -727.476013))
+    propTrain:SetAngles(Angle(0, -90, 0))
+    propTrain:Spawn()
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
