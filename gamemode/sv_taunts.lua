@@ -20,6 +20,8 @@ local function GetNearbyAllies(ply)
         if v:Visible(ply) == false then continue end
         if v:HasSpawnFlags(SF_CITIZEN_NOT_COMMANDABLE) == true then continue end
         if v:Disposition(ply) ~= D_LI then continue end
+        local sched = v:GetCurrentSchedule()
+        if sched ~= SCHED_IDLE_STAND and sched ~= SCHED_ALERT_STAND then continue end
         table.insert(res, v)
     end
 
