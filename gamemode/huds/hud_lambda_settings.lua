@@ -163,6 +163,13 @@ end
 vgui.Register("LambdaCrosshairPanel", PANEL_CROSSHAIR, "DPanel")
 local PANEL_FX = {}
 
+local GLOW_CHOICES = {
+    [0] = "None",
+    [1] = "Projected Texture + Dynamic Light (Highest performance cost)",
+    [2] = "Projected Texture (High performance cost)",
+    [3] = "Dynamic Light (Low performance cost)",
+}
+
 function PANEL_FX:Init()
     local postproc = self:Add("DCheckBoxLabel")
     postproc:SetPos(5, 5)
@@ -176,12 +183,25 @@ function PANEL_FX:Init()
     gore:SizeToContents()
     gore:SetConVar("lambda_gore")
     gore:SetValue(cvars.Number("lambda_gore"))
-    local physcannon_glow = self:Add("DCheckBoxLabel")
+    local physcannon_glow = self:Add("DComboBox")
+    physcannon_glow:SetSize(120, 20)
+    physcannon_glow:SetSortItems(false)
+    physcannon_glow:SetTextColor(Color(255, 255, 255))
     physcannon_glow:SetPos(5, 45)
-    physcannon_glow:SetText("Gravity Gun Glow")
-    physcannon_glow:SizeToContents()
-    physcannon_glow:SetConVar("physcannon_glow")
-    physcannon_glow:SetValue(cvars.Number("physcannon_glow"))
+    local selectedGlow = cvars.Number("lambda_physcannon_glow")
+    for k, v in pairs(GLOW_CHOICES) do
+        physcannon_glow:AddChoice(v, k, selectedGlow == k)
+    end
+    physcannon_glow.OnSelect = function(_, index, value, data)
+        physcannon_glow:SetValue(value)
+        -- TODO: Refactor me, we have to do this because the cvar might not exist earlier on.
+        local physcannon_glow_cvar = GetConVar("lambda_physcannon_glow")
+        physcannon_glow_cvar:SetInt(data)
+    end
+    local label = self:Add("DLabel")
+    label:SetPos(134, 47)
+    label:SetText("Physcannon Light")
+    label:SizeToContents()
 end
 
 vgui.Register("LambdaFXPanel", PANEL_FX, "DPanel")
