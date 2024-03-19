@@ -79,12 +79,6 @@ function MAPSCRIPT:PostInit()
         end
     )
 
-    -- Place another train infront of the existing one.
-    local propTrain = ents.Create("prop_dynamic")
-    propTrain:SetModel("models/props_trainstation/train_outro_car01.mdl")
-    propTrain:SetPos(Vector(9405.219727, 9196.559570, -727.476013))
-    propTrain:SetAngles(Angle(0, -90, 0))
-    propTrain:Spawn()
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
