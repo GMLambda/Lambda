@@ -90,4 +90,10 @@ end
 function MAPSCRIPT:PostPlayerSpawn(ply)
 end
 
+function MAPSCRIPT:EntityKeyValue(ent, key, value)
+    -- HACKHACK: There is an issue with NPCs and multiple players.
+    -- https://github.com/Facepunch/garrysmod-issues/issues/5795
+    if key:iequals("sleepstate") then return "0" end
+end
+
 return MAPSCRIPT
