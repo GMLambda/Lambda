@@ -79,6 +79,39 @@ function MAPSCRIPT:PostInit()
         end
     )
 
+    --[[
+    ents.WaitForEntityByName("counter_deadCits", function(ent)
+        ent:ClearAllOutputs()
+        -- Add all the outputs back except the kill.
+        -- ent:Fire("AddOutput", "OnHitMax citizen_refugees*,Kill,,0,-1")
+        ent:Fire("AddOutput", "OnHitMax ss_citizen_wait_points*,CancelSequence,,0,-1")
+        ent:Fire("AddOutput", "OnHitMax relay_use_cit_*,Disable,,0,-1")
+        ent:Fire("AddOutput", "OnHitMax assault_cit1_lasttrain,Deactivate,,0,-1")
+        ent:Fire("AddOutput", "OnHitMax assault_cit2_lasttrain,Deactivate,,0,-1")
+        ent:Fire("AddOutput", "OnHitMax !self,SetValue,0,0,-1")
+        ent:Fire("AddOutput", "OnHitMax relay_citizens_spawn,Trigger,,0.10,-1")
+    end)
+    ]]
+    
+    GAMEMODE:WaitForInput("citizen_refugees_1", "Kill", function(ent)
+        ent:SetName("lambda_citizen_refugees_1")
+        return true
+    end)
+
+    GAMEMODE:WaitForInput("citizen_refugees_2", "Kill", function(ent)
+        ent:SetName("lambda_citizen_refugees_2")
+        return true
+    end)
+
+    GAMEMODE:WaitForInput("citizen_refugees_3", "Kill", function(ent)
+        ent:SetName("lambda_citizen_refugees_3")
+        return true
+    end)
+
+    GAMEMODE:WaitForInput("citizen_refugees_4", "Kill", function(ent)
+        ent:SetName("lambda_citizen_refugees_4")
+        return true
+    end)
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
