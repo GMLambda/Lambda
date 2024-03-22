@@ -14,7 +14,12 @@ MAPSCRIPT.DefaultLoadout = {
 }
 
 MAPSCRIPT.InputFilters = {}
-MAPSCRIPT.EntityFilterByClass = {}
+MAPSCRIPT.EntityFilterByClass = {
+    ["weapon_physcannon"] = true,
+    ["weapon_pistol"] = true,
+    ["weapon_shotgun"] = true
+}
+
 MAPSCRIPT.EntityFilterByName = {
     ["door_blocker"] = true,
     ["suit"] = true,
@@ -49,7 +54,6 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-
         -- Remove counter that closes dowmn the combine wall. Maybe improve this later to close when everyone is here
         ents.WaitForEntityByName("Crushing_wall_counter", function(ent)
             ent:Remove()
@@ -62,11 +66,17 @@ function MAPSCRIPT:PostInit()
                 GAMEMODE:SetPlayerCheckpoint(hellscheckpoint)
             end
         end)
-
     end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
+end
+
+function MAPSCRIPT:EntityKeyValue(ent, key, val)
+    -- Known engine bug with func_movelinear. If parented the move direction is incorrect.
+    if ent:GetClass() == "func_movelinear" and key == "parentname" then
+        return "0"
+    end
 end
 
 return MAPSCRIPT
