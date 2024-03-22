@@ -2,93 +2,64 @@ local DbgPrint = GetLogging("IO")
 local ents = ents
 local table = table
 GM.InputFilters = {}
-GM.OutputCallbacks = {}
 GM.InputCallbacks = {}
-
 function GM:ResetInputOutput()
     self.InputFilters = {}
-    self.OutputCallbacks = {}
     self.InputCallbacks = {}
 end
 
-function GM:FilterEntityInput(name, input)
-    self.InputFilters[name] = self.InputFilters[name] or {}
-    table.insert(self.InputFilters[name], input)
+function GM:FilterEntityInput(entName, inputName)
+    self.InputFilters[entName] = self.InputFilters[entName] or {}
+    table.insert(self.InputFilters[entName], inputName)
 end
 
-function GM:AddOutputCallback(name, outputname, inputname, delay, cb)
-    ents.WaitForEntityByName(name, function(ent)
-        local infotarget = ents.Create("info_target")
-        infotarget:SetName(inputname)
-        infotarget:Spawn()
-        DbgPrint("Added new output on " .. tostring(ent) .. " -> " .. outputname .. " " .. inputname)
-        ent:Fire("AddOutput", outputname .. " " .. inputname .. ",OutputCallback", delay)
-        self.OutputCallbacks[inputname] = cb
-    end)
-end
-
-function GM:WaitForEntityInput(ent, input, cb)
-    DbgPrint("Added new input listener on " .. tostring(ent) .. " -> " .. input)
-    self.InputCallbacks[ent] = self.InputCallbacks[ent] or {}
-    self.InputCallbacks[ent][input] = cb
+function GM:WaitForEntityInput(entName, inputName, cb)
+    DbgPrint("Added new input listener on " .. entName .. " -> " .. inputName)
+    self.InputCallbacks[entName] = self.InputCallbacks[ent] or {}
+    self.InputCallbacks[entName][inputName] = cb
 end
 
 -- Named entity variant.
-function GM:WaitForInput(nameEnt, input, cb)
-    ents.WaitForEntityByName(nameEnt, function(ent)
-        self:WaitForEntityInput(ent, input, cb)
-    end)
+function GM:WaitForInput(entName, inputName, cb)
+    self:WaitForEntityInput(entName, inputName, cb)
 end
 
-function GM:RemoveInputCallback(name, input)
-    ents.WaitForEntityByName(name, function(ent)
-        DbgPrint("Removing input listener on " .. tostring(ent) .. " -> " .. input)
-        self.InputCallbacks[ent] = self.InputCallbacks[ent] or {}
-        self.InputCallbacks[ent][input] = nil
-    end)
+function GM:RemoveInputCallback(entName, inputName)
+    DbgPrint("Removing input listener on " .. tostring(entName) .. " -> " .. inputName)
+    self.InputCallbacks[entName] = self.InputCallbacks[entName] or {}
+    self.InputCallbacks[entName][inputName] = nil
 end
 
-function GM:AcceptInput(ent, input, activator, caller, value)
-    local name = ent:GetName()
-    local filters = self.InputFilters[name]
-
+function GM:AcceptInput(ent, inputName, activator, caller, value)
+    local entName = ent:GetName()
+    local filters = self.InputFilters[entName]
     if filters ~= nil then
         for _, v in pairs(filters) do
-            if v == input then
-                DbgPrint(ent, "Filtered input: " .. name .. " -> " .. input)
+            if v == inputName then
+                DbgPrint(ent, "Filtered input: " .. entName .. " -> " .. inputName)
 
                 return true
             end
         end
     end
 
-    local inputcb = self.InputCallbacks[ent]
-
+    local inputcb = self.InputCallbacks[entName]
     if inputcb ~= nil then
-        local cb = inputcb[input]
-
+        local cb = inputcb[inputName]
         if cb ~= nil then
-            local res = cb(ent, input, activator, caller, value)
-
+            local res = cb(ent, inputName, activator, caller, value)
             if res == true then
-                DbgPrint(ent, "Filtered input: " .. name .. " -> " .. input)
+                DbgPrint(ent, "Filtered input: " .. entName .. " -> " .. inputName)
 
                 return true
             end
         end
-    end
-
-    local output = self.OutputCallbacks[name]
-
-    if output ~= nil then
-        DbgPrint("Input Target: " .. name)
-        output(name)
     end
 
     -- HACKHACK: We handle this here since its a Portal 2 specific feature.
-    if input == "DisableDraw" then
+    if inputName == "DisableDraw" then
         ent:SetNoDraw(true)
-    elseif input == "EnableDraw" then
+    elseif inputName == "EnableDraw" then
         ent:SetNoDraw(false)
     end
 end
