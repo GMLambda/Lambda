@@ -1,5 +1,4 @@
 local DbgPrint = GetLogging("IO")
-local ents = ents
 local table = table
 GM.InputFilters = {}
 GM.InputCallbacks = {}
@@ -15,7 +14,7 @@ end
 
 function GM:WaitForEntityInput(entName, inputName, cb)
     DbgPrint("Added new input listener on " .. entName .. " -> " .. inputName)
-    self.InputCallbacks[entName] = self.InputCallbacks[ent] or {}
+    self.InputCallbacks[entName] = self.InputCallbacks[entName] or {}
     self.InputCallbacks[entName][inputName] = cb
 end
 
