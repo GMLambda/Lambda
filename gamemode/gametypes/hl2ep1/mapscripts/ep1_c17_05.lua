@@ -239,7 +239,7 @@ function MAPSCRIPT:PostInit()
     CreateAssaultPoint(Vector(10335.364258, 11658.113281, -703.968750))
     CreateAssaultPoint(Vector(9641.139648, 11862.100586, -703.968750))
     CreateAssaultPoint(Vector(10027.281250, 10899.580078, -832.058777))
-    
+
     local function CreateRallyPoint(pos, name)
         local rallyPoint = ents.Create("assault_rallypoint")
         rallyPoint:SetPos(pos)
