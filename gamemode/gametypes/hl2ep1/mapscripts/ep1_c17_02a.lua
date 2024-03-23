@@ -55,6 +55,24 @@ MAPSCRIPT.Checkpoints = {
             Maxs = Vector(117, 98, 64)
         }
     },
+    {
+        Pos = Vector(-682, 8611, -2552),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-861, 8608, -2506),
+            Mins = Vector(-92, -112, -70),
+            Maxs = Vector(92, 112, 70)
+        }
+    },
+    {
+        Pos = Vector(-682, 9518, -2684),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-852, 9522, -2590),
+            Mins = Vector(-80, -95, -105),
+            Maxs = Vector(80, 95, 105)
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
