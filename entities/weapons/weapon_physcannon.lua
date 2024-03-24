@@ -1018,15 +1018,13 @@ end
 function SWEP:GetLightPosition()
     local owner = self:GetOwner()
     local pos
-    if self:ShouldDrawUsingViewModel() == true then
-        if IsValid(owner) == true then
-            local vm = owner:GetViewModel()
-            local attachmentData = vm:GetAttachment(1)
-            if attachmentData == nil then return end
-            local fwd = attachmentData.Ang:Forward()
-            pos = self:FormatViewModelAttachment(attachmentData.Pos, true) - (fwd * 60)
-            pos = pos + (attachmentData.Ang:Up() * 5)
-        end
+    if self:ShouldDrawUsingViewModel() == true and IsValid(owner) == true then
+        local vm = owner:GetViewModel()
+        local attachmentData = vm:GetAttachment(1)
+        if attachmentData == nil then return end
+        local fwd = attachmentData.Ang:Forward()
+        pos = self:FormatViewModelAttachment(attachmentData.Pos, true) - (fwd * 60)
+        pos = pos + (attachmentData.Ang:Up() * 5)
     else
         local attachment = self:GetAttachment(1)
         if attachment == nil then return end
