@@ -368,7 +368,6 @@ if SERVER then
         for k, v in pairs(loadout.Weapons or {}) do
             if ply:HasWeapon(v) == true then continue end
             local weapon = ply:Give(v, true)
-            print("Gave player weapon", ply, weapon)
             local ammoType1 = weapon:GetPrimaryAmmoType()
             if ammoType1 ~= -1 then
                 local ammoName = game.GetAmmoName(ammoType1)
@@ -454,7 +453,6 @@ if SERVER then
             end
         )
 
-        PrintTable(weps)
         if #weps == 0 then return nil end
 
         return weps[1]
