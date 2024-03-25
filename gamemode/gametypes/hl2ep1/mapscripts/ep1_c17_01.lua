@@ -33,12 +33,30 @@ MAPSCRIPT.GlobalStates = {
 
 MAPSCRIPT.Checkpoints = {
     {
-        Pos = Vector(2828, -1360, 68),
+        Pos = Vector(2660, -1324, 8),
         Ang = Angle(0, 90, 0),
         Trigger = {
             Pos = Vector(2828, -1360, 68),
             Mins = Vector(-75, -75, -44),
             Maxs = Vector(75, 75, 44)
+        }
+    },
+    {
+        Pos = Vector(1871, 2071, 33),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(1844, 1878, 78),
+            Mins = Vector(-100, -160, -75),
+            Maxs = Vector(100, 160, 75)
+        }
+    },
+    {
+        Pos = Vector(100, 695, 174),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(109, 692, 216),
+            Mins = Vector(-65, -30, -40),
+            Maxs = Vector(65, 30, 40)
         }
     },
     {
@@ -54,17 +72,15 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
+        -- Use the combine wall open trigger to add weapon_smg1 to the map loadout
+        ents.WaitForEntityByName("trigger_combine_wall", function (ent)
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_smg1")
+        end)
+
         -- Remove counter that closes dowmn the combine wall. Maybe improve this later to close when everyone is here
         ents.WaitForEntityByName("Crushing_wall_counter", function(ent)
             ent:Remove()
-        end)
-
-        -- Create checkpoint after turning off gas
-        ents.WaitForEntityByName("relay_hellskitchen_stop", function(ent)
-            ent.OnTrigger = function()
-                local hellscheckpoint = GAMEMODE:CreateCheckpoint(Vector(1568, 1782, 60), Angle(0, 90, 0))
-                GAMEMODE:SetPlayerCheckpoint(hellscheckpoint)
-            end
         end)
     end
 end
