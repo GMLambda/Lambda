@@ -8,42 +8,47 @@ local util = util
 local ents = ents
 local IsValid = IsValid
 local table = table
-
 if SERVER then
     local persistantremovals = {}
     local delayedcallbacks = {}
     local delayedcallbacksIndex = {}
+    hook.Add(
+        "PreCleanupMap",
+        "LambadPreCleanupMap",
+        function()
+            persistantremovals = {}
+            delayedcallbacks = {}
+            delayedcallbacksIndex = {}
+        end
+    )
 
-    hook.Add("PreCleanupMap", "LambadPreCleanupMap", function()
-        persistantremovals = {}
-        delayedcallbacks = {}
-        delayedcallbacksIndex = {}
-    end)
+    hook.Add(
+        "OnEntityCreated",
+        "LambdaEntityCreation",
+        function(ent)
+            -- Do this the next frame.
+            util.RunNextFrame(
+                function()
+                    if not IsValid(ent) then return end --DbgPrint("Entity " .. tostring(ent) .. " no longer valid")
+                    local name = ent:GetName()
+                    if persistantremovals[name] then
+                        DbgPrint("Persistant removal of entity " .. tostring(ent))
+                        SafeRemoveEntityDelayed(ent, 0.1)
+                    end
 
-    hook.Add("OnEntityCreated", "LambdaEntityCreation", function(ent)
-        -- Do this the next frame.
-        util.RunNextFrame(function()
-            if not IsValid(ent) then return end --DbgPrint("Entity " .. tostring(ent) .. " no longer valid")
-            local name = ent:GetName()
-
-            if persistantremovals[name] then
-                DbgPrint("Persistant removal of entity " .. tostring(ent))
-                SafeRemoveEntityDelayed(ent, 0.1)
-            end
-
-            local cbs = delayedcallbacks[name]
-
-            if cbs ~= nil then
-                for k, v in pairs(cbs) do
-                    v.cb(ent)
-
-                    if v.multiple == false then
-                        delayedcallbacks[name][k] = nil
+                    local cbs = delayedcallbacks[name]
+                    if cbs ~= nil then
+                        for k, v in pairs(cbs) do
+                            v.cb(ent)
+                            if v.multiple == false then
+                                delayedcallbacks[name][k] = nil
+                            end
+                        end
                     end
                 end
-            end
-        end)
-    end)
+            )
+        end
+    )
 
     function ents.WaitForEntityByName(name, cb, multiple)
         if multiple == nil then
@@ -51,13 +56,11 @@ if SERVER then
         end
 
         local found = ents.FindByName(name)
-
         for _, v in pairs(found) do
             cb(v)
         end
 
         local data = {}
-
         if found == nil or #found == 0 then
             DbgPrint("Entity " .. tostring(name) .. " not found yet, waiting for creation")
             delayedcallbacks[name] = delayedcallbacks[name] or {}
@@ -69,7 +72,6 @@ if SERVER then
 
     function ents.WaitForEntityByIndex(index, cb)
         local ent = Entity(index)
-
         if IsValid(ent) then
             cb(ent)
 
@@ -82,7 +84,6 @@ if SERVER then
 
     function ents.RemoveByClass(class, pos)
         local found = ents.FindByClass(class)
-
         for _, v in pairs(found) do
             if pos ~= nil then
                 if v:GetPos() == pos then
@@ -96,7 +97,6 @@ if SERVER then
 
     function ents.RemoveByName(name, persistant)
         local found = ents.FindByName(name)
-
         for _, v in pairs(found) do
             v:Remove()
         end
@@ -114,22 +114,29 @@ if SERVER then
         return nil
     end
 
+    local function SetEntityKeyValue(ent, k, v)
+        local newValue = hook.Run("EntityKeyValue", ent, k, v)
+        if newValue ~= nil then
+            v = newValue
+        end
+
+        ent:SetKeyValue(k, v)
+    end
+
     function ents.CreateSimple(class, data)
         local ent = ents.Create(class)
         ent:SetPos(data.Pos or Vector(0, 0, 0))
-
         if data.SpawnFlags then
-            ent:SetKeyValue("spawnflags", tostring(data.SpawnFlags))
+            SetEntityKeyValue(ent, "spawnflags", tostring(data.SpawnFlags))
         end
 
         if data.KeyValues ~= nil then
             for k, v in pairs(data.KeyValues) do
-                ent:SetKeyValue(k, v)
+                SetEntityKeyValue(ent, k, v)
             end
         end
 
         ent:SetAngles(data.Ang or Angle(0, 0, 0))
-
         if data.Model ~= nil then
             ent:SetModel(data.Model)
         end
@@ -147,10 +154,8 @@ if SERVER then
         end
 
         ent:Spawn()
-
         if data.Freeze == true then
             local phys = ent:GetPhysicsObject()
-
             if IsValid(phys) then
                 phys:EnableMotion(false)
             end
@@ -162,24 +167,18 @@ if SERVER then
     function ents.CreateFromData(entData)
         if entData == nil then return nil end
         local classname = entData["classname"]
-
         if classname == nil or classname == "" then
             Error("Data has no classname")
         end
 
         local ent = ents.Create(classname)
-
         for k, v in pairs(entData) do
             if istable(v) then
                 for _, v2 in pairs(v) do
-                    ent:SetKeyValue(k, v2)
-                    -- We process outputs and keyvalues in here, its not calling when calling SetKeyValue
-                    GAMEMODE:EntityKeyValue(ent, k, v2)
+                    SetEntityKeyValue(ent, k, v2)
                 end
             else
-                ent:SetKeyValue(k, v)
-                -- We process outputs and keyvalues in here, its not calling when calling SetKeyValue
-                GAMEMODE:EntityKeyValue(ent, k, v)
+                SetEntityKeyValue(ent, k, v)
             end
         end
 
@@ -198,7 +197,6 @@ function ents.FindByPos(pos, class, name)
     local tolerance = Vector(1, 1, 1)
     local found = ents.FindInBox(pos - tolerance, pos + tolerance)
     local res = {}
-
     for _, v in pairs(found) do
         if class ~= nil and name ~= nil then
             if v:GetClass() == class and v:GetName() == name then
