@@ -93,6 +93,26 @@ function MAPSCRIPT:PostInit()
         ent:SetKeyValue("spawnflags", "820")
     end)
 
+    -- Turn the NPCs passive once they reached the room.
+    local passiveTrigger = ents.Create("trigger_multiple")
+    passiveTrigger:SetKeyValue("filtername", "filter_citizens")
+    passiveTrigger:SetKeyValue("spawnflags", "2")
+    passiveTrigger:SetKeyValue("StartDisabled", "0")
+    passiveTrigger:SetKeyValue("wait", "1")
+    passiveTrigger:SetKeyValue("OnTrigger", "!activator,SetAmmoResupplierOff,,0,-1", "0.0")
+    passiveTrigger:SetKeyValue("OnTrigger", "!activator,SetMedicOff,,0,-1", "0.0")
+    passiveTrigger:SetName("lambda_passive_trigger")
+    passiveTrigger:SetupTrigger(
+        Vector(8681, 9510, -767),
+        Angle(0, 0, 0),
+        Vector(-110, -140, 0),
+        Vector(110, 140, 100))
+
+    ents.WaitForEntityByName("trigger_citizen_boardtrain", function(ent)
+        ent:Fire("AddOutput", "OnTrigger !activator,SetAmmoResupplierOff,,0,-1", "0.0")
+        ent:Fire("AddOutput", "OnTrigger !activator,SetMedicOff,,0,-1", "0.0")
+    end)
+
     GAMEMODE:WaitForInput("citizen_refugees_1", "Kill", function(ent)
         ent:SetName("lambda_citizen_refugees_1")
         print("Prevented citizen_refugees_1 from being killed, renamed")
