@@ -36,7 +36,7 @@ MAPSCRIPT.Checkpoints = {
         }
     },
     {
-        Pos = Vector(-6672.511230, 5903.196777, -22.662888),
+        Pos = Vector(-6672.511230, 5903.196777, -91),
         Ang = Angle(0, 45, 0),
         Trigger = {
             Pos = Vector(-6431.318848, 6006.155273, -100.239578),
@@ -241,6 +241,12 @@ function MAPSCRIPT:PostInit()
             end
         )
 
+        -- Add our own medkit available for pickup next to other 2 medkits
+        local medkit = ents.Create("weapon_lambda_medkit")
+        medkit:SetPos(Vector(-7847, 5886, 60))
+        medkit:SetAngles(Angle(3, 180, 4))
+        medkit:Spawn()
+
         -- Make sure no player is left behind.
         for _, v in pairs(ents.FindByPos(Vector(-7920, 5444, 84), "trigger_once")) do
             v:Remove()
@@ -250,6 +256,12 @@ function MAPSCRIPT:PostInit()
         triggerDogEscape:SetupTrigger(Vector(-8560.031250, 5826.152832, -63.710419), Angle(0, 0, 0), Vector(-600, -350, -100), Vector(800, 400, 500))
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll ss_dog_gunship_down,BeginSequence,,0.0,-1")
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll pclip_gunship_2,Enable,,0.0,-1")
+        triggerDogEscape.OnEndTouchAll = function(trigger, activator)
+            DbgPrint("Adding medkit to loadout")
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_lambda_medkit")
+        end
+
         ents.WaitForEntityByName(
             "counter_alyx_van",
             function(ent)
