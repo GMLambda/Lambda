@@ -1042,17 +1042,32 @@ function SWEP:GetLightBrightness()
         brightness = 0.5
     end
 
-    if self:GetEffectState() == EFFECT_HOLDING then
+    local efState = self:GetEffectState()
+    if efState == EFFECT_HOLDING then
         brightness = brightness * (2.5 + (math.sin(CurTime() * 100) * 0.12))
+    elseif efState == EFFECT_LAUNCH then
+        brightness = brightness * 2.5
     end
 
     return brightness
 end
 
+function SWEP:StopLights()
+    if self.ProjectedTexture ~= nil and IsValid(self.ProjectedTexture) then
+        self.ProjectedTexture:Remove()
+        self.ProjectedTexture = nil
+    end
+end
+
 function SWEP:UpdateGlow()
     if self:IsEffectActive(EF_NODRAW) == true then return end
     local glowMode = physcannon_glow_mode
-    if glowMode == 0 then return end
+    if glowMode == 0 then
+        self:StopLights()
+
+        return
+    end
+
     local curTime = CurTime()
     if curTime < self.NextGlowUpdate then return end
     local lightPos = self:GetLightPosition()
@@ -1653,14 +1668,14 @@ function SWEP:DoEffectLaunch(pos)
     ef:SetOrigin(endPos)
     ef:SetEntity(self)
     if CLIENT and IsFirstTimePredicted() then
-        util.Effect("PhyscannonImpact", ef)
+        util.Effect("lambda_physcannon_impact", ef)
     elseif SERVER then
-        util.Effect("PhyscannonImpact", ef)
+        util.Effect("lambda_physcannon_impact", ef)
     end
 
     if CLIENT then
         local blast = self.EffectParameters[PHYSCANNON_BLAST]
-        blast.Scale:Init(8.0, 64, 0.1)
+        blast.Scale:Init(8.0, 128, 0.3)
         blast.Alpha:Init(255, 0, 0.2)
         blast.Visible = true
     end
@@ -1895,26 +1910,27 @@ local render_StartBeam = render and render.StartBeam or nil
 local render_EndBeam = render and render.EndBeam or nil
 function SWEP:DrawBeam(startPos, endPos, width, color)
     color = color or Color(255, 255, 255, 255)
-    local len = endPos - startPos
-    local split = len / BEAM_SEGMENTS
+    local frequency = 5
+    local curTime = CurTime()
+    local range = 1
     for n = 0, BEAM_GROUPS - 1 do
+        local seed = n
         render_StartBeam(BEAM_SEGMENTS)
         for i = 0, BEAM_SEGMENTS - 1 do
-            local offset = Vector(0, 0, 0)
-            local pos
-            if i == 0 then
-                pos = startPos
-            elseif i == BEAM_SEGMENTS - 1 then
-                pos = endPos
-            else
-                local t = CurTime() * 15
-                local p = (t + (n * n)) + (i / BEAM_SEGMENTS - 1) * math.pi
-                local randVec = Vector(1, 1, 1)
-                randVec.x = randVec.x * util.SharedRandom("beam_posx" .. tostring(i), -0.1, 0.1)
-                randVec.y = randVec.y * util.SharedRandom("beam_posy" .. tostring(i), -0.1, 0.1)
-                randVec.z = randVec.z * util.SharedRandom("beam_posz" .. tostring(i), -0.1, 0.1)
-                offset = Vector(1, 1, 1) * math.sin(p) + (randVec * ((n / BEAM_GROUPS) - 0.5))
-                pos = startPos + (i * split) + offset
+            local p = i / (BEAM_SEGMENTS - 1)
+            local pos = LerpVector(p, startPos, endPos)
+            local randVec = Vector(1, 1, 1)
+            randVec.x = randVec.x * util.SharedRandom("beam_posx" .. tostring(i), -0.1, 0.1)
+            randVec.y = randVec.y * util.SharedRandom("beam_posy" .. tostring(i), -0.1, 0.1)
+            randVec.z = randVec.z * util.SharedRandom("beam_posz" .. tostring(i), -0.1, 0.1)
+            if i > 0 then
+                local yOffset = math.sin(i + (seed * 10) + curTime * frequency) * range
+                local xOffset = math.cos(i + (seed * 20) + seed + curTime * frequency) * range
+                local zOffset = math.sin(i + (seed * 30) + seed + curTime * frequency * 0.5) * range
+                pos.x = pos.x + xOffset
+                pos.y = pos.y + yOffset
+                pos.z = pos.z + zOffset
+                pos = pos + VectorRand() * 0.2
             end
 
             local texcoord = util.SharedRandom("beam_tex" .. tostring(i), 0.5, 1)
