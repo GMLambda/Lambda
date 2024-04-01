@@ -397,12 +397,9 @@ end
 
 function ENTITY_META:CanTakeDamage()
     local data = self:GetInternalVariable("m_takedamage")
-
     if data ~= nil then
         -- DAMAGE_NO
         return data ~= 0
-    else
-        if self:IsNPC() == false and self:IsPlayer() == false and self:IsVehicle() == false then return false end
     end
 
     return true
