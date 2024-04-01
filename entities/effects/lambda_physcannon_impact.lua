@@ -1,4 +1,5 @@
 local MAT_PHYSBEAM = Material("sprites/physbeam.vmt")
+local EFFECT_TIME = 0.01
 function EFFECT:Init(data)
     local pos = data:GetOrigin()
     local ent = data:GetEntity()
@@ -6,7 +7,7 @@ function EFFECT:Init(data)
     if ent:GetClass() ~= "weapon_physcannon" then return end
     self.SourceEntity = ent
     self.TargetPos = pos
-    self.DieTime = CurTime() + 0.01
+    self.DieTime = CurTime() + EFFECT_TIME
     self.Color = ent:GetWeaponColor()
     self.HasLight = false
     local efSparks = EffectData()
@@ -22,6 +23,24 @@ function EFFECT:Init(data)
     end
 end
 
+function EFFECT:GetStartPos()
+    local ent = self.SourceEntity
+    local wepPos
+    local owner = ent:GetOwner()
+    if ent:GetOwner() == LocalPlayer() then
+        local vm = owner:GetViewModel()
+        if not IsValid(vm) then return end
+        local wepCenter = vm:GetAttachment(1)
+        wepPos = ent:FormatViewModelAttachment(wepCenter.Pos, true)
+        wepPos = wepPos - (wepCenter.Ang:Forward() * 10)
+    else
+        local wepCenter = ent:GetAttachment(1)
+        wepPos = wepCenter.Pos
+    end
+
+    return wepPos
+end
+
 function EFFECT:Think()
     local ent = self.SourceEntity
     if not IsValid(ent) then return false end
@@ -32,19 +51,23 @@ function EFFECT:Think()
     -- Emit light.
     if self.EnableLights and self.HasLight == false then
         local targetPos = self.TargetPos
-        local startPos = ent:GetAttachment(1).Pos
-        local center = (startPos + targetPos) * 0.5
+        local startPos = self:GetStartPos()
         local dist = startPos:Distance(targetPos)
         local color = self.Color
-        local dlight = DynamicLight(self:EntIndex())
-        dlight.dietime = self.DieTime
-        dlight.pos = center
-        dlight.r = color.r
-        dlight.g = color.g
-        dlight.b = color.b
-        dlight.brightness = 1
-        dlight.decay = 2000
-        dlight.size = dist
+        for i = 1, 3 do
+            local p = i / 3
+            local pos = LerpVector(p, startPos, targetPos)
+            local index = bit.rshift(i, 16) + i
+            local dlight = DynamicLight(index)
+            dlight.dietime = self.DieTime
+            dlight.pos = pos
+            dlight.r = color.r
+            dlight.g = color.g
+            dlight.b = color.b
+            dlight.brightness = 2
+            dlight.decay = 500
+            dlight.size = dist
+        end
 
         self.HasLight = true
     end
@@ -79,20 +102,7 @@ function EFFECT:RenderBeam(startPos, endPos, seed)
 end
 
 function EFFECT:Render()
-    local ent = self.SourceEntity
-    local wepPos
-    local owner = ent:GetOwner()
-    if ent:GetOwner() == LocalPlayer() then
-        local vm = owner:GetViewModel()
-        if not IsValid(vm) then return end
-        local wepCenter = vm:GetAttachment(1)
-        wepPos = ent:FormatViewModelAttachment(wepCenter.Pos, true)
-        wepPos = wepPos - (wepCenter.Ang:Forward() * 10)
-    else
-        local wepCenter = ent:GetAttachment(1)
-        wepPos = wepCenter.Pos
-    end
-
+    local wepPos = self:GetStartPos()
     render.SetMaterial(MAT_PHYSBEAM)
     local targetPos = self.TargetPos
     for n = 1, 5 do
