@@ -53,6 +53,15 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
+    -- Add ar2 and frags to player loadout when entering the ambush room
+    local loadoutTrigger = ents.Create("trigger_once")
+    loadoutTrigger:SetupTrigger(Vector(1276, -428, 71), Angle(0, 90, 0), Vector(-27, -8, -55), Vector(27, 8, 55))
+    loadoutTrigger.OnTrigger = function()
+        DbgPrint("Adding AR2 and frags to player loadout")
+        local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+        table.insert(loadout.Weapons, "weapon_ar2")
+        table.insert(loadout.Weapons, "weapon_frag")
+    end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
