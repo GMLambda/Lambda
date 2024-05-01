@@ -7,7 +7,6 @@ local IsValid = IsValid
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
 DEFINE_BASECLASS("lambda_entity")
-
 local HIDING_MODELS = {
     ["models/props_junk/wood_crate001a.mdl"] = true,
     ["models/props_junk/wood_pallet001a.mdl"] = true,
@@ -31,12 +30,10 @@ local HIDING_MODELS = {
 local MAX_IN_GROUP = 4
 local SAFE_ZONE_MINS = Vector(-256, -256, -64)
 local SAFE_ZONE_MAXS = Vector(256, 256, 64)
-
 local function GetMaxCockroaches()
     local maxRoaches = GAMEMODE:GetSetting("max_cockroaches")
-    if maxRoaches == nil then
-        return 0
-    end
+    if maxRoaches == nil then return 0 end
+
     return maxRoaches
 end
 
@@ -45,11 +42,14 @@ function ENT:PreInitialize()
     DbgPrint(self, "PreInitialize")
     self:SetInputFunction("Enable", self.Enable)
     self:SetInputFunction("Disable", self.Disable)
-
-    self:SetupNWVar("Disabled", "bool", {
-        Default = false,
-        KeyValue = "StartDisabled"
-    })
+    self:SetupNWVar(
+        "Disabled",
+        "bool",
+        {
+            Default = false,
+            KeyValue = "StartDisabled"
+        }
+    )
 
     self.Roaches = {}
     self.HidingSpots = {}
@@ -64,10 +64,8 @@ end
 local function IsSuitableSpawnPos(pos)
     local nearbyEnts = ents.FindInBox(pos + SAFE_ZONE_MINS, pos + SAFE_ZONE_MAXS)
     local groupCount = 0
-
     for _, v in pairs(nearbyEnts) do
         if v:IsPlayer() and v:Alive() then return false end
-
         if v:IsNPC() then
             if v.LambdaCockroach ~= nil then
                 groupCount = groupCount + 1
@@ -100,13 +98,14 @@ function ENT:SpawnRoach()
     local roach = ents.Create("npc_lambda_cockroach")
     roach:SetPos(spawnPos)
     roach:Spawn()
-
-    roach:CallOnRemove("RoachRemove", function(e)
-        table.RemoveByValue(self.Roaches, e)
-    end, roach)
+    roach:CallOnRemove(
+        "RoachRemove",
+        function(e)
+            table.RemoveByValue(self.Roaches, e)
+        end, roach
+    )
 
     table.insert(self.Roaches, roach)
-    
     local maxRoaches = GetMaxCockroaches()
     DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. maxRoaches)
 
@@ -116,10 +115,8 @@ end
 function ENT:FindHidingSpots()
     if self.EmptyMap == true or #self.HidingSpots > 0 then return end
     local unique = {}
-
     for v, _ in pairs(HIDING_MODELS) do
         local found = ents.FindByModel(v)
-
         for id, e in pairs(found) do
             if e:GetVelocity():Length() == 0 then
                 unique[e] = true
@@ -128,7 +125,6 @@ function ENT:FindHidingSpots()
     end
 
     local spots = {}
-
     for k, _ in pairs(unique) do
         table.insert(spots, k)
     end
@@ -139,7 +135,6 @@ end
 
 function ENT:MaintainHidingSpots()
     self:FindHidingSpots()
-
     for k, v in pairs(self.HidingSpots) do
         if not IsValid(v) then
             table.remove(self.HidingSpots, k)
@@ -157,7 +152,6 @@ end
 
 function ENT:Think()
     self:NextThink(CurTime() + 0.2)
-
     if self.InitialThink == nil then
         -- Ignore the first time.
         self.InitialThink = true
@@ -167,18 +161,18 @@ function ENT:Think()
 
     if self:GetNWVar("Disabled") == true then return true end
     self:MaintainHidingSpots()
-
     local maxRoaches = GetMaxCockroaches()
     if #self.Roaches < maxRoaches then
         self:AttemptSpawnRoach()
     end
 
-    while (#self.Roaches > maxRoaches) do
+    while #self.Roaches > maxRoaches do
         local roach = self.Roaches[1]
         if IsValid(roach) then
             DbgPrint(self, "Removing roach", roach)
             roach:Remove()
         end
+
         table.remove(self.Roaches, 1)
     end
 
