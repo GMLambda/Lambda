@@ -534,6 +534,19 @@ function GAMETYPE:InitSettings()
             Max = 600
         }
     })
+
+    GAMEMODE:AddSetting("max_cockroaches", {
+        Category = "SERVER",
+        NiceName = "#GM_COCKROACHES",
+        Description = "The maximum amount of cockroaches that can be spawned",
+        Type = "int",
+        Default = 30,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
+        Clamp = {
+            Min = 0,
+            Max = 100,
+        }
+    })
 end
 
 function GAMETYPE:GetScoreboardInfo()
