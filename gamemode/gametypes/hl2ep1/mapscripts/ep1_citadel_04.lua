@@ -91,6 +91,13 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("stalkerPod_Physanim", function(ent)
             ent:Fire("AddOutput", "OnPhysGunPickup lambda_stalkerPod_Physanim,Trigger,0.0,-1")
         end)
+
+        -- Move changelevel a bit further to prevent players getting stuck
+        ents.RemoveByClass("trigger_changelevel")
+        local changelevelTrigger = ents.Create("trigger_changelevel")
+        changelevelTrigger:SetupTrigger(Vector(4078, 8115, 3410), Angle(0, 0, 0), Vector(-80, -30, -80), Vector(80, 30, 80))
+        changelevelTrigger:SetKeyValue("map", "ep1_c17_00")
+        changelevelTrigger:SetKeyValue("landmark", "cit_04_to_c17_00")
     end
 end
 
