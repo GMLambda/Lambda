@@ -83,15 +83,26 @@ function MAPSCRIPT:PostInit()
 
     -- Prevent NPCs from getting stuck on the lockers. Adjust spawnflags
     -- so they can't interact with it.
-    ents.WaitForEntityByName("lockers_1_door_left", function(ent)
-        ent:SetKeyValue("spawnflags", "820")
-    end)
-    ents.WaitForEntityByName("lockers_1_door_middle", function(ent)
-        ent:SetKeyValue("spawnflags", "820")
-    end)
-    ents.WaitForEntityByName("lockers_1_door_right", function(ent)
-        ent:SetKeyValue("spawnflags", "820")
-    end)
+    ents.WaitForEntityByName(
+        "lockers_1_door_left",
+        function(ent)
+            ent:SetKeyValue("spawnflags", "820")
+        end
+    )
+
+    ents.WaitForEntityByName(
+        "lockers_1_door_middle",
+        function(ent)
+            ent:SetKeyValue("spawnflags", "820")
+        end
+    )
+
+    ents.WaitForEntityByName(
+        "lockers_1_door_right",
+        function(ent)
+            ent:SetKeyValue("spawnflags", "820")
+        end
+    )
 
     -- Turn the NPCs passive once they reached the room.
     local passiveTrigger = ents.Create("trigger_multiple")
@@ -102,40 +113,54 @@ function MAPSCRIPT:PostInit()
     passiveTrigger:SetKeyValue("OnTrigger", "!activator,SetAmmoResupplierOff,,0,-1", "0.0")
     passiveTrigger:SetKeyValue("OnTrigger", "!activator,SetMedicOff,,0,-1", "0.0")
     passiveTrigger:SetName("lambda_passive_trigger")
-    passiveTrigger:SetupTrigger(
-        Vector(8681, 9510, -767),
-        Angle(0, 0, 0),
-        Vector(-110, -140, 0),
-        Vector(110, 140, 100))
+    passiveTrigger:SetupTrigger(Vector(8681, 9510, -767), Angle(0, 0, 0), Vector(-110, -140, 0), Vector(110, 140, 100))
+    ents.WaitForEntityByName(
+        "trigger_citizen_boardtrain",
+        function(ent)
+            ent:Fire("AddOutput", "OnTrigger !activator,SetAmmoResupplierOff,,0,-1", "0.0")
+            ent:Fire("AddOutput", "OnTrigger !activator,SetMedicOff,,0,-1", "0.0")
+        end
+    )
 
-    ents.WaitForEntityByName("trigger_citizen_boardtrain", function(ent)
-        ent:Fire("AddOutput", "OnTrigger !activator,SetAmmoResupplierOff,,0,-1", "0.0")
-        ent:Fire("AddOutput", "OnTrigger !activator,SetMedicOff,,0,-1", "0.0")
-    end)
+    GAMEMODE:WaitForInput(
+        "citizen_refugees_1",
+        "Kill",
+        function(ent)
+            ent:SetName("lambda_citizen_refugees_1")
 
-    GAMEMODE:WaitForInput("citizen_refugees_1", "Kill", function(ent)
-        ent:SetName("lambda_citizen_refugees_1")
-        print("Prevented citizen_refugees_1 from being killed, renamed")
-        return true
-    end)
+            return true
+        end
+    )
 
-    GAMEMODE:WaitForInput("citizen_refugees_2", "Kill", function(ent)
-        ent:SetName("lambda_citizen_refugees_2")
-        print("Prevented citizen_refugees_2 from being killed, renamed")
-        return true
-    end)
+    GAMEMODE:WaitForInput(
+        "citizen_refugees_2",
+        "Kill",
+        function(ent)
+            ent:SetName("lambda_citizen_refugees_2")
 
-    GAMEMODE:WaitForInput("citizen_refugees_3", "Kill", function(ent)
-        ent:SetName("lambda_citizen_refugees_3")
-        print("Prevented citizen_refugees_3 from being killed, renamed")
-        return true
-    end)
+            return true
+        end
+    )
 
-    GAMEMODE:WaitForInput("citizen_refugees_4", "Kill", function(ent)
-        ent:SetName("lambda_citizen_refugees_4")
-        print("Prevented citizen_refugees_4 from being killed, renamed")
-        return true
-    end)
+    GAMEMODE:WaitForInput(
+        "citizen_refugees_3",
+        "Kill",
+        function(ent)
+            ent:SetName("lambda_citizen_refugees_3")
+
+            return true
+        end
+    )
+
+    GAMEMODE:WaitForInput(
+        "citizen_refugees_4",
+        "Kill",
+        function(ent)
+            ent:SetName("lambda_citizen_refugees_4")
+
+            return true
+        end
+    )
 
     -- Create more places where the NPC can sit.
     local sit1 = ents.Create("scripted_sequence")
@@ -152,7 +177,6 @@ function MAPSCRIPT:PostInit()
     sit1:SetKeyValue("OnBeginSequence", "citizen_refugees_3,AddContext,Citizens_Safe_Ep1_05:1,0,-1")
     sit1:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_1,RunLua,,0,-1")
     sit1:Spawn()
-
     local sit2 = ents.Create("scripted_sequence")
     sit2:SetPos(Vector(9648, 9446, -735))
     sit2:SetName("lambda_ss_citizen_wait_points_4")
@@ -167,66 +191,53 @@ function MAPSCRIPT:PostInit()
     sit2:SetKeyValue("OnBeginSequence", "citizen_refugees_1,AddContext,Citizens_Safe_Ep1_05:1,0,-1")
     sit2:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_2,RunLua,,0,-1")
     sit2:Spawn()
-
-    GAMEMODE:WaitForInput("ss_citizen_wait_points_3", "CancelSequence", function(ent)
-        return true
-    end)
-
-    GAMEMODE:WaitForInput("ss_citizen_wait_points_4", "CancelSequence", function(ent)
-        return true
-    end)
-
-    GAMEMODE:WaitForInput("ss_citizen_wait_points_3", "Kill", function(ent)
-        return true
-    end)
-
-    GAMEMODE:WaitForInput("ss_citizen_wait_points_4", "Kill", function(ent)
-        return true
-    end)
-
+    GAMEMODE:WaitForInput("ss_citizen_wait_points_3", "CancelSequence", function(ent) return true end)
+    GAMEMODE:WaitForInput("ss_citizen_wait_points_4", "CancelSequence", function(ent) return true end)
+    GAMEMODE:WaitForInput("ss_citizen_wait_points_3", "Kill", function(ent) return true end)
+    GAMEMODE:WaitForInput("ss_citizen_wait_points_4", "Kill", function(ent) return true end)
     local renameTrigger1 = ents.Create("lambda_lua_logic")
     renameTrigger1:SetName("lambda_rename_trigger_1")
     renameTrigger1.OnRunLua = function(trigger)
         local old = ents.FindFirstByName("ss_citizen_wait_points_3")
         if IsValid(old) then
-            print("Renaming ss_citizen_wait_points_3 to stub_ss_citizen_wait_points_3")
             old:SetName("stub_ss_citizen_wait_points_3")
         end
+
         local new = ents.FindFirstByName("lambda_ss_citizen_wait_points_3")
         if IsValid(new) then
-            print("Renaming lambda_ss_citizen_wait_points_3 to ss_citizen_wait_points_3")
             new:SetName("ss_citizen_wait_points_3")
         end
     end
-    renameTrigger1:Spawn()
 
+    renameTrigger1:Spawn()
     local renameTrigger2 = ents.Create("lambda_lua_logic")
     renameTrigger2:SetName("lambda_rename_trigger_2")
     renameTrigger2.OnRunLua = function(trigger)
         local old = ents.FindFirstByName("ss_citizen_wait_points_4")
         if IsValid(old) then
-            print("Renaming ss_citizen_wait_points_4 to stub_ss_citizen_wait_points_4")
             old:SetName("stub_ss_citizen_wait_points_4")
         end
+
         local new = ents.FindFirstByName("lambda_ss_citizen_wait_points_4")
         if IsValid(new) then
-            print("Renaming lambda_ss_citizen_wait_points_4 to ss_citizen_wait_points_4")
             new:SetName("ss_citizen_wait_points_4")
         end
     end
+
     renameTrigger2:Spawn()
+    ents.WaitForEntityByName(
+        "ss_citizen_wait_points_3",
+        function(ent)
+            ent:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_1,RunLua,,0,-1")
+        end
+    )
 
-    ents.WaitForEntityByName("ss_citizen_wait_points_3", function(ent)
-        print("Found ss_citizen_wait_points_3")
-        print(ent:GetName())
-        ent:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_1,RunLua,,0,-1")
-    end)
-
-    ents.WaitForEntityByName("ss_citizen_wait_points_4", function(ent)
-        print("Found ss_citizen_wait_points_4")
-        print(ent:GetName())
-        ent:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_2,RunLua,,0,-1")
-    end)
+    ents.WaitForEntityByName(
+        "ss_citizen_wait_points_4",
+        function(ent)
+            ent:SetKeyValue("OnBeginSequence", "lambda_rename_trigger_2,RunLua,,0,-1")
+        end
+    )
 
     -- Replace the NPCs that would spawn in the parking lot and use a better spawn.
     local parkingLotSpawner = ents.Create("npc_template_maker")
@@ -241,7 +252,6 @@ function MAPSCRIPT:PostInit()
     parkingLotSpawner:Spawn()
     parkingLotSpawner:Activate()
     parkingLotSpawner:SetKeyValue("OnSpawnNPC", "csoldier_parkinglot_cargroup,Assault,rallypoint_parkinglot*,0,-1")
-
     local function CreateAssaultPoint(pos)
         local assaultPoint = ents.Create("assault_assaultpoint")
         assaultPoint:SetPos(pos)
@@ -259,7 +269,6 @@ function MAPSCRIPT:PostInit()
     CreateAssaultPoint(Vector(10335.364258, 11658.113281, -703.968750))
     CreateAssaultPoint(Vector(9641.139648, 11862.100586, -703.968750))
     CreateAssaultPoint(Vector(10027.281250, 10899.580078, -832.058777))
-
     local function CreateRallyPoint(pos, name)
         local rallyPoint = ents.Create("assault_rallypoint")
         rallyPoint:SetPos(pos)
@@ -274,10 +283,12 @@ function MAPSCRIPT:PostInit()
         CreateRallyPoint(Vector(9832.306641, 11567.169922, -703.968750), "rallypoint_parkinglot" .. i)
     end
 
-    ents.WaitForEntityByName("trigger_csoldiers_cargroup", function(ent)
-        ent:Fire("AddOutput", "OnTrigger csoldier_parkinglot_spawner,Enable,,0,-1", "0.0")
-    end)
-
+    ents.WaitForEntityByName(
+        "trigger_csoldiers_cargroup",
+        function(ent)
+            ent:Fire("AddOutput", "OnTrigger csoldier_parkinglot_spawner,Enable,,0,-1", "0.0")
+        end
+    )
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
@@ -287,34 +298,6 @@ function MAPSCRIPT:EntityKeyValue(ent, key, value)
     -- HACKHACK: There is an issue with NPCs and multiple players.
     -- https://github.com/Facepunch/garrysmod-issues/issues/5795
     if key:iequals("sleepstate") then return "0" end
-end
-
-if false then
-    -- Makes debugging this map easier.
-    local function KillClass(entClass)
-        for _,v in pairs(ents.FindByClass(entClass)) do
-            local dmg = DamageInfo()
-            dmg:SetDamage(1000)
-            dmg:SetDamageType(DMG_BLAST)
-            dmg:SetAttacker(game.GetWorld())
-            dmg:SetDamagePosition(v:GetPos())
-            if IsValid(v) then
-                v:TakeDamageInfo(dmg)
-            end
-        end
-    end
-
-    if SERVER then
-        timer.Create("PissOff", 1, 0, function()
-            KillClass("npc_manhack")
-            KillClass("npc_metropolice")
-            KillClass("npc_combine_s")
-            KillClass("npc_cscanner")
-            KillClass("npc_clawscanner")
-            KillClass("npc_combinedropship")
-            KillClass("prop_vehicle_apc")
-        end)
-    end
 end
 
 return MAPSCRIPT
