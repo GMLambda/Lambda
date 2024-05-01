@@ -4,7 +4,7 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
-    Weapons = {"weapon_physcannon"},
+    Weapons = {"weapon_lambda_medkit", "weapon_physcannon"},
     Ammo = {},
     Armor = 0,
     HEV = true
@@ -32,12 +32,30 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
 
 MAPSCRIPT.Checkpoints = {
     {
-        Pos = Vector(3792, 11592, 4741),
+        Pos = Vector(3799, 12449, 4745),
         Ang = Angle(0, 0, 0),
         Trigger = {
-            Pos = Vector(3792, 11592, 4741),
-            Mins = Vector(-40, -20, 0),
-            Maxs = Vector(40, 20, 50)
+            Pos = Vector(3554, 12529, 4801),
+            Mins = Vector(-28, -37, -65),
+            Maxs = Vector(28, 37, 65)
+        }
+    },
+    {
+        Pos = Vector(3035, 11112, 5001),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(3096, 11194, 5054),
+            Mins = Vector(-48, -26, -64),
+            Maxs = Vector(48, 26, 64)
+        }
+    },
+    {
+        Pos = Vector(3056, 12920, 5513),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(3080, 12666.6, 5613.5),
+            Mins = Vector(-88, -16, -115),
+            Maxs = Vector(88, 16, 115)
         }
     },
     {
@@ -73,12 +91,13 @@ function MAPSCRIPT:PostInit()
         end
 
         local monitorSceneTrigger = ents.Create("trigger_once")
-        monitorSceneTrigger:SetupTrigger(Vector(1196, 11708, 5247.96), Angle(0, 0, 0), Vector(-204, -188, -512), Vector(204, 188, 512))
+        monitorSceneTrigger:SetupTrigger(Vector(1200, 11676, 5536), Angle(0, 0, 0), Vector(-208, -156, -222), Vector(208, 156, 222))
         monitorSceneTrigger:SetName("trigger_startmonitor_scene_1")
         monitorSceneTrigger:SetKeyValue("StartDisabled", "1")
         monitorSceneTrigger:SetKeyValue("teamwait", "1")
         monitorSceneTrigger:Fire("AddOutput", "OnTrigger trigger_door_comb_close,Enable,0.0,-1")
         monitorSceneTrigger:Fire("AddOutput", "OnTrigger lcs_core_control_scene,Start,0.0,1")
+        monitorSceneTrigger:Fire("AddOutput", "OnTrigger pclip_door1,Enable,0.0,-1")
         monitorSceneTrigger.OnTrigger = function(_, activator)
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1224, 11835, 5317))
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
@@ -119,7 +138,7 @@ function MAPSCRIPT:PostInit()
         )
 
         local liftTrigger2 = ents.Create("trigger_once")
-        liftTrigger2:SetupTrigger(Vector(1857.5, 10507.5, 4988), Angle(0, 30, 0), Vector(-90, -100, -25), Vector(90, 100, 25))
+        liftTrigger2:SetupTrigger(Vector(1857.5, 10507.5, 4988), Angle(0, 75, 0), Vector(-80, -100, -25), Vector(80, 100, 25))
         liftTrigger2:SetKeyValue("teamwait", "1")
         liftTrigger2:Fire("AddOutput", "OnTrigger Train_lift_TP,StartForward,0.0,-1")
         liftTrigger2:Fire("AddOutput", "OnTrigger enemyfinder_core_breakerroom_2b,Wake,3.0,1")
@@ -143,7 +162,7 @@ function MAPSCRIPT:PostInit()
         end
 
         local liftTrigger3 = ents.Create("trigger_once")
-        liftTrigger3:SetupTrigger(Vector(1152, 13654, 5312), Angle(0, 0, 0), Vector(-60, -96, -32), Vector(60, 96, 32))
+        liftTrigger3:SetupTrigger(Vector(1152, 13658, 5344), Angle(0, 0, 0), Vector(-95, -75, -64), Vector(95, 75, 64))
         liftTrigger3:SetKeyValue("teamwait", "1")
         liftTrigger3:Fire("AddOutput", "OnTrigger relay_powerdown_sequence,Trigger,0.0,-1")
         liftTrigger3.OnTrigger = function(_, activator)

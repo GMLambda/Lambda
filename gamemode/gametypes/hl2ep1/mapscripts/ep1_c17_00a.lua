@@ -4,7 +4,7 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
-    Weapons = {"weapon_physcannon", "weapon_pistol", "weapon_shotgun"},
+    Weapons = {"weapon_lambda_medkit", "weapon_physcannon", "weapon_pistol", "weapon_shotgun"},
     Ammo = {
         ["Pistol"] = 18,
         ["Buckshot"] = 12
@@ -26,20 +26,44 @@ MAPSCRIPT.GlobalStates = {
     ["super_phys_gun"] = GLOBAL_OFF
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(1161.264038, 4318.854980, 628.031250),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(1161.264038, 4318.854980, 628.031250),
+            Mins = Vector(-25, -25, 0),
+            Maxs = Vector(25, 25, 100)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(4352, -4260, -119), Angle(0, 90, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(4292, -4130, -119), Angle(0, 0, 0), Vector(-25, -25, 0), Vector(25, 25, 100))
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
+        -- Prevent door from closing when entering the elevator waiting room
+        ents.WaitForEntityByName("math_count_door", function(ent)
+            ent:Remove()
+        end)
 
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(1161.264038, 4318.854980, 628.031250), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(1161.264038, 4318.854980, 628.031250), Angle(0, 0, 0), Vector(-25, -25, 0), Vector(25, 25, 100))
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+        -- Add checkpoint in elevator wait room
+        ents.WaitForEntityByName("trigger_door_close", function(ent)
+            ent.OnStartTouch = function()
+                local elevfightcp = GAMEMODE:CreateCheckpoint(Vector(4436, 3578, 414), Angle(0, 90, 0))
+                GAMEMODE:SetPlayerCheckpoint(elevfightcp)
+            end
+        end)
+
+        -- Remove default elevator player entry trigger
+        ents.WaitForEntityByName("trigger_elevator_player", function(ent)
+            ent:Remove()
+        end)
+
+        -- Add a new one with a teamwait value
+        local elevTrigger = ents.Create("trigger_once")
+        elevTrigger:SetupTrigger(Vector(4644, 3584, 481.5), Angle(0, 0, 0), Vector(-100, -100, -50), Vector(100, 100, 50))
+        elevTrigger:SetKeyValue("teamwait", "1")
+        elevTrigger.OnTrigger = function(trigger)
+            TriggerOutputs({{"counter_elevator", "Add", 0.0, "1"}})
         end
     end
 end

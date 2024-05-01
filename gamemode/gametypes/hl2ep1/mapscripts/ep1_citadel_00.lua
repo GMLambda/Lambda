@@ -36,7 +36,7 @@ MAPSCRIPT.Checkpoints = {
         }
     },
     {
-        Pos = Vector(-6672.511230, 5903.196777, -22.662888),
+        Pos = Vector(-6672.511230, 5903.196777, -91),
         Ang = Angle(0, 45, 0),
         Trigger = {
             Pos = Vector(-6431.318848, 6006.155273, -100.239578),
@@ -241,6 +241,12 @@ function MAPSCRIPT:PostInit()
             end
         )
 
+        -- Add our own medkit available for pickup next to other 2 medkits
+        local medkit = ents.Create("weapon_lambda_medkit")
+        medkit:SetPos(Vector(-7847, 5886, 60))
+        medkit:SetAngles(Angle(3, 180, 4))
+        medkit:Spawn()
+
         -- Make sure no player is left behind.
         for _, v in pairs(ents.FindByPos(Vector(-7920, 5444, 84), "trigger_once")) do
             v:Remove()
@@ -250,6 +256,12 @@ function MAPSCRIPT:PostInit()
         triggerDogEscape:SetupTrigger(Vector(-8560.031250, 5826.152832, -63.710419), Angle(0, 0, 0), Vector(-600, -350, -100), Vector(800, 400, 500))
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll ss_dog_gunship_down,BeginSequence,,0.0,-1")
         triggerDogEscape:Fire("AddOutput", "OnEndTouchAll pclip_gunship_2,Enable,,0.0,-1")
+        triggerDogEscape.OnEndTouchAll = function(trigger, activator)
+            DbgPrint("Adding medkit to loadout")
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_lambda_medkit")
+        end
+
         ents.WaitForEntityByName(
             "counter_alyx_van",
             function(ent)
@@ -339,6 +351,56 @@ function MAPSCRIPT:PostPlayerSpawn(ply)
             end
         end
     end
+end
+
+-- Adds material proxy for blue vortigaunts
+if CLIENT then
+
+    local VORTIGAUNT_BLUE_FADE_TIME = 2.25
+
+    matproxy.Add({
+        name = "VortEmissive",
+        init = function(self, mat, values)
+            self.matEmissiveStrength = mat:GetFloat("$emissiveblendstrength")
+
+            if self.matEmissiveStrength ~= nil then
+                self.matDetailBlendStrength = mat:GetFloat("$detailblendfactor")
+            end
+        end,
+        bind = function(self, mat, ent)
+            local flBlendValue
+            local isBlue
+
+            if mat:GetName() == "models/vortigaunt/vortigaunt_blue" then
+                local fadeBlueEndTime =  1 -- m_flBlueEndFadeTime var does not exist on the NPC so we hardcode a value
+                isBlue = true
+
+                -- Do we need to crossfade?
+                if CurTime() < fadeBlueEndTime and fadeBlueEndTime ~= -1 then
+                    local fadeRatio = (fadeBlueEndTime - CurTime()) / VORTIGAUNT_BLUE_FADE_TIME
+                    if isBlue then
+                        fadeRatio = 1 - fadeRatio
+                    end
+                    flBlendValue = math.Clamp(fadeRatio, 0, 1)
+
+                -- No, we do not.
+                else
+                    if isBlue then flBlendValue = 1 else flBlendValue = 0 end
+                end
+            else
+                flBlendValue = 0
+            end
+
+            if self.matEmissiveStrength ~= nil then
+                mat:SetFloat("$emissiveblendstrength", flBlendValue)
+            end
+
+            if self.matDetailBlendStrength ~= nil then
+                mat:SetFloat("$detailblendfactor", flBlendValue)
+            end
+        end
+    })
+
 end
 
 return MAPSCRIPT
