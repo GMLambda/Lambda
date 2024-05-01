@@ -33,6 +33,15 @@ MAPSCRIPT.Checkpoints = {
         }
     },
     {
+        Pos = Vector(4427, -281, -96),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(4448, -288, -40),
+            Mins = Vector(-27, -64, -70),
+            Maxs = Vector(27, 64, 70)
+        }
+    },
+    {
         Pos = Vector(3550.521240, 1506.495483, 140.031250),
         Ang = Angle(0, -180, 0),
         Trigger = {
