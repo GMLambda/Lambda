@@ -3,6 +3,7 @@
 - Improved: Lambda no longer override the localization already existing in the game.
 - Improved: d2_coast_03: Give more supplies, hope this can help player fight with multiple gunships better.
 - Improved: d2_coast_03: Mission critical NPCs now have protection to prevent dying from a car accident.
+- Improved: The gravity gun punt has now an energy effect.
 - Fixed: Pickup SMG grenade showing wrong icon.
 - Fixed: d2_coast_03: G-Man and Oddssa stay in the balcony forever.
 - Fixed: d2_coast_03: Blocked a exploit where player can use it to skip the final scene.
