@@ -24,13 +24,21 @@ local HIDING_MODELS = {
     ["models/props_c17/oildrum001.mdl"] = true,
     ["models/props_c17/furnituredresser001a.mdl"] = true,
     ["models/props_vehicles/car004b_physics.mdl"] = true,
-    ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true
+    ["models/props_junk/wood_crate001a_damagedmax.mdl"] = true,
+    ["models/props_lab/scrapyarddumpster_static.mdl"] = true,
 }
 
-local MAX_COCKROACHES = 60
 local MAX_IN_GROUP = 4
 local SAFE_ZONE_MINS = Vector(-256, -256, -64)
 local SAFE_ZONE_MAXS = Vector(256, 256, 64)
+
+local function GetMaxCockroaches()
+    local maxRoaches = GAMEMODE:GetSetting("max_cockroaches")
+    if maxRoaches == nil then
+        return 0
+    end
+    return maxRoaches
+end
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
@@ -98,7 +106,9 @@ function ENT:SpawnRoach()
     end, roach)
 
     table.insert(self.Roaches, roach)
-    DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. MAX_COCKROACHES)
+    
+    local maxRoaches = GetMaxCockroaches()
+    DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. maxRoaches)
 
     return true
 end
@@ -158,8 +168,18 @@ function ENT:Think()
     if self:GetNWVar("Disabled") == true then return true end
     self:MaintainHidingSpots()
 
-    if #self.Roaches < MAX_COCKROACHES then
+    local maxRoaches = GetMaxCockroaches()
+    if #self.Roaches < maxRoaches then
         self:AttemptSpawnRoach()
+    end
+
+    while (#self.Roaches > maxRoaches) do
+        local roach = self.Roaches[1]
+        if IsValid(roach) then
+            DbgPrint(self, "Removing roach", roach)
+            roach:Remove()
+        end
+        table.remove(self.Roaches, 1)
     end
 
     return true
