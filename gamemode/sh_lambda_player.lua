@@ -26,36 +26,27 @@ local HITGROUP_BACK = 101
 if SERVER then
     function GM:IsPlayerEnemy(ply1, ply2)
         local isEnemy = self:CallGameTypeFunc("IsPlayerEnemy", ply1, ply2)
-
         return isEnemy
     end
 
     function GM:ShowHelp(ply)
         local posLocked = ply:IsPositionLocked()
-        if posLocked == false then
-            self:TogglePlayerSettings(ply, true, 1)
-        end
+        if posLocked == false then self:TogglePlayerSettings(ply, true, 1) end
     end
 
     function GM:ShowTeam(ply)
         local posLocked = ply:IsPositionLocked()
-        if posLocked == false then
-            self:TogglePlayerSettings(ply, true, 2)
-        end
+        if posLocked == false then self:TogglePlayerSettings(ply, true, 2) end
     end
 
     function GM:ShowSpare1(ply)
         local posLocked = ply:IsPositionLocked()
-        if posLocked == false then
-            self:TogglePlayerSettings(ply, true, 3)
-        end
+        if posLocked == false then self:TogglePlayerSettings(ply, true, 3) end
     end
 
     function GM:ShowSpare2(ply)
         local posLocked = ply:IsPositionLocked()
-        if posLocked == false then
-            self:TogglePlayerSettings(ply, true, 4)
-        end
+        if posLocked == false then self:TogglePlayerSettings(ply, true, 4) end
     end
 
     function GM:TogglePlayerSettings(ply, state, tab)
@@ -75,25 +66,19 @@ if SERVER then
         end
     end
 
-    net.Receive(
-        "LambdaPlayerSettings",
-        function(len, ply)
-            local state = net.ReadBool()
-            if state == true then return end
-            -- Who cares about state, only sent when closed.
-            GAMEMODE:TogglePlayerSettings(ply, false)
-        end
-    )
+    net.Receive("LambdaPlayerSettings", function(len, ply)
+        local state = net.ReadBool()
+        if state == true then return end
+        -- Who cares about state, only sent when closed.
+        GAMEMODE:TogglePlayerSettings(ply, false)
+    end)
 
-    net.Receive(
-        "LambdaPlayerSettingsChanged",
-        function(len, ply)
-            GAMEMODE:PlayerSetColors(ply)
-            GAMEMODE:PlayerSetModel(ply)
-            GAMEMODE:PlayerSetSkin(ply)
-            GAMEMODE:PlayerSetBodyGroup(ply)
-        end
-    )
+    net.Receive("LambdaPlayerSettingsChanged", function(len, ply)
+        GAMEMODE:PlayerSetColors(ply)
+        GAMEMODE:PlayerSetModel(ply)
+        GAMEMODE:PlayerSetSkin(ply)
+        GAMEMODE:PlayerSetBodyGroup(ply)
+    end)
 
     function GM:ResetPlayerRespawnQueue()
         DbgPrint("Reset respawn queue")
@@ -107,7 +92,6 @@ if SERVER then
 
     function GM:IsPlayerInRespawnQueue(ply)
         if not IsValid(ply) or ply:Alive() == true then return false end
-
         return self.PlayerRespawnQueue[ply] == true
     end
 
@@ -120,21 +104,14 @@ if SERVER then
     function GM:CanPlayerSuicide(ply)
         if ply:Alive() == false then return false end
         if ply:IsPositionLocked() then return false end
-
         return true
     end
 
     function GM:PlayerDisconnected(ply)
         -- Remove from queue.
         self:RemovePlayerFromRespawnQueue(ply)
-        if ply.LambdaPlayerData == nil then
-            DbgPrint("Disconnected without LambdaPlayerData assigned, bug?")
-        end
-
-        if IsValid(ply.TrackerEntity) then
-            ply.TrackerEntity:Remove()
-        end
-
+        if ply.LambdaPlayerData == nil then DbgPrint("Disconnected without LambdaPlayerData assigned, bug?") end
+        if IsValid(ply.TrackerEntity) then ply.TrackerEntity:Remove() end
         return BaseClass.PlayerDisconnected(self, ply)
     end
 
@@ -156,10 +133,7 @@ if SERVER then
 
         ply:SetTeam(TEAM_SPECTATOR)
         ply:SetName("!player") -- Some thing are triggered between PlayerInitialSpawn and PlayerSpawn
-        if ply:IsBot() == false then
-            ply:SetInactive(true)
-        end
-
+        if ply:IsBot() == false then ply:SetInactive(true) end
         -- If game in progress player needs to wait.
         local elapsed = self:RoundElapsedTime()
         DbgPrint("Round time elapsed:", elapsed)
@@ -185,7 +159,6 @@ if SERVER then
             -- Check if players reached a checkpoint.
             if self.CurrentCheckpoint ~= nil and IsValid(self.CurrentCheckpoint) then
                 ply.SelectedSpawnpoint = self.CurrentCheckpoint
-
                 return self.CurrentCheckpoint
             end
         end
@@ -201,28 +174,18 @@ if SERVER then
         local spawnpoint = nil
         local possibleSpawns = {}
         for _, v in pairs(spawnpoints) do
-            if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then
-                table.insert(possibleSpawns, v)
-            end
+            if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then table.insert(possibleSpawns, v) end
         end
 
-        if spawnpoint == nil and #possibleSpawns > 0 then
-            spawnpoint = self:CallGameTypeFunc("PlayerSelectSpawn", possibleSpawns)
-        end
-
+        if spawnpoint == nil and #possibleSpawns > 0 then spawnpoint = self:CallGameTypeFunc("PlayerSelectSpawn", possibleSpawns) end
         DbgPrint("Select spawnpoint for player: " .. tostring(ply) .. ", spawn: " .. tostring(spawnpoint))
         ply.SelectedSpawnpoint = spawnpoint
-
         return spawnpoint
     end
 
     function GM:WaitForNextCheckpoint(ply)
         local gameType = self:GetGameType()
-        if gameType.UsingCheckpoints == true then
-            local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
-            if respawnTime == -1 then return true end
-        end
-
+        if gameType.UsingCheckpoints == true then return self:CallGameTypeFunc("CheckpointEnablesRespawn") end
         return false
     end
 
@@ -251,17 +214,13 @@ if SERVER then
             if v:HasSpawnFlags(1) then return true end
             if self:CallGameTypeFunc("CanPlayerSpawn", ply, v) == true then return true end
         end
-
         return false
     end
 
     function GM:PlayerSetModel(ply)
         DbgPrint("GM:PlayerSetModel")
         local playermdl = ply:GetInfo("lambda_playermdl")
-        if playermdl == nil or playermdl == "" then
-            playermdl = "male05"
-        end
-
+        if playermdl == nil or playermdl == "" then playermdl = "male05" end
         local mdls = self:GetAvailablePlayerModels()
         local selection = mdls[playermdl]
         if selection == nil then
@@ -272,10 +231,7 @@ if SERVER then
         local mdl = selection
         util.PrecacheModel(mdl)
         ply:SetModel(mdl)
-        if IsValid(ply.TrackerEntity) then
-            ply.TrackerEntity:AttachToPlayer(ply)
-        end
-
+        if IsValid(ply.TrackerEntity) then ply.TrackerEntity:AttachToPlayer(ply) end
         ply:SetupHands()
     end
 
@@ -286,10 +242,7 @@ if SERVER then
 
     function GM:PlayerSetBodyGroup(ply)
         local bg = ply:GetInfo("lambda_playermdl_bodygroup")
-        if bg == nil then
-            bg = ""
-        end
-
+        if bg == nil then bg = "" end
         bg = string.Explode(" ", bg)
         for k = 0, ply:GetNumBodyGroups() - 1 do
             ply:SetBodygroup(k, tonumber(bg[k + 1]) or 0)
@@ -372,18 +325,14 @@ if SERVER then
             if ammoType1 ~= -1 then
                 local ammoName = game.GetAmmoName(ammoType1)
                 local ammoNum = ammoTable[ammoName]
-                if ammoNum ~= nil then
-                    ply:GiveAmmo(ammoNum, ammoName, true)
-                end
+                if ammoNum ~= nil then ply:GiveAmmo(ammoNum, ammoName, true) end
             end
 
             local ammoType2 = weapon:GetSecondaryAmmoType()
             if ammoType2 ~= -1 then
                 local ammoName = game.GetAmmoName(ammoType2)
                 local ammoNum = ammoTable[ammoName]
-                if ammoNum ~= nil then
-                    ply:GiveAmmo(ammoNum, ammoName, true)
-                end
+                if ammoNum ~= nil then ply:GiveAmmo(ammoNum, ammoName, true) end
             end
 
             -- We make sure the weapon is loaded.
@@ -391,10 +340,7 @@ if SERVER then
             if ammo1 ~= -1 then
                 local maxClip = weapon:GetMaxClip1()
                 local newAmmo = maxClip
-                if newAmmo > ammo1 then
-                    newAmmo = ammo1
-                end
-
+                if newAmmo > ammo1 then newAmmo = ammo1 end
                 weapon:SetClip1(newAmmo)
                 ply:SetAmmo(ammo1 - newAmmo, weapon:GetPrimaryAmmoType())
             end
@@ -405,7 +351,6 @@ if SERVER then
         if isnumber(dmg) then return dmg end
         local cvar = GetConVar(dmg)
         if cvar == nil then return 0 end
-
         return cvar:GetFloat()
     end
 
@@ -418,43 +363,32 @@ if SERVER then
         }
 
         -- Sort them first by weight.
-        table.sort(
-            weps,
-            function(a, b)
-                local ammoDataPrimaryA = game.GetAmmoData(a:GetPrimaryAmmoType()) or defaultAmmoData
-                local ammoDataSecondaryA = game.GetAmmoData(a:GetSecondaryAmmoType()) or defaultAmmoData
-                local ammoDataPrimaryB = game.GetAmmoData(b:GetPrimaryAmmoType()) or defaultAmmoData
-                local ammoDataSecondaryB = game.GetAmmoData(b:GetSecondaryAmmoType()) or defaultAmmoData
-                local weightA = a:GetWeight() * 3
-                local weightB = b:GetWeight() * 3
-                local dmgPrimaryA = GetDamageValue(ammoDataPrimaryA.npcdmg) + GetDamageValue(ammoDataPrimaryA.plydmg)
-                if bit.band(ammoDataPrimaryA.dmgtype, DMG_BUCKSHOT) ~= 0 then
-                    dmgPrimaryA = dmgPrimaryA * 4
-                end
-
-                local dmgSecondaryA = GetDamageValue(ammoDataSecondaryA.npcdmg) + GetDamageValue(ammoDataSecondaryA.plydmg)
-                local dmgPrimaryB = GetDamageValue(ammoDataPrimaryB.npcdmg) + GetDamageValue(ammoDataPrimaryB.plydmg)
-                if bit.band(ammoDataPrimaryB.dmgtype, DMG_BUCKSHOT) ~= 0 then
-                    dmgPrimaryB = dmgPrimaryB * 4
-                end
-
-                local dmgSecondaryB = GetDamageValue(ammoDataSecondaryB.npcdmg) + GetDamageValue(ammoDataSecondaryB.plydmg)
-                local ammoCountPrimaryA = ply:GetAmmoCount(a:GetPrimaryAmmoType())
-                local ammoCountSecondaryA = ply:GetAmmoCount(a:GetSecondaryAmmoType())
-                local ammoCountPrimaryB = ply:GetAmmoCount(b:GetPrimaryAmmoType())
-                local ammoCountSecondaryB = ply:GetAmmoCount(b:GetSecondaryAmmoType())
-                local bonusDualA = (a:GetPrimaryAmmoType() ~= -1 and a:GetSecondaryAmmoType() ~= -1) and 1 or 0
-                local bonusDualB = (b:GetPrimaryAmmoType() ~= -1 and b:GetSecondaryAmmoType() ~= -1) and 1 or 0
-                -- Combine all the values to get a weight.
-                weightA = weightA + ((ammoCountPrimaryA * dmgPrimaryA) * 0.1) + ((ammoCountSecondaryA * dmgSecondaryA) * 0.5) + bonusDualA
-                weightB = weightB + ((ammoCountPrimaryB * dmgPrimaryB) * 0.1) + ((ammoCountSecondaryB * dmgSecondaryB) * 0.5) + bonusDualB
-
-                return weightA > weightB
-            end
-        )
+        table.sort(weps, function(a, b)
+            local ammoDataPrimaryA = game.GetAmmoData(a:GetPrimaryAmmoType()) or defaultAmmoData
+            local ammoDataSecondaryA = game.GetAmmoData(a:GetSecondaryAmmoType()) or defaultAmmoData
+            local ammoDataPrimaryB = game.GetAmmoData(b:GetPrimaryAmmoType()) or defaultAmmoData
+            local ammoDataSecondaryB = game.GetAmmoData(b:GetSecondaryAmmoType()) or defaultAmmoData
+            local weightA = a:GetWeight() * 3
+            local weightB = b:GetWeight() * 3
+            local dmgPrimaryA = GetDamageValue(ammoDataPrimaryA.npcdmg) + GetDamageValue(ammoDataPrimaryA.plydmg)
+            if bit.band(ammoDataPrimaryA.dmgtype, DMG_BUCKSHOT) ~= 0 then dmgPrimaryA = dmgPrimaryA * 4 end
+            local dmgSecondaryA = GetDamageValue(ammoDataSecondaryA.npcdmg) + GetDamageValue(ammoDataSecondaryA.plydmg)
+            local dmgPrimaryB = GetDamageValue(ammoDataPrimaryB.npcdmg) + GetDamageValue(ammoDataPrimaryB.plydmg)
+            if bit.band(ammoDataPrimaryB.dmgtype, DMG_BUCKSHOT) ~= 0 then dmgPrimaryB = dmgPrimaryB * 4 end
+            local dmgSecondaryB = GetDamageValue(ammoDataSecondaryB.npcdmg) + GetDamageValue(ammoDataSecondaryB.plydmg)
+            local ammoCountPrimaryA = ply:GetAmmoCount(a:GetPrimaryAmmoType())
+            local ammoCountSecondaryA = ply:GetAmmoCount(a:GetSecondaryAmmoType())
+            local ammoCountPrimaryB = ply:GetAmmoCount(b:GetPrimaryAmmoType())
+            local ammoCountSecondaryB = ply:GetAmmoCount(b:GetSecondaryAmmoType())
+            local bonusDualA = (a:GetPrimaryAmmoType() ~= -1 and a:GetSecondaryAmmoType() ~= -1) and 1 or 0
+            local bonusDualB = (b:GetPrimaryAmmoType() ~= -1 and b:GetSecondaryAmmoType() ~= -1) and 1 or 0
+            -- Combine all the values to get a weight.
+            weightA = weightA + ((ammoCountPrimaryA * dmgPrimaryA) * 0.1) + ((ammoCountSecondaryA * dmgSecondaryA) * 0.5) + bonusDualA
+            weightB = weightB + ((ammoCountPrimaryB * dmgPrimaryB) * 0.1) + ((ammoCountSecondaryB * dmgSecondaryB) * 0.5) + bonusDualB
+            return weightA > weightB
+        end)
 
         if #weps == 0 then return nil end
-
         return weps[1]
     end
 
@@ -462,7 +396,6 @@ if SERVER then
         local betterWep = self:GetNextBestWeapon(ply)
         if IsValid(betterWep) then
             ply:SelectWeapon(betterWep:GetClass())
-
             return
         end
 
@@ -483,7 +416,6 @@ if SERVER then
         DbgPrint("GM:PlayerSpawn")
         if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
             ply:KillSilent()
-
             return
         end
 
@@ -492,7 +424,6 @@ if SERVER then
             DbgPrint("Initial spawn, using respawn queue")
             ply.InitialSpawnHandled = true
             ply:KillSilent()
-
             return
         end
 
@@ -535,10 +466,7 @@ if SERVER then
             hook.Call("PlayerLoadoutRevive", GAMEMODE, ply)
         end
 
-        if self.MapScript.PrePlayerSpawn ~= nil then
-            self.MapScript:PrePlayerSpawn(ply)
-        end
-
+        if self.MapScript.PrePlayerSpawn ~= nil then self.MapScript:PrePlayerSpawn(ply) end
         ply:SetLambdaSuitPower(100)
         ply:SetGeigerRange(1000)
         ply:SetLambdaStateSprinting(false)
@@ -611,15 +539,10 @@ if SERVER then
 
             if ply.ScheduledLastWeapon ~= nil then
                 local wep = ply:GetWeapon(ply.ScheduledLastWeapon)
-                if IsValid(wep) then
-                    ply:SetSaveValue("m_hLastWeapon", wep)
-                end
+                if IsValid(wep) then ply:SetSaveValue("m_hLastWeapon", wep) end
             end
 
-            if self.MapScript.PostPlayerSpawn ~= nil then
-                self.MapScript:PostPlayerSpawn(ply)
-            end
-
+            if self.MapScript.PostPlayerSpawn ~= nil then self.MapScript:PostPlayerSpawn(ply) end
             -- In case the map script decides to put us in a vehicle lets not do this.
             if useSpawnpoint == true and IsValid(ply:GetVehicle()) == false and IsValid(ply.SelectedSpawnpoint) then
                 ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
@@ -629,14 +552,7 @@ if SERVER then
             ply.TransitionData = nil -- Make sure we erase it because this only happens on a new round.
         end
 
-        if SERVER then
-            util.RunNextFrame(
-                function()
-                    self:CheckPlayerNotStuck(ply)
-                end
-            )
-        end
-
+        if SERVER then util.RunNextFrame(function() self:CheckPlayerNotStuck(ply) end) end
         -- Adjust difficulty, we want later some dynamic system that adjusts depending on the players.
         self:AdjustDifficulty()
         if not IsValid(ply.TrackerEntity) then
@@ -660,15 +576,7 @@ if SERVER then
         ply.IsCurrentlySpawning = false
         -- Notify the player to start the gamemode in multiplayer to avoid any possible gamemode issues.
         if game.SinglePlayer() == true then
-            timer.Create(
-                "SPNotify",
-                2,
-                10,
-                function()
-                    PrintMessage(HUD_PRINTCENTER, "You are in Singleplayer mode. For a better playing experience start Lambda in Multiplayer.")
-                end
-            )
-
+            timer.Create("SPNotify", 2, 10, function() PrintMessage(HUD_PRINTCENTER, "You are in Singleplayer mode. For a better playing experience start Lambda in Multiplayer.") end)
             PrintMessage(HUD_PRINTTALK, "You are in Singleplayer mode. For a better playing experience start Lambda in Multiplayer.")
         end
     end
@@ -688,9 +596,7 @@ if SERVER then
         DbgPrint("GM:DoPlayerDeath", ply)
         if ply.LastWeaponsDropped ~= nil then
             for _, v in pairs(ply.LastWeaponsDropped) do
-                if IsValid(v) and not IsValid(v:GetOwner()) then
-                    v:Remove()
-                end
+                if IsValid(v) and not IsValid(v:GetOwner()) then v:Remove() end
             end
         end
 
@@ -699,10 +605,7 @@ if SERVER then
         if dropMode >= 1 then
             -- Add active weapon.
             local activeWep = ply:GetActiveWeapon()
-            if IsValid(activeWep) then
-                weps[activeWep] = true
-            end
-
+            if IsValid(activeWep) then weps[activeWep] = true end
             -- Drop everything.
             if dropMode >= 2 then
                 for _, v in pairs(ply:GetWeapons()) do
@@ -746,14 +649,9 @@ if SERVER then
             local ammo2 = -1
             if v:Clip1() == -1 and v:Clip2() == -1 then
                 ammo1 = ply:GetAmmoCount(ammoType1)
-                if ammo1 > 0 then
-                    dropAmmo = true
-                end
-
+                if ammo1 > 0 then dropAmmo = true end
                 ammo2 = ply:GetAmmoCount(ammoType2)
-                if ammo2 > 0 then
-                    dropAmmo = true
-                end
+                if ammo2 > 0 then dropAmmo = true end
             end
 
             local drop
@@ -799,9 +697,7 @@ if SERVER then
         -- Apply the velocity to all weapons, when dropped they have zero.
         for _, v in ipairs(ply.LastWeaponsDropped) do
             local phys = v:GetPhysicsObject()
-            if IsValid(phys) then
-                phys:SetVelocity(dmgForce * 0.03)
-            end
+            if IsValid(phys) then phys:SetVelocity(dmgForce * 0.03) end
         end
 
         ply:SetShouldServerRagdoll(false)
@@ -821,20 +717,13 @@ if SERVER then
                 local totalMass = 0
                 for i = 0, attacker:GetPhysicsObjectCount() - 1 do
                     local physObj = attacker:GetPhysicsObjectNum(i)
-                    if IsValid(physObj) then
-                        totalMass = totalMass + physObj:GetMass()
-                    end
+                    if IsValid(physObj) then totalMass = totalMass + physObj:GetMass() end
                 end
 
                 local forceLen = dmgForce:Length2D()
-                if forceLen <= 0 then
-                    forceLen = 1
-                end
-
+                if forceLen <= 0 then forceLen = 1 end
                 local forceWithMass = totalMass * forceLen
-                if forceWithMass >= 150000 or totalMass >= 10000 then
-                    gibPlayer = true
-                end
+                if forceWithMass >= 150000 or totalMass >= 10000 then gibPlayer = true end
             elseif dmgInfo:IsDamageType(DMG_FALL) and vel2D >= 600 then
                 gibPlayer = true
                 dmgForce = ply:GetVelocity()
@@ -842,15 +731,9 @@ if SERVER then
         end
 
         -- If we gib the player nothing is left.
-        if gibPlayer == true then
-            ply.RevivalData = nil
-        end
-
+        if gibPlayer == true then ply.RevivalData = nil end
         local ragdollMgr = ply:GetRagdollManager()
-        if IsValid(ragdollMgr) then
-            ragdollMgr:CreateRagdoll(dmgForce, gibPlayer, didExplode)
-        end
-
+        if IsValid(ragdollMgr) then ragdollMgr:CreateRagdoll(dmgForce, gibPlayer, didExplode) end
         local inflictor = dmgInfo:GetInflictor()
         self:RegisterPlayerDeath(ply, attacker, inflictor, dmgInfo)
     end
@@ -882,36 +765,25 @@ if SERVER then
         ply:LockPosition(false, false)
         local respawnTime = self:CallGameTypeFunc("GetPlayerRespawnTime")
         ply.RespawnTime = ply.DeathTime + respawnTime
-        if self:WaitForNextCheckpoint(ply) then
-            self:AddPlayerToRespawnQueue(ply)
-        end
-
+        if self:WaitForNextCheckpoint(ply) then self:AddPlayerToRespawnQueue(ply) end
         if self:IsRoundRestarting() == false and self:CallGameTypeFunc("ShouldRestartRound") == false then
             if self:CanPlayerSpawn(ply) == true then
                 DbgPrint("Notifying respawn")
-                self:NotifyRoundStateChanged(
-                    ply,
-                    ROUND_INFO_PLAYERRESPAWN,
-                    {
-                        EntIndex = ply:EntIndex(),
-                        Respawn = true,
-                        StartTime = ply.DeathTime,
-                        Timeout = respawnTime
-                    }
-                )
+                self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN, {
+                    EntIndex = ply:EntIndex(),
+                    Respawn = true,
+                    StartTime = ply.DeathTime,
+                    Timeout = respawnTime
+                })
             else
                 DbgPrint("Notifying spawn blocked")
-                self:NotifyRoundStateChanged(
-                    ply,
-                    ROUND_INFO_PLAYERRESPAWN,
-                    {
-                        EntIndex = ply:EntIndex(),
-                        Respawn = true,
-                        StartTime = ply.DeathTime,
-                        Timeout = 0,
-                        SpawnBlocked = true
-                    }
-                )
+                self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN, {
+                    EntIndex = ply:EntIndex(),
+                    Respawn = true,
+                    StartTime = ply.DeathTime,
+                    Timeout = 0,
+                    SpawnBlocked = true
+                })
 
                 ply:SetSpawningBlocked(true)
             end
@@ -921,71 +793,51 @@ if SERVER then
     function GM:PlayerDeathThink(ply)
         if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
             DbgPrint("Can not spawn before players available")
-
             return false
         end
 
         local elapsed = GetSyncedTimestamp() - ply.DeathTime
-        if elapsed >= 5 and ply:IsSpectator() == false then
-            ply:SetSpectator()
-        end
-
+        if elapsed >= 5 and ply:IsSpectator() == false then ply:SetSpectator() end
         if GetSyncedTimestamp() < ply.RespawnTime then return false end
         local timeout = self:CallGameTypeFunc("GetPlayerRespawnTime")
-        if timeout >= 0 then
-            if GetSyncedTimestamp() < ply.RespawnTime then return false end
-        end
-
+        if timeout >= 0 then if GetSyncedTimestamp() < ply.RespawnTime then return false end end
         if self:CanPlayerSpawn(ply) == false then
             if ply:IsSpawningBlocked() ~= true then
                 DbgPrint("Notifying spawn blocked")
-                self:NotifyRoundStateChanged(
-                    ply,
-                    ROUND_INFO_PLAYERRESPAWN,
-                    {
-                        EntIndex = ply:EntIndex(),
-                        Respawn = true,
-                        StartTime = ply.DeathTime,
-                        Timeout = 0,
-                        SpawnBlocked = true
-                    }
-                )
+                self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN, {
+                    EntIndex = ply:EntIndex(),
+                    Respawn = true,
+                    StartTime = ply.DeathTime,
+                    Timeout = 0,
+                    SpawnBlocked = true
+                })
 
                 ply:SetSpawningBlocked(true)
             end
             -- Can't spawn.
-
             return false
         end
 
         -- If the player was previously blocked, notify.
         if ply:IsSpawningBlocked() == true then
             DbgPrint("Notifying spawn free")
-            self:NotifyRoundStateChanged(
-                ply,
-                ROUND_INFO_PLAYERRESPAWN,
-                {
-                    EntIndex = ply:EntIndex(),
-                    Respawn = true,
-                    StartTime = ply.DeathTime,
-                    Timeout = 0,
-                    SpawnBlocked = false
-                }
-            )
+            self:NotifyRoundStateChanged(ply, ROUND_INFO_PLAYERRESPAWN, {
+                EntIndex = ply:EntIndex(),
+                Respawn = true,
+                StartTime = ply.DeathTime,
+                Timeout = 0,
+                SpawnBlocked = false
+            })
 
             ply:SetSpawningBlocked(false)
         end
 
-        if ply:KeyReleased(IN_JUMP) then
-            ply:Spawn()
-        end
-
+        if ply:KeyReleased(IN_JUMP) then ply:Spawn() end
         return true
     end
 
     function GM:PlayerSwitchFlashlight(ply, enabled)
         if not ply:IsSuitEquipped() then return false end
-
         return true
     end
 
@@ -998,9 +850,7 @@ if SERVER then
         for k, v in pairs(self.MAX_AMMO_DEF) do
             local count = ply:GetAmmoCount(k)
             local maxCount = v:GetInt()
-            if count > maxCount then
-                ply:SetAmmo(maxCount, k)
-            end
+            if count > maxCount then ply:SetAmmo(maxCount, k) end
         end
     end
 
@@ -1010,13 +860,11 @@ if SERVER then
         local curTime = CurTime()
         if curTime - ply.LastPickupTime < pickupDelay then return false end
         ply.LastPickupTime = curTime
-
         return true
     end
 
     function GM:GetFallDamage(ply, speed)
         speed = speed - 480
-
         return speed * (100 / (1024 - 480))
     end
 
@@ -1025,20 +873,15 @@ if SERVER then
             local res = self.MapScript:PlayerUse(ply, ent)
             if res == false then return false end
         end
-
         return true
     end
 
     function GM:FindUseEntity(ply, engineEnt)
-        if engineEnt ~= nil and engineEnt:IsVehicle() then
-            engineEnt = self:FindVehicleSeat(ply, engineEnt)
-        end
-
+        if engineEnt ~= nil and engineEnt:IsVehicle() then engineEnt = self:FindVehicleSeat(ply, engineEnt) end
         if self.MapScript ~= nil and self.MapScript.FindUseEntity ~= nil then
             local res = self.MapScript:FindUseEntity(ply, engineEnt)
             if res ~= nil then return res end
         end
-
         return engineEnt
     end
 
@@ -1073,10 +916,7 @@ function GM:UpdateGeigerCounter(ply, mv)
         if curTime < ply.GeigerDelay then return end
         ply.GeigerDelay = curTime + GEIGER_DELAY
         local range = math.Clamp(math.floor(ply:GetNearestRadiationRange() / 4), 0, 255)
-        if ply:InVehicle() then
-            range = math.Clamp(range * 4, 0, 1000)
-        end
-
+        if ply:InVehicle() then range = math.Clamp(range * 4, 0, 1000) end
         local randChance = math.random(0, 5)
         if randChance == 0 then
             ply:SetGeigerRange(1000)
@@ -1163,21 +1003,17 @@ local function PlayerAllowSprinting(ply)
     if ply:WaterLevel() > 1 then return false end
     if ply:InVehicle() == true then return false end
     if ply:KeyDown(IN_DUCK) then return false end
-
     return true
 end
 
 local function CanPlaySound(ply)
     if not CLIENT and game.MaxPlayers() > 1 then return false end
     if IsFirstTimePredicted() then return true end
-
     return false
 end
 
 function GM:PlayerRejectSprinting(ply, mv)
-    if CanPlaySound(ply) then
-        ply:EmitSound("HL2Player.SprintNoPower")
-    end
+    if CanPlaySound(ply) then ply:EmitSound("HL2Player.SprintNoPower") end
 end
 
 function GM:PlayerStartSprinting(ply, mv)
@@ -1188,9 +1024,7 @@ function GM:PlayerStartSprinting(ply, mv)
     ply:SetMaxSpeed(self:GetSetting("sprintspeed"))
     ply:SetLambdaSprinting(true)
     local suitPower = ply:GetLambdaSuitPower()
-    if CanPlaySound(ply) and suitPower > 0 then
-        ply:EmitSound("HL2Player.SprintStart")
-    end
+    if CanPlaySound(ply) and suitPower > 0 then ply:EmitSound("HL2Player.SprintStart") end
     --DbgPrint("Sprint State: " .. tostring(ply:GetLambdaSprinting()))
 end
 
@@ -1208,24 +1042,13 @@ function GM:StartCommand(ply, cmd)
     -- TODO: Make this a new setting so bots do random things.
     if false and ply:IsBot() then
         local rnd = math.random(0, 200)
-        if rnd < 1 then
-            cmd:AddKey(IN_JUMP)
-        end
-
+        if rnd < 1 then cmd:AddKey(IN_JUMP) end
         rnd = math.random(0, 100)
-        if rnd < 1 then
-            cmd:AddKey(IN_USE)
-        end
-
+        if rnd < 1 then cmd:AddKey(IN_USE) end
         rnd = math.random(0, 200)
-        if rnd < 1 then
-            cmd:AddKey(IN_ATTACK)
-        end
-
+        if rnd < 1 then cmd:AddKey(IN_ATTACK) end
         rnd = math.random(0, 10)
-        if rnd < 1 then
-            cmd:AddKey(IN_DUCK)
-        end
+        if rnd < 1 then cmd:AddKey(IN_DUCK) end
     end
 
     if ply:IsPositionLocked() == true then
@@ -1244,38 +1067,24 @@ function GM:StartCommand(ply, cmd)
         end
 
         ply.LastUserCmdButtons = cmd:GetButtons()
-
         return
     end
 
     -- Fixes a prediction error when starting noclip in water and flying out.
-    if ply:GetMoveType() == MOVETYPE_NOCLIP and ply:WaterLevel() == 0 then
-        ply:RemoveFlags(FL_INWATER)
-    end
-
+    if ply:GetMoveType() == MOVETYPE_NOCLIP and ply:WaterLevel() == 0 then ply:RemoveFlags(FL_INWATER) end
     if CLIENT then
         if cmd:KeyDown(IN_SCORE) then
             cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK)))
             cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_ATTACK2)))
         end
 
-        if self:GetSetting("allow_auto_jump") == true and lambda_auto_jump:GetBool() == true then
-            if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then
-                cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_JUMP)))
-            end
-        end
+        if self:GetSetting("allow_auto_jump") == true and lambda_auto_jump:GetBool() == true then if ply:GetMoveType() == MOVETYPE_WALK and not ply:IsOnGround() and ply:WaterLevel() < 2 then cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_JUMP))) end end
     end
 
-    if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() > 1) and ply:InVehicle() == false then
-        cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED)))
-    end
-
+    if cmd:KeyDown(IN_SPEED) == true and (ply:IsSuitEquipped() ~= true or ply:WaterLevel() > 1) and ply:InVehicle() == false then cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_SPEED))) end
     -- HACKHACK: When the player is crouched and releases IN_DUCK but can't stand up it would
     -- offset the player for a short moment when pressing IN_DUCK again. We suppress this.
-    if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then
-        cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK)))
-    end
-
+    if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK))) end
     ply.LastUserCmdButtons = cmd:GetButtons()
 end
 
@@ -1283,14 +1092,8 @@ function GM:SetupMove(ply, mv, cmd)
     --if not IsFirstTimePredicted() then return end
     if ply:Alive() == false then return end
     local isSprinting = false
-    if ply.GetLambdaSprinting ~= nil then
-        isSprinting = ply:GetLambdaSprinting()
-    end
-
-    if bit.band(mv:GetButtons(), IN_JUMP) ~= 0 and bit.band(mv:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() then
-        ply:SetIsJumping(true)
-    end
-
+    if ply.GetLambdaSprinting ~= nil then isSprinting = ply:GetLambdaSprinting() end
+    if bit.band(mv:GetButtons(), IN_JUMP) ~= 0 and bit.band(mv:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() then ply:SetIsJumping(true) end
     if mv:KeyDown(IN_DUCK) and ply:IsOnGround() and isSprinting == true then
         self:PlayerEndSprinting(ply, mv)
         ply:SetLambdaStateSprinting(false)
@@ -1329,9 +1132,7 @@ function GM:Move(ply, mv)
         local class = groundEnt:GetClass()
         if class == "prop_physics" or class == "func_physbox" then
             local phys = groundEnt:GetPhysicsObject()
-            if IsValid(phys) and phys:IsMotionEnabled() == true then
-                ply:SetPos(ply:GetPos() + Vector(0, 0, 1))
-            end
+            if IsValid(phys) and phys:IsMotionEnabled() == true then ply:SetPos(ply:GetPos() + Vector(0, 0, 1)) end
         end
     end
 end
@@ -1382,14 +1183,8 @@ function GM:FinishMove(ply, mv)
             local speedAddition = math.abs(mv:GetForwardSpeed() * speedBoostPerc)
             local maxSpeed = mv:GetMaxSpeed() * (1 + speedBoostPerc)
             local newSpeed = speedAddition + mv:GetVelocity():Length2D()
-            if newSpeed > maxSpeed then
-                speedAddition = speedAddition - (newSpeed - maxSpeed)
-            end
-
-            if mv:GetForwardSpeed() < 0 then
-                speedAddition = -speedAddition
-            end
-
+            if newSpeed > maxSpeed then speedAddition = speedAddition - (newSpeed - maxSpeed) end
+            if mv:GetForwardSpeed() < 0 then speedAddition = -speedAddition end
             mv:SetVelocity(forward * speedAddition + mv:GetVelocity())
         end
 
@@ -1400,11 +1195,11 @@ end
 function GM:DrainSuit(ply, amount)
     local current = ply:GetLambdaSuitPower()
     local res = true
-    if ply:GetMoveType() == MOVETYPE_NOCLIP then return true end -- Dont do anything in this case
-    if sv_infinite_aux_power:GetBool() == true then
-        amount = 0
+    if ply:GetMoveType() == MOVETYPE_NOCLIP then -- Dont do anything in this case
+        return true
     end
 
+    if sv_infinite_aux_power:GetBool() == true then amount = 0 end
     current = current - amount
     if current < 0 then
         current = 0
@@ -1412,16 +1207,12 @@ function GM:DrainSuit(ply, amount)
     end
 
     ply:SetLambdaSuitPower(current)
-
     return res
 end
 
 function GM:ChargeSuitPower(ply, amount)
     local current = ply:GetLambdaSuitPower() + amount
-    if current > 100.0 then
-        current = 100.0
-    end
-
+    if current > 100.0 then current = 100.0 end
     ply:SetLambdaSuitPower(current)
     ply:RemoveSuitDevice(SUIT_DEVICE_BREATHER)
     ply:RemoveSuitDevice(SUIT_DEVICE_SPRINT)
@@ -1431,14 +1222,19 @@ function GM:ShouldChargeSuitPower(ply)
     local sprinting = ply:GetLambdaSprinting()
     local inWater = ply:WaterLevel() >= 3
     local powerDrain = sprinting or inWater --[[ or flashlightOn ]]
-    if powerDrain == true then return false end -- Something is draning power.
+    if powerDrain == true then -- Something is draning power.
+        return false
+    end
+
     local power = ply:GetLambdaSuitPower()
-    if power >= 100.0 then return false end -- Full
+    if power >= 100.0 then -- Full
+        return false
+    end
+
     local curTime = CurTime()
     ply.NextSuitCharge = ply.NextSuitCharge or curTime
     if curTime < ply.NextSuitCharge then return false end
     --DbgPrint("Should Charge")
-
     return true
 end
 
@@ -1453,9 +1249,7 @@ function GM:UpdateSuit(ply, mv)
         local powerLoad = 0
         if ply:GetLambdaSprinting() then
             local pos = ply:GetAbsVelocity()
-            if math.abs(pos.x) > 0 or math.abs(pos.y) > 0 then
-                powerLoad = powerLoad + SUIT_SPRINT_DRAIN
-            end
+            if math.abs(pos.x) > 0 or math.abs(pos.y) > 0 then powerLoad = powerLoad + SUIT_SPRINT_DRAIN end
         end
 
         if ply:WaterLevel() >= 3 then
@@ -1469,9 +1263,7 @@ function GM:UpdateSuit(ply, mv)
             ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
             if self:DrainSuit(ply, powerLoad * frameTime) == false then
                 ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
-                if ply:GetLambdaSprinting() == true then
-                    self:PlayerEndSprinting(ply, mv)
-                end
+                if ply:GetLambdaSprinting() == true then self:PlayerEndSprinting(ply, mv) end
             end
         end
     end
@@ -1486,10 +1278,7 @@ function GM:PlayerCheckDrowning(ply)
     ply.WaterDamage = ply.WaterDamage or 0
     local curTime = CurTime()
     if ply:WaterLevel() ~= 3 then
-        if ply.IsDrowning == true then
-            ply.IsDrowning = false
-        end
-
+        if ply.IsDrowning == true then ply.IsDrowning = false end
         if ply.WaterDamage > 0 then
             ply.NextWaterHealthTime = ply.NextWaterHealthTime or curTime + WATER_HEALTH_RECHARGE_TIME
             if ply:Health() >= 100 then
@@ -1532,9 +1321,7 @@ function GM:PlayerWeaponTick(ply, mv, ucmd)
     -- HACKHACK: Because Think is broken on SWEPS and only called when
     --           the weapon is active we do this for the medkit.
     for _, wep in pairs(ply:GetWeapons()) do
-        if wep.PredictedThink ~= nil then
-            wep:PredictedThink()
-        end
+        if wep.PredictedThink ~= nil then wep:PredictedThink() end
     end
 end
 
@@ -1544,10 +1331,7 @@ function GM:PlayerTick(ply, mv)
     if SERVER then
         self:LimitPlayerAmmo(ply)
         self:PlayerCheckDrowning(ply)
-        if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then
-            ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped())
-        end
-
+        if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped()) end
         ply:SetNWVector("LambdaVelocity", ply:GetVelocity())
     end
 end
@@ -1559,10 +1343,7 @@ function GM:CalculateMovementAccuracy(ent)
     local len = vel:Length()
     local target = len / ent:GetWalkSpeed()
     local scale = 100
-    if len > 0 then
-        scale = 20
-    end
-
+    if len > 0 then scale = 20 end
     movementRecoil = Lerp(FrameTime() * scale, movementRecoil, target)
     movementRecoil = math.Clamp(movementRecoil, 0, 2)
     ent.MovementRecoil = movementRecoil
@@ -1580,16 +1361,14 @@ function GM:CheckPlayerCollision(ply)
     if playersCollide == false then return end
     if ply:IsPlayerCollisionEnabled() == true then return end
     local hullMin, hullMax = ply:GetHull()
-    local tr = util.TraceHull(
-        {
-            start = ply:GetPos(),
-            endpos = ply:GetPos(),
-            filter = ply,
-            mins = hullMin,
-            maxs = hullMax,
-            mask = MASK_SHOT_HULL
-        }
-    )
+    local tr = util.TraceHull({
+        start = ply:GetPos(),
+        endpos = ply:GetPos(),
+        filter = ply,
+        mins = hullMin,
+        maxs = hullMax,
+        mask = MASK_SHOT_HULL
+    })
 
     if tr.Hit == false and tr.Fraction == 1 then
         ply:DisablePlayerCollide(false)
@@ -1607,9 +1386,7 @@ function GM:PlayerThink(ply)
         local viewlock = ply:GetViewLock()
         if viewlock == VIEWLOCK_SETTINGS_RELEASE then
             local viewlockTime = ply:GetNWFloat("ViewLockTime")
-            if viewlockTime + VIEWLOCK_RELEASE_TIME < CurTime() then
-                ply:LockPosition(false)
-            end
+            if viewlockTime + VIEWLOCK_RELEASE_TIME < CurTime() then ply:LockPosition(false) end
         end
 
         self:CheckPlayerCollision(ply)
@@ -1629,28 +1406,23 @@ function GM:GravGunPunt(ply, ent)
     local playerVehicle = ply:GetVehicle()
     if playerVehicle ~= NULL and IsValid(playerVehicle) == true and ent:IsVehicle() == true and ent:GetNWEntity("PassengerSeat") == playerVehicle then return false end
     if ent:IsVehicle() then
-        util.RunNextFrame(
-            function()
-                if not IsValid(ent) then return end
-                local phys = ent:GetPhysicsObject()
-                if not IsValid(phys) then return end
-                local force = phys:GetVelocity()
-                force = force * 0.000001
-                phys:SetVelocity(force)
-            end
-        )
+        util.RunNextFrame(function()
+            if not IsValid(ent) then return end
+            local phys = ent:GetPhysicsObject()
+            if not IsValid(phys) then return end
+            local force = phys:GetVelocity()
+            force = force * 0.000001
+            phys:SetVelocity(force)
+        end)
     end
 
     if ent:IsNPC() and IsFriendEntityName(ent:GetClass()) then return false end
-
     return BaseClass.GravGunPickupAllowed(ply, ent)
 end
 
 function GM:PlayerFootstep(ply, pos, foot, sound, volume, filter)
     if ply:KeyDown(IN_WALK) then return true end
-    if SERVER then
-        self:NotifyNPCFootsteps(ply, pos, foot, sound, volume)
-    end
+    if SERVER then self:NotifyNPCFootsteps(ply, pos, foot, sound, volume) end
 end
 
 function GM:PlayerSwitchWeapon(ply, old, new)
@@ -1660,19 +1432,13 @@ end
 function GM:OnPlayerAmmoDepleted(ply, wep)
     DbgPrint("Ammo Depleted: " .. tostring(ply) .. " - " .. tostring(wep))
     if SERVER then
-        util.RunDelayed(
-            function()
-                -- Only switch if we are still holding the empty weapon.
-                if ply:GetActiveWeapon() == wep then
-                    self:SelectBestWeapon(ply)
-                end
-            end, CurTime() + 1.5
-        )
+        util.RunDelayed(function()
+            -- Only switch if we are still holding the empty weapon.
+            if ply:GetActiveWeapon() == wep then self:SelectBestWeapon(ply) end
+        end, CurTime() + 1.5)
     end
 
-    if CLIENT then
-        ply:EmitSound("hl1/fvox/ammo_depleted.wav", 75, 100, 0.5)
-    end
+    if CLIENT then ply:EmitSound("hl1/fvox/ammo_depleted.wav", 75, 100, 0.5) end
 end
 
 function GM:PlayerNoClip(ply, desiredState)
@@ -1705,10 +1471,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
     -- Must be called here not in EntityTakeDamage as that runs after so scaling wouldn't work.
     self:ApplyCorrectedDamage(dmginfo)
     local attacker = dmginfo:GetAttacker()
-    if SERVER and dmginfo:IsDamageType(DMG_BULLET) == true then
-        self:MetricsRegisterBulletHit(attacker, ply, hitgroup)
-    end
-
+    if SERVER and dmginfo:IsDamageType(DMG_BULLET) == true then self:MetricsRegisterBulletHit(attacker, ply, hitgroup) end
     -- First scale hitgroups.
     local scale = self:GetDifficultyPlayerHitgroupDamageScale(hitgroup)
     DbgPrintDmg("Hitgroup Scale", npc, scale)
@@ -1735,14 +1498,8 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
     end
 
     -- Reset water damage
-    if ply.IsDrowning ~= true then
-        ply.WaterDamage = 0
-    end
-
-    if ply:IsPositionLocked() == true then
-        dmginfo:ScaleDamage(0)
-    end
-
+    if ply.IsDrowning ~= true then ply.WaterDamage = 0 end
+    if ply:IsPositionLocked() == true then dmginfo:ScaleDamage(0) end
     -- Determine if the bullet came from the back or front.
     local eyePos = ply:EyePos()
     local dmgDelta = (attacker:EyePos() - eyePos):GetNormalized()
@@ -1751,10 +1508,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
     local eyeFwd = eyeAng:Forward()
     local dot = eyeFwd:Dot(dmgDelta)
     local isBackside = false
-    if dot < -0.4 then
-        isBackside = true
-    end
-
+    if dot < -0.4 then isBackside = true end
     if isBackside == true then
         if hitgroup == HITGROUP_HEAD then
             hitgroup = HITGROUP_HEAD_BACK
@@ -1774,9 +1528,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         net.Send(plys)
     else
         -- Local player runs this shared, no need to network this.
-        if attacker == LocalPlayer() then
-            self:OnPlayerDamage(attacker, ply, hitgroup, dmginfo:GetDamagePosition())
-        end
+        if attacker == LocalPlayer() then self:OnPlayerDamage(attacker, ply, hitgroup, dmginfo:GetDamagePosition()) end
     end
 
     local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
@@ -1796,10 +1548,7 @@ function GM:PlayerApplyViewPunch(ply, viewPunch)
     local alpha = 1.0
     if ply.NextViewPunchTime ~= nil then
         alpha = ply.NextViewPunchTime - CurTime()
-        if alpha < 0 then
-            alpha = 0
-        end
-
+        if alpha < 0 then alpha = 0 end
         alpha = 1.0 - (alpha / VIEWPUNCH_DECAY_TIME)
         alpha = alpha
     end
@@ -1840,13 +1589,10 @@ function GM:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
     end
 end
 
-net.Receive(
-    "LambdaPlayerDamage",
-    function(len)
-        local attacker = net.ReadEntity()
-        local victim = net.ReadEntity()
-        local hitgroup = net.ReadUInt(10)
-        local hitpos = net.ReadVector()
-        GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
-    end
-)
+net.Receive("LambdaPlayerDamage", function(len)
+    local attacker = net.ReadEntity()
+    local victim = net.ReadEntity()
+    local hitgroup = net.ReadUInt(10)
+    local hitpos = net.ReadVector()
+    GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
+end)
