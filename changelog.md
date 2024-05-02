@@ -11,6 +11,7 @@
 - Fixed: d2_coast_03: Blocked a exploit where player can use it to skip the final scene.
 - Fixed: Disallow commanding citizen NPCs that have an active schedule.
 - Fixed: Enemy scaling was improperly calculcated, now the math is right.
+- Changed: Added a new setting to block respawns until a checkpoint is activated, previously it relied on lambda_max_respawn_timeout being -1.
 
 0.9.19
 - Fixed: SWEPs that use custom CalcView not working correctly.
