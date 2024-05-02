@@ -158,9 +158,9 @@ local TRANSITION_ENFORCED_NPC = {
 function GM:ShouldTransitionObject(obj, playersInTrigger)
     if obj:IsWorld() then return false end
     if obj:IsPlayer() then
-        if obj:IsBot() then 
+        if obj:IsBot() then
             -- Ignore bots.
-            return false 
+            return false
         end
         -- Players always transition.
         return true
@@ -474,7 +474,6 @@ end
 
 function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
     local objects = {}
-
     DbgPrint("Collecting objects...")
     local checkVolumes = table.Count(transitionTriggers) > 0
     --local inPVS = ents.FindInPVS(landmarkEnt) -- Currently crashing, we use landmark:TestPVS instead.
@@ -507,6 +506,7 @@ function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, play
                 -- Ignore bots.
                 continue
             end
+
             if v:Alive() == false then
                 -- Ignore dead players.
                 continue
