@@ -1,4 +1,5 @@
 0.9.20 (in development)
+- Feature: Episode 1 support.
 - Improved: When "Friendly Fire" and "Player Collision" both disabled, bullet can pass through other players.
 - Improved: Lambda no longer override the localization already existing in the game.
 - Improved: d2_coast_03: Give more supplies, hope this can help player fight with multiple gunships better.
