@@ -206,7 +206,7 @@ function ENT:GetScaleCount()
         if IsFriendEntityName(class) then return 0 end
     end
 
-    local playerCount = player.GetCount()
+    local playerCount = math.max(1, player.GetCount()) - 1
     local scale = GAMEMODE:GetNPCSpawningScale()
     local extraCount = math.ceil(playerCount * scale)
 

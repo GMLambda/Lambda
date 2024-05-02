@@ -189,7 +189,7 @@ function GAMETYPE:GetDifficultyData()
             Name = "Normal",
             Proficiency = WEAPON_PROFICIENCY_GOOD,
             Skill = 2,
-            NPCSpawningScale = 0.3,
+            NPCSpawningScale = 0.4,
             DamageScale = {
                 [DMG_SCALE_PVN] = 1,
                 [DMG_SCALE_NVP] = 1,

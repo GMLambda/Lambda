@@ -10,6 +10,7 @@
 - Fixed: d2_coast_03: G-Man and Oddssa stay in the balcony forever.
 - Fixed: d2_coast_03: Blocked a exploit where player can use it to skip the final scene.
 - Fixed: Disallow commanding citizen NPCs that have an active schedule.
+- Fixed: Enemy scaling was improperly calculcated, now the math is right.
 
 0.9.19
 - Fixed: SWEPs that use custom CalcView not working correctly.
