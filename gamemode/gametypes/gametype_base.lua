@@ -1,7 +1,4 @@
-if SERVER then
-    AddCSLuaFile()
-end
-
+if SERVER then AddCSLuaFile() end
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 GAMETYPE.Name = "Lambda Base"
@@ -14,21 +11,22 @@ GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
-
 function GAMETYPE:GetData(name)
     local base = self
-
     while base ~= nil do
         local var = base[name]
         if var ~= nil and isfunction(var) == false then return var end
         base = base.Base
     end
-
     return nil
 end
 
 function GAMETYPE:GetPlayerRespawnTime()
     return 0
+end
+
+function GAMETYPE:CheckpointEnablesRespawn()
+    return false
 end
 
 function GAMETYPE:ShouldRestartRound()
@@ -57,11 +55,9 @@ end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
     ply:AddDeaths(1)
-
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
-
         return
     end
 
@@ -92,10 +88,8 @@ end
 function GAMETYPE:LoadMapScript(path, name)
     local MAPSCRIPT_FILE = path .. "/mapscripts/" .. name .. ".lua"
     self.MapScript = nil
-
     if file.Exists(MAPSCRIPT_FILE, "LUA") == true then
         self.MapScript = include(MAPSCRIPT_FILE)
-
         if self.MapScript ~= nil then
             DbgPrint("Loaded mapscript: " .. MAPSCRIPT_FILE)
         else
@@ -419,12 +413,21 @@ function GAMETYPE:InitSettings()
         NiceName = "#GM_RESPAWNTIME",
         Description = "Respawn time",
         Type = "int",
-        Default = -1,
+        Default = 20,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
         Clamp = {
-            Min = -1,
+            Min = 0,
             Max = 600
         }
+    })
+
+    GAMEMODE:AddSetting("checkpoint_respawn", {
+        Category = "SERVER",
+        NiceName = "#GM_CHECKPOINT_RESPAWN",
+        Description = "Players have to wait for checkpoints in order to respawn",
+        Type = "bool",
+        Default = false,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
     })
 
     GAMEMODE:AddSetting("map_restart_timeout", {
@@ -554,6 +557,7 @@ function GAMETYPE:GetScoreboardInfo()
 end
 
 hook.Add("LambdaLoadGameTypes", "LambdaBaseGameType", function(gametypes)
+    --
     gametypes:Add("lambda_base", GAMETYPE)
 end)
 

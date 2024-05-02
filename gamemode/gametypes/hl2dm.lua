@@ -1,7 +1,4 @@
-if SERVER then
-    AddCSLuaFile()
-end
-
+if SERVER then AddCSLuaFile() end
 local GAMETYPE = {}
 GAMETYPE.Name = "Half-Life 2 Deathmatch"
 GAMETYPE.BaseGameType = "lambda_base"
@@ -16,11 +13,13 @@ GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PostRoundMapVote = true
-
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = 2
-
     return timeout
+end
+
+function GAMETYPE:CheckpointEnablesRespawn()
+    return false
 end
 
 function GAMETYPE:IsTeamOnly()
@@ -36,11 +35,9 @@ end
 
 function GAMETYPE:GetAllFrags()
     local f = 0
-
     for k, v in pairs(player.GetAll()) do
         f = f + v:Frags()
     end
-
     return f
 end
 
@@ -50,21 +47,17 @@ end
 
 function GAMETYPE:ShouldEndRound(roundTime)
     if roundTime >= self:GetTimeLimit() then return true end
-
     for _, ply in pairs(player.GetAll()) do
         if ply:Frags() >= self:GetFragLimit() then return true end
     end
-
     return false
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
     ply:AddDeaths(1)
-
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
-
         return
     end
 
@@ -109,14 +102,12 @@ end
 function GAMETYPE:ShouldRespawnWeapon(ent)
     local SF_NORESPAWN = 1073741824 -- (1 << 30)
     if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then return false end
-
     return true
 end
 
 function GAMETYPE:ShouldRespawnItem(ent)
     local SF_NORESPAWN = 1073741824 -- (1 << 30)
     if GAMEMODE:IsLevelDesignerPlacedObject(ent) == false and ent:HasSpawnFlags(SF_NORESPAWN) ~= true then return false end
-
     return true
 end
 
@@ -130,7 +121,6 @@ end
 
 function GAMETYPE:CanPlayerSpawn(ply, spawn)
     local pos = spawn:GetPos()
-
     local tr = util.TraceHull({
         start = pos,
         endpos = pos + Vector(0, 0, 1),
@@ -139,7 +129,6 @@ function GAMETYPE:CanPlayerSpawn(ply, spawn)
         mask = MASK_SOLID,
         filter = ply
     })
-
     return tr.Fraction == 1.0
 end
 
@@ -195,7 +184,6 @@ end
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()
-
     GAMEMODE:AddSetting("dm_fraglimit", {
         Category = "SERVER",
         NiceName = "#GM_DM_FRAGLIMIT",
@@ -236,13 +224,8 @@ function GAMETYPE:GetScoreboardInfo()
     local timeElapsed = GAMEMODE:RoundElapsedTime()
     local timeLimit = self:GetTimeLimit()
     local timeLeft = timeLimit - timeElapsed
-
-    if timeLeft < 0 then
-        timeLeft = 0
-    end
-
+    if timeLeft < 0 then timeLeft = 0 end
     local fragsleft = self:GetFragLimit() - self:GetAllFrags()
-
     local scoreboardInfo = {
         {
             name = "LAMBDA_Map",
@@ -257,10 +240,10 @@ function GAMETYPE:GetScoreboardInfo()
             value = fragsleft
         }
     }
-
     return scoreboardInfo
 end
 
 hook.Add("LambdaLoadGameTypes", "HL2DMGameType", function(gametypes)
+    --
     gametypes:Add("hl2dm", GAMETYPE)
 end)

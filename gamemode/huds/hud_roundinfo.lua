@@ -2,7 +2,6 @@ include("hud_numeric.lua")
 local FONT_TEXT = "HudDefault"
 local BAR_HEIGHT = util.ScreenScaleH(40)
 local PANEL = {}
-
 function PANEL:Init()
     self:SetSize(ScrW(), BAR_HEIGHT)
     self.TextColor = Color(255, 220, 0, 100)
@@ -22,7 +21,6 @@ function PANEL:PaintText(font, val, x, y, w, h)
     y = y + (textH / 2)
     surface.SetTextPos(x, y)
     surface.DrawText(text)
-
     return textW, textH
 end
 
@@ -43,7 +41,6 @@ function PANEL:Paint()
     -- Background.
     surface.SetDrawColor(0, 0, 0, 64)
     surface.DrawRect(0, 0, ScrW(), BAR_HEIGHT)
-
     if infoType == ROUND_INFO_PLAYERRESPAWN then
         self:PaintInfoPlayerRespawn()
     elseif infoType == ROUND_INFO_ROUNDRESTART then
@@ -65,14 +62,12 @@ function PANEL:PaintInfoPlayerRespawn()
     local timeout = self.Parameters["Timeout"]
     local spawnBlocked = self.Parameters["SpawnBlocked"]
     timeout = math.Clamp(timeout, -1, 127)
-
     if timeout == -1 then
         text = string.upper("Respawning next round")
         self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
     else
         local timeEnd = startTime + timeout
         local remain = timeEnd - GetSyncedTimestamp()
-
         if remain > 0 then
             text = string.upper("Time remaining until respawn")
             local _, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
@@ -81,7 +76,7 @@ function PANEL:PaintInfoPlayerRespawn()
             self:PaintText(FONT_TEXT, text, 0, h / 4 + y, w, h)
         else
             if spawnBlocked == true then
-                text = "Spawn currently blocked, waiting..."
+                text = "Spawn currently blocked, waiting for checkpoint..."
                 self:PaintText(FONT_TEXT, text, 0, h / 4, w, h)
             else
                 local keyName = input.LookupBinding("+jump", true)
@@ -102,7 +97,6 @@ function PANEL:PaintInfoRoundRestart()
     local timeEnd = startTime + timeout
     local remain = timeEnd - GetSyncedTimestamp()
     remain = math.Clamp(remain, 0, 127)
-
     if remain > 0 then
         text = string.upper("Restarting Round in...")
         local _, y = self:PaintText(FONT_TEXT, text, 0, h / 6, w, h)
@@ -116,7 +110,6 @@ function PANEL:PaintInfoRoundRestart()
     local reverse = timeout - remain
     local ralpha = 1 - (remain / timeout)
     local brightness = 0
-
     if reverse <= 0.5 then
         brightness = (0.5 - reverse) * 1.3
     else
