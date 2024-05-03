@@ -1,4 +1,4 @@
-0.9.20 (in development)
+0.9.20
 - Feature: Episode 1 support.
 - Improved: Language localization of settings (English only as of now).
 - Improved: When "Friendly Fire" and "Player Collision" both disabled, bullet can pass through other players.
