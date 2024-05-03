@@ -1,33 +1,39 @@
-include("lang/english.lua")
 local DbgPrint = GetLogging("Language")
 
-local ext = ".lua"
-local filepath = "lambda/gamemode/lang/"
+local SUPPORTED_LANGUAGES = {
+    ["en"] = "english",
+}
 
-local current_lang = lambda_language:GetString()
-include("lang/" .. current_lang .. ext)
-
--- Find all available languages
-GM.Languages = {}
-for k, v in pairs(file.Find(filepath .. "*", "LUA")) do
-    v = string.StripExtension(v)
-    DbgPrint("Found language: " .. v)
-    GM.Languages[v] = true
+local function GetCurrentLanguage()
+    local gmod_language = GetConVar("gmod_language")
+    local lang = gmod_language:GetString()
+    local realLang = SUPPORTED_LANGUAGES[lang]
+    if realLang == nil then
+        DbgPrint("Language '" .. lang .. "' is not supported, falling back to 'en'")
+        realLang = "english"
+    end
+    return realLang
 end
 
-function GM:ChangeLanguage(new)
-    if file.Exists(filepath .. new .. ext, "LUA") then
-        DbgPrint("Including new language: " .. new)
-        include(filepath .. new .. ext)
+function GM:LoadLocalisation()
+    local langName = GetCurrentLanguage()
+    local gameType = self:GetGameType()
+    if gameType == nil then return end
+    while gameType ~= nil do
+        local langData = gameType.Localisation
+        if langData ~= nil then
+            local langEntries = langData[langName]
+            if langEntries ~= nil then
+                for k, v in pairs(langEntries) do
+                    DbgPrint("Adding localisation: " .. k .. " = " .. v)
+                    language.Add(k, v)
+                end
+            end
+        end
+        gameType = gameType.Base
     end
 end
 
-cvars.AddChangeCallback("lambda_language", function(cvar, old, new)
-    if GAMEMODE.Languages[new] then
-        DbgPrint("Language found")
-        GAMEMODE:ChangeLanguage(new)
-    else
-        DbgPrint("Language not found!!! Reverting convar!")
-        lambda_language:SetString(old)
-    end
+cvars.AddChangeCallback("gmod_language", function(cvar, old, new)
+    GAMEMODE:LoadLocalisation()
 end)

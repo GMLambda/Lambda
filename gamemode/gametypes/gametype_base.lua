@@ -11,6 +11,8 @@ GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PlayerTiming = false
 GAMETYPE.WaitForPlayers = false
+GAMETYPE.Localisation = include("base/cl_localisation.lua")
+
 function GAMETYPE:GetData(name)
     local base = self
     while base ~= nil do
@@ -102,7 +104,7 @@ function GAMETYPE:LoadMapScript(path, name)
 end
 
 function GAMETYPE:LoadLocalisation(lang)
-    -- Stub
+
 end
 
 function GAMETYPE:AllowPlayerTracking()

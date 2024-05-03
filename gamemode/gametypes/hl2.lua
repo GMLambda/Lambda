@@ -108,6 +108,7 @@ GAMETYPE.CampaignNames = {
 }
 
 GAMETYPE.Settings = {}
+GAMETYPE.Localisation = include("hl2/cl_localisation.lua")
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), 0, 255)
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)

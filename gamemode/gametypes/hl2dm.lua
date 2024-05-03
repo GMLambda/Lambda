@@ -13,6 +13,7 @@ GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PostRoundMapVote = true
+GAMETYPE.Localisation = include("hl2dm/cl_localisation.lua")
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = 2
     return timeout
