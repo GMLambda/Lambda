@@ -1,3 +1,5 @@
+0.9.21 (in development)
+
 0.9.20
 - Feature: Episode 1 support.
 - Improved: Language localization of settings (English only as of now).
