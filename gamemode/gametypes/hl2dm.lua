@@ -13,6 +13,7 @@ GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
 GAMETYPE.PostRoundMapVote = true
+GAMETYPE.Localisation = include("hl2dm/cl_localisation.lua")
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = 2
     return timeout
@@ -187,7 +188,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("dm_fraglimit", {
         Category = "SERVER",
         NiceName = "#GM_DM_FRAGLIMIT",
-        Description = "Frag limit",
+        Description = "#GM_DM_FRAGLIMIT_DESC",
         Type = "int",
         Value = 50,
         Flags = bit.bor(0, FCVAR_REPLICATED),
@@ -200,7 +201,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("dm_timelimit", {
         Category = "SERVER",
         NiceName = "#GM_DM_TIMELIMIT",
-        Description = "Time limit",
+        Description = "#GM_DM_TIMELIMIT_DESC",
         Type = "int",
         Value = 10,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -213,7 +214,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("dm_teamonly", {
         Category = "SERVER",
         NiceName = "#GM_DM_TEAMONLY",
-        Description = "Team based",
+        Description = "#GM_DM_TEAMONLY_DESC",
         Type = "bool",
         Value = 0,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)

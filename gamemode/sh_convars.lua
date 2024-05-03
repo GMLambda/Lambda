@@ -57,6 +57,7 @@ if CLIENT then
     lambda_deathnotice_time = GM:RegisterConVar("deathnotice_time", "6", bit.bor(0, FCVAR_ARCHIVE), "Deathnotice time")
     lambda_auto_jump = GM:RegisterConVar("auto_jump", "0", bit.bor(0, FCVAR_ARCHIVE), "Automatically jump if on ground")
     lambda_gore = GM:RegisterConVar("gore", "1", bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO), "Enable gore")
+    lambda_language = GM:RegisterConVar("language", "english", bit.bor(0, FCVAR_ARCHIVE), "Gamemode language")
 end
 
 -- Server --

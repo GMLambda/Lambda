@@ -30,6 +30,7 @@ GAMETYPE.CampaignNames = {
         e = 15
     }
 }
+GAMETYPE.Localisation = include("hl2ep1/cl_localisation.lua")
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()

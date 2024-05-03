@@ -1,7 +1,4 @@
-if SERVER then
-    AddCSLuaFile()
-end
-
+if SERVER then AddCSLuaFile() end
 local DbgPrint = GetLogging("GameType")
 local GAMETYPE = {}
 GAMETYPE.Name = "Half-Life 1: Source"
@@ -14,48 +11,36 @@ GAMETYPE.MapList = {"c0a0", "c0a0a", "c0a0b", "c0a0c", "c0a0d", "c0a0e", "c1a0",
 GAMETYPE.ClassesEnemyNPC = {}
 GAMETYPE.ImportantPlayerNPCNames = {}
 GAMETYPE.ImportantPlayerNPCClasses = {}
-
+GAMETYPE.Localisation = include("hl1s/cl_localisation.lua")
 function GAMETYPE:GetPlayerRespawnTime()
     local timeout = math.Clamp(GAMEMODE:GetSetting("max_respawn_timeout"), -1, 255)
     if timeout == -1 then return timeout end
     local alive = #team.GetPlayers(LAMBDA_TEAM_ALIVE)
     local total = player.GetCount() - 1
-
-    if total <= 0 then
-        total = 1
-    end
-
+    if total <= 0 then total = 1 end
     local timeoutAmount = math.Round(alive / total * timeout)
-
     return timeoutAmount
 end
 
 function GAMETYPE:ShouldRestartRound()
     local playerCount = 0
     local aliveCount = 0
-
     -- Collect how many players exist and how many are alive, in case they are all dead
     -- we have to restart the round.
     for _, ply in pairs(player.GetAll()) do
-        if ply:Alive() then
-            aliveCount = aliveCount + 1
-        end
-
+        if ply:Alive() then aliveCount = aliveCount + 1 end
         playerCount = playerCount + 1
     end
 
     if playerCount > 0 and aliveCount == 0 then
         DbgPrint("All players are dead, restart required")
-
         return true
     end
-
     return false
 end
 
 function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
     local class = wep:GetClass()
-
     if class == "weapon_frag" then
         if ply:HasWeapon(class) and ply:GetAmmoCount("grenade") >= sk_max_grenade:GetInt() then return false end
     elseif class == "weapon_annabelle" then
@@ -65,10 +50,8 @@ function GAMETYPE:PlayerCanPickupWeapon(ply, wep)
     if ply:HasWeapon(wep:GetClass()) == true then
         -- Only allow a new pickup once if there is ammo in the weapon.
         if wep:GetPrimaryAmmoType() == -1 and wep:GetSecondaryAmmoType() == -2 then return false end
-
         return ply.ObjectPickupTable[wep.UniqueEntityId] ~= true
     end
-
     return true
 end
 
@@ -86,17 +69,14 @@ end
 
 function GAMETYPE:ShouldRespawnWeapon(ent)
     if ent:IsItem() == true or ent.DroppedByPlayerDeath == true then return false end
-
     return true
 end
 
 function GAMETYPE:PlayerDeath(ply, inflictor, attacker)
     ply:AddDeaths(1)
-
     -- Suicide?
     if inflictor == ply or attacker == ply then
         attacker:AddFrags(-1)
-
         return
     end
 
@@ -112,7 +92,6 @@ function GAMETYPE:PlayerShouldTakeDamage(ply, attacker, inflictor)
     local playerAttacking = (IsValid(attacker) and attacker:IsPlayer()) or (IsValid(inflictor) and inflictor:IsPlayer())
     -- Friendly fire is controlled by convar in this case.
     if playerAttacking == true and lambda_friendlyfire:GetBool() == false then return false end
-
     return true
 end
 
@@ -132,7 +111,6 @@ function GAMETYPE:PlayerSelectSpawn(spawns)
     for k, v in pairs(spawns) do
         if v:HasSpawnFlags(1) == true then return v end
     end
-
     return spawns[1]
 end
 
@@ -168,7 +146,6 @@ end
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()
-
     GAMEMODE:AddSetting("dynamic_checkpoints", {
         Category = "SERVER",
         NiceName = "#GM_DYNCHECKPOINT",
@@ -197,6 +174,4 @@ function GAMETYPE:InitSettings()
     })
 end
 
-hook.Add("LambdaLoadGameTypes", "HL1SGameType", function(gametypes)
-    gametypes:Add("hl1s", GAMETYPE)
-end)
+hook.Add("LambdaLoadGameTypes", "HL1SGameType", function(gametypes) gametypes:Add("hl1s", GAMETYPE) end)

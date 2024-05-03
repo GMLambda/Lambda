@@ -4,6 +4,7 @@ include("cl_postprocess.lua")
 include("cl_ragdoll_ext.lua")
 include("cl_taunts.lua")
 include("cl_hud.lua")
+include("cl_lang.lua")
 DEFINE_BASECLASS("gamemode_base")
 local DbgPrint = GetLogging("Client")
 local CurTime = CurTime
