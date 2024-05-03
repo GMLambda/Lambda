@@ -1,6 +1,18 @@
 if SERVER then AddCSLuaFile() end
 local LOCALISATION = {}
 LOCALISATION["english"] = {
+    ["World"] = "Cruel World",
+    ["base_ai"] = "Creature",
+    ["Valve_Hint_EnterVan"] = "%+use% ENTER VAN",
+    ["Valve_Hint_ExitVan"] = "%+use% EXIT VAN",
+    ["Valve_Hint_Crouch"] = "%+duck% CROUCH",
+    ["Valve_Hint_Sprint"] = "%+speed% SPRINT",
+    ["Valve_Hint_PushButton"] = "%+use% PUSH BUTTON",
+    ["Valve_Hint_PicKUp"] = "%+use% PICK UP",
+    ["Valve_Hint_Interact"] = "%+use% INTERACT",
+    ["Valve_Hint_GravGun"] = "%+attack% PUNT OBJECT %+attack2% PULL OBJECT",
+    ["Valve_Hint_CarryTurret"] = "%+use% OR GRAVITY GUN TO PICK UP TURRET",
+    ["Valve_Hint_CROSSBOW"] = "%+attack2% CROSSBOW ZOOM",
     ["GM_DIFFICULTY"] = "Difficulty level",
     ["GM_DIFFICULTY_DESC"] = "Set the gametype difficulty",
     ["GM_WALKSPEED"] = "Walk speed",
