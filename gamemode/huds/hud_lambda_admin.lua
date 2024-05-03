@@ -14,7 +14,7 @@ function PANEL:Init()
         if v.Type == "int" or v.Type == "float" and v.Category == "SERVER" then
             if v.Extra ~= nil and v.Extra.Type ~= nil and v.Extra.Type == "combo" then continue end
             self:AddIntOption(x, y, k, v)
-            self:AddDesc(x, y + 8, "- " .. v.Description)
+            self:AddDesc(x, y + 8, v.Description)
             y = y + 57
             n = n + 1
         end
@@ -25,7 +25,7 @@ function PANEL:Init()
     for k, v in pairs(availableSettings) do
         if v.Type == "bool" and v.Category == "SERVER" then
             self:AddCheckOption(x, _y, k, v)
-            self:AddDesc(x, _y, "- " .. v.Description)
+            self:AddDesc(x, _y, v.Description)
             _y = _y + 50
             n = n + 1
         end
@@ -34,7 +34,7 @@ function PANEL:Init()
     for k, v in pairs(availableSettings) do
         if v.Extra ~= nil and v.Extra.Type == "combo" and v.Category == "SERVER" then
             self:AddComboOption(x, _y, k, v)
-            self:AddDesc(x, _y, "- " .. v.Description)
+            self:AddDesc(x, _y, v.Description)
             _y = _y + 50
         end
     end
@@ -45,8 +45,13 @@ function PANEL:OnClose()
 end
 
 function PANEL:AddDesc(x,y, help)
+    local prfx = self:Add("DLabel")
+    prfx:SetPos(x, y + 24)
+    prfx:SetFont("DefaultSmall")
+    prfx:SetText("- ")
+    prfx:SizeToContents()
     local tlbl = self:Add("DTextEntry")
-    tlbl:SetPos(x, y + 22)
+    tlbl:SetPos(x + 5, y + 22)
     tlbl:SetFont("DefaultSmall")
     tlbl:SetEditable(false)
     tlbl:SetText(help)
