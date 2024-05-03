@@ -2,61 +2,64 @@
 
 
 language.Add("GM_DIFFICULTY", "Difficulty level")
-
+language.Add("GM_DIFFICULTY_DESC", "Set the gametype difficulty")
 language.Add("GM_WALKSPEED", "Walk speed")
-
+language.Add("GM_WALKSPEED_DESC", "Set speed when slowly walking with ALT key")
 language.Add("GM_NORMSPEED", "Normal speed")
-
+language.Add("GM_NORMSPEED_DESC", "Set speed normal walk speed")
 language.Add("GM_SPRINTSPEED", "Sprint speed")
-
+language.Add("GM_SPRINTSPEED_DESC", "Set running speed")
 language.Add("GM_CONNECTTIMEOUT", "Connection timeout")
-
+language.Add("GM_CONNECTTIMEOUT_DESC", "Set how long should it wait for connecting players")
 language.Add("GM_PLAYERCOLLISION", "Player collision")
-
+language.Add("GM_PLAYERCOLLISION_DESC", "Players can collide with other players")
 language.Add("GM_FRIENDLYFIRE", "Friendly fire")
-
+language.Add("GM_FRIENDLYFIRE_DESC", "Enable damage to other players")
 language.Add("GM_PREVENTITEMMOVE", "Prevent item moving")
-
+language.Add("GM_PREVENTITEMMOVE_DESC", "Prevent items from moving when shooting at them")
 language.Add("GM_DEFAMMO", "Limit default ammo")
-
+language.Add("GM_DEFAMMO_DESC", "Disable ammo limits")
 language.Add("GM_AUTOJUMP", "Allow auto jump")
-
+language.Add("GM_AUTOJUMP_DESC", "Allow players to use the auto jump feature")
 language.Add("GM_RESPAWNTIME", "Respawn time")
-
+language.Add("GM_RESPAWNTIME_DESC", "Set players respawn time")
+language.Add("GM_CHECKPOINT_RESPAWN", "Checkpoint respawn")
+language.Add("GM_CHECKPOINT_RESPAWN_DESC", "Players have to wait for checkpoints in order to respawn")
 language.Add("GM_RESTARTTIME", "Restart time")
-
+language.Add("GM_RESTARTTIME_DESC", "Set time between round ending and starting")
 language.Add("GM_MAPCHANGETIME", "Mapchange time")
-
-language.Add("GM_CHECKPOINTTIMEOUT", "Checkpoint time")
-
+language.Add("GM_MAPCHANGETIME_DESC", "Set time after between map finish and level change")
+language.Add("GM_CHECKPOINTTIMEOUT", "Checkpoint timeout")
+language.Add("GM_CHECKPOINTTIMEOUT_DESC", "Set how long checkpoints wait for other players")
 language.Add("GM_GODMODE", "Godmode")
-
+language.Add("GM_GODMODE_DESC", "Enable god mode, prevents any damage")
 language.Add("GM_PICKUPDELAY", "Pickup delay")
-
+language.Add("GM_PICKUPDELAY_DESC", "Set weapon/item delay before picking it up")
 language.Add("GM_DIFFMETRICS", "NPC/Player metrics")
-
+language.Add("GM_DIFFMETRICS_DESC", "Metrics for use by developers")
 language.Add("GM_WEAPONDROP", "Weapon drop mode")
-
+language.Add("GM_WEAPONDROP_DESC", "Change what players drop on death")
 language.Add("GM_CHANGELVLDELAY", "Level change delay")
-
+language.Add("GM_CHANGELVLDELAY_DESC", "The amount in seconds to wait before changing to the next map")
 language.Add("GM_COCKROACHES", "Cockroach amount")
-
+language.Add("GM_COCKROACHES_DESC", "The maximum amount of cockroaches that can be spawned. 0 to disable them")
 language.Add("GM_ABH", "Accelerated backhopping")
-
+language.Add("GM_ABH_DESC", "Enable ABH, widely used by speedrunners to achieve insane speed")
 language.Add("GM_DYNCHECKPOINT", "Dynamic checkpoints")
-
+language.Add("GM_DYNCHECKPOINT_DESC", "Enable dynamic checkpoints")
 language.Add("GM_NPCDMG", "Friendly NPC damage")
-
+language.Add("GM_NPCDMG_DESC", "Allows friendly NPC to take damage")
 language.Add("GM_PLYTRACK", "Player tracking")
-
+language.Add("GM_PLYTRACK_DESC", "Allows seeing players through walls")
 language.Add("GM_ANTLIONCOLLISION", "Friendly antlion collision")
-
+language.Add("GM_ANTLIONCOLLISION_DESC", "Enable/disable colliding with friendly antlions")
 language.Add("GM_PLAYERSPEECH", "Player speech")
-
+language.Add("GM_PLAYERSPEECH_DESC", "Enable/disable players speaking based on performance")
 language.Add("GM_PLAYERHURTSOUNDS", "Player damage speech")
-
+language.Add("GM_PLAYERHURTSOUNDS_DESC", "Enable/disable players speaking based on recieved damage")
 language.Add("GM_DM_FRAGLIMIT","Score limit")
-
+language.Add("GM_DM_FRAGLIMIT_DESC","Set score limit for round to end")
 language.Add("GM_DM_TIMELIMIT","Round time limit")
-
+language.Add("GM_DM_TIMELIMIT_DESC","Set how long the round lasts")
 language.Add("GM_DM_TEAMONLY","Team based deathmatch")
+language.Add("GM_DM_TEAMONLY_DESC","Switch between DM or TDM")

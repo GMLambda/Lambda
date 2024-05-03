@@ -243,7 +243,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("dynamic_checkpoints", {
         Category = "SERVER",
         NiceName = "#GM_DYNCHECKPOINT",
-        Description = "Dynamic checkpoints",
+        Description = "#GM_DYNCHECKPOINT_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -252,7 +252,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("allow_npcdmg", {
         Category = "SERVER",
         NiceName = "#GM_NPCDMG",
-        Description = "Friendly NPC damage",
+        Description = "#GM_NPCDMG_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -261,7 +261,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("player_tracker", {
         Category = "SERVER",
         NiceName = "#GM_PLYTRACK",
-        Description = "Player tracking",
+        Description = "#GM_PLYTRACK_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -270,7 +270,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("friendly_antlion_collision", {
         Category = "SERVER",
         NiceName = "#GM_ANTLIONCOLLISION",
-        Description = "Friendly Antlion collision",
+        Description = "#GM_ANTLIONCOLLISION_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -279,7 +279,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("player_speech", {
         Category = "SERVER",
         NiceName = "#GM_PLAYERSPEECH",
-        Description = "Player Speech, talks based on surroundings",
+        Description = "#GM_PLAYERSPEECH_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -288,7 +288,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("player_damage_speech", {
         Category = "SERVER",
         NiceName = "#GM_PLAYERHURTSOUNDS",
-        Description = "Player damage speech",
+        Description = "#GM_PLAYERHURTSOUNDS_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)

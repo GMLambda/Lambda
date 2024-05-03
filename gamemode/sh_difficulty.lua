@@ -53,7 +53,7 @@ function GM:InitDifficultySettings()
     self:AddSetting("difficulty", {
         Category = "SERVER",
         NiceName = "#GM_DIFFICULTY",
-        Description = "Difficulty",
+        Description = "#GM_DIFFICULTY_DESC",
         Type = "int",
         Default = 2, -- Normal, TODO: Allow the game type to specify the default.
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),

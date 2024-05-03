@@ -315,7 +315,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("walkspeed", {
         Category = "SERVER",
         NiceName = "#GM_WALKSPEED",
-        Description = "Walk speed",
+        Description = "#GM_WALKSPEED_DESC",
         Type = "int",
         Default = 150,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -328,7 +328,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("normspeed", {
         Category = "SERVER",
         NiceName = "#GM_NORMSPEED",
-        Description = "Run speed",
+        Description = "#GM_NORMSPEED_DESC",
         Type = "int",
         Default = 190,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -341,7 +341,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("sprintspeed", {
         Category = "SERVER",
         NiceName = "#GM_SPRINTSPEED",
-        Description = "Sprint speed",
+        Description = "#GM_SPRINTSPEED_DESC",
         Type = "int",
         Default = 320,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -354,7 +354,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("connect_timeout", {
         Category = "SERVER",
         NiceName = "#GM_CONNECTTIMEOUT",
-        Description = "Timeout limit",
+        Description = "#GM_CONNECTTIMEOUT_DESC",
         Type = "int",
         Default = 120,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -366,7 +366,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("playercollision", {
         Category = "SERVER",
         NiceName = "#GM_PLAYERCOLLISION",
-        Description = "Player collision",
+        Description = "#GM_PLAYERCOLLISION_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -375,7 +375,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("friendlyfire", {
         Category = "SERVER",
         NiceName = "#GM_FRIENDLYFIRE",
-        Description = "Friendly fire",
+        Description = "#GM_FRIENDLYFIRE_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -384,7 +384,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("prevent_item_move", {
         Category = "SERVER",
         NiceName = "#GM_PREVENTITEMMOVE",
-        Description = "Prevent item moving",
+        Description = "#GM_PREVENTITEMMOVE_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -393,7 +393,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("limit_default_ammo", {
         Category = "SERVER",
         NiceName = "#GM_DEFAMMO",
-        Description = "Limit default ammo",
+        Description = "#GM_DEFAMMO_DESC",
         Type = "bool",
         Default = true,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -402,7 +402,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("allow_auto_jump", {
         Category = "SERVER",
         NiceName = "#GM_AUTOJUMP",
-        Description = "Auto jump",
+        Description = "#GM_AUTOJUMP_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -411,7 +411,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("max_respawn_timeout", {
         Category = "SERVER",
         NiceName = "#GM_RESPAWNTIME",
-        Description = "Respawn time",
+        Description = "#GM_RESPAWNTIME_DESC",
         Type = "int",
         Default = 20,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -424,7 +424,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("checkpoint_respawn", {
         Category = "SERVER",
         NiceName = "#GM_CHECKPOINT_RESPAWN",
-        Description = "Players have to wait for checkpoints in order to respawn",
+        Description = "#GM_CHECKPOINT_RESPAWN_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -433,7 +433,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("map_restart_timeout", {
         Category = "SERVER",
         NiceName = "#GM_RESTARTTIME",
-        Description = "Restart time",
+        Description = "#GM_RESTARTTIME_DESC",
         Type = "int",
         Default = 20,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -446,7 +446,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("map_change_timeout", {
         Category = "SERVER",
         NiceName = "#GM_MAPCHANGETIME",
-        Description = "Map change time",
+        Description = "#GM_MAPCHANGETIME_DESC",
         Type = "int",
         Default = 60,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -459,7 +459,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("checkpoint_timeout", {
         Category = "SERVER",
         NiceName = "#GM_CHECKPOINTTIMEOUT",
-        Description = "Checkpoint timeout",
+        Description = "#GM_CHECKPOINTTIMEOUT_DESC",
         HelpText = "Set to 0 to disable timeout",
         Type = "int",
         Default = 60,
@@ -473,7 +473,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("player_god", {
         Category = "SERVER",
         NiceName = "#GM_GODMODE",
-        Description = "Player god mode",
+        Description = "#GM_GODMODE_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -482,7 +482,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("pickup_delay", {
         Category = "SERVER",
         NiceName = "#GM_PICKUPDELAY",
-        Description = "Pickup delay",
+        Description = "#GM_PICKUPDELAY_DESC",
         Type = "float",
         Default = 0.5,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -492,7 +492,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("difficulty_metrics", {
         Category = "DEVELOPER",
         NiceName = "#GM_DIFFMETRICS",
-        Description = "NPC/Player metrics",
+        Description = "#GM_DIFFMETRICS_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_REPLICATED),
@@ -502,7 +502,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("weapondropmode", {
         Category = "SERVER",
         NiceName = "#GM_WEAPONDROP",
-        Description = "Weapon Drop Mode",
+        Description = "#GM_WEAPONDROP_DESC",
         Type = "int",
         Default = 1,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -519,7 +519,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("abh", {
         Category = "SERVER",
         NiceName = "#GM_ABH",
-        Description = "Accelerated backhopping",
+        Description = "#GM_ABH_DESC",
         Type = "bool",
         Default = false,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
@@ -528,7 +528,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("changelevel_delay", {
         Category = "SERVER",
         NiceName = "#GM_CHANGELVLDELAY",
-        Description = "The amount in seconds to wait before changing to the next map",
+        Description = "#GM_CHANGELVLDELAY_DESC",
         Type = "int",
         Default = 6,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
@@ -541,7 +541,7 @@ function GAMETYPE:InitSettings()
     GAMEMODE:AddSetting("max_cockroaches", {
         Category = "SERVER",
         NiceName = "#GM_COCKROACHES",
-        Description = "The maximum amount of cockroaches that can be spawned",
+        Description = "#GM_COCKROACHES_DESC",
         Type = "int",
         Default = 30,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
