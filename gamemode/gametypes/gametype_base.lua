@@ -527,7 +527,7 @@ function GAMETYPE:InitSettings()
 
     GAMEMODE:AddSetting("changelevel_delay", {
         Category = "SERVER",
-        NiceName = "#GM_ABH",
+        NiceName = "#GM_CHANGELVLDELAY",
         Description = "The amount in seconds to wait before changing to the next map",
         Type = "int",
         Default = 6,
