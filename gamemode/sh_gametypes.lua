@@ -1,7 +1,4 @@
-if SERVER then
-    AddCSLuaFile()
-end
-
+if SERVER then AddCSLuaFile() end
 local DbgPrint = GetLogging("GameType")
 local table = table
 include("gametypes/gametype_base.lua")
@@ -11,7 +8,6 @@ include("gametypes/hl2dm.lua")
 include("gametypes/hl1s.lua")
 local DEFAULT_MAPSCRIPT = {}
 DEFAULT_MAPSCRIPT.InputFilters = {}
-
 DEFAULT_MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_physcannon", "weapon_frag", "weapon_shotgun", "weapon_ar2", "weapon_rpg", "weapon_crossbow", "weapon_bugbait"},
     Ammo = {
@@ -38,22 +34,15 @@ DEFAULT_MAPSCRIPT.PostPlayerSpawn = function(self, ply) end
 DEFAULT_MAPSCRIPT.OnNewGame = function(self) end
 GameTypes = GameTypes or {}
 GameTypes.Registered = {}
-
 function GameTypes:Add(name, tbl)
     local mappedName = name:lower()
-
-    if self.Registered[mappedName] ~= nil then
-        error("GameType name is already taken: " .. name)
-    end
-
+    if self.Registered[mappedName] ~= nil then error("GameType name is already taken: " .. name) end
     -- Don't reference the table.
     local data = table.Copy(tbl)
     data.GameType = mappedName
     local meta = {}
-
     meta.__index = function(i, k)
         local base = i
-
         while base ~= nil do
             local v = rawget(base, k)
             if v ~= nil then return v end
@@ -66,9 +55,7 @@ function GameTypes:Add(name, tbl)
 end
 
 function GameTypes:Get(name)
-    if name == nil then
-        return nil
-    end
+    if name == nil then return nil end
     local mappedName = name:lower()
     return self.Registered[mappedName]
 end
@@ -79,16 +66,13 @@ function GameTypes:GetByMap(mapName)
             if string.iequals(map, mapName) then return gameTypeName end
         end
     end
-
     return nil
 end
 
 function GM:LoadGameTypes()
     hook.Run("LambdaLoadGameTypes", GameTypes)
-
     if SERVER then
         print("-- Loaded GameTypes --")
-
         for k, v in pairs(GameTypes.Registered) do
             print("> " .. k)
         end
@@ -97,7 +81,6 @@ function GM:LoadGameTypes()
     for k, v in pairs(GameTypes.Registered) do
         if v.BaseGameType ~= nil then
             local base = GameTypes.Registered[v.BaseGameType]
-
             if base == nil then
                 print("GameType '" .. k .. "' references missing base: '" .. tostring(v.BaseGameType) .. "'")
                 continue
@@ -110,36 +93,28 @@ end
 
 function GM:CallGameTypeFunc(name, ...)
     local base = self:GetGameType()
-
     while base ~= nil do
         if base[name] ~= nil and isfunction(base[name]) then return base[name](base, ...) end
         base = base.Base
     end
-
     return nil
 end
 
 function GM:GetGameTypeData(name)
     local base = self:GetGameType()
-
     while base ~= nil do
         if base[name] ~= nil and not isfunction(base[name]) then return base[name] end
         base = base.Base
     end
-
     return nil
 end
 
-local gmod_language = GetConVar("gmod_language")
-
 function GM:SetGameType(gametype, isFallback)
     DbgPrint("SetGameType: " .. tostring(gametype))
-
     if gametype == "auto" then
         DbgPrint("Trying to detect game type based on map")
         local currentMap = game.GetMap():lower()
         gametype = GameTypes:GetByMap(currentMap)
-
         if gametype ~= nil then
             DbgPrint("Detected game type '" .. gametype .. "' for map " .. currentMap)
         else
@@ -148,28 +123,18 @@ function GM:SetGameType(gametype, isFallback)
     end
 
     local gametypeData = GameTypes:Get(gametype)
-
     if gametypeData == nil then
         print("Unable to find gametype: " .. (gametype or "unknown"))
-
         if isFallback ~= true then
             DbgPrint("Fallback: hl2")
-
             return self:SetGameType("hl2", true)
         end
     end
 
     self.GameType = gametypeData
     self:InitializeMapList()
-
-    if gametypeData.LoadCurrentMapScript ~= nil then
-        gametypeData:LoadCurrentMapScript()
-    end
-
-    if CLIENT then
-        self:LoadLocalisation()
-    end
-
+    if gametypeData.LoadCurrentMapScript ~= nil then gametypeData:LoadCurrentMapScript() end
+    if CLIENT then self:LoadLocalisation() end
     self:ResetMapScript()
 end
 
@@ -182,11 +147,7 @@ end
 
 function GM:ResetMapScript()
     local gametype = self.GameType
-
-    if gametype.LoadCurrentMapScript ~= nil then
-        gametype:LoadCurrentMapScript()
-    end
-
+    if gametype.LoadCurrentMapScript ~= nil then gametype:LoadCurrentMapScript() end
     self.MapScript = gametype.MapScript or table.Copy(DEFAULT_MAPSCRIPT)
 end
 
