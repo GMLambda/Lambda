@@ -1,4 +1,4 @@
-0.9.21 (in development)
+0.9.21
 - Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.
 
 0.9.20
