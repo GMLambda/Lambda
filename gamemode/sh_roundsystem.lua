@@ -3,7 +3,18 @@ local util = util
 if SERVER then
     AddCSLuaFile()
     util.AddNetworkString("LambdaRoundInfo")
+    util.AddNetworkString("LambdaRoundRestarting")
 end
+
+sound.Add({
+    name = "Lambda.RoundEnd",
+    channel = CHAN_STATIC,
+    volume = 1.0,
+    soundlevel = 80,
+    pitchstart = 100,
+    pitchend = 100,
+    sound = "lambda/roundover.mp3"
+})
 
 local DbgPrint = GetLogging("RoundLogic")
 local ents = ents
@@ -142,23 +153,8 @@ if SERVER then
                 end
             end
 
-            -- FIXME: This only works on listen server, we should setup a new message
-            --        and run this on the client only.
-            -- Stop all the current playing sounds.
-            for k, v in pairs(player.GetAll()) do
-                v:ConCommand("stopsoundscape")
-                v:ConCommand("stopsound")
-                v:SetDSP(0, true)
-            end
-
-            -- We have to delay this otherwise it will be cancalced by stopsound.
-            util.RunNextFrame(function()
-                local filter = RecipientFilter()
-                filter:AddAllPlayers()
-                local snd = CreateSound(game.GetWorld(), "lambda/roundover.mp3", filter)
-                snd:SetSoundLevel(0)
-                snd:Play()
-            end)
+            net.Start("LambdaRoundRestarting", false)
+            net.Broadcast()
         end
     end
 
@@ -198,13 +194,16 @@ if SERVER then
     function GM:RoundStateRestartRequested()
         local curTime = GetSyncedTimestamp()
 
-        if curTime > self.ScheduledRestartTime then
+        if curTime >= self.ScheduledRestartTime then
             DbgPrint("Restarting round...")
             self.RoundState = STATE_RESTARTING
             self:CleanUpMap()
         else
-            local timescale = 0.7 - ((curTime / self.ScheduledRestartTime) * 0.5)
-            game.SetTimeScale(timescale)
+            local timeLeft = self.ScheduledRestartTime - curTime
+            local timeLimit = self.ScheduledRestartTime - self.RestartStartTime
+            local timeAlpha = timeLeft / timeLimit
+            local timeScale = math.max(0.005, timeAlpha * 0.2)
+            game.SetTimeScale(timeScale)
         end
     end
 
@@ -323,6 +322,10 @@ if SERVER then
     end
 else -- CLIENT
     function GM:HandleRoundInfoStarted(infoType, params)
+        if IsValid(self.RoundEndSound) then
+            self.RoundEndSound:Stop()
+            self.RoundEndSound = nil
+        end
     end
 
     function GM:HandleRoundInfoFinished(infoType, params)
@@ -349,11 +352,32 @@ else -- CLIENT
         end
     end
 
+    function GM:HandleRoundRestarting()
+        local ply = LocalPlayer()
+        ply:ConCommand("stopsoundscape")
+        ply:ConCommand("stopsound")
+        ply:SetDSP(0, true)
+
+        -- We have to delay this otherwise it will be cancalced by stopsound.
+        util.RunNextFrame(function()
+            local snd = CreateSound(game.GetWorld(), "Lambda.RoundEnd")
+            snd:SetSoundLevel(0)
+            snd:ChangeVolume(1)
+            snd:Play()
+
+            self.RoundEndSound = snd
+        end)
+    end
+
     net.Receive("LambdaRoundInfo", function(len)
         local infoType = net.ReadUInt(4)
         local params = net.ReadTable()
         DbgPrint("Received round state info: " .. tostring(infoType))
         GAMEMODE:HandleRoundInfoChange(infoType, params)
+    end)
+
+    net.Receive("LambdaRoundRestarting", function(len)
+        GAMEMODE:HandleRoundRestarting()
     end)
 end
 
