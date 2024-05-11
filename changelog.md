@@ -1,4 +1,5 @@
 0.9.22 (in development)
+- Fixed: Level transition sometimes ignoring the transition volumes forcing players to spawn with the default loadout on the next map.
 
 0.9.21
 - Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.
