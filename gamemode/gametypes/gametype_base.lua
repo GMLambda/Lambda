@@ -435,7 +435,7 @@ function GAMETYPE:InitSettings()
         NiceName = "#GM_RESTARTTIME",
         Description = "#GM_RESTARTTIME_DESC",
         Type = "int",
-        Default = 20,
+        Default = 10,
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED),
         Clamp = {
             Min = 0,
