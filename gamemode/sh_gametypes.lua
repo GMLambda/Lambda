@@ -124,8 +124,8 @@ function GM:SetGameType(gametype, isFallback)
         gametype = "auto"
     end
 
-    print("Current Gametype: " .. gametype)
-    print("Ideal Gametype: " .. (idealGametype or "unknown"))
+    DbgPrint("Current Gametype: " .. gametype)
+    DbgPrint("Ideal Gametype: " .. (idealGametype or "unknown"))
 
     if gametype == "auto" then
         DbgPrint("Game type is set to auto, trying to detect gametype by map.")
