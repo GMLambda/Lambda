@@ -96,11 +96,50 @@ function GM:ConflictRecovery()
     end
 end
 
+local function MigrateConfig(cvarName, newValue)
+    local cvar = GetConVar(cvarName)
+    if cvar == nil then
+        print(" > Warning: Unable to find cvar: " .. cvarName .. " for migration.")
+        return
+    end
+    if isstring(newValue) then
+        cvar:SetString(newValue)
+    elseif isnumber(newValue) then
+        cvar:SetFloat(newValue)
+    elseif isbool(newValue) then
+        cvar:SetBool(newValue)
+    end
+    print(" > Migrated cvar '" .. cvarName .. "' to '" .. tostring(newValue) .. "'")
+end
+
+function GM:UpdateConfigs()
+    local lastVersion = cookie.GetNumber("lambda_internal_version", 0)
+    if lastVersion >= self.InternalVersion then
+        return
+    end
+
+    print("-- Config Migration to version " .. tostring(self.InternalVersion) .. " --")
+
+    if lastVersion == 0 then
+        -- Version 0.9.20 -> 0.9.21
+        if SERVER then
+            -- Set lambda_gametype to auto.
+            MigrateConfig("lambda_gametype", "auto")
+        else
+            -- Set lambda_physcannon_glow to 2.
+            MigrateConfig("lambda_physcannon_glow", "2")
+        end
+    end
+
+    cookie.Set("lambda_internal_version", self.InternalVersion)
+end
+
 -- First function called when the game mode is loaded.
 function GM:OnGamemodeLoaded()
     DbgPrint("GM:OnGamemodeLoaded")
     self.OnGamemodeLoadedCalled = true
     self.ServerStartupTime = GetSyncedTimestamp()
+    self:UpdateConfigs()
     self:LoadGameTypes()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()

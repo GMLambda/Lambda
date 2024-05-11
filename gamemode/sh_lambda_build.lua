@@ -12,3 +12,4 @@ GM.Website = "https://github.com/ZehMatt/Lambda"
 GM.WorkshopID = "801875828"
 GM.WorkshopBuild = false
 GM.Version = "develop"
+GM.InternalVersion = 1

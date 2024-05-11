@@ -74,7 +74,7 @@ function GM:LoadGameTypes()
     if SERVER then
         print("-- Loaded GameTypes --")
         for k, v in pairs(GameTypes.Registered) do
-            print("> " .. k)
+            print(" > " .. k)
         end
     end
 
@@ -111,14 +111,40 @@ end
 
 function GM:SetGameType(gametype, isFallback)
     DbgPrint("SetGameType: " .. tostring(gametype))
+
+    local currentMap = game.GetMap():lower()
+    local idealGametype = GameTypes:GetByMap(currentMap)
+
+    if gametype == nil or gametype == "" then
+        if SERVER then
+            ErrorNoHalt("Warning: 'lambda_gametype' is empty, using 'auto'.\n")
+        else
+            print("Warning: 'lambda_gametype' is empty, using 'auto'.")
+        end
+        gametype = "auto"
+    end
+
+    DbgPrint("Current Gametype: " .. gametype)
+    DbgPrint("Ideal Gametype: " .. (idealGametype or "unknown"))
+
     if gametype == "auto" then
-        DbgPrint("Trying to detect game type based on map")
-        local currentMap = game.GetMap():lower()
-        gametype = GameTypes:GetByMap(currentMap)
+        DbgPrint("Game type is set to auto, trying to detect gametype by map.")
         if gametype ~= nil then
             DbgPrint("Detected game type '" .. gametype .. "' for map " .. currentMap)
         else
             DbgPrint("No game type registered that contains the map " .. currentMap)
+        end
+        gametype = idealGametype
+    else
+        if idealGametype ~= nil and idealGametype ~= gametype then
+            local msg = ""
+            msg = msg .. "Warning: Server ConVar 'lambda_gametype' is set to '" .. gametype .. "', but the map is associated with '" .. idealGametype .. "'.\n"
+            msg = msg .. " - Set 'lambda_gametype' to '" .. idealGametype .. "' or 'auto' to use the correct gametype.\n"
+            if SERVER then
+                ErrorNoHalt(msg)
+            else
+                print(msg)
+            end
         end
     end
 
