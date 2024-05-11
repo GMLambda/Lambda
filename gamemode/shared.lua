@@ -126,7 +126,7 @@ function GM:UpdateConfigs()
             -- Set lambda_gametype to auto.
             MigrateConfig("lambda_gametype", "auto")
         else
-            -- Set lambda_gametype to auto.
+            -- Set lambda_physcannon_glow to 2.
             MigrateConfig("lambda_physcannon_glow", "2")
         end
     end
