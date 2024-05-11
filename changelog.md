@@ -1,4 +1,5 @@
 0.9.21 (in development)
+- Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.
 
 0.9.20
 - Feature: Episode 1 support.
