@@ -161,6 +161,9 @@ if SERVER then
         if self:IsNPCMissionCritical(npc) == true then
             self:RestartRound("GAMEOVER_ALLY")
             self:RegisterRoundLost()
+
+            -- Prevent the game from trying to reload the last save.
+            npc:SetKeyValue("GameEndAlly", "0")
         end
     end
 
