@@ -576,6 +576,16 @@ function GM:EntityKeyValue(ent, key, val)
         return newTriggerName
     end
 
+    if SERVER then
+        -- In case a map has a scripted_sequence with onplayerdeath set to 1, we want to know about it.
+        if key == "onplayerdeath" and entClass == "scripted_sequence" and tostring(val) ~= "0" then
+            local msg = "Found scripted_sequence with onplayerdeath set to " .. tostring(val) .. ": " .. tostring(ent) .. " (" .. ent:GetName() .. ")"
+            msg = msg .. " at " .. tostring(ent:GetPos()) .. " for map " .. game.GetMap()
+            msg = msg .. "\nIf you see this message please submit a new issue on https://github.com/GMLambda/Lambda/issues\n"
+            ErrorNoHalt(msg)
+        end
+    end
+
     if util.IsOutputValue(key) then
         ent.EntityOutputs = ent.EntityOutputs or {}
         ent.EntityOutputs[key] = ent.EntityOutputs[key] or {}
