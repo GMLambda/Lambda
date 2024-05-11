@@ -1,6 +1,7 @@
 0.9.22 (in development)
 - Fixed: Level transition sometimes ignoring the transition volumes forcing players to spawn with the default loadout on the next map.
 - Fixed: ep1_citadel_00: Alyx stops the scripted scene if player falls off the cliff.
+- Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
 
 0.9.21
 - Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.
