@@ -1,5 +1,21 @@
 local MAT_PHYSBEAM = Material("sprites/physbeam.vmt")
 local EFFECT_TIME = 0.01
+
+local function ImpactEffect(ent, pos, matType, normal)
+    local ef = EffectData()
+    local effectType = "Sparks"
+    ef:SetOrigin(pos)
+    ef:SetStart(pos)
+    ef:SetScale(0.1)
+    if matType == MAT_METAL or matType == MAT_VENT or matType == MAT_COMPUTER then
+        ef:SetMagnitude(2)
+        effectType = "ElectricSpark"
+    else
+        ef:SetMagnitude(1)
+    end
+    util.Effect(effectType, ef)
+end
+
 function EFFECT:Init(data)
     local pos = data:GetOrigin()
     local ent = data:GetEntity()
@@ -10,11 +26,9 @@ function EFFECT:Init(data)
     self.DieTime = CurTime() + EFFECT_TIME
     self.Color = ent:GetWeaponColor()
     self.HasLight = false
-    local efSparks = EffectData()
-    efSparks:SetOrigin(pos)
-    efSparks:SetMagnitude(2)
-    efSparks:SetScale(2)
-    util.Effect("Sparks", efSparks)
+
+    ImpactEffect(ent, pos, data:GetMaterialIndex(), data:GetNormal())
+
     local glowConvar = GetConVar("lambda_physcannon_glow")
     if glowConvar:GetInt() > 0 then
         self.EnableLights = true
