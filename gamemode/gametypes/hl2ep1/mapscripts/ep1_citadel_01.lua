@@ -150,7 +150,6 @@ function MAPSCRIPT:PostInit()
 
         -- Unnamed trigger.
         for _, stripTrigger in pairs(ents.FindByPos(Vector(-2658, 1377, 2576.86), "trigger_once")) do
-            print("Removing trigger:" .. tostring(stripTrigger))
             stripTrigger:Remove()
         end
 

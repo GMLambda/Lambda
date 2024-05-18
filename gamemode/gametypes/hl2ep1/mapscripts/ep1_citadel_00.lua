@@ -14,7 +14,7 @@ MAPSCRIPT.DefaultLoadout = {
 
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
-MAPSCRIPT.EntityFilterByName = {}
+MAPSCRIPT.EntityFilterByName = {"trigger_falldeath"}
 MAPSCRIPT.Scenes = {"lcs_ep1_intro_01", "lcs_ep1_intro_02", "lcs_ep1_intro_03", "lcs_ep1_intro_03b", "lcs_ep1_intro_04b", "lcs_ep1_intro_05", "lcs_ep1_intro_07", "lcs_ep1_intro_06", "lcs_ep1_intro_04", "lcs_ep1_intro_08", "lcs_al_vanride_end02", "lcs_al_vanride_end01"}
 MAPSCRIPT.Checkpoints = {
     {

@@ -36,6 +36,7 @@ function MAPSCRIPT:PostInit()
             --- 3304.103271 5262.621094 1536.031250
             local checkpointTransfer = GAMEMODE:CreateCheckpoint(Vector(3304.103271, 5262.621094, 1536.031250), Angle(0, 90, 0))
             GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
+            GAMEMODE:SetVehicleCheckpoint(Vector(1227.954468, 6228.015137, 1531.526611), Angle(0, -90, 0))
 
             ents.WaitForEntityByName("village_squad", function(ent)
                 ent:Fire("ForceSpawn")
@@ -43,6 +44,11 @@ function MAPSCRIPT:PostInit()
 
             ents.WaitForEntityByName("assault_trigger", function(ent)
                 ent:Fire("Enable")
+            end)
+
+            -- Workaround for a func_brush that has a white square when transitioning.
+            ents.WaitForEntityByName("bridge_field_01", function(ent)
+                ent:Remove()
             end)
         end
 
@@ -56,20 +62,6 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
-        --[[
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(3302.857178, 5274.505859, 1536.031250), Angle(0, 180, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(
-            Vector(3302.857178, 5274.505859, 1536.031250),
-            Angle(0, 0, 0),
-            Vector(-150, -80, 0),
-            Vector(150, 80, 100)
-        )
-        checkpointTrigger2.OnTrigger = function()
-            GAMEMODE:SetVehicleCheckpoint(Vector(1950.889160, 6521.036621, 1538.650757), Angle(0.372, 3.839, 1.433))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2)
-        end
-        ]]
         -- The game isnt over if someone falls down, we clear the outputs and just kill the player.
         for _, v in pairs(ents.FindByName("fall_trigger")) do
             v:ClearOutputs()
@@ -105,7 +97,7 @@ function MAPSCRIPT:PostInit()
             ent:Fire("Close")
         end)
 
-        -- Workaround: Make sure we let the dropship fly off, atm theres lua way to tell the contents of a specific model shape.
+        -- Workaround: Make sure we let the dropship fly off, atm theres is no lua way to tell the contents of a specific model shape.
         -- 3031.886963 5218.268066 1532.155762
         local hackTrigger1 = ents.Create("trigger_once")
         hackTrigger1:SetupTrigger(Vector(3031.886963, 5218.268066, 1532.155762), Angle(0, 0, 0), Vector(-150, -80, 0), Vector(150, 80, 100))

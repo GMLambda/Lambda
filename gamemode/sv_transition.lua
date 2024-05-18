@@ -458,18 +458,28 @@ function GM:TransitionObjects(landmarkEnt, objects, objectTable, playerTable, pl
     if debugTransition == true then PrintTable(transitionTable) end
 end
 
+local function CheckTouchingVolume(volume, obj)
+    if volume.GetTouchingObjects ~= nil then
+        local touching = volume:GetTouchingObjects()
+        if table.HasValue(touching, obj) == true then return true end
+    end
+    -- Check against bounding box.
+    local pos = obj:GetPos()
+    local volPos = volume:GetPos()
+    local volMins = volPos + volume:OBBMins()
+    local volMaxs = volPos + volume:OBBMaxs()
+
+    if pos:WithinAABox(volMins, volMaxs) == true then return true end
+    return false
+end
+
 function GM:InTransitionVolume(volumes, obj)
     local caps = obj:ObjectCaps()
     if bit.band(caps, FCAP_FORCE_TRANSITION) ~= 0 or obj.ForceTransition == true then return true end
     for _, volume in pairs(volumes) do
-        local pos = obj:GetPos()
-        local volPos = volume:GetPos()
-        local volMins = volPos + volume:OBBMins()
-        local volMaxs = volPos + volume:OBBMaxs()
-        -- FIXME: This is currently inaccurate, but theres no way to do it properly.
-        if pos:WithinAABox(volMins, volMaxs) == false then return false end
+        if CheckTouchingVolume(volume, obj) == true then return true end
     end
-    return true
+    return false
 end
 
 function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)

@@ -354,6 +354,13 @@ if SERVER then
         return cvar:GetFloat()
     end
 
+    local WEAPON_PRIORITY_PENALTY =
+    {
+        ["weapon_frag"] = 100,
+        ["weapon_bugbait"] = 100,
+        ["weapon_crowbar"] = 100,
+    }
+
     function GM:GetNextBestWeapon(ply)
         local weps = ply:GetWeapons()
         local defaultAmmoData = {
@@ -362,7 +369,7 @@ if SERVER then
             dmgtype = 0,
         }
 
-        -- Sort them first by weight.
+        -- Sort them by damage and ammo count.
         table.sort(weps, function(a, b)
             local ammoDataPrimaryA = game.GetAmmoData(a:GetPrimaryAmmoType()) or defaultAmmoData
             local ammoDataSecondaryA = game.GetAmmoData(a:GetSecondaryAmmoType()) or defaultAmmoData
@@ -385,6 +392,11 @@ if SERVER then
             -- Combine all the values to get a weight.
             weightA = weightA + ((ammoCountPrimaryA * dmgPrimaryA) * 0.1) + ((ammoCountSecondaryA * dmgSecondaryA) * 0.5) + bonusDualA
             weightB = weightB + ((ammoCountPrimaryB * dmgPrimaryB) * 0.1) + ((ammoCountSecondaryB * dmgSecondaryB) * 0.5) + bonusDualB
+            -- Penalize certain weapons.
+            local penaltyA = WEAPON_PRIORITY_PENALTY[a:GetClass()] or 0
+            local penaltyB = WEAPON_PRIORITY_PENALTY[b:GetClass()] or 0
+            weightA = weightA - penaltyA
+            weightB = weightB - penaltyB
             return weightA > weightB
         end)
 

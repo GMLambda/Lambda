@@ -1,4 +1,10 @@
 0.9.22 (in development)
+- Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
+- Fixed: Level transition sometimes ignoring the transition volumes forcing players to spawn with the default loadout on the next map.
+- Fixed: ep1_citadel_00: Alyx stops the scripted scene if player falls off the cliff.
+- Fixed: Killing mission critical NPCs causes the game end text to show up twice in some cases.
+- Fixed: d2_coast_07: Forcefield has a white square when returning from d2_coast_08.
+- Fixed: d2_coast_07: Wrong vehicle checkpoint when returning from d2_coast_08.
 
 0.9.21
 - Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.

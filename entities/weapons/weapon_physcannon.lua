@@ -1347,7 +1347,7 @@ function SWEP:PuntNonVPhysics(ent, fwd, tr)
         dmgInfo:SetDamageForce(fwd)
         dmgInfo:SetDamagePosition(tr.HitPos)
         ent:DispatchTraceAttack(dmgInfo, tr, fwd)
-        self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+        self:DoEffect(EFFECT_LAUNCH, tr.HitPos, tr.MatType, tr.HitNormal)
         self:SetNextIdleTime(CurTime() + 0.2)
         ent:SetPhysicsAttacker(self:GetOwner())
     end
@@ -1445,7 +1445,7 @@ function SWEP:PuntVPhysics(ent, fwd, tr)
     self.ChangeState = ELEMENT_STATE_CLOSED
     self.ElementDebounce = CurTime() + 0.5
     self.CheckSuppressTime = CurTime() + 0.25
-    self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+    self:DoEffect(EFFECT_LAUNCH, tr.HitPos, tr.MatType, tr.HitNormal)
     self:SetNextIdleTime(CurTime() + 0.2)
     self:SetNextPrimaryFire(CurTime() + 0.5)
     self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -1482,7 +1482,7 @@ function SWEP:PuntRagdoll(ent, fwd, tr)
     self.ChangeState = ELEMENT_STATE_CLOSED
     self.ElementDebounce = CurTime() + 0.5
     self.CheckSuppressTime = CurTime() + 0.25
-    self:DoEffect(EFFECT_LAUNCH, tr.HitPos)
+    self:DoEffect(EFFECT_LAUNCH, tr.HitPos, tr.MatType, tr.HitNormal)
     self:SetNextIdleTime(CurTime() + 0.2)
     self:SetNextPrimaryFire(CurTime() + 0.5)
     self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -1631,7 +1631,7 @@ function SWEP:DoEffectHolding(pos)
     core2.Alpha:InitFromCurrent(150, 0.2)
 end
 
-function SWEP:DoEffectLaunch(pos)
+function SWEP:DoEffectLaunch(pos, matType, normal)
     DbgPrint("DoEffectLaunch")
     local owner = self:GetOwner()
     local startPos = owner:GetShootPos()
@@ -1639,7 +1639,11 @@ function SWEP:DoEffectLaunch(pos)
     local shotDir
     local controller = self:GetMotionController()
     local attachedEnt = controller:GetAttachedObject()
+    if matType == nil then
+        matType = 0
+    end
     if pos == nil then
+
         if attachedEnt ~= nil then
             endPos = attachedEnt:WorldSpaceCenter()
             startPos = endPos
@@ -1654,19 +1658,33 @@ function SWEP:DoEffectLaunch(pos)
                     filter = owner
                 }
             )
-
             endPos = tr.HitPos
+            matType = tr.MatType
+            normal = tr.HitNormal
             shotDir = endPos - startPos
+            -- Override material type for zombies, it reports MAT_FLESH
+            if IsValid(tr.Entity) and tr.Entity:IsNPC() then
+                local hitClass = tr.Entity:GetClass()
+                if hitClass == "npc_zombie" or hitClass == "npc_fastzombie" or hitClass == "npc_poisonzombie" then
+                    matType = MAT_ALIENFLESH
+                end
+            end
         end
     else
         endPos = pos
         shotDir = endPos - startPos
     end
 
+    if normal == nil then
+        normal = shotDir:GetNormalized()
+    end
+
     shotDir:Normalize()
     local ef = EffectData()
     ef:SetOrigin(endPos)
     ef:SetEntity(self)
+    ef:SetMaterialIndex(matType)
+    ef:SetNormal(normal)
     if CLIENT and IsFirstTimePredicted() then
         util.Effect("lambda_physcannon_impact", ef)
     elseif SERVER then
@@ -1707,7 +1725,7 @@ local EFFECT_TABLE = {
     [EFFECT_PULLING] = SWEP.DoEffectPulling
 }
 
-function SWEP:DoEffect(effect, pos)
+function SWEP:DoEffect(effect, pos, matType, normal)
     if self.CurrentEffect == effect then return end
     if CLIENT then
         self:StartEffects()
@@ -1720,7 +1738,7 @@ function SWEP:DoEffect(effect, pos)
     end
 
     DbgPrint("Assigned Current Effect: " .. (EFFECT_NAME[effect] or "Unknown!") .. " (" .. effect .. ")")
-    EFFECT_TABLE[effect](self, pos)
+    EFFECT_TABLE[effect](self, pos, matType, normal)
 end
 
 function SWEP:DrawWorldModel()
