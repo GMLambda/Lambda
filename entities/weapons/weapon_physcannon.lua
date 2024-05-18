@@ -1639,9 +1639,7 @@ function SWEP:DoEffectLaunch(pos, matType, normal)
     local shotDir
     local controller = self:GetMotionController()
     local attachedEnt = controller:GetAttachedObject()
-    if matType == nil then
-        matType = 0
-    end
+
     if pos == nil then
 
         if attachedEnt ~= nil then
@@ -1677,6 +1675,10 @@ function SWEP:DoEffectLaunch(pos, matType, normal)
 
     if normal == nil then
         normal = shotDir:GetNormalized()
+    end
+
+    if matType == nil then
+        matType = 0
     end
 
     shotDir:Normalize()
