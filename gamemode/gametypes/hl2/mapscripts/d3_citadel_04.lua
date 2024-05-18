@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -44,10 +43,6 @@ function MAPSCRIPT:PostInit()
         end)
 
     end
-end
-
-function MAPSCRIPT:PostPlayerSpawn(ply)
-    --DbgPrint("PostPlayerSpawn")
 end
 
 return MAPSCRIPT
