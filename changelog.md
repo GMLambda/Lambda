@@ -1,4 +1,4 @@
-0.9.22 (in development)
+0.9.22
 - Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
 - Fixed: Level transition sometimes ignoring the transition volumes forcing players to spawn with the default loadout on the next map.
 - Fixed: ep1_citadel_00: Alyx stops the scripted scene if player falls off the cliff.
