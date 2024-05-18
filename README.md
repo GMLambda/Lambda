@@ -26,7 +26,7 @@ Half-Life 2
 - Fully supported.
 
 Half-Life 2: Episode 1
-- In development.
+- Fully supported.
 
 Half-Life 2: Episode 2
 - Planned 
@@ -35,7 +35,7 @@ Half-Life 2: Deathmatch
 - Fully supported.
 
 Half-Life 1/Source
- - Nope, but you can check [out this.](https://steamcommunity.com/sharedfiles/filedetails/?id=1590755372)
+- Experimental. 
 
 ## Campaign/Story Creation
 This is currently a work-in-progress, but will be documented soon. Here are the current specifications:
