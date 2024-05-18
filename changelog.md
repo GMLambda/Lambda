@@ -1,3 +1,5 @@
+0.9.23 (in development)
+
 0.9.22
 - Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
 - Fixed: Level transition sometimes ignoring the transition volumes forcing players to spawn with the default loadout on the next map.
