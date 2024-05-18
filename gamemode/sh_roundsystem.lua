@@ -202,7 +202,7 @@ if SERVER then
             local timeLeft = self.ScheduledRestartTime - curTime
             local timeLimit = self.ScheduledRestartTime - self.RestartStartTime
             local timeAlpha = timeLeft / timeLimit
-            local timeScale = math.max(0.005, timeAlpha * 0.2)
+            local timeScale = math.max(0.1, timeAlpha * 0.2)
             game.SetTimeScale(timeScale)
         end
     end
