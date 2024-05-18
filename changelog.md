@@ -5,6 +5,7 @@
 - Fixed: Killing mission critical NPCs causes the game end text to show up twice in some cases.
 - Fixed: d2_coast_07: Forcefield has a white square when returning from d2_coast_08.
 - Fixed: d2_coast_07: Wrong vehicle checkpoint when returning from d2_coast_08.
+- Fixed: d3_citadel_04: Added missing checkpoint for the elevator.
 
 0.9.21
 - Improved: lambda_gametype will now default to 'auto' and warns about a misconfiguration.

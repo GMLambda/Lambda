@@ -2,7 +2,6 @@ if SERVER then
     AddCSLuaFile()
 end
 
-local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -28,16 +27,22 @@ MAPSCRIPT.GlobalStates = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-        DbgPrint("YUP")
+        ents.WaitForEntityByName("citadel_trigger_elevatorride_up", function(elevatorTrigger)
+            elevatorTrigger:SetKeyValue("teamwait", "1")
 
-        ents.WaitForEntityByName("citadel_trigger_elevatorride_up", function(ent)
-            ent:SetKeyValue("teamwait", "1")
+            ents.WaitForEntityByName("citadel_train_lift01_1", function(elevator)
+                -- Checkpoint on elevator.
+                local pos = elevator:GetPos()
+                local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(262.721558, 803.862915, pos.z + 5), Angle(0, -180, 0))
+                checkpoint1:SetParent(elevator)
+
+                elevatorTrigger.OnTrigger = function(_, activator)
+                    GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
+                end
+            end)
         end)
-    end
-end
 
-function MAPSCRIPT:PostPlayerSpawn(ply)
-    --DbgPrint("PostPlayerSpawn")
+    end
 end
 
 return MAPSCRIPT
