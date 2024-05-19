@@ -1,4 +1,5 @@
 0.9.23 (in development)
+- Improved: Some minor performance improvements for level transitioning.
 - Fixed: Transitioning doors have sometimes the wrong rotation.
 
 0.9.22
