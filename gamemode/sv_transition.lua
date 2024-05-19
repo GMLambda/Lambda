@@ -525,11 +525,26 @@ function GM:TransitionObjects(landmarkEnt, objects, objectTable, playerTable, pl
     end)
 end
 
-local function CheckTouchingVolume(volume, obj)
-    if volume.GetTouchingObjects ~= nil then
+-- This caches the table in the volume entity to avoid creating new tables for each
+-- query.
+local function IsTouchingVolume(volume, obj)
+    if volume.GetTouchingObjects == nil then
+        return false
+    end
+    if volume.TouchingObjectsCache == nil then
+        volume.TouchingObjectsCache = {}
         local touching = volume:GetTouchingObjects()
-        if table.HasValue(touching, obj) == true then return true end
+        for _, v in pairs(touching) do
+            volume.TouchingObjectsCache[v] = true
         end
+    end
+    return volume.TouchingObjectsCache[obj] == true
+end
+
+local function CheckTouchingVolume(volume, obj)
+    return Profiled("CheckTouchingVolume", function()
+        -- Check if the volume registered the object as touching.
+        if IsTouchingVolume(volume, obj) == true then return true end
         -- Check against bounding box.
         local pos = obj:GetPos()
         local volPos = volume:GetPos()
@@ -538,6 +553,7 @@ local function CheckTouchingVolume(volume, obj)
 
         if pos:WithinAABox(volMins, volMaxs) == true then return true end
         return false
+    end)
 end
 
 function GM:InTransitionVolume(volumes, obj)
