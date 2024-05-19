@@ -229,8 +229,11 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
         local transition = false
         local caps = obj:ObjectCaps()
         local class = obj:GetClass()
+        local isVehicle = obj:IsVehicle()
+        local isNPC = obj:IsNPC()
+
         if TRANSITION_BLACKLIST[class] == true then return false end
-        if bit.band(caps, FCAP_DONT_SAVE) ~= 0 and obj:IsVehicle() == false then
+        if bit.band(caps, FCAP_DONT_SAVE) ~= 0 and isVehicle == false then
             DbgPrint("Ignoring object for transition (FCAP_DONT_SAVE): " .. tostring(obj))
             return false
         end
@@ -247,12 +250,12 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
             obj.ForceTransition = true
         end
 
-        if obj:IsNPC() and TRANSITION_ENFORCED_NPC[obj:GetClass()] == true then
+        if isNPC and TRANSITION_ENFORCED_NPC[class] == true then
             transition = true
             obj.ForceTransition = true
         end
 
-        if obj:IsVehicle() and transition == false then
+        if isVehicle and transition == false then
             local driver = obj:GetDriver()
             if IsValid(driver) and driver:IsPlayer() then
                 if table.HasValue(playersInTrigger, driver) == true then
