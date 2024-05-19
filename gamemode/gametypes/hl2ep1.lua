@@ -4,6 +4,7 @@ end
 
 local GAMETYPE = {}
 GAMETYPE.Name = "Half-Life 2: Episode 1"
+GAMETYPE.InternalName = "episodic"
 GAMETYPE.BaseGameType = "hl2"
 GAMETYPE.MapScript = {}
 GAMETYPE.MapList = {"ep1_citadel_00", "ep1_citadel_01", "ep1_citadel_02", "ep1_citadel_02b", "ep1_citadel_03", "ep1_citadel_04", "ep1_c17_00", "ep1_c17_00a", "ep1_c17_01", "ep1_c17_02", "ep1_c17_02b", "ep1_c17_02a", "ep1_c17_05", "ep1_c17_06"}
@@ -47,3 +48,14 @@ end
 hook.Add("LambdaLoadGameTypes", "HL2EP1GameType", function(gametypes)
     gametypes:Add("hl2ep1", GAMETYPE)
 end)
+
+if CLIENT then
+    surface.CreateFont("ClientTitleFont", {
+        font = "HL2EP2", -- EP1 font didn't work and they are the same anyways
+        size = util.ScreenScaleH(34),
+        weight = 0,
+        antialias = true,
+        additive = true,
+        custom = true
+    })
+end
