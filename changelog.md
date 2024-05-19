@@ -1,4 +1,5 @@
 0.9.23 (in development)
+- Fixed: Transitioning doors have sometimes the wrong rotation.
 
 0.9.22
 - Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
