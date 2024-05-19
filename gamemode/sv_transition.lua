@@ -744,8 +744,6 @@ function GM:CreateTransitionObjects()
 
     DbgPrint("Creating " .. tostring(objCount) .. " transition Objects...")
     local entityTransitionData = {}
-    ignoreKeyIndex = -1 -- ignoreKeyIndex + 1
-    DbgPrint("IgnoreKeyIndex: " .. ignoreKeyIndex)
     for _, data in pairs(objects) do
         if data.Ignored == true then continue end
         -- NOTE/FIXME: Observed different results on linux
@@ -773,7 +771,6 @@ function GM:CreateTransitionObjects()
         ent.SourceMap = data.SourceMap
         ent.ShouldDispatchSpawn = dispatchSpawn
         -- Do key values first because we might override a few things with setters.
-        local keyIndex = 0
         for k, v in pairs(data.KeyValues) do
             if KEYVALUE_BLACKLIST[k] == true then continue end
             v = tostring(v)
@@ -786,15 +783,9 @@ function GM:CreateTransitionObjects()
                 ent:SetKeyValue(k, v)
                 GAMEMODE:EntityKeyValue(ent, k, v)
             else
-                if keyIndex == ignoreKeyIndex then
-                    DbgPrint("IGNORED KEY: " .. k)
-                else
-                    ent:SetKeyValue(k, v)
-                    GAMEMODE:EntityKeyValue(ent, k, v)
-                end
+                ent:SetKeyValue(k, v)
+                GAMEMODE:EntityKeyValue(ent, k, v)
             end
-
-            keyIndex = keyIndex + 1
         end
 
         for k, v in pairs(data.EntityOutputs or {}) do
@@ -816,7 +807,6 @@ function GM:CreateTransitionObjects()
         ent:SetVelocity(data.Vel)
         if data.Mdl ~= nil then
             ent:SetModel(data.Mdl)
-            DbgPrint(data.Mdl)
         end
 
         ent:SetName(data.Name)
@@ -924,5 +914,4 @@ function GM:CreateTransitionObjects()
         end
     end
 
-    if ignoreKeyIndex ~= -1 then ignoreKeyIndex = ignoreKeyIndex + 1 end
 end
