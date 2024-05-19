@@ -82,7 +82,7 @@ function GM:HUDTick()
     local CHudHealth = (not wep:IsValid() or AskWeapon(ply, "CHudHealth", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudHealth") ~= false and not hideHud
     local CHudBattery = (not wep:IsValid() or AskWeapon(ply, "CHudBattery", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudBattery") ~= false and not hideHud
     local CHudSecondaryAmmo = (wep:IsValid() and AskWeapon(ply, "CHudSecondaryAmmo", wep) ~= false) and hook.Call("HUDShouldDraw", nil, "CHudSecondaryAmmo") ~= false and not hideHud
-    local drawHud = ply:IsSuitEquipped() and ply:Alive() and hidehud:GetBool() ~= true
+    local drawHud = ply:IsSuitEquipped() and ply:Alive() and hidehud:GetBool() ~= true and ply:GetViewEntity() == ply
 
     if IsValid(self.HUDSuit) then
         local vehicle = ply:GetVehicle()
