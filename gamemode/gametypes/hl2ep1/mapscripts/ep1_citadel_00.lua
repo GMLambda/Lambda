@@ -89,6 +89,19 @@ local VAN_SEATS = {
     }
 }
 
+-- Force remove the leftover base HL2 chapter message
+hook.Add("OnEntityCreated", "NoChapterMsg", function(ent)
+    util.RunNextFrame(function()
+        if IsValid(ent) == false then return end
+        if ent:GetClass() == "env_message" then
+            local msg = ent:GetInternalVariable("message")
+            if msg == "Chapter1_Title" then
+                ent:SetSaveValue("message", "")
+            end
+        end
+    end)
+end)
+
 local function CreateVanSeat(van, data, seats)
     local pos = van:LocalToWorld(data.P)
     local ang = van:LocalToWorldAngles(data.A)
@@ -151,6 +164,22 @@ function MAPSCRIPT:PostInit()
             "pvc_intro",
             function(ent)
                 ent:SetKeyValue("spawnflags", "412")
+            end
+        )
+
+        -- The starting env_fade is kinda short
+        ents.WaitForEntityByName(
+            "fade_black_1_1",
+            function(ent)
+                ent:SetKeyValue("holdtime", "13")
+            end
+        )
+
+        -- Vortigaunt on right side in GMan's intro has it's sequence set way too late.
+        ents.WaitForEntityByName(
+            "relay_gman_start",
+            function(ent)
+                ent:Fire("AddOutput", "OnTrigger vort_gordon_grab2,SetSequence,gordon_grab_2_prei,0.0,-1")
             end
         )
 

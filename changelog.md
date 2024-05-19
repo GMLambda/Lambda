@@ -1,5 +1,7 @@
 0.9.23 (in development)
 - Improved: Some minor performance improvements for level transitioning.
+- Improved: Implemented "ShowLogo" input to env_message entity.
+- Improved: ep1_citadel_00: Fixed T-pose on vortigaunt and remove leftover chapter messages.
 - Fixed: Transitioning doors have sometimes the wrong rotation.
 
 0.9.22

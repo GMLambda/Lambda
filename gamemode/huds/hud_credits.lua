@@ -4,11 +4,13 @@ CREDITS_TYPE_NONE = 0
 CREDITS_TYPE_INTRO = 1
 CREDITS_TYPE_OUTRO = 2
 CREDITS_TYPE_PARAMS = 3
+CREDITS_TYPE_LOGO = 4
 
 local CREDITS_SECTION_NAME = {
     [CREDITS_TYPE_INTRO] = "IntroCreditsNames",
     [CREDITS_TYPE_OUTRO] = "OutroCreditsNames",
-    [CREDITS_TYPE_PARAMS] = "CreditsParams"
+    [CREDITS_TYPE_PARAMS] = "CreditsParams",
+    [CREDITS_TYPE_LOGO] = "CreditsParams"
 }
 
 local function CreateFonts()
@@ -118,6 +120,15 @@ function PANEL:ShowCredits(credits, params, creditsType, startTime, finishTime)
             ts = ts + pauseBetweenWaves
             i = i + len
         end
+    elseif creditsType == CREDITS_TYPE_LOGO then
+        self.startTime = startTime
+
+        -- Logo fonts are also predefined in game code
+        self.logoFont = "WeaponIcons"
+        local episodic = GetConVar("hl2_episodic")
+        if episodic then
+            self.logoFont = "ClientTitleFont"
+        end
     end
 
     self.CreditsType = creditsType
@@ -139,6 +150,53 @@ function PANEL:ComputeSize()
         }
 
         self.TotalHeight = self.TotalHeight + h + ROW_SPACING
+    end
+end
+
+function PANEL:PaintLogo(width, height)
+    local elapsed = CurTime() - self.startTime
+    local fadeInTime = self.Params["fadeintime"] or 1.0
+    local fadeOutTime = self.Params["fadeouttime"] or 1.0
+    local logoTime = self.Params["logotime"] or 1.0
+    local logo = self.Params["logo"]
+    local logo2 = self.Params["logo2"]
+    local font = self.logoFont
+    local color = self.Params["color"]
+    local alpha = 0
+
+    if elapsed < fadeInTime then
+        alpha = elapsed / fadeInTime
+    elseif elapsed > fadeInTime and elapsed < (fadeInTime + logoTime) then
+        alpha = 1
+    elseif elapsed >= fadeInTime + logoTime then
+        local fadeElapsed = elapsed - fadeInTime - logoTime
+        alpha = 1.0 - (fadeElapsed / fadeOutTime)
+    end
+
+    surface.SetFont(font)
+    local lW,lH = surface.GetTextSize(logo)
+    surface.SetTextPos(ScrW() / 2 - (lW / 2) , ScrH() / 2 - lH)
+
+    if color ~= nil then
+        surface.SetTextColor(color.r, color.g, color.b, color.a * alpha)
+    else
+        surface.SetTextColor(255, 255, 255)
+    end
+
+    surface.DrawText(logo)
+
+    if logo2 ~= nil then
+        surface.SetFont(font)
+        local l2W, l2H = surface.GetTextSize(logo2)
+        surface.SetTextPos(ScrW() / 2 - (l2W / 2), ScrH() / 2 - lH + l2H)
+
+        if color ~= nil then
+            surface.SetTextColor(color.r, color.g, color.b, color.a * alpha)
+        else
+            surface.SetTextColor(255, 255, 255)
+        end
+
+        surface.DrawText(logo2)
     end
 end
 
@@ -229,6 +287,8 @@ function PANEL:Paint(width, height)
         self:PaintIntroCredits(width, height)
     elseif self.CreditsType == CREDITS_TYPE_OUTRO then
         self:PaintOutroCredits(width, height)
+    elseif self.CreditsType == CREDITS_TYPE_LOGO then
+        self:PaintLogo(width, height)
     end
 end
 

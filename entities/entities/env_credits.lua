@@ -11,11 +11,13 @@ CREDITS_TYPE_NONE = 0
 CREDITS_TYPE_INTRO = 1
 CREDITS_TYPE_OUTRO = 2
 CREDITS_TYPE_PARAMS = 3
+CREDITS_TYPE_LOGO = 4
 
 local CREDITS_SECTION_NAME = {
     [CREDITS_TYPE_INTRO] = "IntroCreditsNames",
     [CREDITS_TYPE_OUTRO] = "OutroCreditsNames",
-    [CREDITS_TYPE_PARAMS] = "CreditsParams"
+    [CREDITS_TYPE_PARAMS] = "CreditsParams",
+    [CREDITS_TYPE_LOGO] = "CreditsParams"
 }
 
 local function GetCreditsSection(tab, key)
@@ -30,8 +32,10 @@ function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
     DbgPrint(self, "PreInitialize")
 
+    local gamepath = GAMEMODE:GetGameTypeData("InternalName") or "hl2"
+
     self:SetupNWVar("CreditsFile", "string", {
-        Default = "hl2:scripts/credits.txt",
+        Default = gamepath .. ":scripts/credits.txt",
         KeyValue = "CreditsFile",
         OnChange = self.CreditsFileChanged
     })
@@ -145,6 +149,12 @@ function ENT:GetCreditsLength(creditsType)
         creditsLength = creditsLength + entryLength
     elseif creditsType == CREDITS_TYPE_OUTRO then
         creditsLength = self.Params["scrolltime"] or 158
+    elseif creditsType == CREDITS_TYPE_LOGO then
+        local fadeInTime = self.Params["fadeintime"] or 1.0
+        local fadeOutTime = self.Params["fadeouttime"] or 1.0
+        local logoTime = self.Params["logotime"] or 1.0
+
+        creditsLength = fadeInTime + logoTime + fadeOutTime
     end
 
     return creditsLength
@@ -208,6 +218,14 @@ function ENT:AcceptInput(fn, data, activator, caller)
     BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
 
+function ENT:ShowLogo()
+    if CLIENT then return end
+    local length = self:GetCreditsLength(CREDITS_TYPE_LOGO)
+    self:SetNWVar("CreditsStartTime", CurTime())
+    self:SetNWVar("CreditsFinishTime", CurTime() + length)
+    self:SetNWVar("CreditsType", CREDITS_TYPE_LOGO)
+end
+
 function ENT:RollCredits()
     if CLIENT then return end
     local length = self:GetCreditsLength(CREDITS_TYPE_INTRO)
@@ -250,6 +268,13 @@ end
 
 function ENT:UpdateTransmitState()
     return TRANSMIT_ALWAYS
+end
+
+function TriggerLogo()
+    for k, v in pairs(ents.FindByClass("env_credits")) do
+        v:Fire("ShowLogo")
+        break
+    end
 end
 
 function TriggerCredits()
