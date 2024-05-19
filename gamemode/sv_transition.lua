@@ -810,7 +810,9 @@ function GM:CreateTransitionObjects()
         end
 
         ent:SetPos(data.Pos)
-        ent:SetAngles(data.Ang)
+        if data.Type ~= ENT_TYPE_DOOR then
+            ent:SetAngles(data.Ang)
+        end
         ent:SetVelocity(data.Vel)
         if data.Mdl ~= nil then
             ent:SetModel(data.Mdl)
