@@ -3,6 +3,7 @@
 - Improved: Implemented "ShowLogo" input to env_message entity.
 - Improved: ep1_citadel_00: Fixed T-pose on vortigaunt and remove leftover chapter messages.
 - Fixed: Transitioning doors have sometimes the wrong rotation.
+- Fixed: HUD is now hidden when point_viewcontrol takes control.
 
 0.9.22
 - Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
