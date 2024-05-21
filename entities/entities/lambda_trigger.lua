@@ -299,6 +299,7 @@ if SERVER then
         self:SetNWVar("Disabled", true)
         self:RemoveEFlags(EFL_CHECK_UNTOUCH)
         self.DisabledTouchingObjects = self.TouchingObjects or {}
+        self.TouchingObjects = {}
     end
 
     function ENT:IsDisabled()
