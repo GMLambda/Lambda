@@ -25,6 +25,71 @@ if SERVER then
         end
     end
 
+    local function BuildTeleportList(ent, teleportList)
+        local entry = {
+            Entity = ent,
+            Pos = ent:GetPos(),
+            Ang = ent:GetAngles(),
+        }
+        table.insert(teleportList, entry)
+
+        local children = ent:GetChildren()
+        for _, child in pairs(children) do
+            BuildTeleportList(child, teleportList)
+        end
+    end
+
+    local function TeleportEntity(sourceEnt, entry, newPos, newAng, newVel)
+
+        local teleportEnt = entry.Entity
+
+        local solidFlags = teleportEnt:GetSolidFlags()
+        teleportEnt:SetSolidFlags(FSOLID_NOT_SOLID)
+
+        if sourceEnt == teleportEnt then
+            teleportEnt:SetLocalAngles(newAng)
+            teleportEnt:SetSaveValue("m_vecAbsVelocity", newVel)
+            teleportEnt:SetSaveValue("basevelocity", Vector(0,0,0))
+            -- NOTE: This actually calls CBaseEntity::SetLocalVelocity which is what we want.
+            teleportEnt:SetAbsVelocity(entry.Pos)
+            teleportEnt:SetPos(newPos)
+        else
+            -- TODO: Re-create this functionality or beg rubat to add it to GMod.
+            if false then
+                teleportEnt:CalculcateAbsolutePosition()
+            end
+        end
+
+        local physObj = teleportEnt:GetPhysicsObject()
+        if IsValid(physObj) then
+            physObj:SetVelocity(newVel)
+
+            local ang = teleportEnt:GetAngles()
+            if teleportEnt:IsPlayer() or teleportEnt:GetSolid() == SOLID_BBOX then
+                ang = Angle(0, 0, 0)
+            end
+
+            physObj:SetPos(teleportEnt:GetPos())
+            physObj:SetAngles(ang)
+        end
+
+        teleportEnt:SetSolidFlags(solidFlags)
+    end
+
+    local function TeleportObject(ent, newPos, newAng, newVel)
+        local teleportList = {}
+        BuildTeleportList(ent, teleportList)
+
+        for _, entry in pairs(teleportList) do
+            TeleportEntity(ent, entry, newPos, newAng, newVel)
+        end
+
+        for _, entry in pairs(teleportList) do
+            local teleportEnt = entry.Entity
+            teleportEnt:CollisionRulesChanged()
+        end
+    end
+
     function ENT:Touch(ent)
         if self:IsDisabled() == true then return end
         if self:PassesTriggerFilters(ent) == false then return end
@@ -74,9 +139,7 @@ if SERVER then
                 self.CheckpointSet = true
             end
         else
-            ent:SetPos(tmp)
-            ent:SetVelocity(vel)
-            ent:SetAngles(ang)
+            TeleportObject(ent, tmp, ang, vel)
         end
     end
 end
