@@ -8,7 +8,6 @@ MAPSCRIPT.PlayersLocked = false
 
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {},
-    --"weapon_physcannon",
     Ammo = {},
     Armor = 60,
     HEV = true
@@ -19,15 +18,10 @@ MAPSCRIPT.InputFilters = {
 }
 
 MAPSCRIPT.EntityFilterByClass = {
-    ["env_fade"] = true
 }
 
 MAPSCRIPT.EntityFilterByName = {
-    ["sprite_breen_blast_1"] = true, -- Visible thru walls.
     ["citadel_template_combinewall_start1"] = true,
-    ["blackout"] = true,
-    ["logic_fade_view"] = true,
-    ["teleport_breen_blast_1"] = true,
     ["trigger_gameover_toplevelfallmessage"] = true,
     ["trigger_gameover_toplevelfallhurt"] = true,
     ["relay_riftcleanup"] = true
@@ -121,35 +115,35 @@ function MAPSCRIPT:PostInit()
             local podParent = ent:GetParent()
             local parentAttachment = ent:GetParentAttachment()
             DbgPrint("Pod parent: " .. tostring(podParent))
-            local pos = ent:GetPos()
-            local ang = ent:GetAngles()
-            local mdl = ent:GetModel()
+
+            local podPos = ent:GetPos()
+            local podAng = ent:GetAngles()
+            local podMdl = ent:GetModel()
             table.insert(self.Pods, ent)
 
-            -- Insert the ones we transitioned.
-            for _, v in pairs(ents.FindByName("lambda_pod_*")) do
-                DbgPrint("Merging pod " .. tostring(v) .. " with " .. tostring(ent))
-                v:SetPos(ent:GetPos())
-                v:SetAngles(ent:GetAngles())
-                v:SetParent(ent)
-                v:SetName("pod")
-                table.insert(self.Pods, v)
-            end
-
-            -- Create pods for empty player slots.
-            for i = 1, game.MaxPlayers() do
-                local pod = ents.Create(ent:GetClass())
+            local function initPod(pod)
                 pod:SetNotSolid(true)
-                pod:SetPos(pos)
-                pod:SetAngles(ang)
-                pod:SetModel(mdl)
-                pod:SetAngles(ang)
+                pod:SetPos(podPos)
+                pod:SetAngles(podAng)
+                pod:SetModel(podMdl)
                 pod:SetKeyValue("vehiclescript", "scripts/vehicles/prisoner_podTooLoud.txt")
                 pod:DrawShadow(false)
                 pod:SetNoDraw(true)
                 pod:SetName("pod")
                 pod:SetParent(podParent, parentAttachment)
-                pod:SetMoveType(MOVETYPE_NONE)
+            end
+
+            -- Insert the ones we transitioned.
+            for _, v in pairs(ents.FindByName("lambda_pod_*")) do
+                DbgPrint("Merging pod " .. tostring(v) .. " with " .. tostring(ent))
+                initPod(v)
+                table.insert(self.Pods, v)
+            end
+
+            -- Create pods for empty player slots.
+            for i = 1, game.MaxPlayers() - #self.Pods do
+                local pod = ents.Create(ent:GetClass())
+                initPod(pod)
                 pod:Spawn()
                 pod:Activate()
                 table.insert(self.Pods, pod)
@@ -162,11 +156,6 @@ function MAPSCRIPT:PostInit()
         podExitTeleport:SetPos(Vector(-1875, 887, 627))
         podExitTeleport:SetAngles(Angle(0, 265, 0))
         podExitTeleport:Spawn()
-
-        ents.WaitForEntityByName("logic_breenblast_2", function(ent)
-            ent:Fire("AddOutput", "OnTrigger blackout_viewcontroller,Disable,,0.0,-1")
-            ent:Fire("AddOutput", "OnTrigger lambda_pod_teleport,Teleport,,1.25,-1")
-        end)
 
         ents.WaitForEntityByName("blackout_viewcontroller", function(ent)
             ent:SetKeyValue("spawnflags", "188")
@@ -199,6 +188,39 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("credits", function(ent)
             ent:Fire("AddOutput", "OnCreditsDone lambda_changelevel,ChangeLevel,,10,-1")
+        end)
+
+        -- Increase the delay for the pod exit as it looks otherwise strange.
+        ents.WaitForEntityByName("logic_playerExitPod", function(ent)
+            ent:ClearAllOutputs()
+            ent:Fire("AddOutput", "OnTrigger pod,Open,,0.0,-1")
+            ent:Fire("AddOutput", "OnTrigger pod,Unlock,,2.65,-1")
+            ent:Fire("AddOutput", "OnTrigger pod,ExitVehicle,,2.75,-1")
+        end)
+
+        -- Replace physgun_soldier with the weapon_physcannon.
+        local function ReplacePhyscannon(ent)
+            local newGun = ents.Create("weapon_physcannon")
+            -- Make sure no player can ever pick this up.
+            newGun.CreatedForPlayer = newGun
+            newGun:SetPos(ent:GetPos())
+            newGun:SetAngles(ent:GetAngles())
+            newGun:SetSolid(SOLID_NONE)
+            newGun:SetSolidFlags(FSOLID_NOT_SOLID)
+            newGun:SetParent(ent)
+            newGun:SetTrigger(false)
+            newGun:Spawn()
+            newGun:DrawShadow(false)
+            ent:SetRenderMode(RENDERMODE_NONE)
+        end
+
+        ents.WaitForEntityByName("physgun_soldier", function(ent)
+            ReplacePhyscannon(ent)
+        end)
+
+        -- Replace the physgun_breen with the weapon_physcannon.
+        ents.WaitForEntityByName("physgun_breen", function(ent)
+            ReplacePhyscannon(ent)
         end)
     end
 end
