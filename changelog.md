@@ -3,6 +3,7 @@
 - Improved: Implemented "ShowLogo" input to env_message entity.
 - Improved: ep1_citadel_00: Fixed T-pose on vortigaunt and remove leftover chapter messages.
 - Improved: d3_breen_01: Get the functionality closer to the original.
+- Improved: Add a button in the settings menu to revert colors.
 - Fixed: Transitioning doors have sometimes the wrong rotation.
 - Fixed: HUD is now hidden when point_viewcontrol takes control.
 - Fixed: Triggers not firing outputs when they are disabled and then enabled again while entities are touching it.

@@ -207,6 +207,14 @@ end
 vgui.Register("LambdaFXPanel", PANEL_FX, "DPanel")
 local PANEL_COLOR = {}
 
+local function vecStringToColor(str)
+    local color = string.Explode(" ", str)
+    local r = tonumber(color[1] or 0)
+    local g = tonumber(color[2] or 0)
+    local b = tonumber(color[3] or 0)
+    return Color(r * 255, g * 255, b * 255)
+end
+
 function PANEL_COLOR:Init()
     local colOptions = {
         ["ply"] = "Player",
@@ -214,9 +222,16 @@ function PANEL_COLOR:Init()
         ["hudBG"] = "HUD Background",
         ["hudTXT"] = "HUD Text"
     }
+    local colOrder = {
+        "ply",
+        "wep",
+        "hudBG",
+        "hudTXT"
+    }
 
     local colTabs = {}
     local colMixers = {}
+    local revertBts = {}
 
     local function strColorToVector(str)
         local color = string.Explode(" ", str)
@@ -243,15 +258,29 @@ function PANEL_COLOR:Init()
     local colSheet = self:Add("DPropertySheet")
     colSheet:Dock(FILL)
 
-    for k, v in pairs(colOptions) do
-        colTabs[k] = vgui.Create("DPanel", colSheet)
-        colTabs[k]:SetPaintBackground(false)
-        colMixers[k] = vgui.Create("DColorMixer", colTabs[k])
-        colMixers[k]:SetPos(0, 0)
-        colMixers[k]:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
-        colMixers[k]:SetAlphaBar(false)
-        colMixers[k]:SetPalette(false)
-        colSheet:AddSheet(string.upper(v), colTabs[k])
+    for _, colName in pairs(colOrder) do
+        local k = colName
+        local v = colOptions[k]
+
+        local colTab = vgui.Create("DPanel", colSheet)
+        colTab:SetPaintBackground(false)
+        colTabs[k] = colTab
+
+        local colMixer = vgui.Create("DColorMixer", colTab)
+        colMixer:SetPos(0, 0)
+        colMixer:SetSize(COLOR_PANEL_W, COLOR_PANEL_H)
+        colMixer:SetAlphaBar(false)
+        colMixer:SetPalette(false)
+        colMixers[k] = colMixer
+
+        local colReset = vgui.Create("DImageButton", colTab)
+        colReset:SetPos(COLOR_PANEL_W - 50, 72)
+        colReset:SetSize(16, 16)
+        colReset:SetImage("icon16/arrow_undo.png")
+        colReset:SetTooltip("Revert color to default")
+        revertBts[k] = colReset
+
+        colSheet:AddSheet(string.upper(v), colTab)
     end
 
     for k, v in pairs(colMixers) do
@@ -267,6 +296,30 @@ function PANEL_COLOR:Init()
             else
                 self:UpdateSettings(k, v:GetVector())
             end
+        end
+    end
+
+    for k, v in pairs(revertBts) do
+        v.DoClick = function()
+            local col
+            if k == "hudTXT" then
+                lambda_hud_text_color:Revert()
+                col = strColorToVector(lambda_hud_text_color:GetString())
+            elseif k == "hudBG" then
+                lambda_hud_bg_color:Revert()
+                col = strColorToVector(lambda_hud_bg_color:GetString())
+            elseif k == "wep" then
+                lambda_weapon_color:Revert()
+                col = vecStringToColor(lambda_weapon_color:GetString())
+            elseif k == "ply" then
+                lambda_player_color:Revert()
+                col = vecStringToColor(lambda_player_color:GetString())
+            end
+            colMixers[k]:SetColor(col)
+            if k == "ply" or k == "wep" then
+                col = Vector(col.r / 255, col.g / 255, col.b / 255)
+            end
+            self:UpdateSettings(k, col)
         end
     end
 end
