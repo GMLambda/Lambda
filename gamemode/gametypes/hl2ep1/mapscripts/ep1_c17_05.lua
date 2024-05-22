@@ -44,11 +44,21 @@ MAPSCRIPT.Checkpoints = {}
 function MAPSCRIPT:PostInit()
     -- Force the NPCs to follow the player. Squads in Garry's Mod are a bit broken, the replacement
     -- lambda_player_follow entity is a bit more reliable but also quite hacky.
-    local playerFollow = ents.Create("lambda_player_follow")
+    local playerFollow = ents.Create("ai_goal_follow")
     playerFollow:SetName("lambda_follow_player")
     playerFollow:SetKeyValue("actor", "citizen_refugees*")
+    playerFollow:SetKeyValue("goal", "!player")
+    playerFollow:SetKeyValue("Formation", "0")
+    playerFollow:SetKeyValue("MaximumState", "1")
+    playerFollow:SetKeyValue("StartActive", "0")
+    playerFollow:SetKeyValue("SearchType", "0")
     playerFollow:Spawn()
-    playerFollow:Activate()
+
+    ents.WaitForEntityByName("relay_pickup_citizens", function(ent)
+        ent:Fire("AddOutput", "OnTrigger lambda_follow_player,Deactivate,,0,-1")
+        ent:Fire("AddOutput", "OnTrigger lambda_follow_player,Activate,,0.01,-1")
+    end)
+
     -- Alyx should wait for everyone at the end before closing
     ents.WaitForEntityByName(
         "counter_everyone_in_place_for_barney_goodbye",
@@ -69,7 +79,7 @@ function MAPSCRIPT:PostInit()
     ents.WaitForEntityByName(
         "rallypoint_barney_lasttrain",
         function(ent)
-            ent:Fire("AddOutput", "OnArrival lambda_close_doors,Enable,,0,-1", "0.0")
+            ent:Fire("AddOutput", "OnArrival lambda_close_doors,Enable,,0,-1")
         end
     )
 
