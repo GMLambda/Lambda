@@ -21,6 +21,7 @@ if SERVER then
         self:SetKeyValue("teamwait", "1")
         self:SetKeyValue("timeout", timeout)
         self:SetKeyValue("lockplayers", "1")
+        self:SetKeyValue("timeoutteleport", "0")
         self:SetNWVar("DisableEndTouch", true)
         self:AddSpawnFlags(SF_TRIGGER_ALLOW_CLIENTS)
         BaseClass.Initialize(self)
