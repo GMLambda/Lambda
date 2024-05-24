@@ -10,6 +10,7 @@
 - Fixed: HUD is now hidden when point_viewcontrol takes control.
 - Fixed: Triggers not firing outputs when they are disabled and then enabled again while entities are touching it.
 - Fixed: trigger_teleport not working properly with flying NPC's.
+- Fixed: ep1_c17_06: Add a fail-safe timer to ensure Barney will board the train.
 
 0.9.22
 - Improved: Weapon selection weights, this should improve selecting the next weapon when current one is empty.
