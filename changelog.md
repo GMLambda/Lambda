@@ -5,6 +5,7 @@
 - Improved: d3_breen_01: Get the functionality closer to the original.
 - Improved: Add a button in the settings menu to revert colors.
 - Improved: ep1_c17_05: Escorting the NPCs should be a bit more reliable now.
+- Improved: Players that didn't make the changelevel trigger will not be forcefully teleported, they get the default spawn next map.
 - Fixed: Transitioning doors have sometimes the wrong rotation.
 - Fixed: HUD is now hidden when point_viewcontrol takes control.
 - Fixed: Triggers not firing outputs when they are disabled and then enabled again while entities are touching it.
