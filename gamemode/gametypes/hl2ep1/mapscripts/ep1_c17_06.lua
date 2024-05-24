@@ -102,10 +102,23 @@ function MAPSCRIPT:PostInit()
         end
     )
 
+    -- Setup a timeout in case NPCs get stuck, seems to happen.
+    local timeoutEnt = ents.Create("logic_timer")
+    timeoutEnt:SetKeyValue("UseRandomTime", "0")
+    timeoutEnt:SetKeyValue("RefireTime", "5")
+    timeoutEnt:SetKeyValue("StartDisabled", "1")
+    timeoutEnt:Fire("AddOutput", "OnTimer counter_goodbyescene,Add,999,0,-1", 0)
+    timeoutEnt:Fire("AddOutput", "OnTimer !self,Kill,,0.01,-1", 0)
+    timeoutEnt:SetName("logic_timer_goodbyescene")
+    timeoutEnt:Spawn()
+
     local goodbyeCounter = ents.FindFirstByName("counter_goodbyescene")
     ents.WaitForEntityByName(
         "relay_barney_leaves",
         function(relayEnt)
+
+            relayEnt:Fire("AddOutput", "OnTrigger logic_timer_goodbyescene,Enable,,0,-1", 0)
+
             local counter = 0
             local function CreateSS(entName, index)
                 local ss = ents.Create("scripted_sequence")
@@ -127,7 +140,24 @@ function MAPSCRIPT:PostInit()
                 goodbyeCounter:SetKeyValue("max", tostring(counter + 2))
                 relayEnt:Fire("AddOutput", "OnTrigger ss_cit_board" .. tostring(counter) .. ",BeginSequence,," .. tostring(counter + 2) .. ",-1", 0)
                 counter = counter + 1
+
+                -- Give each NPC some time to board before the fail safe kicks in.
+                timeoutEnt:SetKeyValue("RefireTime", tostring(counter * 1.5))
             end
+
+            ents.WaitForEntityByName(
+                "citizen_refugees_1",
+                function(ent)
+                    HandleCitizen(ent)
+                end
+            )
+
+            ents.WaitForEntityByName(
+                "citizen_refugees_2",
+                function(ent)
+                    HandleCitizen(ent)
+                end
+            )
 
             ents.WaitForEntityByName(
                 "lambda_citizen_refugees_1",
