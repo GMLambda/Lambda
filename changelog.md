@@ -1,4 +1,5 @@
 0.9.25 (in development)
+- Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
 
 0.9.24
 - Fixed: trigger_multiple ignoring the delay time.

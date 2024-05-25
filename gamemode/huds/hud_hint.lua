@@ -136,6 +136,19 @@ function GM:UpdateHintHistory()
 end
 
 function GM:AddHint(text, time)
+    -- Check if the hint already exists and just renew it.
+    for _, v in pairs(self.HintHistory) do
+        if v.text == string.upper(text) then
+            v.elapsed = 0
+            v.timescale = 1
+            v.holdtime = time
+            v.fadein = 0.0
+            v.fadeout = 0.03
+            self:UpdateHintHistory(false)
+            return
+        end
+    end
+    -- Insert a new one.
     local count = #self.HintHistory
     local hint = {}
     hint.time = CurTime()
