@@ -1,3 +1,5 @@
+0.9.24 (in development)
+
 0.9.23
 - Improved: Some minor performance improvements for level transitioning.
 - Improved: Implemented "ShowLogo" input to env_message entity.
