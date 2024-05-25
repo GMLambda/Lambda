@@ -1,4 +1,4 @@
-0.9.23 (in development)
+0.9.23
 - Improved: Some minor performance improvements for level transitioning.
 - Improved: Implemented "ShowLogo" input to env_message entity.
 - Improved: ep1_citadel_00: Fixed T-pose on vortigaunt and remove leftover chapter messages.
