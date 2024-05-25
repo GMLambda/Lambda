@@ -1,4 +1,4 @@
-0.9.24 (in development)
+0.9.24
 - Fixed: trigger_multiple ignoring the delay time.
 
 0.9.23
