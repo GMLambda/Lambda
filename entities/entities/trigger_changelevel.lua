@@ -10,6 +10,7 @@ if SERVER then
 
     function ENT:PreInitialize()
         BaseClass.PreInitialize(self)
+        BaseClass.SetWaitTime(self, -1) -- Remove once triggered.
         self:SetInputFunction("ChangeLevel", self.InputChangeLevel)
         self.TargetMap = ""
         self.Landmark = ""
@@ -17,6 +18,8 @@ if SERVER then
     end
 
     function ENT:Initialize()
+        BaseClass.Initialize(self)
+
         local timeout = GAMEMODE:GetSetting("map_change_timeout")
         self:SetKeyValue("teamwait", "1")
         self:SetKeyValue("timeout", timeout)
@@ -24,8 +27,6 @@ if SERVER then
         self:SetKeyValue("timeoutteleport", "0")
         self:SetNWVar("DisableEndTouch", true)
         self:AddSpawnFlags(SF_TRIGGER_ALLOW_CLIENTS)
-        BaseClass.Initialize(self)
-        BaseClass.SetWaitTime(self, -1) -- Remove once triggered.
     end
 
     function ENT:KeyValue(key, val)

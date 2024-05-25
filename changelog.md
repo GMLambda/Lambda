@@ -1,4 +1,5 @@
 0.9.24 (in development)
+- Fixed: trigger_multiple ignoring the delay time.
 
 0.9.23
 - Improved: Some minor performance improvements for level transitioning.

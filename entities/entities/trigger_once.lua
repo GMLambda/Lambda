@@ -3,9 +3,8 @@ if SERVER then
     ENT.Type = "brush"
     DEFINE_BASECLASS("lambda_trigger")
 
-    function ENT:Initialize()
-        --DbgPrint(self, "trigger_once:Initialize")
-        BaseClass.Initialize(self)
+    function ENT:PreInitialize()
+        BaseClass.PreInitialize(self)
         BaseClass.SetWaitTime(self, -1) -- Remove once triggered.
     end
 end
