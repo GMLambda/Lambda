@@ -1,0 +1,73 @@
+// envmaptint_fix
+"LightmappedGeneric"
+{
+	"LightmappedGeneric_DX6"
+	{
+		"$fallbackmaterial" "nature/toxicslime002a_dx70"
+	}
+
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ 1.00 .89 .80 ]"
+	"$envmapcontrast" "1"
+
+	"$surfaceprop" "slime"
+	"%keywords" "wasteland"
+	"%compileSlime" 1
+
+	"$bottommaterial" "nature/toxicslime002a_beneath"
+
+	"$fogenable" 1
+	"$fogcolor" "{29 199 39}"
+	"$fogstart" 1.00
+	"$fogend" 330.00
+    
+    $color "[0.9 2.2 0.5]"
+    $selfillum 1
+    
+	// Use scrolling animated textures on DX9 hardware
+	">=DX90"
+	{
+		"$basetexture" "Nature/toxicslime002a"
+		"$bumpmap"  "dev/waterA_normal" 		// These two slide...
+		"$bumpmap2" "dev/waterB_normal"			// ...against each other
+
+		"$bumpmask" "Nature/toxicslime002a_normal"	// This holds still and alpha masks to get final normal
+
+		"Proxies"
+		{
+			"TextureScroll"
+			{
+				"texturescrollvar" "$bumptransform"
+				"texturescrollrate" 0.03
+				"texturescrollangle" 100.00
+				"texturescale" 2.8
+			}
+			"TextureScroll"
+			{
+				"texturescrollvar" "$bumptransform2"
+				"texturescrollrate" 0.03
+				"texturescrollangle" -36.00
+				"texturescale" 3.4
+			}
+		}
+	}
+
+	// Use animated texture on Pre DX9 hardware
+	"<DX90"
+	{
+		"$basetexture" "Nature/toxicslime002a"
+		"$bumpmap" "Nature/slime_normal"
+		"$normalmapalphaenvmapmask" "1"
+
+		"Proxies"
+		{
+			"AnimatedTexture"
+			{
+				"animatedtexturevar" "$bumpmap"
+				"animatedtextureframenumvar" "$bumpframe"
+				"animatedtextureframerate" 21.00
+			}
+		}
+	}
+
+}

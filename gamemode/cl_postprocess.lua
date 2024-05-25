@@ -47,18 +47,6 @@ end
 
 local LAST_GEIGER_RANGE = 1000
 
-local RADIATION_COLOR_MOD = {
-    ["$pp_colour_addr"] = 0,
-    ["$pp_colour_addg"] = 0,
-    ["$pp_colour_addb"] = 0,
-    ["$pp_colour_brightness"] = 0,
-    ["$pp_colour_contrast"] = 1,
-    ["$pp_colour_colour"] = 1.0,
-    ["$pp_colour_mulr"] = 0,
-    ["$pp_colour_mulg"] = 0,
-    ["$pp_colour_mulb"] = 0
-}
-
 function GM:RenderRadiationEffects(ply)
     GenerateFilmGrain()
     local curGeigerRange = math.Clamp(ply:GetGeigerRange() * 4, 0, 1000)
@@ -69,8 +57,6 @@ function GM:RenderRadiationEffects(ply)
     GRAIN_MAT:SetFloat("$alpha", iv)
     render.SetMaterial(GRAIN_MAT)
     render.DrawScreenQuad()
-    RADIATION_COLOR_MOD["$pp_colour_mulg"] = iv * 3
-    DrawColorModify(RADIATION_COLOR_MOD)
 end
 
 function GM:RenderSprintEffect(ply)
