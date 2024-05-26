@@ -6,7 +6,7 @@ DEFINE_BASECLASS("lambda_entity")
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
     DbgPrint(self, "PreInitialize")
-    self:SetInputFunction("RunLua", self.OnRunLua)
+    self:SetInputFunction("RunLua", self.InputRunLua)
 end
 
 function ENT:Initialize()
@@ -14,7 +14,16 @@ function ENT:Initialize()
     DbgPrint(self, "Initialize")
 end
 
+function ENT:InputRunLua(data, activator, caller)
+    if self.OnRunLua ~= nil then
+        self:OnRunLua(data, activator, caller)
+    else
+        DbgPrint(self, "No OnRunLua function defined.")
+    end
+end
+
 function ENT:OnRunLua(data, activator, caller)
+    -- Override this function.
 end
 
 function ENT:UpdateTransmitState()
