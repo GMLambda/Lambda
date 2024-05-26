@@ -1,5 +1,6 @@
 0.9.25 (in development)
 - Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
+- Fixed: ep1_c17_02a: Alyx not picking up a shotgun.
 
 0.9.24
 - Fixed: trigger_multiple ignoring the delay time.
