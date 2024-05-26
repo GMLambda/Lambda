@@ -1,7 +1,4 @@
-if SERVER then
-    AddCSLuaFile()
-end
-
+if SERVER then AddCSLuaFile() end
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {"weapon_lambda_medkit", "weapon_crowbar", "weapon_physcannon", "weapon_pistol", "weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_frag", "weapon_ar2", "weapon_crossbow"},
@@ -76,14 +73,31 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    if SERVER then
-        ents.WaitForEntityByName("trigger_shotgun", function(ent)
-            ent:Fire("AddOutput", "OnTrigger lcs_hos_enterance,Start,5,0")
-        end)
+    -- Ugly hack to get alyx to pickup the shotgun, no clue to why this is broken in Garry's Mod.
+    local alyxPickupLogic = ents.Create("lambda_lua_logic")
+    alyxPickupLogic:SetName("alyx_pickup_logic")
+    alyxPickupLogic:Spawn()
+    alyxPickupLogic.OnRunLua = function(s)
+        local alyx = ents.FindFirstByName("alyx")
+        if not IsValid(alyx) then
+            -- Some whacko must have killed her.
+            return
+        end
+
+        -- Get nearby shotguns.
+        local shotguns = ents.FindInSphere(alyx:GetPos(), 256)
+        for _, shotgun in pairs(shotguns) do
+            if shotgun:GetClass() == "weapon_shotgun" and IsValid(shotgun:GetOwner()) == false then
+                alyx:SetSaveValue("m_hTargetEnt", shotgun)
+                alyx:SetSchedule(SCHED_NEW_WEAPON)
+                break
+            end
+        end
     end
-end
 
-function MAPSCRIPT:PostPlayerSpawn(ply)
+    ents.WaitForEntityByName("trigger_shotgun", function(ent)
+        -- Normally the scripted sequences deals with this but it doesn't.
+        ent:Fire("AddOutput", "OnTrigger alyx_pickup_logic,RunLua,,3,-1")
+    end)
 end
-
 return MAPSCRIPT
