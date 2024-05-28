@@ -13,6 +13,10 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
+    ["clip_player"] = true,
+    ["clip_player_train"] = true,
+    ["mine_pit_clip_brush"] = true,
+    ["prop_traincar_panel_02"] = true, -- This gets stuck in the train and kills players.
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -40,49 +44,44 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    print("-- Incomplete mapscript --")
-    if SERVER then
-        -- Create the physcannon
-        local createPhyscannon = ents.Create("lambda_clientcommand")
-        createPhyscannon:Spawn()
-        createPhyscannon.Command = function(s, data, activator, caller)
-            local pos = Vector(1051, -316, -2)
-            local ang = Angle(0, 0, 0)
+    -- Don't make the train fall.
+    ents.WaitForEntityByName("prop.phys.train.04", function(ent)
+        ent:SetName("lambda_prop.phys.train.04")
+    end)
 
-            local wep = ents.CreateSimple("weapon_physcannon", {
-                Pos = pos,
-                Ang = ang
-            })
+    ents.WaitForEntityByName("prop.train.02", function(ent)
+        ent:SetName("lambda_prop.train.02")
+    end)
 
-            local phys = wep:GetPhysicsObject()
+    -- Create the physcannon
+    local createPhyscannon = ents.Create("lambda_clientcommand")
+    createPhyscannon:Spawn()
+    createPhyscannon.Command = function(s, data, activator, caller)
+        local pos = Vector(1051, -316, -2)
+        local ang = Angle(0, 0, 0)
 
-            if IsValid(phys) then
-                phys:SetMass(1000) -- Somewhat prevents players trying to hide the gun or moving it too far as its rather important.
-            end
+        local wep = ents.CreateSimple("weapon_physcannon", {
+            Pos = pos,
+            Ang = ang
+        })
 
-            table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_physcannon")
-            s:Remove()
+        local phys = wep:GetPhysicsObject()
 
-            return true
+        if IsValid(phys) then
+            phys:SetMass(1000) -- Somewhat prevents players trying to hide the gun or moving it too far as its rather important.
         end
 
-        -- Remove the old clientcommand
-        ents.WaitForEntityByName("command_physcannon", function(ent)
-            createPhyscannon:SetName("command_physcannon")
-            ent:Remove()
-        end)
+        table.insert(GAMEMODE:GetMapScript().DefaultLoadout.Weapons, "weapon_physcannon")
+        s:Remove()
 
-        -- Remove train player clip
-        ents.WaitForEntityByName("clip_player", function(ent)
-        ent:Remove()
-        end)
-
-        -- Remove pit player clip
-        ents.WaitForEntityByName("mine_pit_clip_brush", function(ent)
-        ent:Remove()
-        end)
-
+        return true
     end
+
+    -- Remove the old clientcommand
+    ents.WaitForEntityByName("command_physcannon", function(ent)
+        createPhyscannon:SetName("command_physcannon")
+        ent:Remove()
+    end)
 end
 
 return MAPSCRIPT
