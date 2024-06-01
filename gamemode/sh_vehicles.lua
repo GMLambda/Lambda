@@ -30,7 +30,7 @@ if SERVER then
                 table.insert(self.MapVehicles, v)
             elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/buggy.mdl" then
                 table.insert(self.MapVehicles, v)
-            elseif v["classname"] == "prop_vehicle_jalopy" then
+            elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/vehicle.mdl" then
                 table.insert(self.MapVehicles, v)
             end
         end
@@ -83,6 +83,8 @@ if SERVER then
                 return
             end
 
+            DbgPrint(vehicle, "Vehicle type: " .. tostring(vehicleType))
+
             self.ActiveVehicles[vehicle] = true
             vehicle:SetCustomCollisionCheck(true)
 
@@ -110,11 +112,11 @@ if SERVER then
         end)
     end
 
-    local function CreatePassengerSeat(parent, localPos, localAng)
+    local function CreatePassengerSeat(parent, localPos, localAng, mdl)
         local seat = ents.Create("prop_vehicle_prisoner_pod")
-        seat:SetPos(parent:LocalToWorld(Vector(19.369112, -37.018456, 18.896046)))
-        seat:SetAngles(parent:LocalToWorldAngles(Angle(-0.497, -3.368, 0.259)))
-        seat:SetModel("models/nova/jeep_seat.mdl")
+        seat:SetPos(parent:LocalToWorld(localPos))
+        seat:SetAngles(parent:LocalToWorldAngles(localAng))
+        seat:SetModel(mdl)
         seat:SetParent(parent)
         seat:Spawn()
         seat:SetNWBool("IsPassengerSeat", true)
@@ -127,7 +129,11 @@ if SERVER then
             -- Already exists.
             return
         end
-        seat = CreatePassengerSeat(jeep, Vector(19.369112, -37.018456, 18.896046), Angle(-0.497, -3.368, 0.259))
+        seat = CreatePassengerSeat(jeep, 
+            Vector(19.369112, -37.018456, 18.896046),
+            Angle(-0.497, -3.368, 0.259),
+            "models/nova/jeep_seat.mdl"
+        )
         jeep:SetNWEntity("PassengerSeat", seat)
     end
 
@@ -137,7 +143,14 @@ if SERVER then
             -- Already exists.
             return
         end
-        seat = CreatePassengerSeat(jalopy, Vector(19.369112, -37.018456, 18.896046), Angle(-0.497, -3.368, 0.259))
+        seat = CreatePassengerSeat(jalopy, 
+            Vector(21.498613, -27.285204, 18.695107),
+            Angle(-0.211, 0.621, -0.145),
+            "models/nova/jalopy_seat.mdl"
+        )
+        -- Make it invisible, we just want the functionality.
+        seat:SetNoDraw(true)
+
         jalopy:SetNWEntity("PassengerSeat", seat)
     end
 
@@ -249,7 +262,7 @@ if SERVER then
             vehicle.ResetVehicleEntryAnim = false
         end
 
-        if vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_airboat" or vehicle:GetClass() == "prop_vehicle_jalopy" then
+        if vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_airboat" then
             if vehicle.LambdaPlayer == nil and ply.OwnedVehicle == nil then
                 -- Not yet owned.
                 return true
@@ -371,6 +384,7 @@ if SERVER then
         self.NextVehicleThink = curTime + VEHICLE_THINK
 
         if self:CanSpawnVehicle() then
+            DbgPrint("Spawning vehicles...")
             for _, v in pairs(self.MapVehicles) do
                 self:SpawnVehicleAtSpot(v)
             end
@@ -408,6 +422,14 @@ if SERVER then
                     vehicle:Remove()
                 end
             else
+                local isVisible = false
+                for _, ply in pairs(player.GetAll()) do
+                    if ply:Visible(vehicle) then
+                        isVisible = true
+                        break
+                    end
+                end
+
                 -- If the player is too far away from an unowned vehicle remove it.
                 if #playerPosTable > 0 and inVehicle < alivePlayers then
                     local vehiclePos = vehicle:GetPos()
@@ -418,14 +440,14 @@ if SERVER then
                         for _, p in pairs(playerPosTable) do
                             local dist = p:Distance(vehiclePos)
 
-                            if dist < 4000 then
+                            if dist < 4500 then
                                 nearby = true
                                 break
                             end
                         end
 
                         -- If no player is nearby we can remove the old unowned vehicle.
-                        if nearby == false then
+                        if nearby == false and isVisible == false then
                             vehicle:Remove()
                             continue
                         end
