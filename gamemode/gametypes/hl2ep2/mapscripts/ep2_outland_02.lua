@@ -13,6 +13,7 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
+    ["spawnitems_template"] = true,
 }
 
 MAPSCRIPT.GlobalStates = {

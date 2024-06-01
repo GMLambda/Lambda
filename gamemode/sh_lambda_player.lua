@@ -1608,3 +1608,39 @@ net.Receive("LambdaPlayerDamage", function(len)
     local hitpos = net.ReadVector()
     GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
 end)
+
+if SERVER then
+    concommand.Add("lambda_show_loadout", function(ply, cmd, args)
+        -- Build the weapon table
+        local weps = {}
+        for _,v in pairs(ply:GetWeapons()) do
+            table.insert(weps, v:GetClass())
+        end
+
+        -- Build ammo table
+        local ammo = {}
+        for ammoId, count in pairs(ply:GetAmmo()) do
+            local ammoName = game.GetAmmoName(ammoId)
+            ammo[ammoName] = count
+        end
+
+        local armor = ply:Armor()
+        local hev = ply:IsSuitEquipped()
+
+        -- Print the DefaultLoadout table
+        print("DefaultLoadout = {")
+        print("    Weapons = {")
+        for _,v in pairs(weps) do
+            print("        \"" .. v .. "\",")
+        end
+        print("    },")
+        print("    Ammo = {")
+        for k,v in pairs(ammo) do
+            print("        [\"" .. k .. "\"] = " .. v .. ",")
+        end
+        print("    },")
+        print("    Armor = " .. armor .. ",")
+        print("    HEV = " .. tostring(hev))
+        print("}")
+    end)
+end
