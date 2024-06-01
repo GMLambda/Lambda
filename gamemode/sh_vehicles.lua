@@ -10,10 +10,10 @@ VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
 VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
 local VEHICLE_JEEP = 0
 local VEHICLE_AIRBOAT = 1
+local VEHICLE_JALOPY = 2
 local NEXT_VEHICLE_SPAWN = CurTime()
 local VEHICLE_SPAWN_TIME = 2
 
---local VEHICLE_JALOPY = 2
 if SERVER then
     AddCSLuaFile()
 
@@ -77,6 +77,8 @@ if SERVER then
                 vehicleType = VEHICLE_AIRBOAT
             elseif class == "prop_vehicle_jeep" and mdl == "models/buggy.mdl" then
                 vehicleType = VEHICLE_JEEP
+            elseif class == "prop_vehicle_jeep" and mdl == "models/vehicle.mdl" then
+                vehicleType = VEHICLE_JALOPY
             else
                 return
             end
@@ -102,20 +104,41 @@ if SERVER then
                 self:HandleJeepCreation(vehicle)
             elseif vehicleType == VEHICLE_AIRBOAT then
                 self:HandleAirboatCreation(vehicle)
+            elseif vehicleType == VEHICLE_JALOPY then
+                self:HandleJalopyCreation(vehicle)
             end
         end)
     end
 
-    function GM:HandleJeepCreation(jeep)
-        if IsValid(jeep:GetNWEntity("PassengerSeat")) then return end
+    local function CreatePassengerSeat(parent, localPos, localAng)
         local seat = ents.Create("prop_vehicle_prisoner_pod")
-        seat:SetPos(jeep:LocalToWorld(Vector(19.369112, -37.018456, 18.896046)))
-        seat:SetAngles(jeep:LocalToWorldAngles(Angle(-0.497, -3.368, 0.259)))
+        seat:SetPos(parent:LocalToWorld(Vector(19.369112, -37.018456, 18.896046)))
+        seat:SetAngles(parent:LocalToWorldAngles(Angle(-0.497, -3.368, 0.259)))
         seat:SetModel("models/nova/jeep_seat.mdl")
-        seat:SetParent(jeep)
+        seat:SetParent(parent)
         seat:Spawn()
         seat:SetNWBool("IsPassengerSeat", true)
+        return seat
+    end
+
+    function GM:HandleJeepCreation(jeep)
+        local seat = jeep:GetNWEntity("PassengerSeat")
+        if IsValid(seat) then
+            -- Already exists.
+            return
+        end
+        seat = CreatePassengerSeat(jeep, Vector(19.369112, -37.018456, 18.896046), Angle(-0.497, -3.368, 0.259))
         jeep:SetNWEntity("PassengerSeat", seat)
+    end
+
+    function GM:HandleJalopyCreation(jalopy)
+        local seat = jalopy:GetNWEntity("PassengerSeat")
+        if IsValid(seat) then
+            -- Already exists.
+            return
+        end
+        seat = CreatePassengerSeat(jalopy, Vector(19.369112, -37.018456, 18.896046), Angle(-0.497, -3.368, 0.259))
+        jalopy:SetNWEntity("PassengerSeat", seat)
     end
 
     function GM:HandleAirboatCreation(airboat)
