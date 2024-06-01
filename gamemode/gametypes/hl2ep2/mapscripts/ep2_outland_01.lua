@@ -90,6 +90,28 @@ function MAPSCRIPT:PostInit()
         createPhyscannon:SetName("command_physcannon")
         ent:Remove()
     end)
+
+    -- Rename the door and add a new trigger to EnableMotion
+    ents.WaitForEntityByName("physbox_floor_door", function(ent)
+        ent:SetName("lambda_physbox_floor_door")
+    end)
+
+    local openDoorTrigger = ents.Create("trigger_once")
+    openDoorTrigger:SetName("lambda_trigger_open_door")
+    openDoorTrigger:SetKeyValue("teamwait", "1")
+    openDoorTrigger:SetKeyValue("StartDisabled", "1")
+    openDoorTrigger:SetupTrigger(
+        Vector(-5613.831543, 4506.608398, -135.968750),
+        Angle(0, 0, 0),
+        Vector(-150, -100, 0),
+        Vector(150, 120, 128)
+    )
+    openDoorTrigger:Fire("AddOutput", "OnTrigger lambda_physbox_floor_door,EnableMotion,,0,-1", "0.0")
+
+    ents.WaitForEntityByName("gate_control_lever", function(ent)
+        ent:Fire("AddOutput", "OnPressed lambda_trigger_open_door,Enable,,0,-1", "0.0")
+    end)
+
 end
 
 return MAPSCRIPT
