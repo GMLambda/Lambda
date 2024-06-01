@@ -20,6 +20,15 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-3189, -9255, -875),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-2031, -8637, -715),
+            Mins = Vector(-150, -150, 0),
+            Maxs = Vector(150, 150, 76)
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
