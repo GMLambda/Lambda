@@ -14,7 +14,9 @@ function ENT:AcceptInput(inputName, activator, called, data)
         local speed = tonumber(data)
 
         for _, v in pairs(util.GetAllPlayers()) do
-            v:Flashlight(false)
+            if v:FlashlightIsOn() then
+                v:Flashlight(false)
+            end
             v:SetLaggedMovementValue(speed)
         end
 
