@@ -16,7 +16,6 @@ MAPSCRIPT.EntityFilterByName = {
     ["clip_player"] = true,
     ["clip_player_train"] = true,
     ["mine_pit_clip_brush"] = true,
-    ["prop_traincar_panel_02"] = true, -- This gets stuck in the train and kills players.
 }
 
 MAPSCRIPT.GlobalStates = {
