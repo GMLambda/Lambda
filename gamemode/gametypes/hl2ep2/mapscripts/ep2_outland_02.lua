@@ -33,6 +33,14 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     print("-- Incomplete mapscript --")
+
+    -- The default spawn gets players stuck.
+    for _, v in pairs(ents.FindByClass("info_player_start")) do
+        if v:HasSpawnFlags(1) then -- Master
+            v:SetPos(Vector(-2293.175537, -8260.166016, -497.381989))
+            print("Yep")
+        end
+    end
 end
 
 return MAPSCRIPT
