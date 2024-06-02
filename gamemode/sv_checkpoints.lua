@@ -136,6 +136,29 @@ local function CreateCheckpointWithTrigger(data)
 
     checkpointTrigger.OnTrigger = function(_, activator)
         GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
+
+        local mapscript = GAMEMODE:GetMapScript()
+        if mapscript ~= nil and mapscript.DefaultLoadout ~= nil then
+            local loadoutWeapons = mapscript.DefaultLoadout.Weapons
+            -- Handle additions to the weapon loadout.
+            if data.WeaponAdditions ~= nil and #data.WeaponAdditions > 0 then
+                DbgPrint("Extending loadout...")
+                for _, v in pairs(data.WeaponAdditions) do
+                    if table.HasValue(loadoutWeapons, v) == false then
+                        table.insert(loadoutWeapons, v)
+                        DbgPrint("Added weapon to loadout: " .. v)
+                    end
+                end
+            end
+            -- Handle removal of weapons in the loadout.
+            if data.WeaponRemovals ~= nil and #data.WeaponRemovals > 0 then
+                DbgPrint("Removing weapons from loadout...")
+                for _, v in pairs(data.WeaponRemovals) do
+                    table.RemoveByValue(loadoutWeapons, v)
+                    DbgPrint("Removed weapon from loadout: " .. v)
+                end
+            end
+        end
     end
 end
 
