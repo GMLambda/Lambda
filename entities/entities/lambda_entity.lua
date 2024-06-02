@@ -228,6 +228,14 @@ function ENT:SetupNWVar(key, dtType, data)
     end
 end
 
+function ENT:OnRestore()
+    -- Adjust the Get/Set functions, functions can not be serialized.
+    for k, v in pairs(self.DTVarTable) do
+        v.Get = DTVAR_GET[v.Type]
+        v.Set = DTVAR_SET[v.Type]
+    end
+end
+
 function ENT:GetNWVar(key, fallback)
     if self.DTVarTable == nil then return fallback end
     local dtVar = self.DTVarTable[key]
