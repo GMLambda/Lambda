@@ -129,7 +129,7 @@ if SERVER then
             -- Already exists.
             return
         end
-        seat = CreatePassengerSeat(jeep, 
+        seat = CreatePassengerSeat(jeep,
             Vector(19.369112, -37.018456, 18.896046),
             Angle(-0.497, -3.368, 0.259),
             "models/nova/jeep_seat.mdl"
@@ -143,7 +143,7 @@ if SERVER then
             -- Already exists.
             return
         end
-        seat = CreatePassengerSeat(jalopy, 
+        seat = CreatePassengerSeat(jalopy,
             Vector(21.498613, -27.285204, 18.695107),
             Angle(-0.211, 0.621, -0.145),
             "models/nova/jalopy_seat.mdl"
