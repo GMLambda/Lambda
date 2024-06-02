@@ -112,6 +112,26 @@ function MAPSCRIPT:PostInit()
         ent:Fire("AddOutput", "OnPressed lambda_trigger_open_door,Enable,,0,-1", "0.0")
     end)
 
+    -- Wait for team before we can pull the crowbar and trigger the elevator
+    local multiple = ents.FindByPos(Vector(-6289, 3807, -288),"trigger_multiple")
+    for k, v in pairs(multiple) do
+        v:Remove()
+    end
+
+    local elevatorTrigger = ents.Create("trigger_once")
+    elevatorTrigger:SetupTrigger(Vector(-6289, 3807, -288), Angle(0, 0, 0), Vector(-47, -25, -36), Vector(47, 25, 36))
+    elevatorTrigger:SetKeyValue("teamwait", "1")
+    elevatorTrigger:Fire("AddOutput", "OnTrigger crowbar,EnablePhyscannonPickup,,0,-1")
+    elevatorTrigger:Fire("AddOutput", "OnTrigger crowbar_cover,Disable,,0,-1")
+    elevatorTrigger:Fire("AddOutput", "OnTrigger timer.vort.nag.01,Disable,,0,1")
+    elevatorTrigger:Fire("AddOutput", "OnTrigger lcs_intro_vort_carefull,Start,,0,1")
+
+    ents.WaitForEntityByName("relay_crowbar_grabbed", function(ent)
+        ent.OnTrigger = function(_,activator)
+            local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+            table.insert(loadout.Weapons, "weapon_crowbar")
+        end
+    end)
 end
 
 return MAPSCRIPT
