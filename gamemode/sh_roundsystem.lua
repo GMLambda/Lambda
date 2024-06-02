@@ -584,6 +584,7 @@ function GM:OnNewGame()
         -- Notify clients.
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
         self:SetupRoundRelevantObjects()
+        self:ResetVehicleCheck()
 
         util.RunNextFrame(function()
             GAMEMODE:PostRoundSetup()

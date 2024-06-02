@@ -23,8 +23,9 @@ if SERVER then
         self.ActiveVehicles = {}
         self.MapVehicles = {}
         self.SpawnPlayerVehicles = true
-        local mapdata = game.GetMapData()
+        self.NextVehicleThink = 0
 
+        local mapdata = game.GetMapData()
         for _, v in pairs(mapdata.Entities) do
             if v["classname"] == "prop_vehicle_airboat" then
                 table.insert(self.MapVehicles, v)
@@ -52,6 +53,12 @@ if SERVER then
                 DbgPrint("Vehicle " .. tostring(k) .. " invalid")
             end
         end
+
+        self:ResetVehicleCheck()
+    end
+
+    function GM:ResetVehicleCheck()
+        self.NextVehicleThink = CurTime() + VEHICLE_THINK
     end
 
     function GM:HandleVehicleCreation(vehicle)
@@ -435,7 +442,6 @@ if SERVER then
     function GM:VehiclesThink()
         if self:IsRoundRunning() == false and self:RoundElapsedTime() >= 1 then return end
         local curTime = CurTime()
-        self.NextVehicleThink = self.NextVehicleThink or (curTime + VEHICLE_THINK)
         if curTime < self.NextVehicleThink then return end
         self.NextVehicleThink = curTime + VEHICLE_THINK
 
@@ -478,6 +484,12 @@ if SERVER then
                     vehicle:Remove()
                 end
             else
+                local passenger = self:GetVehiclePassenger(vehicle)
+                if IsValid(passenger) then
+                    -- Can't remove, has a passenger inside.
+                    continue
+                end
+
                 local isVisible = false
                 for _, ply in pairs(player.GetAll()) do
                     if ply:Visible(vehicle) then
@@ -486,7 +498,13 @@ if SERVER then
                     end
                 end
 
-                -- If the player is too far away from an unowned vehicle remove it.
+                if isVisible then
+                    -- Vehicle is visible, don't remove it.
+                    continue
+                end
+
+                -- If all the players are too far away remove it, its most likely abondended.
+                -- and will be recreated at the current vehicle checkpoint.
                 if #playerPosTable > 0 and inVehicle < alivePlayers then
                     local vehiclePos = vehicle:GetPos()
                     local centerDist = centerPos:Distance(vehiclePos)
@@ -503,20 +521,13 @@ if SERVER then
                         end
 
                         -- If no player is nearby we can remove the old unowned vehicle.
-                        if nearby == false and isVisible == false then
+                        if nearby == false then
                             vehicle:Remove()
                             continue
                         end
                     end
                 end
             end
-            -- Commented, util.IsInWorld is not reliable at all.
-            --[[
-            if util.IsInWorld(vehicle:GetPos()) == false then
-                DbgPrint("Removing out of world vehicle")
-                vehicle:Remove()
-            end
-            ]]
         end
     end
 else -- CLIENT
@@ -619,4 +630,17 @@ function GM:VehicleMove(ply, vehicle, mv)
             vehicle:Fire("HandBrakeOn")
         end
     end
+end
+
+function GM:GetVehiclePassenger(vehicle)
+    local npcPassenger = vehicle:GetNWEntity("LambdaPassenger")
+    if IsValid(npcPassenger) then
+        -- There is an NPC sitting in the vehicle.
+        return npcPassenger
+    end
+    local seat = vehicle:GetNWEntity("PassengerSeat")
+    if IsValid(seat) then
+        return seat:GetDriver()
+    end
+    return nil
 end
