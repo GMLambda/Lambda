@@ -4,9 +4,17 @@ end
 
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
-    Weapons = {"weapon_lambda_medkit", "weapon_physcannon"},
-    Ammo = {},
-    Armor = 0,
+    Weapons = {
+        "weapon_lambda_medkit",
+        "weapon_physcannon",
+        "weapon_crowbar",
+        "weapon_357",
+        "weapon_shotgun",
+        "weapon_pistol",
+    },
+    Ammo = {
+    },
+    Armor = 30,
     HEV = true
 }
 
