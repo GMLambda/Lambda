@@ -16,6 +16,12 @@ MAPSCRIPT.EntityFilterByName = {
     ["spawnitems_template"] = true,
 }
 
+MAPSCRIPT.ImportantPlayerNPCNames = {
+    ["sheckley"] = true,
+    ["griggs"] = true,
+    ["vort"] = true
+}
+
 MAPSCRIPT.GlobalStates = {
 }
 
