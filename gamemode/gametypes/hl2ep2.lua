@@ -13,6 +13,7 @@ GAMETYPE.MapList = {
     "ep2_outland_02",
     "ep2_outland_03",
     "ep2_outland_04",
+    "ep2_outland_02",
     "ep2_outland_05",
     "ep2_outland_06",
     "ep2_outland_06a",
