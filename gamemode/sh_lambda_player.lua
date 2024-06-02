@@ -1373,6 +1373,11 @@ function GM:CheckPlayerCollision(ply)
     if playersCollide == false then return end
     if ply:IsPlayerCollisionEnabled() == true then return end
     local hullMin, hullMax = ply:GetHull()
+    -- Extend the hull so we keep collisions off in tight spaces.
+    hullMin.x = hullMin.x * 2
+    hullMin.y = hullMin.y * 2
+    hullMax.x = hullMax.x * 2
+    hullMax.y = hullMax.y * 2
     local tr = util.TraceHull({
         start = ply:GetPos(),
         endpos = ply:GetPos(),
