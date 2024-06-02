@@ -68,6 +68,10 @@ if SERVER then
             DbgPrint("No guns enabled")
         end
 
+        -- Akward hack to know if an NPC passenger is inside. We handle this with our AcceptInput hook.
+        vehicle:Fire("AddOutput", "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,0,-1", "0.0")
+        vehicle:Fire("AddOutput", "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,1,-1", "0.0")
+
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
             if not IsValid(vehicle) then return end
@@ -98,6 +102,8 @@ if SERVER then
             end)
 
             vehicle.AllowVehicleCheckpoint = true
+            vehicle.LambdaVehicleType = vehicleType
+
             local tracker = ents.Create("lambda_vehicle_tracker")
             tracker:AttachToVehicle(vehicle)
             tracker:Spawn()
@@ -154,6 +160,44 @@ if SERVER then
         jalopy:SetNWEntity("PassengerSeat", seat)
     end
 
+    function GM:OnCompanionEnteredVehicle(jalopy, passenger)
+        DbgPrint("Companion entered vehicle")
+        jalopy:SetNWEntity("LambdaPassenger", passenger)
+
+        local seat = jalopy:GetNWEntity("PassengerSeat")
+        if IsValid(seat) then
+            -- Lock this seat as we have the passenger inside the vehicle.
+            seat:Fire("Lock")
+        else
+            DbgPrint("No passenger seat on jalopy: " .. tostring(jalopy))
+        end
+    end
+
+    function GM:OnCompanionExitedVehicle(jalopy, passenger)
+        DbgPrint("Companion exited vehicle")
+        jalopy:SetNWEntity("LambdaPassenger", NULL)
+
+        local seat = jalopy:GetNWEntity("PassengerSeat")
+        if IsValid(seat) then
+            -- Lock this seat as we have the passenger inside the vehicle.
+            seat:Fire("Unlock")
+        end
+    end
+
+    function GM:OnPlayerPassengerEnteredVehicle(ply, vehicle, seat)
+        DbgPrint("Player entered passenger seat", ply, vehicle, seat)
+
+        -- Prevent NPC companions from entering as passengers.
+        vehicle:Fire("LockEntrance")
+    end
+
+    function GM:OnPlayerPassengerExitedVehicle(ply, vehicle, seat)
+        DbgPrint("Player exited passenger seat", ply, vehicle, seat)
+
+        -- Allow NPC companions to enter as passengers.
+        vehicle:Fire("UnlockEntrance")
+    end
+
     function GM:HandleAirboatCreation(airboat)
     end
 
@@ -186,6 +230,13 @@ if SERVER then
         local ang = vehicle:GetForward():Angle()
         ang = vehicle:WorldToLocalAngles(ang)
         ply:SetEyeAngles(ang)
+
+        if vehicle:GetNWBool("IsPassengerSeat", false) then
+            local parent = vehicle:GetParent()
+            if IsValid(parent) and parent:GetNWEntity("PassengerSeat") == vehicle then
+                self:OnPlayerPassengerEnteredVehicle(ply, parent, vehicle)
+            end
+        end
 
         if self.MapScript ~= nil and self.MapScript.OnEnteredVehicle ~= nil then
             self.MapScript:OnEnteredVehicle(ply, vehicle, role)
@@ -237,6 +288,11 @@ if SERVER then
             local exitang = (pos - exitpos):Angle()
             ply:TeleportPlayer(exitpos, exitang)
             vehicle:GetParent().Passenger = nil
+
+            local parent = vehicle:GetParent()
+            if IsValid(parent) and parent:GetNWEntity("PassengerSeat") == vehicle then
+                self:OnPlayerPassengerExitedVehicle(ply, parent, vehicle)
+            end
         end
     end
 
