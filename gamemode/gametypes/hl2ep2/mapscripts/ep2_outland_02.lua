@@ -43,6 +43,7 @@ MAPSCRIPT.Checkpoints = {
         Condition = function()
             return GAMEMODE:GetPreviousMap() ~= "ep2_outland_04"
         end,
+        WeaponAdditions = { "weapon_smg1" },
         Trigger = {
             Pos = Vector(-2031, -8637, -715),
             Mins = Vector(-150, -150, 0),
@@ -103,17 +104,6 @@ function MAPSCRIPT:PostInit()
                 v:SetPos(Vector(-2293.175537, -8260.166016, -497.381989))
             end
         end
-
-        -- Loadout modifier.
-        local loadoutChange = ents.Create("lambda_lua_logic")
-        loadoutChange:SetName("lambda_loadout_change")
-        loadoutChange.OnRunLua = function()
-            local weps = GAMEMODE:GetMapScript().DefaultLoadout.Weapons
-            table.insert(weps, "weapon_smg1")
-            table.insert(weps, "weapon_shotgun")
-            table.insert(weps, "weapon_pistol")
-        end
-        loadoutChange:Spawn()
 
         ents.WaitForEntityByName("trigger_turret2_vcd", function(ent)
             ent:Fire("AddOutput", "OnTrigger lambda_loadout_change,RunLua,,0,-1", "0.0")
