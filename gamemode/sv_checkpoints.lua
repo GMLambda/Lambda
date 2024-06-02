@@ -106,6 +106,12 @@ local function CreateCheckpointWithTrigger(data)
         error("Missing Ang in data")
     end
 
+    if data.Condition ~= nil and isfunction(data.Condition) then
+        if data.Condition() == false then
+            return
+        end
+    end
+
     local triggerData = data.Trigger
 
     if triggerData == nil then
