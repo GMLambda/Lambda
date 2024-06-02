@@ -28,6 +28,7 @@ MAPSCRIPT.Checkpoints = {
     {
         Pos = Vector(-10951, -7040, 1302),
         Ang = Angle(0, 0, 0),
+        WeaponAdditions = { "weapon_pistol" },
         Trigger = {
             Pos = Vector(-10947, -7060, 1358),
             Mins = Vector(-66, -85, -60),
@@ -55,6 +56,7 @@ MAPSCRIPT.Checkpoints = {
     {
         Pos = Vector(-7103, -8731, 23),
         Ang = Angle(0, 0, 0),
+        WeaponAdditions = { "weapon_frag", "weapon_357", "weapon_shotgun" },
         Trigger = {
             Pos = Vector(-7136, -8618, 62),
             Mins = Vector(-100, -80, -44),
@@ -107,24 +109,6 @@ function MAPSCRIPT:PostInit()
             end
         end)
     end)
-
-    -- Create trigger to add pistol to loadout table
-    local pistolTrigger = ents.Create("trigger_once")
-    pistolTrigger:SetupTrigger(Vector(-11136, -7123, 1660), Angle(0, 0, 0), Vector(-16, -40, -62), Vector(16, 40, 62))
-    pistolTrigger.OnTrigger = function(_, activator)
-        local loadout = GAMEMODE:GetMapScript().DefaultLoadout
-        table.insert(loadout.Weapons, "weapon_pistol")
-    end
-
-    -- Create trigger to populate loadout table with weapons
-    local wpnTrigger = ents.Create("trigger_once")
-    wpnTrigger:SetupTrigger(Vector(-7637, -7834, 66), Angle(0, 0, 0), Vector(-60, -50, -50), Vector(60, 50, 50))
-    wpnTrigger.OnTrigger = function(_, activator)
-        local loadout = GAMEMODE:GetMapScript().DefaultLoadout
-        table.insert(loadout.Weapons, "weapon_shotgun")
-        table.insert(loadout.Weapons, "weapon_frag")
-        table.insert(loadout.Weapons, "weapon_357")
-    end
 end
 
 return MAPSCRIPT
