@@ -960,7 +960,12 @@ function GM:CreateTransitionObjects()
             if data.Parent then
                 local parent = self.CreatedTransitionObjects[data.Parent]
                 if IsValid(parent) then
-                    ent:SetParent(parent)
+                    -- FIXME: This is way too generic to be safe.
+                    if ent:IsNPC() and parent:IsVehicle() and parent:GetClass() == "prop_vehicle_jeeep" then
+                        ent:Fire("EnterVehicleImmediately", parent:GetName(), 0)
+                    else
+                        ent:SetParent(parent)
+                    end
                     -- FIX: Make sure we assign the seat to the vehicle.
                     if ent:GetNWBool("IsPassengerSeat", false) == true then parent:SetNWEntity("PassengerSeat", ent) end
                 end

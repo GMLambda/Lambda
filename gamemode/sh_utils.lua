@@ -267,7 +267,17 @@ if SERVER then
         ["OnNewGame"] = true,
         ["OnGetValue"] = true,
         ["OnHitMax"] = true,
-        ["OnHitMin"] = true
+        ["OnHitMin"] = true,
+        ["PlayerOff"] = true,
+        ["PlayerOn"] = true,
+        ["OnCompanionEnteredVehicle"] = true,
+        ["OnCompanionExitedVehicle"] = true,
+        ["OnHostileEnteredVehicle"] = true,
+        ["OnHostileExitedVehicle"] = true,
+        ["PressedAttack"] = true,
+        ["PressedAttack2"] = true,
+        ["AttackAxis"] = true,
+        ["Attack2Axis"] = true,
     }
 
     function util.IsOutputValue(key)
