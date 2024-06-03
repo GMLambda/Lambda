@@ -26,9 +26,12 @@ function GM:InitializeCurrentLevel()
     end
 
     self.ChangingLevel = false
-    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Changelevel")
-    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Landmark")
-    util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "PrevMap")
+    if g_debug_transitions:GetBool() == false then
+        util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Changelevel")
+        util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "Landmark")
+        util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "PrevMap")
+    end
+
     DbgPrint("Used Changelevel: " .. tostring(self.IsChangeLevel))
     self:InitializeTransitionData()
 end

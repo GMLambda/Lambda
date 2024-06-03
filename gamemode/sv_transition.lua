@@ -1,4 +1,5 @@
 local DbgPrint = GetLogging("Transition")
+local g_debug_transitions = GetConVar("g_debug_transitions")
 local util = util
 local ents = ents
 local player = player
@@ -116,7 +117,10 @@ function GM:InitializeTransitionData()
         DbgPrint("  World objects: " .. tostring(table.Count(self.TransitionData.Objects or {})))
         DbgPrint("  Global states: " .. tostring(table.Count(self.TransitionData.GlobalStates or {})))
         --PrintTable(self.TransitionData)
-        util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
+
+        if g_debug_transitions:GetBool() == false then
+            util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
+        end
     end)
 end
 
@@ -850,6 +854,8 @@ function GM:CreateTransitionObjects()
             end
         end
 
+        local postSpawnQueue = {}
+
         DbgPrint("Creating " .. tostring(objCount) .. " transition Objects...")
         local entityTransitionData = {}
         for _, data in pairs(objects) do
@@ -1009,13 +1015,21 @@ function GM:CreateTransitionObjects()
                     if IsValid(vehicle) then
                         ent:SetNWEntity("LambdaVehicle", vehicle)
                     end
-                    local oldName = vehicle:GetName()
-                    local newName = oldName .. tostring(vehicle:EntIndex())
-                    vehicle:SetName(newName)
-                    ent:SetParent(nil)
-                    -- FIXME: Should probably use Input to bypass the queue, investigate why this crashed.
-                    ent:Fire("EnterVehicleImmediately", newName)
-                    vehicle:SetName(oldName)
+                    -- This has to wait after the vehicle is fully initialized/spawned,
+                    -- otherwise it will cause crashes.
+                    table.insert(postSpawnQueue, function()
+                        local oldName = vehicle:GetName()
+                        local newName = oldName .. tostring(vehicle:EntIndex())
+                        -- This is one major hack to ensure alyx will be in the correct "jeep" vehicle.
+                        vehicle:SetName(newName)
+                        ent:SetParent(nil)
+                        -- FIXME: Should probably use Input to bypass the queue, investigate why this crashed.
+                        vehicle:ClearAllOutputs()
+                        -- Bypass queue as our name is only valid here so it can't end up in a queue.
+                        ent:Input("EnterVehicleImmediately", NULL, NULL, newName)
+                        -- Reset the name.
+                        vehicle:SetName(oldName)
+                    end)
                 end
             end
 
@@ -1042,6 +1056,11 @@ function GM:CreateTransitionObjects()
                     physObj:SetAngles(physAng)
                 end
             end
+        end
+
+        -- Those functions might fire some inputs which require the object to be fully initialized first.
+        for _, func in pairs(postSpawnQueue) do
+            func()
         end
     end)
 end
