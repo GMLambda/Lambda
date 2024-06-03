@@ -381,7 +381,11 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 end
 
 local SAVETABLE_WHITELIST = {
-    ["target"] = true
+    ["target"] = true,
+    ["m_bEntranceLocked"] = true,
+    ["m_bExitLocked"] = true,
+    ["m_bEngineLocked"] = true,
+    ["m_bRadarEnabled"] = true,
 }
 
 local SAVETABLE_BLACKLIST = {
@@ -1001,7 +1005,10 @@ function GM:CreateTransitionObjects()
                         ent:SetSaveValue(k, refEnt)
                     end
                 else
-                    if SAVETABLE_WHITELIST[k] == true then ent:SetSaveValue(k, v) end
+                    if SAVETABLE_WHITELIST[k] == true then 
+                        DbgPrint("Setting save value for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(v))
+                        ent:SetSaveValue(k, v)
+                    end
                 end
             end
 
@@ -1014,22 +1021,20 @@ function GM:CreateTransitionObjects()
                     local vehicle = self.CreatedTransitionObjects[refId]
                     if IsValid(vehicle) then
                         ent:SetNWEntity("LambdaVehicle", vehicle)
-                    end
-                    -- This has to wait after the vehicle is fully initialized/spawned,
-                    -- otherwise it will cause crashes.
-                    table.insert(postSpawnQueue, function()
-                        local oldName = vehicle:GetName()
-                        local newName = oldName .. tostring(vehicle:EntIndex())
-                        -- This is one major hack to ensure alyx will be in the correct "jeep" vehicle.
-                        vehicle:SetName(newName)
                         ent:SetParent(nil)
-                        -- FIXME: Should probably use Input to bypass the queue, investigate why this crashed.
-                        vehicle:ClearAllOutputs()
-                        -- Bypass queue as our name is only valid here so it can't end up in a queue.
-                        ent:Input("EnterVehicleImmediately", NULL, NULL, newName)
-                        -- Reset the name.
-                        vehicle:SetName(oldName)
-                    end)
+                        -- This has to wait after the vehicle is fully initialized/spawned,
+                        -- otherwise it will cause crashes.
+                        table.insert(postSpawnQueue, function()
+                            local oldName = vehicle:GetName()
+                            local newName = oldName .. tostring(vehicle:EntIndex())
+                            -- This is one major hack to ensure alyx will be in the correct "jeep" vehicle.
+                            vehicle:SetName(newName)
+                            -- Bypass queue as our name is only valid here so it can't end up in a queue.
+                            ent:Input("EnterVehicleImmediately", NULL, NULL, newName)
+                            -- Reset the name.
+                            vehicle:SetName(oldName)
+                        end)
+                    end
                 end
             end
 
