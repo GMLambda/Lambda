@@ -32,6 +32,8 @@ MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
     ["spawnitems"] = true,
+    ["velsensor_car_superjump_01"] = true,
+    ["velsensor_car_superjump_00"] = true,
 }
 
 MAPSCRIPT.GlobalStates = {

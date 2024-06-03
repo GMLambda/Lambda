@@ -36,7 +36,6 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
         for _, v in pairs(filters) do
             if v == inputName then
                 DbgPrint(ent, "Filtered input: " .. entName .. " -> " .. inputName)
-
                 return true
             end
         end
@@ -49,7 +48,6 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
             local res = cb(ent, inputName, activator, caller, value)
             if res == true then
                 DbgPrint(ent, "Filtered input: " .. entName .. " -> " .. inputName)
-
                 return true
             end
         end
@@ -71,6 +69,22 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
         print("LambdaCompanionExitedVehicle", ent, inputName, activator, caller, value)
         self:OnCompanionExitedVehicle(activator, caller)
         return true
+    end
+
+    -- Deal with AddOutput.
+    if inputName == "AddOutput" then
+        -- Split outputname and output parameters.
+        local outputName, outputParams = string.match(value, "(%w+)%s+(.*)")
+
+        -- AddOutput uses double point instead of comma, replace that.
+        outputParams = string.gsub(outputParams, ":", ",")
+
+        print(ent, "AddOutput", outputName, outputParams)
+
+        ent.EntityOutputs = ent.EntityOutputs or {}
+        local outputs = ent.EntityOutputs[outputName] or {}
+        table.insert(outputs, outputParams)
+        ent.EntityOutputs[outputName] = outputs
     end
 
 end
