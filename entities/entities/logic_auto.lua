@@ -81,10 +81,12 @@ end
 function ENT:Enable()
     self:SetNWVar("Disabled", false)
     self:NextThink(CurTime())
+    return true
 end
 
 function ENT:Disable()
     self:SetNWVar("Disabled", true)
+    return true
 end
 
 function ENT:UpdateTransmitState()
