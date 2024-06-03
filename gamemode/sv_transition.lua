@@ -8,6 +8,7 @@ local ENT_TYPE_NPC = 0
 local ENT_TYPE_VEHICLE = 1
 local ENT_TYPE_DOOR = 2
 local ENT_TYPE_GENERIC = 3
+local REF_PREFIX = "CoopRef"
 local SERIALIZE_VECTOR = function(ent, val) return ent:WorldToLocal(val) end
 local SERIALIZE_ANGLES = function(ent, val) return ent:WorldToLocalAngles(val) end
 local FIELD_SERIALIZE = {
@@ -84,6 +85,17 @@ local function GetProfilingData()
         v.AverageTime = v.TotalTime / numTimes
     end
     return ProfiledFunctions
+end
+
+local function ToRefId(ent)
+    return REF_PREFIX .. "_" .. tostring(ent:EntIndex())
+end
+
+local function GetRefId(refId)
+    if not isstring(refId) then return nil end
+    local prefix = string.sub(refId, 1, #REF_PREFIX)
+    if prefix ~= REF_PREFIX then return nil end
+    return tonumber(string.sub(refId, #REF_PREFIX + 2))
 end
 
 function GM:InitializeTransitionData()
@@ -421,6 +433,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             data.Expression = ent:GetExpression()
             data.Activity = ent:GetActivity()
             data.NPCState = ent:GetNPCState()
+            data.SaveTable["LambdaVehicle"] = ent:GetNWEntity("LambdaVehicle", nil)
             local activeWeapon = ent:GetActiveWeapon()
             if IsValid(activeWeapon) then data.ActiveWeapon = activeWeapon:GetClass() end
         elseif ent:IsVehicle() then
@@ -467,7 +480,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             end
 
             if IsEntity(v) and IsValid(v) then
-                data.SaveTable[k] = "CoopRef_" .. tostring(v:EntIndex())
+                data.SaveTable[k] = ToRefId(v)
             else
                 data.SaveTable[k] = v
             end
@@ -949,7 +962,7 @@ function GM:CreateTransitionObjects()
             --ent.TransitionData = data
             entityTransitionData[ent] = data
             self.CreatedTransitionObjects[data.RefId] = ent
-            DbgPrint("Created " .. tostring(ent))
+            DbgPrint("Created " .. tostring(ent) .. ", RefId: " .. data.RefId)
         end
 
         -- Second iteration: We resolve dependencies.
@@ -960,14 +973,11 @@ function GM:CreateTransitionObjects()
             if data.Parent then
                 local parent = self.CreatedTransitionObjects[data.Parent]
                 if IsValid(parent) then
-                    -- FIXME: This is way too generic to be safe.
-                    if ent:IsNPC() and parent:IsVehicle() and parent:GetClass() == "prop_vehicle_jeeep" then
-                        ent:Fire("EnterVehicleImmediately", parent:GetName(), 0)
-                    else
-                        ent:SetParent(parent)
+                    ent:SetParent(parent)
+                    if ent:GetNWBool("IsPassengerSeat", false) == true then
+                        -- FIX: Make sure we assign the seat to the vehicle.
+                        parent:SetNWEntity("PassengerSeat", ent)
                     end
-                    -- FIX: Make sure we assign the seat to the vehicle.
-                    if ent:GetNWBool("IsPassengerSeat", false) == true then parent:SetNWEntity("PassengerSeat", ent) end
                 end
             end
 
@@ -977,8 +987,8 @@ function GM:CreateTransitionObjects()
             end
 
             for k, v in pairs(data.SaveTable) do
-                if isstring(v) and v:sub(1, 8) == "CoopRef_" then
-                    local refId = tonumber(v:sub(9))
+                local refId = GetRefId(v)
+                if refId ~= nil then
                     local refEnt = self.CreatedTransitionObjects[refId]
                     if IsValid(refEnt) and refEnt ~= ent and ent:IsNPC() == false then
                         DbgPrint("Resolved reference for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(refEnt))
@@ -986,6 +996,26 @@ function GM:CreateTransitionObjects()
                     end
                 else
                     if SAVETABLE_WHITELIST[k] == true then ent:SetSaveValue(k, v) end
+                end
+            end
+
+            -- Handle NPCs entering the vehicle/passenger seat.
+            if ent:IsNPC() then
+                local vehicleRef = data.SaveTable["LambdaVehicle"]
+                if vehicleRef ~= nil then
+                    local refId = GetRefId(vehicleRef)
+                    DbgPrint("Found vehicle reference for " .. tostring(ent) .. ": " .. vehicleRef)
+                    local vehicle = self.CreatedTransitionObjects[refId]
+                    if IsValid(vehicle) then
+                        ent:SetNWEntity("LambdaVehicle", vehicle)
+                    end
+                    local oldName = vehicle:GetName()
+                    local newName = oldName .. tostring(vehicle:EntIndex())
+                    vehicle:SetName(newName)
+                    ent:SetParent(nil)
+                    -- FIXME: Should probably use Input to bypass the queue, investigate why this crashed.
+                    ent:Fire("EnterVehicleImmediately", newName)
+                    vehicle:SetName(oldName)
                 end
             end
 

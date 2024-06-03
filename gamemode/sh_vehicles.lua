@@ -43,6 +43,7 @@ if SERVER then
         for k, _ in pairs(self.ActiveVehicles) do
             if IsValid(k) then
                 DbgPrint("Removing vehicle: " .. tostring(k))
+                k:ClearAllOutputs()
                 k:Remove()
                 local ply = k.LambdaPlayer
 
@@ -170,6 +171,7 @@ if SERVER then
     function GM:OnCompanionEnteredVehicle(jalopy, passenger)
         DbgPrint("Companion entered vehicle")
         jalopy:SetNWEntity("LambdaPassenger", passenger)
+        passenger:SetNWEntity("LambdaVehicle", jalopy)
 
         local seat = jalopy:GetNWEntity("PassengerSeat")
         if IsValid(seat) then
@@ -183,6 +185,7 @@ if SERVER then
     function GM:OnCompanionExitedVehicle(jalopy, passenger)
         DbgPrint("Companion exited vehicle")
         jalopy:SetNWEntity("LambdaPassenger", NULL)
+        passenger:SetNWEntity("LambdaVehicle", NULL)
 
         local seat = jalopy:GetNWEntity("PassengerSeat")
         if IsValid(seat) then
