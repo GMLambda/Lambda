@@ -387,6 +387,9 @@ function GM:PreCleanupMap()
     self.ChangingLevel = false
 
     if SERVER then
+        -- Make sure there are no builtin outputs
+        RunConsoleCommand("ent_cancelpendingentfires")
+
         -- Disable all overlays.
         for _, v in pairs(ents.FindByClass("env_screenoverlay")) do
             v:Input("StopOverlays")
@@ -399,9 +402,12 @@ function GM:PreCleanupMap()
             v:KillSilent()
         end
 
-        -- Prevent recursions.
         for _, v in pairs(ents.GetAll()) do
+            -- Prevent recursions.
             v:EnableRespawn(false)
+
+            -- Prevent firing i/o when cleaned up, this otherwise slips to the post cleanup.
+            v:ClearAllOutputs()
         end
 
         -- NOTE: Sometimes scripted scenes can play after map cleanup.
@@ -410,12 +416,12 @@ function GM:PreCleanupMap()
             for _, v in pairs(ents.FindByClass("logic_choreographed_scene")) do
                 -- Cancel all scenes.
                 DbgPrint("Cancel scene " .. tostring(v))
-                v:Fire("Cancel")
+                v:Input("Cancel")
             end
 
             for _, v in pairs(ents.FindByClass("npc_*")) do
                 DbgPrint("Cancel scripting " .. tostring(v))
-                v:Fire("StopScripting")
+                v:Input("StopScripting")
             end
         end
 
@@ -430,6 +436,7 @@ function GM:PreCleanupMap()
         self:ResetVehicleCheckpoint()
         self:ResetCheckpoints()
         self:ResetSceneCheck()
+        self:CleanUpVehicles()
         self:ClearLevelDesignerPlacedObjects()
         -- Reset all queued functions.
         util.ResetFunctionQueue()
