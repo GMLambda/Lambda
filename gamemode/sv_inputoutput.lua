@@ -72,14 +72,14 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
     end
 
     -- Deal with AddOutput.
-    if inputName == "AddOutput" then
+    if inputName == "AddOutput" and self.IsCreatingInternalOutputs ~= true then
         -- Split outputname and output parameters.
         local outputName, outputParams = string.match(value, "(%w+)%s+(.*)")
 
         -- AddOutput uses double point instead of comma, replace that.
         outputParams = string.gsub(outputParams, ":", ",")
 
-        print(ent, "AddOutput", outputName, outputParams)
+        DbgPrint("Handling AddOutput", ent, outputName, outputParams)
 
         ent.EntityOutputs = ent.EntityOutputs or {}
         local outputs = ent.EntityOutputs[outputName] or {}

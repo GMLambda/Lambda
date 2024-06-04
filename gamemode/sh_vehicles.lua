@@ -77,9 +77,11 @@ if SERVER then
         end
 
         -- Akward hack to know if an NPC passenger is inside. We handle this with our AcceptInput hook.
+        self.IsCreatingInternalOutputs = true
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,,0,-1")
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,,1,-1")
-
+        self.IsCreatingInternalOutputs = false
+        
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
             if not IsValid(vehicle) then return end
