@@ -507,7 +507,7 @@ function GM:OnEntityCreated(ent)
         end)
 
         -- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
-        if ent:IsVehicle() then
+        if ent:IsVehicle() and ent.CreatedByLevelTransition ~= true then
             self:HandleVehicleCreation(ent)
         end
     end

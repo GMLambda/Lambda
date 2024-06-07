@@ -191,7 +191,7 @@ function GM:CalcViewModelView(wep, vm, oldPos, oldAng, vm_origin, vm_angles)
     local ply = wep:GetOwner()
     if IsValid(ply) and IsValid(ply:GetVehicle()) then
         local vehicle = ply:GetVehicle()
-        if vehicle:GetNWBool("IsPassengerSeat", false) == true then
+        if self:VehicleIsPassengerSeat(vehicle) == true then
             local ang = oldAng
             local eyeAng = ply:GetAimVector():Angle()
             ang:Set(eyeAng + ply:GetViewPunchAngles())
@@ -307,7 +307,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
         local vehicle = ply:GetVehicle()
         local wep = ply:GetActiveWeapon()
         if IsValid(vehicle) then
-            if vehicle:GetNWBool("IsPassengerSeat", false) == true then
+            if self:VehicleIsPassengerSeat(vehicle) == true then
                 local eyeAng = ply:GetAimVector():Angle()
                 ang:Set(eyeAng + ply:GetViewPunchAngles())
                 local _, localang = WorldToLocal(Vector(0, 0, 0), ang, Vector(0, 0, 0), vehicle:GetAngles())

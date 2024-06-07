@@ -20,7 +20,6 @@ function ENT:Initialize()
     end
 
     self:DrawShadow(false)
-    --self:AddEffects(EF_NODRAW)
 end
 
 function ENT:AttachToVehicle(vehicle)
@@ -28,10 +27,9 @@ function ENT:AttachToVehicle(vehicle)
     self:SetPos(vehicle:GetPos())
     self:SetAngles(vehicle:GetAngles())
     self:SetParent(vehicle)
-    --self:AddEffects(EF_NODRAW)
     self:DrawShadow(false)
     self.Vehicle = vehicle
-    self.Player = vehicle.LambdaPlayer
+    self.Player = GAMEMODE:VehicleGetPlayerOwner(vehicle)
     self:SetNWEntity("LambdaVehicleOwner", self.Player)
     self:SetNWBool("LambdaVehicleTaken", IsValid(self.Player))
 end
@@ -50,8 +48,9 @@ if SERVER then
             return
         end
 
-        if self.Player ~= vehicle.LambdaPlayer then
-            self.Player = vehicle.LambdaPlayer
+        local vehicleOwner = GAMEMODE:VehicleGetPlayerOwner(vehicle)
+        if self.Player ~= vehicleOwner then
+            self.Player = vehicleOwner
             self:SetNWEntity("LambdaVehicleOwner", self.Player)
             self:SetNWBool("LambdaVehicleTaken", IsValid(self.Player))
             DbgPrint("Owner changed")

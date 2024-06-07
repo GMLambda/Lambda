@@ -453,7 +453,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             end
 
             data.VehicleScript = ent:GetInternalVariable("VehicleScript")
-            if ent:GetNWBool("IsPassengerSeat", false) == true then data.IsPassengerSeat = true end
+            if self:VehicleIsPassengerSeat(ent) == true then data.IsPassengerSeat = true end
         elseif ent:IsDoor() then
             data.Type = ENT_TYPE_DOOR
             if ent:IsDoorOpen() or ent:IsDoorOpening() then
@@ -879,6 +879,7 @@ function GM:CreateTransitionObjects()
                 DbgPrint("Using global entity!")
             else
                 ent = ents.Create(data.Class)
+                ent.CreatedByLevelTransition = true
             end
 
             if not IsValid(ent) then
@@ -984,7 +985,7 @@ function GM:CreateTransitionObjects()
                 local parent = self.CreatedTransitionObjects[data.Parent]
                 if IsValid(parent) then
                     ent:SetParent(parent)
-                    if ent:GetNWBool("IsPassengerSeat", false) == true then
+                    if self:VehicleIsPassengerSeat(ent) == true then
                         -- FIX: Make sure we assign the seat to the vehicle.
                         parent:SetNWEntity("PassengerSeat", ent)
                     end
@@ -1005,7 +1006,7 @@ function GM:CreateTransitionObjects()
                         ent:SetSaveValue(k, refEnt)
                     end
                 else
-                    if SAVETABLE_WHITELIST[k] == true then 
+                    if SAVETABLE_WHITELIST[k] == true then
                         DbgPrint("Setting save value for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(v))
                         ent:SetSaveValue(k, v)
                     end

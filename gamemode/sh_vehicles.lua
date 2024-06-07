@@ -8,9 +8,10 @@ local CurTime = CurTime
 local VEHICLE_THINK = 1
 VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
 VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
-local VEHICLE_JEEP = 0
-local VEHICLE_AIRBOAT = 1
-local VEHICLE_JALOPY = 2
+local VEHICLE_JEEP = 1
+local VEHICLE_AIRBOAT = 2
+local VEHICLE_JALOPY = 3
+local VEHICLE_PASSENGER = 4
 local NEXT_VEHICLE_SPAWN = CurTime()
 local VEHICLE_SPAWN_TIME = 2
 
@@ -40,18 +41,13 @@ if SERVER then
     function GM:CleanUpVehicles()
         DbgPrint("Cleaning up vehicles..")
 
-        for k, _ in pairs(self.ActiveVehicles) do
+        for vehicle, _ in pairs(self.ActiveVehicles) do
             if IsValid(k) then
-                DbgPrint("Removing vehicle: " .. tostring(k))
-                k:ClearAllOutputs()
-                k:Remove()
-                local ply = k.LambdaPlayer
-
-                if IsValid(ply) and ply.OwnedVehicle == k then
-                    ply.OwnedVehicle = nil
-                end
+                DbgPrint("Removing vehicle: " .. tostring(vehicle))
+                vehicle:ClearAllOutputs()
+                vehicle:Remove()
             else
-                DbgPrint("Vehicle " .. tostring(k) .. " invalid")
+                DbgPrint("Vehicle " .. tostring(vehicle) .. " invalid")
             end
         end
 
@@ -60,6 +56,22 @@ if SERVER then
 
     function GM:ResetVehicleCheck()
         self.NextVehicleThink = CurTime() + VEHICLE_THINK
+    end
+
+    function GM:VehicleSetPlayerOwner(vehicle, ply)
+        vehicle:SetNWEntity("LambdaVehicleOwner", ply)
+    end
+
+    function GM:PlayerSetVehicleOwned(ply, vehicle)
+        ply:SetNWEntity("LambdaOwnedVehicle", vehicle)
+    end
+
+    function GM:SetVehicleType(vehicle, vehicleType)
+        vehicle:SetNWInt("LambdaVehicleType", vehicleType)
+    end
+
+    function GM:VehicleSetPassengerSeat(vehicle, seat)
+        vehicle:SetNWEntity("PassengerSeat", seat)
     end
 
     function GM:HandleVehicleCreation(vehicle)
@@ -81,7 +93,7 @@ if SERVER then
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,,0,-1")
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,,1,-1")
         self.IsCreatingInternalOutputs = false
-        
+
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
             if not IsValid(vehicle) then return end
@@ -100,19 +112,14 @@ if SERVER then
             DbgPrint(vehicle, "Vehicle type: " .. tostring(vehicleType))
 
             self.ActiveVehicles[vehicle] = true
-            vehicle:SetCustomCollisionCheck(true)
+            --vehicle:SetCustomCollisionCheck(true)
 
             vehicle:CallOnRemove("LambdaVehicleCleanup", function(ent)
                 self.ActiveVehicles[ent] = nil
-                local ply = ent.LambdaPlayer
-
-                if IsValid(ply) and ply.OwnedVehicle == ent then
-                    ply.OwnedVehicle = nil
-                end
             end)
 
             vehicle.AllowVehicleCheckpoint = true
-            vehicle.LambdaVehicleType = vehicleType
+            self:SetVehicleType(vehicle, vehicleType)
 
             local tracker = ents.Create("lambda_vehicle_tracker")
             tracker:AttachToVehicle(vehicle)
@@ -135,7 +142,9 @@ if SERVER then
         seat:SetModel(mdl)
         seat:SetParent(parent)
         seat:Spawn()
+        -- TODO: Remove this, legacy.
         seat:SetNWBool("IsPassengerSeat", true)
+        GAMEMODE:SetVehicleType(seat, VEHICLE_PASSENGER)
         return seat
     end
 
@@ -223,19 +232,28 @@ if SERVER then
     end
 
     function GM:PlayerEnteredVehicle(ply, vehicle, role)
+        DbgPrint("PlayerEnteredVehicle", ply, vehicle, role)
+
         if ply:IsSprinting() == true then
             ply:StopSprinting()
         end
 
-        if vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_airboat" or vehicle:GetClass() == "prop_vehicle_jalopy" then
-            if vehicle.LambdaPlayer ~= nil and vehicle.LambdaPlayer ~= ply then
-                DbgError("Bogus vehicle logic: Player entering vehicle that does not belong to him")
-            elseif vehicle.LambdaPlayer == nil then
+        local vehicleType = self:VehicleGetType(vehicle)
+        if vehicleType ~= VEHICLE_PASSENGER then
+            -- Clear the previous vehicle owner.
+            local prevVehicle = self:PlayerGetVehicleOwned(ply)
+            if IsValid(prevVehicle) then
+                self:VehicleSetPlayerOwner(prevVehicle, nil)
+            end
+
+            local owner = self:VehicleGetPlayerOwner(vehicle)
+            if IsValid(owner) and owner ~= ply then
+                DbgError("Bogus vehicle logic: Player entering vehicle that does not belong to him", owner, ply, vehicle)
+            elseif owner == nil then
                 -- Now belongs to the specific player.
                 DbgPrint("Player " .. tostring(ply) .. " gets ownership of vehicle: " .. tostring(vehicle))
-                vehicle.LambdaPlayer = ply
-                ply.OwnedVehicle = vehicle
-                ply:SetNWEntity("LambdaOwnedVehicle", vehicle)
+                self:VehicleSetPlayerOwner(vehicle, ply)
+                self:PlayerSetVehicleOwned(ply, vehicle)
             end
         end
 
@@ -243,7 +261,7 @@ if SERVER then
         ang = vehicle:WorldToLocalAngles(ang)
         ply:SetEyeAngles(ang)
 
-        if vehicle:GetNWBool("IsPassengerSeat", false) then
+        if self:VehicleIsPassengerSeat(vehicle) then
             local parent = vehicle:GetParent()
             if IsValid(parent) and parent:GetNWEntity("PassengerSeat") == vehicle then
                 self:OnPlayerPassengerEnteredVehicle(ply, parent, vehicle)
@@ -271,28 +289,19 @@ if SERVER then
             vehicle:SetVehicleEntryAnim(true)
         end
 
+        local vehicleType = self:VehicleGetType(vehicle)
+
         if ply:Alive() == false then
-            DbgPrint("Player who left is now dead, we shall remove this")
-            -- We give the driver a chance to pick up this vehicle.
-            local passengerSeat = vehicle:GetNWEntity("PassengerSeat")
-
-            if IsValid(passengerSeat) then
-                local passenger = passengerSeat:GetDriver()
-
-                if IsValid(passenger) and passenger:IsPlayer() then
-                    DbgPrint("Giving passenger temporary ownership of vehicle")
-                    vehicle.LambdaPlayer = nil
-                    vehicle.LambdaAllowEnter = passenger
-                    ply.OwnedVehicle = nil
-                    ply:SetNWEntity("LambdaOwnedVehicle", nil)
-                end
+            if vehicleType ~= VEHICLE_PASSENGER then
+                self:VehicleSetPlayerOwner(vehicle, nil)
+                self:VehicleDriverKilled(vehicle, ply)
             end
         else
             -- Make sure players won't collide if they exit strangely.
             ply:DisablePlayerCollide(true)
         end
 
-        if ply:Alive() and vehicle:GetNWBool("IsPassengerSeat", false) == true then
+        if ply:Alive() and vehicleType == VEHICLE_PASSENGER then
             local ang = vehicle:GetAngles()
             local pos = vehicle:GetPos()
             local exitpos = pos + (ang:Forward() * 50)
@@ -302,7 +311,7 @@ if SERVER then
             vehicle:GetParent().Passenger = nil
 
             local parent = vehicle:GetParent()
-            if IsValid(parent) and parent:GetNWEntity("PassengerSeat") == vehicle then
+            if IsValid(parent) and self:VehicleGetPassengerSeat(parent) == vehicle then
                 self:OnPlayerPassengerExitedVehicle(ply, parent, vehicle)
             end
         end
@@ -311,52 +320,46 @@ if SERVER then
     function GM:CanPlayerEnterVehicle(ply, vehicle, role)
         DbgPrint("CanPlayerEnterVehicle", ply, vehicle)
 
-        if ply.OwnedVehicle ~= nil and IsValid(ply.OwnedVehicle) == false then
-            -- Just to make sure, its possible it might error somewhere and did not unassign it.
-            ply.OwnedVehicle = nil
-        end
+        -- Disallow by default.
+        ply:SetAllowWeaponsInVehicle(false)
 
-        if vehicle:GetNWBool("IsPassengerSeat", false) == true then
-            vehicle:SetKeyValue("limitview", "0")
-            ply:SetAllowWeaponsInVehicle(true)
-        else
-            ply:SetAllowWeaponsInVehicle(false)
-        end
-
-        if vehicle.SetVehicleEntryAnim ~= nil then
-            vehicle.ResetVehicleEntryAnim = true
-            vehicle:SetVehicleEntryAnim(false)
-        else
-            vehicle.ResetVehicleEntryAnim = false
-        end
-
-        if vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_airboat" then
-            if vehicle.LambdaPlayer == nil and ply.OwnedVehicle == nil then
-                -- Not yet owned.
-                return true
-            elseif vehicle.LambdaPlayer == nil and ply.OwnedVehicle ~= nil then
-                if vehicle.LambdaAllowEnter == ply then
-                    -- Important to set this, RemovePlayerVehicles cleans up those where we are allowed to enter.
-                    vehicle.LambdaAllowEnter = nil
-                    -- Remove his old vehicle.
-                    self:RemovePlayerVehicles(ply)
-
-                    return true
-                end
-
-                -- TODO: Add notification of whats happening.
+        local vehicleType = self:VehicleGetType(vehicle)
+        if vehicleType ~= VEHICLE_PASSENGER then
+            local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
+            -- Check if the vehicle is owned by someone else.
+            if IsValid(vehicleOwner) and vehicleOwner ~= ply then
+                DbgPrint("Player not allowed to enter vehicle, owned by: " .. tostring(vehicleOwner))
                 return false
-            elseif vehicle.LambdaPlayer ~= nil then
-                -- Check if we own the vehicle.
-                if vehicle.LambdaPlayer == ply then
-                    DbgPrint("Player can enter")
+            end
 
-                    return true
-                else
-                    DbgPrint("Player not allowed to enter")
+            -- Check if the vehicle is already owned by us.
+            if vehicleOwner == ply then
+                DbgPrint("Player owns the vehicle")
+                return true
+            end
 
+            -- Check if the player already owns a vehicle other than this one.
+            if vehicle.LambdaPlayerTakeover ~= ply then
+                local playerVehicle = self:PlayerGetVehicleOwned(ply)
+                if IsValid(playerVehicle) and playerVehicle ~= vehicle then
+                    DbgPrint("Player already owns a vehicle")
                     return false
                 end
+            end
+
+            -- Take ownership of the vehicle.
+            self:VehicleSetPlayerOwner(vehicle, ply)
+            self:PlayerSetVehicleOwned(ply, vehicle)
+
+        elseif vehicleType == VEHICLE_PASSENGER then
+            vehicle:SetKeyValue("limitview", "0")
+            ply:SetAllowWeaponsInVehicle(true)
+
+            if vehicle.SetVehicleEntryAnim ~= nil then
+                vehicle.ResetVehicleEntryAnim = true
+                vehicle:SetVehicleEntryAnim(false)
+            else
+                vehicle.ResetVehicleEntryAnim = false
             end
         end
 
@@ -367,17 +370,16 @@ if SERVER then
         DbgPrint("GM:RemovePlayerVehicles", ply)
 
         for vehicle, _ in pairs(self.ActiveVehicles) do
-            if vehicle.LambdaPlayer == ply then
+            local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
+            local passenger = self:GetVehiclePassenger(vehicle)
+            if vehicleOwner == ply and not IsValid(passenger) then
                 DbgPrint("Removing player vehicle: " .. tostring(vehicle))
-                vehicle:Remove()
-            elseif vehicle.LambdaAllowEnter == ply and vehicle.LambdaPlayer == nil then
-                DbgPrint("Passenger took no ownership of the vehicle, no owner, removing.")
+                self:VehicleSetPlayerOwner(vehicle, nil)
                 vehicle:Remove()
             end
         end
 
-        ply.OwnedVehicle = nil
-        ply:SetNWEntity("LambdaOwnedVehicle", nil)
+        self:PlayerSetVehicleOwned(ply, nil)
     end
 
     function GM:SetSpawnPlayerVehicles(state)
@@ -408,6 +410,16 @@ if SERVER then
         return false
     end
 
+    function GM:GetVehicleSpawnPos()
+        if self.VehicleCheckpoint ~= nil then
+            return self.VehicleCheckpoint.Pos
+        end
+        if #self.MapVehicles == 0 then
+            return nil
+        end
+        return util.StringToType(self.MapVehicles[1]["origin"], "Vector")
+    end
+
     function GM:SpawnVehicleAtSpot(vehicle)
         local pos = util.StringToType(vehicle["origin"], "Vector")
 
@@ -427,6 +439,7 @@ if SERVER then
             -- The box is somewhat big, we should deal with players standing directly in the way.
         end
 
+        DbgPrint("Spawning vehicle...")
         local newVehicle = ents.CreateFromData(vehicle)
 
         if self.VehicleCheckpoint ~= nil then
@@ -444,94 +457,70 @@ if SERVER then
         NEXT_VEHICLE_SPAWN = CurTime() + VEHICLE_SPAWN_TIME
     end
 
+    function GM:CheckRemoveVehicle(vehicle)
+        local passenger = self:GetVehiclePassenger(vehicle)
+        if IsValid(passenger) then
+            -- Never remove vehicles that have a passenger.
+            return
+        end
+
+        local vehiclePos = vehicle:GetPos()
+        local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
+        if IsValid(vehicleOwner) then
+            -- Check how far away the vehicle owner is.
+            local ownerDist = vehicleOwner:GetPos():Distance(vehiclePos)
+            if ownerDist < 1024 then
+                return
+            end
+        end
+
+        if vehicleOwner ~= nil and not IsValid(vehicleOwner) then
+            -- Probably disconnected client.
+            self:VehicleSetPlayerOwner(vehicle, nil)
+        end
+
+        local spawnPos = self:GetVehicleSpawnPos()
+        if spawnPos ~= nil then
+            -- See if the checkpoint has moved.
+            local dist = vehiclePos:Distance(spawnPos)
+            if dist < 256 then
+                return
+            end
+        end
+
+        -- Check if there are players nearby.
+        if util.IsPlayerNearby(vehiclePos, 1024) then
+            return
+        end
+
+        vehicle:Remove()
+    end
+
     function GM:VehiclesThink()
-        if self:IsRoundRunning() == false and self:RoundElapsedTime() >= 1 then return end
+        if self:IsRoundRunning() == false and self:RoundElapsedTime() >= 1 then
+            return
+        end
+
+        if #self.MapVehicles == 0 then
+            -- No vehicles on this map.
+            return
+        end
+
         local curTime = CurTime()
         if curTime < self.NextVehicleThink then return end
         self.NextVehicleThink = curTime + VEHICLE_THINK
 
+        for vehicle, _ in pairs(self.ActiveVehicles) do
+            if not IsValid(vehicle) then
+                self.ActiveVehicles[vehicle] = nil
+            else
+                self:CheckRemoveVehicle(vehicle)
+            end
+        end
+
         if self:CanSpawnVehicle() then
-            DbgPrint("Spawning vehicles...")
             for _, v in pairs(self.MapVehicles) do
                 self:SpawnVehicleAtSpot(v)
-            end
-        end
-
-        local playerPosTable = {}
-        local centerPos = Vector(0, 0, 0)
-        local inVehicle = 0
-        local alivePlayers = 0
-
-        for _, v in pairs(player.GetAll()) do
-            if v:Alive() == false then continue end
-            alivePlayers = alivePlayers + 1
-
-            if v:InVehicle() == true then
-                inVehicle = inVehicle + 1
-            end
-
-            local pos = v:GetPos()
-            table.insert(playerPosTable, pos)
-            centerPos = centerPos + pos
-        end
-
-        if #playerPosTable > 0 then
-            centerPos = centerPos / #playerPosTable
-        end
-
-        -- Make sure we clean up vehicles from disconnected players.
-        for vehicle, _ in pairs(self.ActiveVehicles or {}) do
-            if vehicle.LambdaPlayer ~= nil then
-                local ply = vehicle.LambdaPlayer
-
-                if not IsValid(ply) then
-                    DbgPrint("Removing player vehicle")
-                    vehicle:Remove()
-                end
-            else
-                local passenger = self:GetVehiclePassenger(vehicle)
-                if IsValid(passenger) then
-                    -- Can't remove, has a passenger inside.
-                    continue
-                end
-
-                local isVisible = false
-                for _, ply in pairs(player.GetAll()) do
-                    if ply:Visible(vehicle) then
-                        isVisible = true
-                        break
-                    end
-                end
-
-                if isVisible then
-                    -- Vehicle is visible, don't remove it.
-                    continue
-                end
-
-                -- If all the players are too far away remove it, its most likely abondended.
-                -- and will be recreated at the current vehicle checkpoint.
-                if #playerPosTable > 0 and inVehicle < alivePlayers then
-                    local vehiclePos = vehicle:GetPos()
-                    local centerDist = centerPos:Distance(vehiclePos)
-                    local nearby = false
-
-                    if centerDist > 1024 then
-                        for _, p in pairs(playerPosTable) do
-                            local dist = p:Distance(vehiclePos)
-
-                            if dist < 4500 then
-                                nearby = true
-                                break
-                            end
-                        end
-
-                        -- If no player is nearby we can remove the old unowned vehicle.
-                        if nearby == false then
-                            vehicle:Remove()
-                            continue
-                        end
-                    end
-                end
             end
         end
     end
@@ -593,6 +582,47 @@ function GM:VehicleShouldCollide(veh1, veh2)
     end
 end
 
+function GM:VehicleDriverKilled(vehicle, ply)
+    DbgPrint("Vehicle driver dead", ply, vehicle)
+
+    local vehicleType = self:VehicleGetType(vehicle)
+    if vehicleType == VEHICLE_PASSENGER then
+        return
+    end
+
+    local passenger = self:GetVehiclePassenger(vehicle)
+    if IsValid(passenger) then
+        DbgPrint("Notifying passenger")
+
+        -- Send a hint that the passenger can take over.
+        self:AddHint("#LAMBDA_VEHICLE_TAKE_OVER", 7, passenger)
+
+        vehicle.LambdaPlayerTakeover = passenger
+    end
+end
+
+function GM:VehiclePromotePassenger(ply, vehicle)
+    local parent = vehicle:GetParent()
+    if not IsValid(parent) then
+        return
+    end
+
+    if IsValid(parent:GetDriver()) then
+        return
+    end
+
+    local owner = self:VehicleGetPlayerOwner(vehicle)
+    if IsValid(owner) then
+        return
+    end
+
+    print("Switch time")
+    util.RunNextFrame(function()
+        -- Enter the driver side.
+        ply:EnterVehicle(parent)
+    end)
+end
+
 function GM:VehicleMove(ply, vehicle, mv)
     -- We have to call it here because PlayerTick wont be called if we are inside a vehicle.
     self:UpdateSuit(ply, mv)
@@ -603,6 +633,14 @@ function GM:VehicleMove(ply, vehicle, mv)
     --
     if mv:KeyPressed(IN_DUCK) and vehicle.SetThirdPersonMode then
         vehicle:SetThirdPersonMode(not vehicle:GetThirdPersonMode())
+    end
+
+    if SERVER then
+        if mv:KeyDown(IN_SPEED) and mv:KeyDown(IN_USE) then
+            if self:VehicleIsPassengerSeat(vehicle) then
+                self:VehiclePromotePassenger(ply, vehicle)
+            end
+        end
     end
 
     --
@@ -648,4 +686,39 @@ function GM:GetVehiclePassenger(vehicle)
         return seat:GetDriver()
     end
     return nil
+end
+
+function GM:VehicleGetPlayerOwner(vehicle)
+    if not IsValid(vehicle) then
+        DbgError("VehicleGetPlayerOwner: Invalid vehicle")
+        return nil
+    end
+    return vehicle:GetNWEntity("LambdaVehicleOwner", nil)
+end
+
+function GM:PlayerGetVehicleOwned(ply)
+    if not IsValid(ply) then
+        DbgError("PlayerGetVehicleOwned: Invalid player")
+        return nil
+    end
+    return ply:GetNWEntity("LambdaOwnedVehicle", nil)
+end
+
+function GM:VehicleGetType(vehicle, vehicleType)
+    if not IsValid(vehicle) then
+        DbgError("VehicleGetType: Invalid vehicle")
+        return nil
+    end
+    if vehicle:GetNWBool("IsPassengerSeat", false) then
+        return VEHICLE_PASSENGER
+    end
+    vehicle:GetNWInt("LambdaVehicleType", vehicleType)
+end
+
+function GM:VehicleIsPassengerSeat(vehicle)
+    return self:VehicleGetType(vehicle) == VEHICLE_PASSENGER
+end
+
+function GM:VehicleGetPassengerSeat(vehicle)
+    return vehicle:GetNWEntity("PassengerSeat")
 end
