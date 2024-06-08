@@ -47,6 +47,11 @@ if SERVER then
             end
         end
 
+        DbgPrint("Clearing vehicle ownership..")
+        for _, v in pairs(util.GetAllPlayers()) do
+            self:PlayerSetVehicleOwned(v, nil)
+        end
+
         self:ResetVehicleCheck()
     end
 
@@ -55,10 +60,12 @@ if SERVER then
     end
 
     function GM:VehicleSetPlayerOwner(vehicle, ply)
+        DbgPrint("VehicleSetPlayerOwner", vehicle, ply)
         vehicle:SetNWEntity("LambdaVehicleOwner", ply)
     end
 
     function GM:PlayerSetVehicleOwned(ply, vehicle)
+        DbgPrint("PlayerSetVehicleOwned", ply, vehicle)
         ply:SetNWEntity("LambdaOwnedVehicle", vehicle)
     end
 
@@ -68,6 +75,10 @@ if SERVER then
 
     function GM:VehicleSetPassengerSeat(vehicle, seat)
         vehicle:SetNWEntity("PassengerSeat", seat)
+    end
+
+    function GM:VehicleSetCanTakeOver(vehicle, canTakeOver)
+        vehicle:SetNWBool("LambdaVehicleTakeOver", canTakeOver)
     end
 
     function GM:HandleVehicleCreation(vehicle)
@@ -212,11 +223,15 @@ if SERVER then
         if vehicleType ~= VEHICLE_PASSENGER then
             -- Clear the previous vehicle owner.
             local prevVehicle = self:PlayerGetVehicleOwned(ply)
-            if IsValid(prevVehicle) then self:VehicleSetPlayerOwner(prevVehicle, nil) end
+            if IsValid(prevVehicle) then
+                DbgPrint("Player owns another vehicle, clearing ownership", prevVehicle)
+                self:VehicleSetPlayerOwner(prevVehicle, NULL)
+            end
+
             local owner = self:VehicleGetPlayerOwner(vehicle)
             if IsValid(owner) and owner ~= ply then
                 DbgError("Bogus vehicle logic: Player entering vehicle that does not belong to him", owner, ply, vehicle)
-            elseif owner == nil then
+            elseif not IsValid(owner) then
                 -- Now belongs to the specific player.
                 DbgPrint("Player " .. tostring(ply) .. " gets ownership of vehicle: " .. tostring(vehicle))
                 self:VehicleSetPlayerOwner(vehicle, ply)
@@ -249,7 +264,7 @@ if SERVER then
         local vehicleType = self:VehicleGetType(vehicle)
         if ply:Alive() == false then
             if vehicleType ~= VEHICLE_PASSENGER then
-                self:VehicleSetPlayerOwner(vehicle, nil)
+                self:VehicleSetPlayerOwner(vehicle, NULL)
                 self:VehicleDriverKilled(vehicle, ply)
             end
         else
@@ -290,17 +305,14 @@ if SERVER then
             end
 
             -- Check if the player already owns a vehicle other than this one.
-            if vehicle.LambdaPlayerTakeover ~= ply then
+            local canTakeOver = self:VehicleCanTakeOver(vehicle, ply)
+            if not canTakeOver then
                 local playerVehicle = self:PlayerGetVehicleOwned(ply)
                 if IsValid(playerVehicle) and playerVehicle ~= vehicle then
                     DbgPrint("Player already owns a vehicle")
                     return false
                 end
             end
-
-            -- Take ownership of the vehicle.
-            self:VehicleSetPlayerOwner(vehicle, ply)
-            self:PlayerSetVehicleOwned(ply, vehicle)
         elseif vehicleType == VEHICLE_PASSENGER then
             vehicle:SetKeyValue("limitview", "0")
             ply:SetAllowWeaponsInVehicle(true)
@@ -321,7 +333,7 @@ if SERVER then
             local passenger = self:GetVehiclePassenger(vehicle)
             if vehicleOwner == ply and not IsValid(passenger) then
                 DbgPrint("Removing player vehicle: " .. tostring(vehicle))
-                self:VehicleSetPlayerOwner(vehicle, nil)
+                self:VehicleSetPlayerOwner(vehicle, NULL)
                 vehicle:Remove()
             end
         end
@@ -334,19 +346,40 @@ if SERVER then
         if self.SpawnPlayerVehicles == nil then self.SpawnPlayerVehicles = true end
     end
 
+    function GM:GetMaxVehicleCount()
+        if self.MapVehicles == nil or #self.MapVehicles == 0 then
+            -- No vehicles on this map.
+            return 0
+        end
+        -- TODO: Should we always have one extra in reserve? Its possible that a player
+        -- dies far away from the vehicle but has other players around that prevents a despawn.
+        local alive = 0
+        for _, ply in pairs(util.GetAllPlayers()) do
+            if ply:Alive() then alive = alive + 1 end
+        end
+        return alive
+    end
+
     function GM:CanSpawnVehicle()
         if CurTime() < NEXT_VEHICLE_SPAWN then return false end
-        local alivePlayers = 0
-        local playerCount = 0
-        for _, v in pairs(util.GetAllPlayers()) do
-            if v:Alive() then alivePlayers = alivePlayers + 1 end
-            playerCount = playerCount + 1
+
+        local maxVehicles = self:GetMaxVehicleCount()
+        if maxVehicles == 0 then
+            -- No vehicles on this map.
+            return false
         end
 
-        if alivePlayers == 0 then return false end
-        if self.SpawnPlayerVehicles ~= true then return false end
-        if table.Count(self.ActiveVehicles) < playerCount then return true end
-        return false
+        if self.SpawnPlayerVehicles ~= true then
+            -- We are not allowed to spawn vehicles.
+            return false
+        end
+
+        if table.Count(self.ActiveVehicles) >= maxVehicles then
+            -- Exhausted.
+            return false
+        end
+
+        return true
     end
 
     function GM:GetVehicleSpawnPos()
@@ -383,11 +416,11 @@ if SERVER then
         NEXT_VEHICLE_SPAWN = CurTime() + VEHICLE_SPAWN_TIME
     end
 
-    function GM:CheckRemoveVehicle(vehicle)
+    function GM:CheckRemoveVehicle(vehicle, ignoreChecks)
         local passenger = self:GetVehiclePassenger(vehicle)
         if IsValid(passenger) then
             -- Never remove vehicles that have a passenger.
-            return
+            return false
         end
 
         local vehiclePos = vehicle:GetPos()
@@ -395,24 +428,38 @@ if SERVER then
         if IsValid(vehicleOwner) then
             -- Check how far away the vehicle owner is.
             local ownerDist = vehicleOwner:GetPos():Distance(vehiclePos)
-            if ownerDist < 1024 then return end
+            if ownerDist < 1024 then
+                -- Owner is close, don't remove.
+                return false
+            end
         end
 
-        if vehicleOwner ~= nil and not IsValid(vehicleOwner) then
+        if vehicleOwner ~= NULL and not IsValid(vehicleOwner) then
             -- Probably disconnected client.
-            self:VehicleSetPlayerOwner(vehicle, nil)
+            self:VehicleSetPlayerOwner(vehicle, NULL)
         end
 
         local spawnPos = self:GetVehicleSpawnPos()
         if spawnPos ~= nil then
             -- See if the checkpoint has moved.
             local dist = vehiclePos:Distance(spawnPos)
-            if dist < 256 then return end
+            if dist < 256 then
+                -- Vehicle is close to the spawn point.
+                return false
+            end
         end
 
-        -- Check if there are players nearby.
-        if util.IsPlayerNearby(vehiclePos, 1024) then return end
+        if ignoreChecks ~= true then
+            -- Check if there are players nearby.
+            if util.IsPlayerNearby(vehiclePos, 1024) then
+                -- Players are nearby, don't remove.
+                return
+            end
+        end
+
         vehicle:Remove()
+
+        return true
     end
 
     function GM:VehiclesThink()
@@ -422,6 +469,9 @@ if SERVER then
             return
         end
 
+        local plyCount = player.GetCount()
+        local vehicleCount = table.Count(self.ActiveVehicles)
+
         local curTime = CurTime()
         if curTime < self.NextVehicleThink then return end
         self.NextVehicleThink = curTime + VEHICLE_THINK
@@ -429,7 +479,10 @@ if SERVER then
             if not IsValid(vehicle) then
                 self.ActiveVehicles[vehicle] = nil
             else
-                self:CheckRemoveVehicle(vehicle)
+                local additionalChecks = vehicleCount > plyCount
+                if self:CheckRemoveVehicle(vehicle, additionalChecks) then
+                    vehicleCount = vehicleCount - 1
+                end
             end
         end
 
@@ -493,30 +546,69 @@ end
 function GM:VehicleDriverKilled(vehicle, ply)
     DbgPrint("Vehicle driver dead", ply, vehicle)
     local vehicleType = self:VehicleGetType(vehicle)
-    if vehicleType == VEHICLE_PASSENGER then return end
+    if vehicleType == VEHICLE_PASSENGER then
+        -- Do nothing for passenger seats.
+        return
+    end
+    -- Check if we have a passenger, notify him that he can take over.
     local passenger = self:GetVehiclePassenger(vehicle)
     if IsValid(passenger) then
         DbgPrint("Notifying passenger")
         -- Send a hint that the passenger can take over.
         self:AddHint("#LAMBDA_VEHICLE_TAKE_OVER", 7, passenger)
-        vehicle.LambdaPlayerTakeover = passenger
     end
+    -- Allow vehicle to be taken over.
+    self:VehicleSetCanTakeOver(vehicle, true)
 end
 
 function GM:VehiclePromotePassenger(ply, vehicle)
     local parent = vehicle:GetParent()
-    if not IsValid(parent) then return end
-    if IsValid(parent:GetDriver()) then return end
+    if not IsValid(parent) then
+        DbgError("VehiclePromotePassenger: Invalid parent")
+        return
+    end
+    if IsValid(parent:GetDriver()) then
+        DbgError("VehiclePromotePassenger: Parent already has a driver")
+        return
+    end
     local owner = self:VehicleGetPlayerOwner(vehicle)
-    if IsValid(owner) then return end
-    print("Switch time")
+    if IsValid(owner) then
+        DbgError("VehiclePromotePassenger: Vehicle has an owner")
+        return
+    end
     util.RunNextFrame(function()
         -- Enter the driver side.
         ply:EnterVehicle(parent)
     end)
 end
 
+function GM:VehicleStartCommand(ply, vehicle, cmd)
+    -- Handle the vehicle take-over mechanic.
+    local mainVehicle = vehicle:GetParent()
+    if not IsValid(mainVehicle) then
+        return
+    end
+
+    if not (cmd:KeyDown(IN_USE) and cmd:KeyDown(IN_SPEED)) then
+        return
+    end
+
+    if self:VehicleIsPassengerSeat(vehicle) then
+        if self:VehicleCanTakeOver(mainVehicle, ply) then
+            if SERVER then
+                self:VehiclePromotePassenger(ply, vehicle)
+            end
+        else
+            DbgPrint("Not allowed to take-over vehicle")
+            -- Remove the keys from the player.
+            cmd:RemoveKey(IN_USE)
+            cmd:RemoveKey(IN_SPEED)
+        end
+    end
+end
+
 function GM:VehicleMove(ply, vehicle, mv)
+    local modified = false
     -- We have to call it here because PlayerTick wont be called if we are inside a vehicle.
     self:UpdateSuit(ply, mv)
     self:PlayerWeaponTick(ply, mv)
@@ -524,7 +616,6 @@ function GM:VehicleMove(ply, vehicle, mv)
     -- On duck toggle third person view
     --
     if mv:KeyPressed(IN_DUCK) and vehicle.SetThirdPersonMode then vehicle:SetThirdPersonMode(not vehicle:GetThirdPersonMode()) end
-    if SERVER then if mv:KeyDown(IN_SPEED) and mv:KeyDown(IN_USE) then if self:VehicleIsPassengerSeat(vehicle) then self:VehiclePromotePassenger(ply, vehicle) end end end
     --
     -- Adjust the camera distance with the mouse wheel
     --
@@ -550,6 +641,7 @@ function GM:VehicleMove(ply, vehicle, mv)
 
         if len < 50 and (vehicle:GetClass() == "prop_vehicle_jeep" or vehicle:GetClass() == "prop_vehicle_jalopy") then vehicle:Fire("HandBrakeOn") end
     end
+    return modified
 end
 
 function GM:GetVehiclePassenger(vehicle)
@@ -596,4 +688,18 @@ end
 
 function GM:VehicleGetPassengerSeat(vehicle)
     return vehicle:GetNWEntity("PassengerSeat")
+end
+
+function GM:VehicleCanTakeOver(vehicle, ply)
+    local owner = self:VehicleGetPlayerOwner(vehicle)
+    if not IsValid(owner) then
+        -- If there is no owner we can always take it.
+        return true
+    end
+    if owner == ply then
+        -- If we are the owner we can always take it.
+        return true
+    end
+    -- If the driver died in a vehicle we can take it over.
+    return vehicle:GetNWBool("LambdaVehicleTakeOver", false)
 end

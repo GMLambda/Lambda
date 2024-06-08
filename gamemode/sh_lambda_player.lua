@@ -468,7 +468,6 @@ if SERVER then
         ply:DisablePlayerCollide(true)
         -- Lets remove whatever the player left on vehicles behind before he got killed.
         if ply.Reviving ~= true then
-            self:RemovePlayerVehicles(ply)
             -- Should we really do this?
             ply.WeaponDuplication = {}
             ply:RemoveSuit()
@@ -1098,6 +1097,12 @@ function GM:StartCommand(ply, cmd)
     -- offset the player for a short moment when pressing IN_DUCK again. We suppress this.
     if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK))) end
     ply.LastUserCmdButtons = cmd:GetButtons()
+
+    -- Handle the vehicle take-over mechanic.
+    local vehicle = ply:GetVehicle()
+    if IsValid(vehicle) then
+        self:VehicleStartCommand(ply, vehicle, cmd)
+    end
 end
 
 function GM:SetupMove(ply, mv, cmd)
