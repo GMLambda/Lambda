@@ -213,7 +213,9 @@ end
 
 function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     DbgPrint(self, "CreateRagdoll", dmgForce, gibPlayer, didExplode)
+
     local ent = self:GetOwner()
+    local vel = ent:GetVelocity()
 
     if not IsValid(ent) then
         DbgPrint("No valid owner for ragdoll manager")
@@ -225,16 +227,30 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
 
     if mdl == nil then
         DbgPrint("Player has no valid model for ragdoll manager")
-
         return
     end
+
+    -- HACKHACK: Compensate for issue https://github.com/Facepunch/garrysmod-issues/issues/5894
+    local rotation = Angle(0, 0, 0)
+    if SERVER then
+        local vehicle = ent:GetVehicle()
+        if IsValid(vehicle) then
+            local vehicleMdl = vehicle:GetModel()
+            if vehicleMdl == "models/buggy.mdl" then
+                rotation = Angle(0, 85, 0)
+                vel = vehicle:GetVelocity()
+            end
+        end
+    end
+
+    local spawnPos = ent:GetPos()
 
     self:RemoveRagdoll()
     if gibPlayer == true then return self:GibPlayer(dmgForce, gibPlayer, didExplode) end
     local ragdoll = ents.Create("prop_ragdoll")
     ragdoll:SetModel(mdl)
-    ragdoll:SetPos(ent:GetPos())
-    ragdoll:SetAngles(ent:GetAngles())
+    ragdoll:SetPos(spawnPos)
+    ragdoll:SetAngles(Angle(0, 0, 0))
     ragdoll:SetColor(ent:GetColor())
     ragdoll:SetSkin(ent:GetSkin())
 
@@ -253,15 +269,13 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
 
     ragdoll.LastRagdollImpact = 0
     ragdoll:SetNWBool("IsReviving", false)
-
     ragdoll:AddCallback("PhysicsCollide", function(e, data)
         if IsValid(self) then
             self:HandleRagdollCollision(e, data)
         end
     end)
 
-    local vel = ent:GetVelocity()
-
+    local centralPos = ragdoll:GetPos()
     for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
         local bone = ragdoll:GetPhysicsObjectNum(i)
 
@@ -269,8 +283,12 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
             local bp, ba = ent:GetBonePosition(ragdoll:TranslatePhysBoneToBone(i))
 
             if bp and ba then
+                local relativePos = bp - centralPos
+                relativePos:Rotate(rotation)
+                bp = centralPos + relativePos
+
                 bone:SetPos(bp)
-                bone:SetAngles(ba)
+                bone:SetAngles(ba + rotation)
             end
 
             bone:SetVelocity(vel)
