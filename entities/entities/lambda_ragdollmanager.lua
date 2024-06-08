@@ -211,37 +211,51 @@ function ENT:HandleRagdollCollision(ragdoll, data)
     end
 end
 
+-- HACKHACK: Compensate for issue https://github.com/Facepunch/garrysmod-issues/issues/5894
+local function CompensateRotation(ply)
+    local res = Angle(0, 0, 0)
+    local vehicle = ply:GetVehicle()
+    if not IsValid(vehicle) then
+        return res
+    end
+
+    local vehicleMdl = vehicle:GetModel()
+    if vehicleMdl == "models/buggy.mdl" then
+        res = Angle(0, 85, 0)
+    elseif vehicleMdl == "models/airboat.mdl" then
+        res = Angle(0, 85, 0)
+    end
+
+    return res
+end
+
+local function GetPlayerVelocity(ply)
+    local res = ply:GetVelocity()
+    local vehicle = ply:GetVehicle()
+    if not IsValid(vehicle) then
+        return res
+    end
+    return vehicle:GetVelocity()
+end
+
 function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     DbgPrint(self, "CreateRagdoll", dmgForce, gibPlayer, didExplode)
 
     local ent = self:GetOwner()
-    local vel = ent:GetVelocity()
-
     if not IsValid(ent) then
         DbgPrint("No valid owner for ragdoll manager")
-
         return
     end
 
     local mdl = ent:GetModel()
-
     if mdl == nil then
         DbgPrint("Player has no valid model for ragdoll manager")
         return
     end
 
     -- HACKHACK: Compensate for issue https://github.com/Facepunch/garrysmod-issues/issues/5894
-    local rotation = Angle(0, 0, 0)
-    if SERVER then
-        local vehicle = ent:GetVehicle()
-        if IsValid(vehicle) then
-            local vehicleMdl = vehicle:GetModel()
-            if vehicleMdl == "models/buggy.mdl" then
-                rotation = Angle(0, 85, 0)
-                vel = vehicle:GetVelocity()
-            end
-        end
-    end
+    local rotation = CompensateRotation(ent)
+    local vel = GetPlayerVelocity(ent)
 
     local spawnPos = ent:GetPos()
 
