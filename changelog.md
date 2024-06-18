@@ -1,3 +1,5 @@
+0.9.26 (in development)
+
 0.9.25
 - Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
 - Improved: ep1_c17_05: Add a checkpoint after the hallway.
