@@ -2,6 +2,7 @@
 - Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
 - Improved: ep1_c17_05: Add a checkpoint after the hallway.
 - Fixed: ep1_c17_02a: Alyx not picking up a shotgun.
+- Fixed: No longer runs 'skill' concommand, it's blocked since version 201211.
 
 0.9.24
 - Fixed: trigger_multiple ignoring the delay time.
