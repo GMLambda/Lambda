@@ -160,7 +160,10 @@ function GM:AdjustDifficulty()
     if data == nil then return end
 
     if SERVER then
-        RunConsoleCommand("skill", tostring(data.Skill))
+        if tonumber(VERSION) < 201211 then
+            -- Remove this once main is updated.
+            RunConsoleCommand("skill", tostring(data.Skill))
+        end
         game.SetSkillLevel(data.Skill)
 
         for k, v in pairs(self.EnemyNPCs or {}) do
