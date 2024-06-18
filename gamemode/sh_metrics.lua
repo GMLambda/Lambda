@@ -120,7 +120,7 @@ end
 
 function GM:DrawMetrics()
     if self:GetSetting("difficulty_metrics") == false then return end
-    local y = 10
+    local y = 20
 
     -- Draw Difficulty
     do
