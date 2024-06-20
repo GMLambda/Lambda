@@ -277,6 +277,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
         view.origin = self.CurrentViewPos
         view.angles = self.CurrentViewAng
         view.drawviewer = true
+        view.znear = 10
 
         return view
     elseif viewlock == VIEWLOCK_SETTINGS_RELEASE then
@@ -297,6 +298,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
 
         view.origin = self.CurrentViewPos
         view.angles = self.CurrentViewAng
+        view.znear = 10
 
         return view
     else
