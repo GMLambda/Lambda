@@ -1,4 +1,5 @@
 0.9.26 (in development)
+- Improved: Going in and out of the settings no longer clips into the player model.
 
 0.9.25
 - Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
