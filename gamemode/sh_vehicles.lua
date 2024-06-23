@@ -720,7 +720,11 @@ function GM:VehicleGetType(vehicle)
     end
 
     if vehicle:GetNWBool("IsPassengerSeat", false) then return VEHICLE_PASSENGER end
-    return vehicle:GetNWInt("LambdaVehicleType", nil)
+    local res = vehicle:GetNWInt("LambdaVehicleType", -1)
+    if res == -1 then
+        return nil
+    end
+    return res
 end
 
 function GM:VehicleIsPassengerSeat(vehicle)
