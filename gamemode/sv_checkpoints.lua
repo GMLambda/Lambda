@@ -66,6 +66,7 @@ function GM:ResetCheckpoints()
     self.CurrentCheckpoint = nil
     self.CurrentCheckpointPos = nil
     self.NextCheckpointTest = nil
+    self.CheckpointInstances = {}
 end
 
 function GM:CreatePlayerCheckpoint(data)
@@ -112,6 +113,16 @@ local function CreateCheckpointWithTrigger(data)
         end
     end
 
+    local vehicleData = data.Vehicle
+    if vehicleData ~= nil then
+        if vehicleData.Pos == nil then
+            error("Missing Vehicle.Pos in data")
+        end
+        if vehicleData.Ang == nil then
+            error("Missing Vehicle.Ang in data")
+        end
+    end
+
     local triggerData = data.Trigger
 
     if triggerData == nil then
@@ -131,11 +142,19 @@ local function CreateCheckpointWithTrigger(data)
     end
 
     local checkpoint = GAMEMODE:CreateCheckpoint(data.Pos, data.Ang)
+    if data.RenderPos ~= nil then
+        checkpoint:SetRenderPos(data.RenderPos)
+    end
+
     local checkpointTrigger = ents.Create("trigger_once")
     checkpointTrigger:SetupTrigger(triggerData.Pos, triggerData.Ang or Angle(0, 0, 0), triggerData.Mins, triggerData.Maxs)
 
     checkpointTrigger.OnTrigger = function(_, activator)
         GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
+
+        if vehicleData ~= nil then
+            GAMEMODE:SetVehicleCheckpoint(vehicleData.Pos, vehicleData.Ang)
+        end
 
         local mapscript = GAMEMODE:GetMapScript()
         if mapscript ~= nil and mapscript.DefaultLoadout ~= nil then
@@ -160,11 +179,41 @@ local function CreateCheckpointWithTrigger(data)
             end
         end
     end
+
+    local checkpointData = {
+        Checkpoint = checkpoint,
+        Trigger = checkpointTrigger
+    }
+
+    return checkpointData
 end
 
 function GM:CreateCheckpointsFromData(data)
     for _, cp in pairs(data) do
-        CreateCheckpointWithTrigger(cp)
+        local instance = CreateCheckpointWithTrigger(cp)
+        if instance ~= nil then
+            table.insert(self.CheckpointInstances, instance)
+        end
+    end
+end
+
+function GM:ReloadCheckpoints()
+    local mapScript = self:GetMapScript()
+    if mapScript == nil then return end
+
+    -- Remove old ones.
+    self.CheckpointInstances = self.CheckpointInstances or {}
+    for _, v in pairs(self.CheckpointInstances) do
+        if IsValid(v.Trigger) then
+            v.Trigger:Remove()
+        end
+        if IsValid(v.Checkpoint) then
+            v.Checkpoint:Remove()
+        end
+    end
+
+    if mapScript.Checkpoints ~= nil then
+        self:CreateCheckpointsFromData(mapScript.Checkpoints)
     end
 end
 

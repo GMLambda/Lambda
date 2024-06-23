@@ -429,8 +429,7 @@ if SERVER then
     end
 
     function GM:SpawnVehicleAtSpot(vehicle)
-        local pos = util.StringToType(vehicle["origin"], "Vector")
-        if self.VehicleCheckpoint ~= nil then pos = self.VehicleCheckpoint.Pos end
+        local pos = self:GetVehicleSpawnPos()
         -- Check if there is already one.
         local nearbyEnts = ents.FindInBox(pos + VEHICLE_SPAWN_MINS, pos + VEHICLE_SPAWN_MAXS)
         for _, v in pairs(nearbyEnts) do
@@ -442,7 +441,7 @@ if SERVER then
             -- The box is somewhat big, we should deal with players standing directly in the way.
         end
 
-        DbgPrint("Spawning vehicle...")
+        DbgPrint("Spawning vehicle at spot: " .. tostring(pos))
         local newVehicle = ents.CreateFromData(vehicle)
         if self.VehicleCheckpoint ~= nil then
             newVehicle:SetPos(self.VehicleCheckpoint.Pos)

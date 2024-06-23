@@ -136,13 +136,19 @@ function ENT:Think()
     end
 end
 
+-- TODO: Remove all instances, use SetRenderPos
 function ENT:SetVisiblePos(pos)
     self:SetNWVector("VisiblePos", pos)
 end
 
+ENT.SetRenderPos = ENT.SetVisiblePos
+
+-- TODO: Remove all instances, use GetRenderPos
 function ENT:GetVisiblePos()
     return self:GetNWVector("VisiblePos", self:GetPos())
 end
+
+ENT.GetRenderPos = ENT.GetVisiblePos
 
 function ENT:SetDynamicCheckpoint(dynamic)
     self:SetNWBool("DynamicCheckpoint", dynamic)

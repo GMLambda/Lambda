@@ -185,6 +185,10 @@ function GM:OnReloaded()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()
     self:InitializeDifficulty()
+
+    if SERVER then
+        self:ReloadCheckpoints()
+    end
 end
 
 function GM:Tick()

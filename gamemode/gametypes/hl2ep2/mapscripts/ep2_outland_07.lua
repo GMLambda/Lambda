@@ -45,6 +45,20 @@ MAPSCRIPT.GlobalStates = {
 }
 
 MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-9988, -10067, 129),
+        Ang = Angle(0, 0, 0),
+        RenderPos = Vector(-9846, -10569, 114),
+        Trigger = {
+            Pos = Vector(-10506, -11740, 151),
+            Mins = Vector(-500, -50, 0),
+            Maxs = Vector(1500, 50, 200)
+        },
+        Vehicle = {
+            Pos = Vector(-9846, -10604, 118.5),
+            Ang = Angle(0, -100, 0),
+        }
+    },
 }
 
 function MAPSCRIPT:PostInit()
@@ -96,6 +110,8 @@ function MAPSCRIPT:PostInit()
 
     -- Resize the trigger and make it wait for all players.
     ents.WaitForEntityByName("trigger_alyx_start_advisor_scene", function(ent)
+        ent:Remove()
+        local ent = ents.Create("trigger_once")
         ent:SetupTrigger(
             Vector(-9600, -9708, 125),
             Angle(0, 0, 0),
