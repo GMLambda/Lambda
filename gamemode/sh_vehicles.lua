@@ -72,6 +72,7 @@ if SERVER then
     end
 
     function GM:SetVehicleType(vehicle, vehicleType)
+        DbgPrint("SetVehicleType", vehicle, vehicleType)
         vehicle:SetNWInt("LambdaVehicleType", vehicleType)
     end
 
@@ -232,6 +233,7 @@ if SERVER then
         local vehicleType = self:VehicleGetType(vehicle)
         if vehicleType == nil then
             -- Nothing to do here.
+            DbgPrint("Vehicle type is nil")
             return
         end
 
@@ -282,6 +284,7 @@ if SERVER then
         local vehicleType = self:VehicleGetType(vehicle)
         if vehicleType == nil then
             -- Nothing to do here.
+            DbgPrint("Vehicle type is nil", vehicle)
             return
         end
 
@@ -313,6 +316,11 @@ if SERVER then
         -- Disallow by default.
         ply:SetAllowWeaponsInVehicle(false)
         local vehicleType = self:VehicleGetType(vehicle)
+        if vehicleType == nil then
+            -- Nothing to do here.
+            return true
+        end
+
         if vehicleType ~= VEHICLE_PASSENGER then
             local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
             -- Check if the vehicle is owned by someone else.
@@ -333,8 +341,11 @@ if SERVER then
                 local playerVehicle = self:PlayerGetVehicleOwned(ply)
                 if IsValid(playerVehicle) and playerVehicle ~= vehicle then
                     DbgPrint("Player already owns a vehicle")
+                    ply:EmitSound("common/wpn_denyselect.wav")
                     return false
                 end
+            else
+                DbgPrint("Player " .. tostring(ply) .. " can take over vehicle: " .. tostring(vehicle))
             end
         elseif vehicleType == VEHICLE_PASSENGER then
             vehicle:SetKeyValue("limitview", "0")
@@ -696,14 +707,14 @@ function GM:PlayerGetVehicleOwned(ply)
     return ply:GetNWEntity("LambdaOwnedVehicle", nil)
 end
 
-function GM:VehicleGetType(vehicle, vehicleType)
+function GM:VehicleGetType(vehicle)
     if not IsValid(vehicle) then
         DbgError("VehicleGetType: Invalid vehicle")
         return nil
     end
 
     if vehicle:GetNWBool("IsPassengerSeat", false) then return VEHICLE_PASSENGER end
-    vehicle:GetNWInt("LambdaVehicleType", vehicleType)
+    return vehicle:GetNWInt("LambdaVehicleType", nil)
 end
 
 function GM:VehicleIsPassengerSeat(vehicle)
@@ -716,7 +727,7 @@ end
 
 function GM:VehicleCanTakeOver(vehicle, ply)
     local owner = self:VehicleGetPlayerOwner(vehicle)
-    if not IsValid(owner) then
+    if not IsValid(owner) and not IsValid(self:PlayerGetVehicleOwned(ply)) then
         -- If there is no owner we can always take it.
         return true
     end
