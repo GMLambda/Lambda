@@ -85,7 +85,7 @@ if SERVER then
     end
 
     function GM:HandleVehicleCreation(vehicle)
-        DbgPrint("HandleVehicleCreation")
+        DbgPrint("HandleVehicleCreation", vehicle)
         local class = vehicle:GetClass()
         local vehicleType = nil
         if class ~= "prop_vehicle_airboat" and class ~= "prop_vehicle_jeep" then return end
@@ -276,7 +276,7 @@ if SERVER then
 
     function GM:PlayerLeaveVehicle(ply, vehicle)
         -- Reset, we disabled it for transition probably
-        DbgPrint("Player leave: " .. tostring(ply))
+        DbgPrint("PlayerLeaveVehicle", ply, vehicle)
         if vehicle.ResetVehicleEntryAnim == true then
             vehicle:SetVehicleEntryAnim(true)
         end
@@ -320,6 +320,8 @@ if SERVER then
             -- Nothing to do here.
             return true
         end
+
+        DbgPrint(vehicle, "Vehicle Type: " .. tostring(vehicleType))
 
         if vehicleType ~= VEHICLE_PASSENGER then
             local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
