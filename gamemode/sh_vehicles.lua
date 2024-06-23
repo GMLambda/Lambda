@@ -326,6 +326,9 @@ if SERVER then
             -- Check if the vehicle is owned by someone else.
             if IsValid(vehicleOwner) and vehicleOwner ~= ply then
                 DbgPrint("Player not allowed to enter vehicle, owned by: " .. tostring(vehicleOwner))
+                -- If this is true it will start the engine and release the handbrake despite
+                -- the player not being able to enter the vehicle.
+                vehicle:SetVehicleEntryAnim(false)
                 return false
             end
 
@@ -341,7 +344,8 @@ if SERVER then
                 local playerVehicle = self:PlayerGetVehicleOwned(ply)
                 if IsValid(playerVehicle) and playerVehicle ~= vehicle then
                     DbgPrint("Player already owns a vehicle")
-                    ply:EmitSound("common/wpn_denyselect.wav")
+                    ply:EmitSound("HL2Player.UseDeny")
+                    vehicle:SetVehicleEntryAnim(false)
                     return false
                 end
             else
