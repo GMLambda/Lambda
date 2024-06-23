@@ -121,6 +121,8 @@ if SERVER then
         self.DisabledTouchingObjects = {}
         self.TouchingObjects = {}
         self.LastTouch = CurTime()
+        self.PendingStartTouch = false
+
         self:AddDebugOverlays(bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT))
     end
 
@@ -458,7 +460,8 @@ if SERVER then
         --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
         local timeoutEvent = false
 
-        if self:GetNWVar("WaitForTeam") == true then
+        local isTeamWait = self:GetNWVar("WaitForTeam")
+        if isTeamWait == true then
             --DbgPrint("Waiting")
             if self.TeamInside == false then
                 if self.NextTimeout == 0 then
@@ -484,6 +487,15 @@ if SERVER then
 
         if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
             self.OnTrigger(self, ent)
+        end
+
+        if isTeamWait and self.PendingStartTouch == true then
+            DbgPrint(self, "Firing pending StartTouch")
+
+            -- We also have to fire StartTouch because if teamwait is set it will not fire it in StartTouch.
+            self:FireOutputs("OnStartTouch", nil, ent)
+
+            self.PendingStartTouch = false
         end
 
         self:FireOutputs("OnTrigger", nil, ent)
@@ -633,6 +645,9 @@ if SERVER then
             if waitForTeam == false or (waitForTeam == true and self.TeamInside == true) then
                 DbgPrint(self, CurTime() .. ", OnStartTouch")
                 self:FireOutputs("OnStartTouch", nil, ent)
+            else
+                DbgPrint(self, "Delaying StartTouch until condition is met")
+                self.PendingStartTouch = true
             end
 
             if table.Count(self.TouchingObjects) == 1 then
