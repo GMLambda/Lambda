@@ -14,6 +14,8 @@ local VEHICLE_JALOPY = 3
 local VEHICLE_PASSENGER = 4
 local NEXT_VEHICLE_SPAWN = CurTime()
 local VEHICLE_SPAWN_TIME = 2
+local VEHICLE_MIN_DESPAWN_DIST = 5000
+
 if SERVER then
     AddCSLuaFile()
     function GM:InitializeMapVehicles()
@@ -86,6 +88,13 @@ if SERVER then
         local class = vehicle:GetClass()
         local vehicleType = nil
         if class ~= "prop_vehicle_airboat" and class ~= "prop_vehicle_jeep" then return end
+
+        -- Akward hack to know if an NPC passenger is inside. We handle this with our AcceptInput hook.
+        self.IsCreatingInternalOutputs = true
+        vehicle:Input("AddOutput", NULL, NULL, "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,,0,-1")
+        vehicle:Input("AddOutput", NULL, NULL, "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,,1,-1")
+        self.IsCreatingInternalOutputs = false
+
         -- This has to be set this frame.
         if self.MapScript.VehicleGuns == true then
             DbgPrint("Enabling Gun")
@@ -93,12 +102,6 @@ if SERVER then
         else
             DbgPrint("No guns enabled")
         end
-
-        -- Akward hack to know if an NPC passenger is inside. We handle this with our AcceptInput hook.
-        self.IsCreatingInternalOutputs = true
-        vehicle:Input("AddOutput", NULL, NULL, "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,,0,-1")
-        vehicle:Input("AddOutput", NULL, NULL, "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,,1,-1")
-        self.IsCreatingInternalOutputs = false
 
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
@@ -147,6 +150,8 @@ if SERVER then
     end
 
     function GM:HandleJeepCreation(jeep)
+        DbgPrint("HandleJeepCreation", jeep)
+
         local seat = jeep:GetNWEntity("PassengerSeat")
         if IsValid(seat) then
             -- Already exists.
@@ -158,6 +163,8 @@ if SERVER then
     end
 
     function GM:HandleJalopyCreation(jalopy)
+        DbgPrint("HandleJalopyCreation", jalopy)
+
         local seat = jalopy:GetNWEntity("PassengerSeat")
         if IsValid(seat) then
             -- Already exists.
@@ -172,6 +179,7 @@ if SERVER then
 
     function GM:OnCompanionEnteredVehicle(jalopy, passenger)
         DbgPrint("Companion entered vehicle")
+
         jalopy:SetNWEntity("LambdaPassenger", passenger)
         passenger:SetNWEntity("LambdaVehicle", jalopy)
         local seat = jalopy:GetNWEntity("PassengerSeat")
@@ -185,6 +193,7 @@ if SERVER then
 
     function GM:OnCompanionExitedVehicle(jalopy, passenger)
         DbgPrint("Companion exited vehicle")
+
         jalopy:SetNWEntity("LambdaPassenger", NULL)
         passenger:SetNWEntity("LambdaVehicle", NULL)
         local seat = jalopy:GetNWEntity("PassengerSeat")
@@ -442,7 +451,7 @@ if SERVER then
         if IsValid(vehicleOwner) then
             -- Check how far away the vehicle owner is.
             local ownerDist = vehicleOwner:GetPos():Distance(vehiclePos)
-            if ownerDist < 1024 then
+            if ownerDist < VEHICLE_MIN_DESPAWN_DIST then
                 -- Owner is close, don't remove.
                 return false
             end
@@ -457,7 +466,7 @@ if SERVER then
         if spawnPos ~= nil then
             -- See if the checkpoint has moved.
             local dist = vehiclePos:Distance(spawnPos)
-            if dist < 256 then
+            if dist < 512 then
                 -- Vehicle is close to the spawn point.
                 return false
             end
@@ -465,12 +474,13 @@ if SERVER then
 
         if ignoreChecks ~= true then
             -- Check if there are players nearby.
-            if util.IsPlayerNearby(vehiclePos, 1024) then
+            if util.IsPlayerNearby(vehiclePos, VEHICLE_MIN_DESPAWN_DIST) then
                 -- Players are nearby, don't remove.
                 return
             end
         end
 
+        DbgPrint("Removing vehicle " .. tostring(vehicle) .. " because it is too far away from the owner.")
         vehicle:Remove()
 
         return true
