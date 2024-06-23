@@ -530,21 +530,15 @@ if SERVER then
     function ENT:TeleportAllToTrigger()
         local missingEnts = {}
 
-        for _, v in pairs(ents.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if not self:IsEntityTouching(v) and self:PassesTriggerFilters(v) then
-                local isAlive = true
-
-                if v:IsPlayer() then
-                    isAlive = v:Alive()
-                end
-
-                if isAlive then
+                if v:Alive() then
                     table.insert(missingEnts, v)
                 end
             end
         end
 
-        -- Teleport missing objects into the box
+        -- Teleport missing players into the box.
         local centerPos = Vector(0, 0, 0)
         local numEntries = 0
 
