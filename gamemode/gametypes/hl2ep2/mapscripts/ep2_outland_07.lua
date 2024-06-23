@@ -93,6 +93,19 @@ function MAPSCRIPT:PostInit()
     GAMEMODE:WaitForInput("jeep", "Kill", function(ent, caller)
         return true
     end)
+
+    -- Resize the trigger and make it wait for all players.
+    ents.WaitForEntityByName("trigger_alyx_start_advisor_scene", function(ent)
+        ent:SetupTrigger(
+            Vector(-9600, -9708, 125),
+            Angle(0, 0, 0),
+            Vector(-520, -260, 0),
+            Vector(350, 260, 180),
+            false
+        )
+        ent:SetKeyValue("teamwait", "1")
+        ent:SetKeyValue("startdisabled", "0")
+    end)
 end
 
 return MAPSCRIPT
