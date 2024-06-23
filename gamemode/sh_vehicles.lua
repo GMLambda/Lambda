@@ -99,6 +99,7 @@ if SERVER then
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionEnteredVehicle !self,LambdaCompanionEnteredVehicle,,0,-1")
         vehicle:Input("AddOutput", NULL, NULL, "OnCompanionExitedVehicle !self,LambdaCompanionExitedVehicle,,1,-1")
         self.IsCreatingInternalOutputs = false
+
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
             if not IsValid(vehicle) then return end
@@ -220,6 +221,11 @@ if SERVER then
         DbgPrint("PlayerEnteredVehicle", ply, vehicle, role)
         if ply:IsSprinting() == true then ply:StopSprinting() end
         local vehicleType = self:VehicleGetType(vehicle)
+        if vehicleType == nil then
+            -- Nothing to do here.
+            return
+        end
+
         if vehicleType ~= VEHICLE_PASSENGER then
             -- Clear the previous vehicle owner.
             local prevVehicle = self:PlayerGetVehicleOwned(ply)
@@ -260,8 +266,16 @@ if SERVER then
     function GM:PlayerLeaveVehicle(ply, vehicle)
         -- Reset, we disabled it for transition probably
         DbgPrint("Player leave: " .. tostring(ply))
-        if vehicle.ResetVehicleEntryAnim == true then vehicle:SetVehicleEntryAnim(true) end
+        if vehicle.ResetVehicleEntryAnim == true then
+            vehicle:SetVehicleEntryAnim(true)
+        end
+
         local vehicleType = self:VehicleGetType(vehicle)
+        if vehicleType == nil then
+            -- Nothing to do here.
+            return
+        end
+
         if ply:Alive() == false then
             if vehicleType ~= VEHICLE_PASSENGER then
                 self:VehicleSetPlayerOwner(vehicle, NULL)
