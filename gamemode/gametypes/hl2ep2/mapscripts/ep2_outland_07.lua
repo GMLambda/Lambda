@@ -2,6 +2,15 @@ if SERVER then
     AddCSLuaFile()
 end
 
+local function CreateSoundAlias(oldName, newName)
+    local soundData = sound.GetProperties(oldName)
+    soundData.name = newName
+    sound.Add(soundData)
+end
+
+CreateSoundAlias("NPC_Advisor.Speak", "NPC_Advisor.Idle")
+CreateSoundAlias("NPC_Advisor.ScreenVx02", "NPC_Advisor.Alert")
+
 local MAPSCRIPT = {}
 MAPSCRIPT.DefaultLoadout = {
     Weapons = {
@@ -46,13 +55,12 @@ MAPSCRIPT.GlobalStates = {
 
 MAPSCRIPT.Checkpoints = {
     {
-        Pos = Vector(-9988, -10067, 129),
+        Pos = Vector(-10035.7, -9843.1, 32.7),
         Ang = Angle(0, 0, 0),
-        RenderPos = Vector(-9846, -10569, 114),
         Trigger = {
-            Pos = Vector(-10506, -11740, 151),
-            Mins = Vector(-500, -50, 0),
-            Maxs = Vector(1500, 50, 200)
+            Pos = Vector(-10035.7, -9843.1, 32.7),
+            Mins = Vector(-80, -30, 0),
+            Maxs = Vector(80, 30, 70)
         },
         Vehicle = {
             Pos = Vector(-9846, -10604, 118.5),
@@ -62,8 +70,6 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    print("-- Incomplete mapscript --")
-
     -- Create cvehicle_barn1 for all players.
     local datacvehicle_barn1 = game.FindEntityInMapData("cvehicle_barn1")
     if datacvehicle_barn1 ~= nil then
@@ -110,8 +116,6 @@ function MAPSCRIPT:PostInit()
 
     -- Resize the trigger and make it wait for all players.
     ents.WaitForEntityByName("trigger_alyx_start_advisor_scene", function(ent)
-        ent:Remove()
-        local ent = ents.Create("trigger_once")
         ent:SetupTrigger(
             Vector(-9600, -9708, 125),
             Angle(0, 0, 0),
@@ -120,7 +124,6 @@ function MAPSCRIPT:PostInit()
             false
         )
         ent:SetKeyValue("teamwait", "1")
-        ent:SetKeyValue("startdisabled", "0")
     end)
 end
 
