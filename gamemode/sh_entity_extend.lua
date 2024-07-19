@@ -39,6 +39,15 @@ function ENTITY_META:GetActivator()
 end
 
 function ENTITY_META:GetModelCategory()
+    if self:IsPlayer() then
+        local voiceGender = self:GetInfoNum("lambda_voice_gender", 0)
+        if voiceGender == 1 then
+            return "male"
+        elseif voiceGender == 2 then
+            return "female"
+        end
+    end
+
     local oldCache = false
     local mdl = self:GetModel()
 
