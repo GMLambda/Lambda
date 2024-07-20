@@ -17,6 +17,7 @@ MAPSCRIPT.DefaultLoadout = {
         "weapon_shotgun",
     },
     Ammo = {
+        ["Pistol"] = 18,
         ["XBowBolt"] = 4,
         ["AR2"] = 30,
         ["Buckshot"] = 30,
@@ -44,6 +45,14 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     print("-- Incomplete mapscript --")
+
+    -- Checkpoint before heli fight area
+    local containerCP = GAMEMODE:CreateCheckpoint(Vector(-998, 1096, 96))
+    ents.WaitForEntityByName("trigger_enter_box", function(ent)
+        ent.OnTrigger = function(_, activator)
+            GAMEMODE:SetPlayerCheckpoint(containerCP, activator)
+        end
+    end)
 end
 
 return MAPSCRIPT
