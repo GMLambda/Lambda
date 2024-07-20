@@ -58,6 +58,10 @@ function MAPSCRIPT:PostInit()
             ent:Remove()
         end)
 
+        ents.WaitForEntityByName("ss_alyx_elevator_lean", function(ent)
+            ent:SetKeyValue("onplayerdeath", "0")
+        end)
+
         -- Add a new one with a teamwait value
         local elevTrigger = ents.Create("trigger_once")
         elevTrigger:SetupTrigger(Vector(4644, 3584, 481.5), Angle(0, 0, 0), Vector(-100, -100, -50), Vector(100, 100, 50))
