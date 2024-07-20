@@ -35,6 +35,9 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_physcannon"] = true,
     ["global_newgame_template_ammo"] = true,
     ["global_newgame_template_local_items"] = true,
+    ["trigger_goopit3_ladder_up"] = true, -- remove all fall related stuff
+    ["trigger_goopit3_ladder_down"] = true,
+    ["trigger_goopit3_hurt"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -71,7 +74,7 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    ents.WaitForEntityByName("trigger_alyxComeDownToJeep", function(ent)
+    ents.WaitForEntityByName("trigger_alyxChoreoArrive06", function(ent)
         ent.OnTrigger = function()
             local loadout = GAMEMODE:GetMapScript().DefaultLoadout
             table.insert(loadout.Weapons, "weapon_ar2")
@@ -115,7 +118,7 @@ function MAPSCRIPT:PostInit()
     end)
 
     local cp9 = GAMEMODE:CreateCheckpoint(Vector(3961, 2340, 637))
-    ents.WaitForEntityByName("jeep_autosave", function(ent)
+    ents.WaitForEntityByName("autoSave_beforeJeep", function(ent)
         ent.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(cp9, activator)
         end
