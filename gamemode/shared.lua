@@ -601,17 +601,6 @@ function GM:EntityKeyValue(ent, key, val)
         if res ~= nil then return res end
     end
 
-    if self.MapScript ~= nil and self.MapScript.EntityKeyValueOverrides ~= nil then
-        local overrides = self.MapScript.EntityKeyValueOverrides[ent:GetName()]
-        if overrides ~= nil then
-            local override = overrides[key]
-            if override ~= nil then
-                print("Overriding keyvalue for " .. tostring(ent) .. " (" .. ent:GetName() .. ") key: " .. key .. " value: " .. tostring(val) .. " with " .. tostring(override))
-                return override
-            end
-        end
-    end
-
     if SERVER then
         -- In case a map has a scripted_sequence with onplayerdeath set to 1, we want to know about it.
         if key == "onplayerdeath" and entClass == "scripted_sequence" and tostring(val) ~= "0" then
