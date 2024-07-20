@@ -51,9 +51,14 @@ if SERVER then
         self:SetupOutput("OnStartTouchAll")
         self:SetupOutput("OnEndTouch")
         self:SetupOutput("OnEndTouchAll")
+        self:SetupOutput("OnTouching")
+        self:SetupOutput("OnNotTouching")
         self:SetInputFunction("Enable", self.Enable)
         self:SetInputFunction("Disable", self.Disable)
         self:SetInputFunction("Toggle", self.Toggle)
+        self:SetInputFunction("TouchTest", self.TouchTest)
+        self:SetInputFunction("StartTouch", self.InputStartTouch)
+        self:SetInputFunction("EndTouch", self.InputEndTouch)
 
         self:SetupNWVar("Disabled", "bool", {
             Default = false,
@@ -316,6 +321,27 @@ if SERVER then
         else
             self:Enable()
         end
+    end
+
+    function ENT:TouchTest()
+        print(self, "ENT:TouchTest")
+        if table.Count(self.TouchingObjects) == 0 then
+            self:FireOutputs("OnNotTouching", nil, nil)
+        else
+            self:FireOutputs("OnTouching", nil, nil)
+        end
+    end
+
+    function ENT:InputStartTouch(data, activator, caller)
+        print(self, "ENT:InputStartTouch")
+        if not IsValid(caller) then return end
+        self:StartTouch(caller)
+    end
+
+    function ENT:InputEndTouch(data, activator, caller)
+        print(self, "ENT:InputEndTouch")
+        if not IsValid(caller) then return end
+        self:EndTouch(caller)
     end
 
     function ENT:GetTimeout()
