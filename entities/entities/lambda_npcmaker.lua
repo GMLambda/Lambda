@@ -137,10 +137,9 @@ function ENT:Initialize()
     BaseClass.Initialize(self)
     self:SetSolid(SOLID_NONE)
     if self:GetNWVar("Disabled") == false then
-        self:NextThink(CurTime() + 0.1)
-        self.Think = self.MakerThink
+        self:Disable()
     else
-        self.Think = self.StubThink
+        self:Enable()
     end
 end
 
@@ -275,7 +274,14 @@ end
 function ENT:Enable()
     self:SetNWVar("Disabled", false)
     self.Think = self.MakerThink
-    self:NextThink(CurTime())
+    local spawnFrequency = self:GetNWVar("SpawnFrequency")
+    local curTime = CurTime()
+    if spawnFrequency ~= -1 then
+        self.NextSpawnTime = curTime + spawnFrequency
+    else
+        self.NextSpawnTime = curTime
+    end
+    self:NextThink(self.NextSpawnTime)
 end
 
 function ENT:Disable()
@@ -358,6 +364,8 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
 end
 
 function ENT:StubThink()
+    self:NextThink(CurTime() + 1)
+    return true
 end
 
 --DbgPrint(self, "ENT:StubThink", ent)
@@ -369,8 +377,24 @@ function ENT:MakerThink()
         self.CachedPlayerCount = player.GetCount()
     end
 
-    self:NextThink(CurTime() + self:GetNWVar("SpawnFrequency"))
+    local curTime = CurTime()
+
+    if self.NextSpawnTime == -1 or self.NextSpawnTime > curTime then
+        self:NextThink(curTime + 0.1)
+        return true
+    end
+
+    -- Spawn the next NPC.
     self:MakeNPC()
+
+    local spawnFrequency = self:GetNWVar("SpawnFrequency")
+    if spawnFrequency ~= -1 then
+        self.NextSpawnTime = curTime + spawnFrequency
+        self:NextThink(self.NextSpawnTime)
+    else
+        self.NextSpawnTime = -1
+        self:NextThink(curTime + 0.1)
+    end
 
     return true
 end
@@ -381,8 +405,10 @@ function ENT:DeathNotice(ent)
     end
 
     self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") - 1)
+
     if self:GetNWVar("SpawnFrequency") == -1 then
-        self:MakeNPC()
+        -- Allow it to spawn again.
+        self.NextSpawnTime = CurTime()
     end
 
     if self:GetNWVar("LiveChildren") <= 0 then
