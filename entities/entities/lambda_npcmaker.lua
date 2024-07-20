@@ -137,9 +137,9 @@ function ENT:Initialize()
     BaseClass.Initialize(self)
     self:SetSolid(SOLID_NONE)
     if self:GetNWVar("Disabled") == false then
-        self:Disable()
-    else
         self:Enable()
+    else
+        self:Disable()
     end
 end
 
@@ -409,6 +409,7 @@ function ENT:DeathNotice(ent)
     if self:GetNWVar("SpawnFrequency") == -1 then
         -- Allow it to spawn again.
         self.NextSpawnTime = CurTime()
+        self:NextThink(self.NextSpawnTime)
     end
 
     if self:GetNWVar("LiveChildren") <= 0 then
