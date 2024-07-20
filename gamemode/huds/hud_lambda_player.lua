@@ -67,6 +67,35 @@ function PANEL:Init()
 
     sheetPanel:AddSheet("MODEL", mdlPanel)
 
+    local voicePanel = sheetPanel:Add("DPanel")
+
+    local voiceLabel = voicePanel:Add("DLabel")
+    voiceLabel:Dock(TOP)
+    voiceLabel:SetText("Voice Gender")
+    voiceLabel:SetTextColor(Color(255, 255, 255, 255))
+    voiceLabel:SetFont("TargetIDSmall")
+    voiceLabel:SizeToContents()
+    voiceLabel:DockMargin(0, 5, 0, 5)
+
+    local voiceCombo = voicePanel:Add("DComboBox")
+    voiceCombo:Dock(TOP)
+    voiceCombo:SetValue("Auto")
+    voiceCombo:AddChoice("Auto", 0)
+    voiceCombo:AddChoice("Male", 1)
+    voiceCombo:AddChoice("Female", 2)
+    voiceCombo:SetTextColor(Color(255, 255, 255, 255))
+    voiceCombo:SetSortItems(false)
+
+    voiceCombo.OnSelect = function(_, _, _, data)
+        RunConsoleCommand("lambda_voice_gender", data)
+    end
+
+    -- Set the initial value based on the current convar setting
+    local currentVoiceGender = GetConVar("lambda_voice_gender"):GetInt()
+    voiceCombo:ChooseOptionID(currentVoiceGender + 1)
+
+    sheetPanel:AddSheet("VOICE", voicePanel)
+
     local bgPanel = sheetPanel:Add("DPanel")
 
     local bgList = bgPanel:Add("DPanelList")

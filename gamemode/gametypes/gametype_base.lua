@@ -551,23 +551,6 @@ function GAMETYPE:InitSettings()
         }
     })
 
-    GAMEMODE:AddSetting("voice_gender", {
-        Category = "SERVER",
-        NiceName = "#GM_VOICEGENDER",
-        Description = "#GM_VOICEGENDER_DESC",
-        Type = "int",
-        Default = 0,
-        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_USERINFO),
-        Extra = {
-            Type = "combo",
-            Choices = {
-                [0] = "Auto",
-                [1] = "Male",
-                [2] = "Female"
-            }
-        }
-    })
-
 end
 
 function GAMETYPE:GetScoreboardInfo()
