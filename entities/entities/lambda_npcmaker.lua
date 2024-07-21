@@ -274,14 +274,9 @@ end
 function ENT:Enable()
     self:SetNWVar("Disabled", false)
     self.Think = self.MakerThink
-    local spawnFrequency = self:GetNWVar("SpawnFrequency")
     local curTime = CurTime()
-    if spawnFrequency ~= -1 then
-        self.NextSpawnTime = curTime + spawnFrequency
-    else
-        self.NextSpawnTime = curTime
-    end
-    self:NextThink(self.NextSpawnTime)
+    self.NextSpawnTime = curTime
+    self:NextThink(curTime)
 end
 
 function ENT:Disable()
