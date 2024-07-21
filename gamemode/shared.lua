@@ -538,6 +538,18 @@ local function ReplaceFuncTankVolume(ent, volname)
     return newName
 end
 
+local function CheckScriptedSequence(ent)
+    if not IsValid(ent) then return end
+    local val = ent:GetInternalVariable("onplayerdeath")
+    if tonumber(val) ~= 1 then
+        return
+    end
+    local msg = "Found scripted_sequence with onplayerdeath set to " .. tostring(val) .. ": " .. tostring(ent) .. " (" .. ent:GetName() .. ")"
+    msg = msg .. " at " .. tostring(ent:GetPos()) .. " for map " .. game.GetMap()
+    msg = msg .. "\nIf you see this message please submit a new issue on https://github.com/GMLambda/Lambda/issues\n"
+    ErrorNoHalt(msg)
+end
+
 function GM:EntityKeyValue(ent, key, val)
     self:ConflictRecovery()
 
@@ -576,16 +588,6 @@ function GM:EntityKeyValue(ent, key, val)
         return newTriggerName
     end
 
-    if SERVER then
-        -- In case a map has a scripted_sequence with onplayerdeath set to 1, we want to know about it.
-        if key == "onplayerdeath" and entClass == "scripted_sequence" and tostring(val) ~= "0" then
-            local msg = "Found scripted_sequence with onplayerdeath set to " .. tostring(val) .. ": " .. tostring(ent) .. " (" .. ent:GetName() .. ")"
-            msg = msg .. " at " .. tostring(ent:GetPos()) .. " for map " .. game.GetMap()
-            msg = msg .. "\nIf you see this message please submit a new issue on https://github.com/GMLambda/Lambda/issues\n"
-            ErrorNoHalt(msg)
-        end
-    end
-
     if util.IsOutputValue(key) then
         ent.EntityOutputs = ent.EntityOutputs or {}
         ent.EntityOutputs[key] = ent.EntityOutputs[key] or {}
@@ -594,9 +596,19 @@ function GM:EntityKeyValue(ent, key, val)
         ent.LambdaKeyValues[key] = val
     end
 
-    if self.MapScript.EntityKeyValue then
+    if self.MapScript ~= nil and self.MapScript.EntityKeyValue then
         res = self.MapScript:EntityKeyValue(ent, key, val)
         if res ~= nil then return res end
+    end
+
+    if SERVER then
+        -- In case a map has a scripted_sequence with onplayerdeath set to 1, we want to know about it.
+        if key == "onplayerdeath" and entClass == "scripted_sequence" and tostring(val) ~= "0" then
+            -- Delay this check to make sure the map script had time to run.
+            timer.Simple(1, function()
+                CheckScriptedSequence(ent)
+            end)
+        end
     end
 end
 
