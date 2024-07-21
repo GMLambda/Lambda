@@ -523,8 +523,16 @@ function ENT:MakeNPCInLine()
     self:UpdateScaling()
 end
 
-function ENT:MakeMultipleNPCS()
-    Error("MakeMultipleNPCS not implemented")
+function ENT:MakeMultipleNPCS(data)
+    local numNpcs = tonumber(data)
+    local inRadius = self.DestinationGroup ~= nil and self.Radius > 0.1
+    for i = 1, numNpcs do
+        if inRadius then
+            self:MakeNPCInRadius()
+        else
+            self:MakeNPC()
+        end
+    end
 end
 
 function ENT:ChangeDestinationGroup(data)
