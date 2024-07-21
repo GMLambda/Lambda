@@ -71,7 +71,7 @@ function PANEL:Init()
 
     local voiceLabel = voicePanel:Add("DLabel")
     voiceLabel:Dock(TOP)
-    voiceLabel:SetText("Voice Gender")
+    voiceLabel:SetText("Voice Group")
     voiceLabel:SetTextColor(Color(255, 255, 255, 255))
     voiceLabel:SetFont("TargetIDSmall")
     voiceLabel:SizeToContents()
@@ -79,20 +79,42 @@ function PANEL:Init()
 
     local voiceCombo = voicePanel:Add("DComboBox")
     voiceCombo:Dock(TOP)
-    voiceCombo:SetValue("Auto")
-    voiceCombo:AddChoice("Auto", 0)
-    voiceCombo:AddChoice("Male", 1)
-    voiceCombo:AddChoice("Female", 2)
+
+    local categories = GAMEMODE:GetAvailableTauntCategories()
+    for _, category in ipairs(categories) do
+        local displayName = category == "auto" and "Auto" or (string.upper(category:sub(1,1)) .. category:sub(2))
+        voiceCombo:AddChoice(displayName, category)
+    end
+
     voiceCombo:SetTextColor(Color(255, 255, 255, 255))
     voiceCombo:SetSortItems(false)
 
-    voiceCombo.OnSelect = function(_, _, _, data)
-        RunConsoleCommand("lambda_voice_gender", data)
+    local lastKnownVoiceGroup = ""
+
+    local function UpdateVoiceCombo()
+        local currentVoiceGroup = GetConVar("lambda_voice_group"):GetString()
+        if currentVoiceGroup ~= lastKnownVoiceGroup then
+            for id, data in ipairs(voiceCombo.Data) do
+                if data == currentVoiceGroup then
+                    voiceCombo:ChooseOptionID(id)
+                    lastKnownVoiceGroup = currentVoiceGroup
+                    break
+                end
+            end
+        end
     end
 
-    -- Set the initial value based on the current convar setting
-    local currentVoiceGender = GetConVar("lambda_voice_gender"):GetInt()
-    voiceCombo:ChooseOptionID(currentVoiceGender + 1)
+    voiceCombo.OnSelect = function(_, _, _, data)
+        RunConsoleCommand("lambda_voice_group", data)
+        lastKnownVoiceGroup = data
+    end
+
+    UpdateVoiceCombo()
+
+    -- Update only when the panel becomes visible
+    self.OnVisible = function()
+        UpdateVoiceCombo()
+    end
 
     sheetPanel:AddSheet("VOICE", voicePanel)
 
