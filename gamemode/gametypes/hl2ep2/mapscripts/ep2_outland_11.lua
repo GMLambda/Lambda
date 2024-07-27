@@ -39,7 +39,8 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
     ["global_newgame_template_local_items"] = true,
     ["global_newgame_template_ammo"] = true,
-    ["trigger_unlock_ele"] = true
+    ["trigger_unlock_ele"] = true,
+    ["npcclip_alyx_hall_1"] = true
 }
 
 MAPSCRIPT.GlobalStates = {}
