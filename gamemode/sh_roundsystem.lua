@@ -167,7 +167,7 @@ if SERVER then
         -- Check what we have to cleanup
         local filter = {}
         hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
-        game.CleanUpMap(false, filter)
+        game.CleanUpMap(false, filter, function() end)
     end
 
     function GM:RoundStateBooting()
@@ -387,7 +387,7 @@ function GM:PreCleanupMap()
     self.ChangingLevel = false
 
     if SERVER then
-        -- Make sure there are no builtin outputs
+        -- Make sure there are no pending outputs
         RunConsoleCommand("ent_cancelpendingentfires")
 
         -- Disable all overlays.
@@ -405,9 +405,6 @@ function GM:PreCleanupMap()
         for _, v in pairs(ents.GetAll()) do
             -- Prevent recursions.
             v:EnableRespawn(false)
-
-            -- Prevent firing i/o when cleaned up, this otherwise slips to the post cleanup.
-            v:ClearAllOutputs()
         end
 
         -- NOTE: Sometimes scripted scenes can play after map cleanup.

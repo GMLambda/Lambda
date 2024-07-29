@@ -278,6 +278,7 @@ if SERVER then
         ["PressedAttack2"] = true,
         ["AttackAxis"] = true,
         ["Attack2Axis"] = true,
+        ["OnPass"] = true,
     }
 
     function util.IsOutputValue(key)
