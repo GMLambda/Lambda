@@ -557,6 +557,15 @@ end
 function GM:EntityKeyValue(ent, key, val)
     self:ConflictRecovery()
 
+    local gameType = self:GetGameType()
+    if gameType.ModelRemapping ~= nil and key:iequals("model") then
+        local newModel = gameType.ModelRemapping[val]
+        if newModel ~= nil then
+            print("Remapping model: " .. val .. " to " .. newModel)
+            return newModel
+        end
+    end
+
     if self.MapScript then
         -- Monitor scripts that we have filtered by class name.
         if key:iequals("classname") == true then
