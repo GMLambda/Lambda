@@ -61,7 +61,8 @@ GAMETYPE.CampaignNames = {
 }
 GAMETYPE.Localisation = include("hl2ep2/cl_localisation.lua")
 GAMETYPE.ModelRemapping = {
-    ["models/advisor.mdl"] = "models/advisor_ep2.mdl"
+    ["models/advisor.mdl"] = "models/advisor_ep2.mdl",
+    ["models/lamarr.mdl"] = "models/lamarr_ep2.mdl",
 }
 
 function GAMETYPE:InitSettings()
