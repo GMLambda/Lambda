@@ -162,8 +162,6 @@ if SERVER then
         DbgPrint("GM:CleanUpMap")
         -- Make sure nothing is going to create new things now
         self:SetRoundState(STATE_RESTARTING)
-        -- Remove vehicles
-        self:CleanUpVehicles()
         -- Check what we have to cleanup
         local filter = {}
         hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
@@ -683,11 +681,6 @@ function GM:StartRound(cleaned, force)
 
         if self.InitPostEntityDone ~= true then
             DbgError("Unfinished booting")
-        end
-
-        if cleaned == true then
-            -- Make sure map created vehicles are gone, we take over.
-            self:CleanUpVehicles()
         end
 
         --self.RoundState = STATE_RESTARTING
