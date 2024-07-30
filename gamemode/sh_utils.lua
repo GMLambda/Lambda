@@ -279,6 +279,7 @@ if SERVER then
         ["AttackAxis"] = true,
         ["Attack2Axis"] = true,
         ["OnPass"] = true,
+        ["OnChangeLevel"] = true,
     }
 
     function util.IsOutputValue(key)

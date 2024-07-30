@@ -124,7 +124,7 @@ function GM:InitializeTransitionData()
     end)
 end
 
-function GM:TransitionToLevel(activator, map, landmark, playersInTrigger, restart)
+function GM:TransitionToLevel(map, landmark, playersInTrigger, restart)
     Profiled("GM:TransitionToLevel", function()
         -- 1. Lets collect all entities with the landmark name we have to seperate them by landmark and trigger
         local transitionTriggers = {}
@@ -148,7 +148,7 @@ function GM:TransitionToLevel(activator, map, landmark, playersInTrigger, restar
         if not IsValid(landmarkEnt) then
             DbgPrint("Unable to find landmark! - " .. tostring(landmark))
         else
-            self:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+            self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
             -- In case players didnt make it, we erase their position from the data.
             for k, v in pairs(playerTable) do
                 local ply = Entity(v.RefId)
@@ -645,7 +645,7 @@ function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, play
     end)
 end
 
-function GM:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+function GM:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
     return Profiled("GM:GetTransitionList", function()
         DbgPrint("GM:TransitionNearbyObjects")
         -- Create initial list.
@@ -655,10 +655,10 @@ function GM:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, 
             local caps = v:ObjectCaps()
             if bit.band(caps, FCAP_NOTIFY_ON_TRANSITION) == 0 then continue end
             if table.HasValue(initialObjectList, v) == false then
-                v:Input("OutsideTransition", activator, activator, nil)
+                v:Input("OutsideTransition", nil, nil, nil)
                 DbgPrint("Notifying " .. tostring(v) .. " outside of transitioning")
             else
-                v:Input("InsideTransition", activator, activator, nil)
+                v:Input("InsideTransition", nil, nil, nil)
                 DbgPrint("Notifying " .. tostring(v) .. " inside of transitioning")
             end
         end

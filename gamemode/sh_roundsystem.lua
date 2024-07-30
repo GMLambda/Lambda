@@ -315,7 +315,7 @@ if SERVER then
                     mustComplete = true
                 }, mapOptions, {}, function(vote, failed, timeout, winningOption)
                     local picked = mapOptions[winningOption]
-                    self:RequestChangeLevel(nil, picked, nil, {})
+                    self:RequestChangeLevel(picked, nil, {})
                 end)
             end)
         end

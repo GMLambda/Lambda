@@ -110,8 +110,8 @@ function GM:EnablePreviousMap()
     end
 end
 
-function GM:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
-    DbgPrint("GM:PreChangelevel", activator, map, landmark, playersInTrigger, restart)
+function GM:PreChangelevel(map, landmark, playersInTrigger, restart)
+    DbgPrint("GM:PreChangelevel", map, landmark, playersInTrigger, restart)
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", self:GetCurrentMap())
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", map)
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "Landmark", landmark)
@@ -123,20 +123,20 @@ function GM:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
     end
 
     hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark, restart)
-    self:TransitionToLevel(activator, map, landmark, playersInTrigger, restart)
+    self:TransitionToLevel(map, landmark, playersInTrigger, restart)
 end
 
-function GM:RequestChangeLevel(activator, map, landmark, playersInTrigger, restart)
+function GM:RequestChangeLevel(map, landmark, playersInTrigger, restart)
     if self.ChangingLevel == true then return end
 
     if playersInTrigger == nil then
         playersInTrigger = {}
     end
 
-    DbgPrint("GM:ChangeLevel", activator, map, landmark, playersInTrigger, restart)
+    DbgPrint("GM:ChangeLevel", map, landmark, playersInTrigger, restart)
     self.ChangingLevel = true
     DbgPrint("Changing to level: " .. map)
-    self:PreChangelevel(activator, map, landmark, playersInTrigger, restart)
+    self:PreChangelevel(map, landmark, playersInTrigger, restart)
 
     if g_debug_transitions:GetBool() ~= true then
         local changeLevelDelay = self:GetSetting("changelevel_delay", 0)
@@ -156,9 +156,9 @@ function GM:ChangeToNextLevel()
         if v.TargetMap == nextMap then
             local landmark = v.Landmark
 
-            return self:RequestChangeLevel(nil, nextMap, landmark, {})
+            return self:RequestChangeLevel(nextMap, landmark, {})
         end
     end
 
-    return self:RequestChangeLevel(nil, nextMap, nil, {})
+    return self:RequestChangeLevel(nextMap, nil, {})
 end

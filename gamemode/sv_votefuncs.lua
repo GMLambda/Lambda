@@ -35,7 +35,7 @@ function GM:StartMapVote(issuer, map)
     local function OnChangeLevelVoteResult(vote, success, timeout, option)
         -- Yes
         if success == true and option == 1 then
-            GAMEMODE:RequestChangeLevel(nil, map, nil, {})
+            GAMEMODE:RequestChangeLevel(map, nil, {})
         end
     end
 
