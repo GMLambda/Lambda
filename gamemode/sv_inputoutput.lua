@@ -62,11 +62,9 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
 
     -- MORE HACKHACK: Handle the case where companions entered the jalopy.
     if inputName == "LambdaCompanionEnteredVehicle" and activator:IsVehicle() then
-        print("LambdaCompanionEnteredVehicle", ent, inputName, activator, caller, value)
         self:OnCompanionEnteredVehicle(activator, caller)
         return true
     elseif inputName == "LambdaCompanionExitedVehicle" and activator:IsVehicle() then
-        print("LambdaCompanionExitedVehicle", ent, inputName, activator, caller, value)
         self:OnCompanionExitedVehicle(activator, caller)
         return true
     end

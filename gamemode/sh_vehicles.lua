@@ -25,14 +25,19 @@ if SERVER then
         self.MapVehicles = {}
         self.SpawnPlayerVehicles = true
         self.NextVehicleThink = 0
-        local mapdata = game.GetMapData()
-        for _, v in pairs(mapdata.Entities) do
-            if v["classname"] == "prop_vehicle_airboat" then
-                table.insert(self.MapVehicles, v)
-            elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/buggy.mdl" then
-                table.insert(self.MapVehicles, v)
-            elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/vehicle.mdl" then
-                table.insert(self.MapVehicles, v)
+
+        -- NOTE: We rely on the first vehicle spawn, this method is unreliable as in ep2_outland_09 
+        -- the vehicle is spawned later rather than at the start of the map.
+        if false then
+            local mapdata = game.GetMapData()
+            for _, v in pairs(mapdata.Entities) do
+                if v["classname"] == "prop_vehicle_airboat" then
+                    table.insert(self.MapVehicles, v)
+                elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/buggy.mdl" then
+                    table.insert(self.MapVehicles, v)
+                elseif v["classname"] == "prop_vehicle_jeep" and v["model"] == "models/vehicle.mdl" then
+                    table.insert(self.MapVehicles, v)
+                end
             end
         end
     end
@@ -54,6 +59,7 @@ if SERVER then
             self:PlayerSetVehicleOwned(v, nil)
         end
 
+        self.MapVehicles = {}
         self:ResetVehicleCheck()
     end
 
@@ -67,7 +73,7 @@ if SERVER then
     end
 
     function GM:PlayerSetVehicleOwned(ply, vehicle)
-        DbgPrint("PlayerSetVehicleOwned", ply, vehicle)
+        DbgPrint("PlayerSetVehicleOwned", ply, tostring(vehicle))
         ply:SetNWEntity("LambdaOwnedVehicle", vehicle)
     end
 
@@ -85,7 +91,7 @@ if SERVER then
     end
 
     function GM:HandleVehicleCreation(vehicle)
-        DbgPrint("HandleVehicleCreation", vehicle)
+        DbgPrint("HandleVehicleCreation", tostring(vehicle))
         local class = vehicle:GetClass()
         local vehicleType = nil
         if class ~= "prop_vehicle_airboat" and class ~= "prop_vehicle_jeep" then return end
@@ -107,6 +113,7 @@ if SERVER then
         -- We only get a model next frame, delay it.
         util.RunNextFrame(function()
             if not IsValid(vehicle) then return end
+
             local mdl = vehicle:GetModel()
             if class == "prop_vehicle_airboat" and mdl == "models/airboat.mdl" then
                 vehicleType = VEHICLE_AIRBOAT
@@ -116,6 +123,17 @@ if SERVER then
                 vehicleType = VEHICLE_JALOPY
             else
                 return
+            end
+
+            if vehicle:GetName() ~= "" and vehicle.VehicleIsCloned ~= true then
+                -- We have a map creation ID, we can use this to determine the vehicle type.
+                local mapdata = game.GetMapData()
+                for _, v in pairs(mapdata.Entities) do
+                    if v["targetname"] == vehicle:GetName() then
+                        DbgPrint("New vehicle on map: " .. tostring(v["classname"]))
+                        table.insert(self.MapVehicles, v)
+                    end
+                end
             end
 
             DbgPrint(vehicle, "Vehicle type: " .. tostring(vehicleType))
@@ -443,6 +461,7 @@ if SERVER then
 
         DbgPrint("Spawning vehicle at spot: " .. tostring(pos))
         local newVehicle = ents.CreateFromData(vehicle)
+        newVehicle.VehicleIsCloned = true
         if self.VehicleCheckpoint ~= nil then
             newVehicle:SetPos(self.VehicleCheckpoint.Pos)
             newVehicle:SetAngles(self.VehicleCheckpoint.Ang)

@@ -324,7 +324,7 @@ if SERVER then
     end
 
     function ENT:TouchTest()
-        print(self, "ENT:TouchTest")
+        DbgPrint(self, "ENT:TouchTest")
         if table.Count(self.TouchingObjects) == 0 then
             self:FireOutputs("OnNotTouching", nil, nil)
         else
@@ -333,13 +333,13 @@ if SERVER then
     end
 
     function ENT:InputStartTouch(data, activator, caller)
-        print(self, "ENT:InputStartTouch")
+        DbgPrint(self, "ENT:InputStartTouch")
         if not IsValid(caller) then return end
         self:StartTouch(caller)
     end
 
     function ENT:InputEndTouch(data, activator, caller)
-        print(self, "ENT:InputEndTouch")
+        DbgPrint(self, "ENT:InputEndTouch")
         if not IsValid(caller) then return end
         self:EndTouch(caller)
     end

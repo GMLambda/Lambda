@@ -561,7 +561,7 @@ function GM:EntityKeyValue(ent, key, val)
     if gameType.ModelRemapping ~= nil and key:iequals("model") then
         local newModel = gameType.ModelRemapping[val]
         if newModel ~= nil then
-            print("Remapping model: " .. val .. " to " .. newModel)
+            DbgPrint("Remapping model: " .. val .. " to " .. newModel)
             return newModel
         end
     end
