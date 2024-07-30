@@ -92,12 +92,14 @@ if SERVER then
         util.RunDelayed(function()
             -- Remove invalid entities from touching objects, might have been killed by OnChangeLevel.
             for k, v in pairs(touchingObjects) do
-                if not IsValid(v) then
+                local ent = Entity(k)
+                if not IsValid(ent) or ent:IsEFlagSet(EFL_KILLME) then
+                    DbgPrint("Removing killed entity #" .. tostring(k) .. " from touch list.")
                     touchingObjects[k] = nil
                 end
             end
-
+            -- Request a change level.
             GAMEMODE:RequestChangeLevel(targetMap, landmarkName, touchingObjects, restart)
-        end, CurTime() + 0.02)
+        end, CurTime() + 0.1)
     end
 end
