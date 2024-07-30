@@ -28,7 +28,10 @@ MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_ammo"] = true,
     ["global_newgame_template_local_items"] = true,
-    ["global_newgame_template_base_items"] = true
+    ["global_newgame_spawner_suit"] = true,
+    ["global_newgame_spawner_crowbar"] = true,
+    ["global_newgame_spawner_pistol"] = true,
+    ["global_newgame_spawner_physcannon"] = true,
 }
 
 MAPSCRIPT.VehicleGuns = true

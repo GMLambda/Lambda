@@ -26,7 +26,11 @@ MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_base_items"] = true,
-    ["global_newgame_template_local_items"] = true,
+    ["global_newgame_spawner_shotgun"] = true,
+    ["global_newgame_spawner_smg1"] = true,
+    ["global_newgame_spawner_ar2"] = true,
+    ["global_newgame_spawner_rpg"] = true,
+    ["global_newgame_spawner_357"] = true,
     ["global_newgame_template_ammo"] = true,
     ["fall_trigger"] = true, -- We replaced it by a more friendly variant
     ["crane_soldier_kill"] = true -- Why?

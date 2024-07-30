@@ -19,7 +19,10 @@ MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
-    ["global_newgame_entmaker"] = true,
+    ["global_newgame_spawner_suit"] = true,
+    ["global_newgame_spawner_crowbar"] = true,
+    ["global_newgame_spawner_pistol"] = true,
+    ["global_newgame_spawner_smg1"] = true,
     ["relay_locks_closegates"] = true -- Dont close the doors if we pass thru the gate
 }
 

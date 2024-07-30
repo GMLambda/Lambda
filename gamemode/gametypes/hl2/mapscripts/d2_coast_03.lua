@@ -28,7 +28,6 @@ MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
     ["player_spawn_items"] = true,
-    ["player_spawn_items_maker"] = true,
     ["invulnerable"] = true
 }
 
