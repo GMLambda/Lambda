@@ -194,6 +194,11 @@ if SERVER then
         -- Make it invisible, we just want the functionality.
         seat:SetNoDraw(true)
         jalopy:SetNWEntity("PassengerSeat", seat)
+
+        local mapScript = self.MapScript
+        if mapScript ~= nil and mapScript.OnJalopyCreated ~= nil then
+            mapScript:OnJalopyCreated(jalopy)
+        end
     end
 
     function GM:OnCompanionEnteredVehicle(jalopy, passenger)
@@ -258,7 +263,7 @@ if SERVER then
         if vehicleType ~= VEHICLE_PASSENGER then
             -- Clear the previous vehicle owner.
             local prevVehicle = self:PlayerGetVehicleOwned(ply)
-            if IsValid(prevVehicle) then
+            if IsValid(prevVehicle) and prevVehicle ~= vehicle then
                 DbgPrint("Player owns another vehicle, clearing ownership", prevVehicle)
                 self:VehicleSetPlayerOwner(prevVehicle, NULL)
             end
@@ -388,7 +393,7 @@ if SERVER then
         DbgPrint("GM:RemovePlayerVehicles", ply)
         for vehicle, _ in pairs(self.ActiveVehicles) do
             local vehicleOwner = self:VehicleGetPlayerOwner(vehicle)
-            local passenger = self:GetVehiclePassenger(vehicle)
+            local passenger = self:VehicleGetPassenger(vehicle)
             if vehicleOwner == ply and not IsValid(passenger) then
                 DbgPrint("Removing player vehicle: " .. tostring(vehicle))
                 self:VehicleSetPlayerOwner(vehicle, NULL)
@@ -475,7 +480,7 @@ if SERVER then
     end
 
     function GM:CheckRemoveVehicle(vehicle, ignoreChecks)
-        local passenger = self:GetVehiclePassenger(vehicle)
+        local passenger = self:VehicleGetPassenger(vehicle)
         if IsValid(passenger) then
             -- Never remove vehicles that have a passenger.
             return false
@@ -610,7 +615,7 @@ function GM:VehicleDriverKilled(vehicle, ply)
         return
     end
     -- Check if we have a passenger, notify him that he can take over.
-    local passenger = self:GetVehiclePassenger(vehicle)
+    local passenger = self:VehicleGetPassenger(vehicle)
     if IsValid(passenger) then
         DbgPrint("Notifying passenger")
         -- Send a hint that the passenger can take over.
@@ -703,7 +708,7 @@ function GM:VehicleMove(ply, vehicle, mv)
     return modified
 end
 
-function GM:GetVehiclePassenger(vehicle)
+function GM:VehicleGetPassenger(vehicle)
     local npcPassenger = vehicle:GetNWEntity("LambdaPassenger")
     if IsValid(npcPassenger) then
         -- There is an NPC sitting in the vehicle.

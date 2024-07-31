@@ -127,4 +127,20 @@ function MAPSCRIPT:PostInit()
     end)
 end
 
+function MAPSCRIPT:OnJalopyCreated(jalopy)
+    local companionController = ents.Create("lambda_vehicle_companion")
+    local name = "lambda_vc_" .. tostring(jalopy:EntIndex())
+    companionController:SetName(name)
+    companionController:SetPos(jalopy:GetPos())
+    companionController:SetKeyValue("CompanionName", "alyx")
+    companionController:SetParent(jalopy)
+    companionController:Spawn()
+
+    jalopy:ClearAllOutputs("PlayerOff")
+    jalopy:ClearAllOutputs("PlayerOn")
+
+    jalopy:Fire("AddOutput", "PlayerOn " .. name .. ",OnPlayerVehicleEnter,,0,-1")
+    jalopy:Fire("AddOutput", "PlayerOff " .. name .. ",OnPlayerVehicleExit,,0,-1")
+end
+
 return MAPSCRIPT
