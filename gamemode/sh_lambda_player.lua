@@ -1389,7 +1389,9 @@ function GM:CheckPlayerCollision(ply)
         filter = ply,
         mins = hullMin,
         maxs = hullMax,
-        mask = MASK_SHOT_HULL
+        mask = MASK_SHOT_HULL,
+        ignoreworld = true,
+        collisiongroup = COLLISION_GROUP_PLAYER,
     })
 
     if tr.Hit == false and tr.Fraction == 1 then
@@ -1398,7 +1400,7 @@ function GM:CheckPlayerCollision(ply)
         DbgPrint(ply, "Reset player collision.")
     else
         DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
-        ply.NextPlayerCollideTest = curTime + 2
+        ply.NextPlayerCollideTest = curTime + 1
     end
 end
 
