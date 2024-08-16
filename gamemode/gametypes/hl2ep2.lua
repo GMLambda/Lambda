@@ -13,6 +13,7 @@ GAMETYPE.MapList = {
     "ep2_outland_02",
     "ep2_outland_03",
     "ep2_outland_04",
+    "ep2_outland_02",
     "ep2_outland_05",
     "ep2_outland_06",
     "ep2_outland_06a",
@@ -59,6 +60,10 @@ GAMETYPE.CampaignNames = {
     }
 }
 GAMETYPE.Localisation = include("hl2ep2/cl_localisation.lua")
+GAMETYPE.ModelRemapping = {
+    ["models/advisor.mdl"] = "models/advisor_ep2.mdl",
+    ["models/lamarr.mdl"] = "models/lamarr_ep2.mdl",
+}
 
 function GAMETYPE:InitSettings()
     self.Base:InitSettings()

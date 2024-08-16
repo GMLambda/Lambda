@@ -32,17 +32,16 @@ end
 
 function ENT:AcceptInput(fn, data, activator, caller)
     DbgPrint(self, fn, data, activator, caller)
-    BaseClass.AcceptInput(self, fn, data, activator, caller)
+    return BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
 
 function ENT:KeyValue(key, val)
-    BaseClass.KeyValue(self, key, val)
-
     if key:iequals("rate") then
         self.Rate = val
     elseif key:iequals("fov") then
         self.FOV = val
     end
+    return BaseClass.KeyValue(self, key, val)
 end
 
 function ENT:ZoomPlayer(ply)

@@ -185,6 +185,10 @@ function GM:OnReloaded()
     self:SetGameType(lambda_gametype:GetString())
     self:InitSettings()
     self:InitializeDifficulty()
+
+    if SERVER then
+        self:ReloadCheckpoints()
+    end
 end
 
 function GM:Tick()
@@ -507,7 +511,7 @@ function GM:OnEntityCreated(ent)
         end)
 
         -- Deal with vehicles at the same frame, sometimes it wouldn't show the gun.
-        if ent:IsVehicle() then
+        if ent:IsVehicle() and ent.CreatedByLevelTransition ~= true then
             self:HandleVehicleCreation(ent)
         end
     end
@@ -552,6 +556,15 @@ end
 
 function GM:EntityKeyValue(ent, key, val)
     self:ConflictRecovery()
+
+    local gameType = self:GetGameType()
+    if gameType.ModelRemapping ~= nil and key:iequals("model") then
+        local newModel = gameType.ModelRemapping[val]
+        if newModel ~= nil then
+            DbgPrint("Remapping model: " .. val .. " to " .. newModel)
+            return newModel
+        end
+    end
 
     if self.MapScript then
         -- Monitor scripts that we have filtered by class name.

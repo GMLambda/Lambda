@@ -40,10 +40,8 @@ else -- CLIENT
 
     local function LocalizeWithInput(text, default)
         local msg = language.GetPhrase(text, default)
-        if msg == text then return msg end
         -- Process key bindings.
         local i = 1
-
         while i ~= nil do
             local pos = string.find(msg, "%", i, true)
             if pos == nil then break end

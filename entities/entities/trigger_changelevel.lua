@@ -12,6 +12,7 @@ if SERVER then
         BaseClass.PreInitialize(self)
         BaseClass.SetWaitTime(self, -1) -- Remove once triggered.
         self:SetInputFunction("ChangeLevel", self.InputChangeLevel)
+        self:SetupOutput("OnChangeLevel")
         self.TargetMap = ""
         self.Landmark = ""
         self.DisableTouch = false
@@ -69,11 +70,16 @@ if SERVER then
 
     function ENT:DoChangeLevel()
         DbgPrint(self, "DoChangeLevel")
+
+        self:FireOutputs("OnChangeLevel", nil, nil)
+
         local restart = self:HasSpawnFlags(SF_CHANGELEVEL_RESTART)
         local touchingObjects = self:GetTouchingObjects()
+        local targetMap = string.lower(self.TargetMap)
+        local landmarkName = self.Landmark
 
-        if self.Landmark ~= nil and self.Landmark ~= "" then
-            for _, landmark in pairs(ents.FindByName(self.Landmark)) do
+        if landmarkName ~= nil and landmarkName ~= "" then
+            for _, landmark in pairs(ents.FindByName(landmarkName)) do
                 if landmark:GetClass() == "trigger_transition" and landmark.GetTouching ~= nil then
                     for _, v in pairs(landmark:GetTouching()) do
                         touchingObjects[v:EntIndex()] = v
@@ -82,6 +88,18 @@ if SERVER then
             end
         end
 
-        GAMEMODE:RequestChangeLevel(self, string.lower(self.TargetMap), self.Landmark, touchingObjects, restart)
+        -- Because OnChangeLevel might do some things we have to delay this a bit.
+        util.RunDelayed(function()
+            -- Remove invalid entities from touching objects, might have been killed by OnChangeLevel.
+            for k, v in pairs(touchingObjects) do
+                local ent = Entity(k)
+                if not IsValid(ent) or ent:IsEFlagSet(EFL_KILLME) then
+                    DbgPrint("Removing killed entity #" .. tostring(k) .. " from touch list.")
+                    touchingObjects[k] = nil
+                end
+            end
+            -- Request a change level.
+            GAMEMODE:RequestChangeLevel(targetMap, landmarkName, touchingObjects, restart)
+        end, CurTime() + 0.1)
     end
 end

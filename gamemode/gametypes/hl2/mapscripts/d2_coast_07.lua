@@ -25,7 +25,7 @@ MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 
 MAPSCRIPT.EntityFilterByName = {
-    ["player_spawn_items_maker"] = true
+    ["player_spawn_items"] = true
 }
 
 MAPSCRIPT.VehicleGuns = true

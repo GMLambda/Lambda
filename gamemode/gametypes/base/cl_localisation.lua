@@ -75,5 +75,6 @@ LOCALISATION["english"] = {
     ["GM_DM_TIMELIMIT_DESC"] = "Set how long the round lasts",
     ["GM_DM_TEAMONLY"] = "Team based deathmatch",
     ["GM_DM_TEAMONLY_DESC"] = "Switch between DM or TDM",
+    ["LAMBDA_VEHICLE_TAKE_OVER"] = "Take over vehicle %+speed%+%+use%"
 }
 return LOCALISATION

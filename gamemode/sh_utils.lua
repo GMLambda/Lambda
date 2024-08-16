@@ -267,7 +267,19 @@ if SERVER then
         ["OnNewGame"] = true,
         ["OnGetValue"] = true,
         ["OnHitMax"] = true,
-        ["OnHitMin"] = true
+        ["OnHitMin"] = true,
+        ["PlayerOff"] = true,
+        ["PlayerOn"] = true,
+        ["OnCompanionEnteredVehicle"] = true,
+        ["OnCompanionExitedVehicle"] = true,
+        ["OnHostileEnteredVehicle"] = true,
+        ["OnHostileExitedVehicle"] = true,
+        ["PressedAttack"] = true,
+        ["PressedAttack2"] = true,
+        ["AttackAxis"] = true,
+        ["Attack2Axis"] = true,
+        ["OnPass"] = true,
+        ["OnChangeLevel"] = true,
     }
 
     function util.IsOutputValue(key)
@@ -532,4 +544,30 @@ function util.GetAllPlayers()
     end
 
     return PLAYER_LIST_CACHE
+end
+
+local function IsPlayerNearby(pos, ply, radius)
+    if ply:Alive() == false then
+        return false
+    end
+    if ply:GetPos():Distance(pos) <= radius then
+        return true
+    end
+    return false
+end
+
+function util.IsPlayerNearby(entOrPos, radius)
+    local pos = entOrPos
+
+    if IsEntity(entOrPos) then
+        pos = entOrPos:GetPos()
+    end
+
+    for _, ply in pairs(util.GetAllPlayers()) do
+        if IsPlayerNearby(pos, ply, radius) then
+            return true
+        end
+    end
+
+    return false
 end

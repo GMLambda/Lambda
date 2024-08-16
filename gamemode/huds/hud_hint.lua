@@ -92,7 +92,7 @@ function GM:HUDDrawHintHistory()
 
         v.y = v.y or y
         v.y = math.Approach(v.y, v.targetY, dt * 100)
-        v.elapsed = v.elapsed + (dt * 2 * v.timescale)
+        v.elapsed = v.elapsed + (dt * v.timescale)
         local delta = v.holdtime - v.elapsed
         delta = delta / v.holdtime
         local alpha = 255

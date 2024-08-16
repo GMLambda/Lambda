@@ -468,7 +468,6 @@ if SERVER then
         ply:DisablePlayerCollide(true)
         -- Lets remove whatever the player left on vehicles behind before he got killed.
         if ply.Reviving ~= true then
-            self:RemovePlayerVehicles(ply)
             -- Should we really do this?
             ply.WeaponDuplication = {}
             ply:RemoveSuit()
@@ -1098,6 +1097,12 @@ function GM:StartCommand(ply, cmd)
     -- offset the player for a short moment when pressing IN_DUCK again. We suppress this.
     if ply:Crouching() == true and ply:KeyDown(IN_DUCK) == false and cmd:KeyDown(IN_DUCK) == true then cmd:SetButtons(bit.band(cmd:GetButtons(), bit.bnot(IN_DUCK))) end
     ply.LastUserCmdButtons = cmd:GetButtons()
+
+    -- Handle the vehicle take-over mechanic.
+    local vehicle = ply:GetVehicle()
+    if IsValid(vehicle) then
+        self:VehicleStartCommand(ply, vehicle, cmd)
+    end
 end
 
 function GM:SetupMove(ply, mv, cmd)
@@ -1373,13 +1378,20 @@ function GM:CheckPlayerCollision(ply)
     if playersCollide == false then return end
     if ply:IsPlayerCollisionEnabled() == true then return end
     local hullMin, hullMax = ply:GetHull()
+    -- Extend the hull so we keep collisions off in tight spaces.
+    hullMin.x = hullMin.x * 2
+    hullMin.y = hullMin.y * 2
+    hullMax.x = hullMax.x * 2
+    hullMax.y = hullMax.y * 2
     local tr = util.TraceHull({
         start = ply:GetPos(),
         endpos = ply:GetPos(),
         filter = ply,
         mins = hullMin,
         maxs = hullMax,
-        mask = MASK_SHOT_HULL
+        mask = MASK_SHOT_HULL,
+        ignoreworld = true,
+        collisiongroup = COLLISION_GROUP_PLAYER,
     })
 
     if tr.Hit == false and tr.Fraction == 1 then
@@ -1388,7 +1400,7 @@ function GM:CheckPlayerCollision(ply)
         DbgPrint(ply, "Reset player collision.")
     else
         DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
-        ply.NextPlayerCollideTest = curTime + 2
+        ply.NextPlayerCollideTest = curTime + 1
     end
 end
 
@@ -1608,3 +1620,39 @@ net.Receive("LambdaPlayerDamage", function(len)
     local hitpos = net.ReadVector()
     GAMEMODE:OnPlayerDamage(attacker, victim, hitgroup, hitpos)
 end)
+
+if SERVER then
+    concommand.Add("lambda_show_loadout", function(ply, cmd, args)
+        -- Build the weapon table
+        local weps = {}
+        for _,v in pairs(ply:GetWeapons()) do
+            table.insert(weps, v:GetClass())
+        end
+
+        -- Build ammo table
+        local ammo = {}
+        for ammoId, count in pairs(ply:GetAmmo()) do
+            local ammoName = game.GetAmmoName(ammoId)
+            ammo[ammoName] = count
+        end
+
+        local armor = ply:Armor()
+        local hev = ply:IsSuitEquipped()
+
+        -- Print the DefaultLoadout table
+        print("DefaultLoadout = {")
+        print("    Weapons = {")
+        for _,v in pairs(weps) do
+            print("        \"" .. v .. "\",")
+        end
+        print("    },")
+        print("    Ammo = {")
+        for k,v in pairs(ammo) do
+            print("        [\"" .. k .. "\"] = " .. v .. ",")
+        end
+        print("    },")
+        print("    Armor = " .. armor .. ",")
+        print("    HEV = " .. tostring(hev))
+        print("}")
+    end)
+end

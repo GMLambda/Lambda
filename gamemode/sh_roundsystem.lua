@@ -162,12 +162,10 @@ if SERVER then
         DbgPrint("GM:CleanUpMap")
         -- Make sure nothing is going to create new things now
         self:SetRoundState(STATE_RESTARTING)
-        -- Remove vehicles
-        self:CleanUpVehicles()
         -- Check what we have to cleanup
         local filter = {}
         hook.Call("LambdaCleanupFilter", GAMEMODE, filter)
-        game.CleanUpMap(false, filter)
+        game.CleanUpMap(false, filter, function() end)
     end
 
     function GM:RoundStateBooting()
@@ -315,7 +313,7 @@ if SERVER then
                     mustComplete = true
                 }, mapOptions, {}, function(vote, failed, timeout, winningOption)
                     local picked = mapOptions[winningOption]
-                    self:RequestChangeLevel(nil, picked, nil, {})
+                    self:RequestChangeLevel(picked, nil, {})
                 end)
             end)
         end
@@ -387,6 +385,9 @@ function GM:PreCleanupMap()
     self.ChangingLevel = false
 
     if SERVER then
+        -- Make sure there are no pending outputs
+        RunConsoleCommand("ent_cancelpendingentfires")
+
         -- Disable all overlays.
         for _, v in pairs(ents.FindByClass("env_screenoverlay")) do
             v:Input("StopOverlays")
@@ -399,8 +400,8 @@ function GM:PreCleanupMap()
             v:KillSilent()
         end
 
-        -- Prevent recursions.
         for _, v in pairs(ents.GetAll()) do
+            -- Prevent recursions.
             v:EnableRespawn(false)
         end
 
@@ -410,12 +411,12 @@ function GM:PreCleanupMap()
             for _, v in pairs(ents.FindByClass("logic_choreographed_scene")) do
                 -- Cancel all scenes.
                 DbgPrint("Cancel scene " .. tostring(v))
-                v:Fire("Cancel")
+                v:Input("Cancel")
             end
 
             for _, v in pairs(ents.FindByClass("npc_*")) do
                 DbgPrint("Cancel scripting " .. tostring(v))
-                v:Fire("StopScripting")
+                v:Input("StopScripting")
             end
         end
 
@@ -430,6 +431,7 @@ function GM:PreCleanupMap()
         self:ResetVehicleCheckpoint()
         self:ResetCheckpoints()
         self:ResetSceneCheck()
+        self:CleanUpVehicles()
         self:ClearLevelDesignerPlacedObjects()
         -- Reset all queued functions.
         util.ResetFunctionQueue()
@@ -584,6 +586,7 @@ function GM:OnNewGame()
         -- Notify clients.
         self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
         self:SetupRoundRelevantObjects()
+        self:ResetVehicleCheck()
 
         util.RunNextFrame(function()
             GAMEMODE:PostRoundSetup()
@@ -678,11 +681,6 @@ function GM:StartRound(cleaned, force)
 
         if self.InitPostEntityDone ~= true then
             DbgError("Unfinished booting")
-        end
-
-        if cleaned == true then
-            -- Make sure map created vehicles are gone, we take over.
-            self:CleanUpVehicles()
         end
 
         --self.RoundState = STATE_RESTARTING

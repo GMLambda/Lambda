@@ -51,9 +51,14 @@ if SERVER then
         self:SetupOutput("OnStartTouchAll")
         self:SetupOutput("OnEndTouch")
         self:SetupOutput("OnEndTouchAll")
+        self:SetupOutput("OnTouching")
+        self:SetupOutput("OnNotTouching")
         self:SetInputFunction("Enable", self.Enable)
         self:SetInputFunction("Disable", self.Disable)
         self:SetInputFunction("Toggle", self.Toggle)
+        self:SetInputFunction("TouchTest", self.TouchTest)
+        self:SetInputFunction("StartTouch", self.InputStartTouch)
+        self:SetInputFunction("EndTouch", self.InputEndTouch)
 
         self:SetupNWVar("Disabled", "bool", {
             Default = false,
@@ -121,6 +126,8 @@ if SERVER then
         self.DisabledTouchingObjects = {}
         self.TouchingObjects = {}
         self.LastTouch = CurTime()
+        self.PendingStartTouch = false
+
         self:AddDebugOverlays(bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT))
     end
 
@@ -316,6 +323,27 @@ if SERVER then
         end
     end
 
+    function ENT:TouchTest()
+        DbgPrint(self, "ENT:TouchTest")
+        if table.Count(self.TouchingObjects) == 0 then
+            self:FireOutputs("OnNotTouching", nil, nil)
+        else
+            self:FireOutputs("OnTouching", nil, nil)
+        end
+    end
+
+    function ENT:InputStartTouch(data, activator, caller)
+        DbgPrint(self, "ENT:InputStartTouch")
+        if not IsValid(caller) then return end
+        self:StartTouch(caller)
+    end
+
+    function ENT:InputEndTouch(data, activator, caller)
+        DbgPrint(self, "ENT:InputEndTouch")
+        if not IsValid(caller) then return end
+        self:EndTouch(caller)
+    end
+
     function ENT:GetTimeout()
         local timeout = self:GetNWVar("Timeout", 0)
         if timeout ~= 0 then return timeout end
@@ -458,7 +486,8 @@ if SERVER then
         --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
         local timeoutEvent = false
 
-        if self:GetNWVar("WaitForTeam") == true then
+        local isTeamWait = self:GetNWVar("WaitForTeam")
+        if isTeamWait == true then
             --DbgPrint("Waiting")
             if self.TeamInside == false then
                 if self.NextTimeout == 0 then
@@ -484,6 +513,15 @@ if SERVER then
 
         if self.OnTrigger ~= nil and isfunction(self.OnTrigger) then
             self.OnTrigger(self, ent)
+        end
+
+        if isTeamWait and self.PendingStartTouch == true then
+            DbgPrint(self, "Firing pending StartTouch")
+
+            -- We also have to fire StartTouch because if teamwait is set it will not fire it in StartTouch.
+            self:FireOutputs("OnStartTouch", nil, ent)
+
+            self.PendingStartTouch = false
         end
 
         self:FireOutputs("OnTrigger", nil, ent)
@@ -518,21 +556,15 @@ if SERVER then
     function ENT:TeleportAllToTrigger()
         local missingEnts = {}
 
-        for _, v in pairs(ents.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if not self:IsEntityTouching(v) and self:PassesTriggerFilters(v) then
-                local isAlive = true
-
-                if v:IsPlayer() then
-                    isAlive = v:Alive()
-                end
-
-                if isAlive then
+                if v:Alive() then
                     table.insert(missingEnts, v)
                 end
             end
         end
 
-        -- Teleport missing objects into the box
+        -- Teleport missing players into the box.
         local centerPos = Vector(0, 0, 0)
         local numEntries = 0
 
@@ -633,6 +665,9 @@ if SERVER then
             if waitForTeam == false or (waitForTeam == true and self.TeamInside == true) then
                 DbgPrint(self, CurTime() .. ", OnStartTouch")
                 self:FireOutputs("OnStartTouch", nil, ent)
+            else
+                DbgPrint(self, "Delaying StartTouch until condition is met")
+                self.PendingStartTouch = true
             end
 
             if table.Count(self.TouchingObjects) == 1 then

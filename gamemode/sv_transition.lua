@@ -1,4 +1,5 @@
 local DbgPrint = GetLogging("Transition")
+local g_debug_transitions = GetConVar("g_debug_transitions")
 local util = util
 local ents = ents
 local player = player
@@ -8,6 +9,7 @@ local ENT_TYPE_NPC = 0
 local ENT_TYPE_VEHICLE = 1
 local ENT_TYPE_DOOR = 2
 local ENT_TYPE_GENERIC = 3
+local REF_PREFIX = "CoopRef"
 local SERIALIZE_VECTOR = function(ent, val) return ent:WorldToLocal(val) end
 local SERIALIZE_ANGLES = function(ent, val) return ent:WorldToLocalAngles(val) end
 local FIELD_SERIALIZE = {
@@ -86,6 +88,17 @@ local function GetProfilingData()
     return ProfiledFunctions
 end
 
+local function ToRefId(ent)
+    return REF_PREFIX .. "_" .. tostring(ent:EntIndex())
+end
+
+local function GetRefId(refId)
+    if not isstring(refId) then return nil end
+    local prefix = string.sub(refId, 1, #REF_PREFIX)
+    if prefix ~= REF_PREFIX then return nil end
+    return tonumber(string.sub(refId, #REF_PREFIX + 2))
+end
+
 function GM:InitializeTransitionData()
     Profiled("GM:InitializeTransitionData", function()
         local transitionData = DEFAULT_TRANSITION_DATA
@@ -104,11 +117,14 @@ function GM:InitializeTransitionData()
         DbgPrint("  World objects: " .. tostring(table.Count(self.TransitionData.Objects or {})))
         DbgPrint("  Global states: " .. tostring(table.Count(self.TransitionData.GlobalStates or {})))
         --PrintTable(self.TransitionData)
-        util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
+
+        if g_debug_transitions:GetBool() == false then
+            util.RemovePData("Lambda" .. lambda_instance_id:GetString(), "TransitionData")
+        end
     end)
 end
 
-function GM:TransitionToLevel(activator, map, landmark, playersInTrigger, restart)
+function GM:TransitionToLevel(map, landmark, playersInTrigger, restart)
     Profiled("GM:TransitionToLevel", function()
         -- 1. Lets collect all entities with the landmark name we have to seperate them by landmark and trigger
         local transitionTriggers = {}
@@ -132,7 +148,7 @@ function GM:TransitionToLevel(activator, map, landmark, playersInTrigger, restar
         if not IsValid(landmarkEnt) then
             DbgPrint("Unable to find landmark! - " .. tostring(landmark))
         else
-            self:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+            self:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
             -- In case players didnt make it, we erase their position from the data.
             for k, v in pairs(playerTable) do
                 local ply = Entity(v.RefId)
@@ -365,7 +381,11 @@ function GM:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
 end
 
 local SAVETABLE_WHITELIST = {
-    ["target"] = true
+    ["target"] = true,
+    ["m_bEntranceLocked"] = true,
+    ["m_bExitLocked"] = true,
+    ["m_bEngineLocked"] = true,
+    ["m_bRadarEnabled"] = true,
 }
 
 local SAVETABLE_BLACKLIST = {
@@ -421,6 +441,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             data.Expression = ent:GetExpression()
             data.Activity = ent:GetActivity()
             data.NPCState = ent:GetNPCState()
+            data.SaveTable["LambdaVehicle"] = ent:GetNWEntity("LambdaVehicle", nil)
             local activeWeapon = ent:GetActiveWeapon()
             if IsValid(activeWeapon) then data.ActiveWeapon = activeWeapon:GetClass() end
         elseif ent:IsVehicle() then
@@ -432,7 +453,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             end
 
             data.VehicleScript = ent:GetInternalVariable("VehicleScript")
-            if ent:GetNWBool("IsPassengerSeat", false) == true then data.IsPassengerSeat = true end
+            if self:VehicleIsPassengerSeat(ent) == true then data.IsPassengerSeat = true end
         elseif ent:IsDoor() then
             data.Type = ENT_TYPE_DOOR
             if ent:IsDoorOpen() or ent:IsDoorOpening() then
@@ -467,7 +488,7 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             end
 
             if IsEntity(v) and IsValid(v) then
-                data.SaveTable[k] = "CoopRef_" .. tostring(v:EntIndex())
+                data.SaveTable[k] = ToRefId(v)
             else
                 data.SaveTable[k] = v
             end
@@ -624,7 +645,7 @@ function GM:GetTransitionList(landmarkEnt, transitionTriggers, objectTable, play
     end)
 end
 
-function GM:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
+function GM:TransitionNearbyObjects(landmarkEnt, transitionTriggers, objectTable, playerTable, playersInTrigger)
     return Profiled("GM:GetTransitionList", function()
         DbgPrint("GM:TransitionNearbyObjects")
         -- Create initial list.
@@ -634,10 +655,10 @@ function GM:TransitionNearbyObjects(activator, landmarkEnt, transitionTriggers, 
             local caps = v:ObjectCaps()
             if bit.band(caps, FCAP_NOTIFY_ON_TRANSITION) == 0 then continue end
             if table.HasValue(initialObjectList, v) == false then
-                v:Input("OutsideTransition", activator, activator, nil)
+                v:Input("OutsideTransition", nil, nil, nil)
                 DbgPrint("Notifying " .. tostring(v) .. " outside of transitioning")
             else
-                v:Input("InsideTransition", activator, activator, nil)
+                v:Input("InsideTransition", nil, nil, nil)
                 DbgPrint("Notifying " .. tostring(v) .. " inside of transitioning")
             end
         end
@@ -837,6 +858,8 @@ function GM:CreateTransitionObjects()
             end
         end
 
+        local postSpawnQueue = {}
+
         DbgPrint("Creating " .. tostring(objCount) .. " transition Objects...")
         local entityTransitionData = {}
         for _, data in pairs(objects) do
@@ -856,6 +879,7 @@ function GM:CreateTransitionObjects()
                 DbgPrint("Using global entity!")
             else
                 ent = ents.Create(data.Class)
+                ent.CreatedByLevelTransition = true
             end
 
             if not IsValid(ent) then
@@ -949,7 +973,7 @@ function GM:CreateTransitionObjects()
             --ent.TransitionData = data
             entityTransitionData[ent] = data
             self.CreatedTransitionObjects[data.RefId] = ent
-            DbgPrint("Created " .. tostring(ent))
+            DbgPrint("Created " .. tostring(ent) .. ", RefId: " .. data.RefId)
         end
 
         -- Second iteration: We resolve dependencies.
@@ -961,8 +985,10 @@ function GM:CreateTransitionObjects()
                 local parent = self.CreatedTransitionObjects[data.Parent]
                 if IsValid(parent) then
                     ent:SetParent(parent)
-                    -- FIX: Make sure we assign the seat to the vehicle.
-                    if ent:GetNWBool("IsPassengerSeat", false) == true then parent:SetNWEntity("PassengerSeat", ent) end
+                    if self:VehicleIsPassengerSeat(ent) == true then
+                        -- FIX: Make sure we assign the seat to the vehicle.
+                        parent:SetNWEntity("PassengerSeat", ent)
+                    end
                 end
             end
 
@@ -972,15 +998,44 @@ function GM:CreateTransitionObjects()
             end
 
             for k, v in pairs(data.SaveTable) do
-                if isstring(v) and v:sub(1, 8) == "CoopRef_" then
-                    local refId = tonumber(v:sub(9))
+                local refId = GetRefId(v)
+                if refId ~= nil then
                     local refEnt = self.CreatedTransitionObjects[refId]
                     if IsValid(refEnt) and refEnt ~= ent and ent:IsNPC() == false then
                         DbgPrint("Resolved reference for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(refEnt))
                         ent:SetSaveValue(k, refEnt)
                     end
                 else
-                    if SAVETABLE_WHITELIST[k] == true then ent:SetSaveValue(k, v) end
+                    if SAVETABLE_WHITELIST[k] == true then
+                        DbgPrint("Setting save value for " .. tostring(ent) .. ": " .. k .. " -> " .. tostring(v))
+                        ent:SetSaveValue(k, v)
+                    end
+                end
+            end
+
+            -- Handle NPCs entering the vehicle/passenger seat.
+            if ent:IsNPC() then
+                local vehicleRef = data.SaveTable["LambdaVehicle"]
+                if vehicleRef ~= nil then
+                    local refId = GetRefId(vehicleRef)
+                    DbgPrint("Found vehicle reference for " .. tostring(ent) .. ": " .. vehicleRef)
+                    local vehicle = self.CreatedTransitionObjects[refId]
+                    if IsValid(vehicle) then
+                        ent:SetNWEntity("LambdaVehicle", vehicle)
+                        ent:SetParent(nil)
+                        -- This has to wait after the vehicle is fully initialized/spawned,
+                        -- otherwise it will cause crashes.
+                        table.insert(postSpawnQueue, function()
+                            local oldName = vehicle:GetName()
+                            local newName = oldName .. tostring(vehicle:EntIndex())
+                            -- This is one major hack to ensure alyx will be in the correct "jeep" vehicle.
+                            vehicle:SetName(newName)
+                            -- Bypass queue as our name is only valid here so it can't end up in a queue.
+                            ent:Input("EnterVehicleImmediately", NULL, NULL, newName)
+                            -- Reset the name.
+                            vehicle:SetName(oldName)
+                        end)
+                    end
                 end
             end
 
@@ -1007,6 +1062,11 @@ function GM:CreateTransitionObjects()
                     physObj:SetAngles(physAng)
                 end
             end
+        end
+
+        -- Those functions might fire some inputs which require the object to be fully initialized first.
+        for _, func in pairs(postSpawnQueue) do
+            func()
         end
     end)
 end
