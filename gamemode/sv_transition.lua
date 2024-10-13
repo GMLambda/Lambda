@@ -444,6 +444,11 @@ function GM:SerializeEntityData(landmarkEnt, ent, playersInTrigger)
             data.SaveTable["LambdaVehicle"] = ent:GetNWEntity("LambdaVehicle", nil)
             local activeWeapon = ent:GetActiveWeapon()
             if IsValid(activeWeapon) then data.ActiveWeapon = activeWeapon:GetClass() end
+            local npcWeps = ent:GetWeapons()
+            data.NPCWeapons = {}
+            for _, v in pairs(npcWeps) do
+                table.insert(data.NPCWeapons, v:GetClass())
+            end
         elseif ent:IsVehicle() then
             data.Type = ENT_TYPE_VEHICLE
             if ent:IsGunEnabled() then
@@ -943,12 +948,13 @@ function GM:CreateTransitionObjects()
             if data.IsPassengerSeat == true then ent:SetNWBool("IsPassengerSeat", true) end
             if data.Type == ENT_TYPE_NPC then
                 ent:SetMovementActivity(data.MovementActivity)
-                --ent:SetMovementSequence(data.MovementSequence)
                 ent:SetExpression(data.Expression)
                 ent:SetNPCState(data.NPCState)
+                for _, v in pairs(data.NPCWeapons) do
+                    ent:Give(v)
+                end
                 if data.ActiveWeapon ~= nil then
-                    ent:SetKeyValue("additionalequipment", data.ActiveWeapon)
-                    GAMEMODE:EntityKeyValue(ent, "additionalequipment", data.ActiveWeapon)
+                    ent:SelectWeapon(data.ActiveWeapon)
                 end
             elseif data.Type == ENT_TYPE_VEHICLE then
                 if data.EnableGun == true then

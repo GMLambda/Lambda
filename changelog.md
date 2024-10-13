@@ -2,6 +2,7 @@
 - Improved: Going in and out of the settings no longer clips into the player model.
 - Fixed: NPC makers not respecting the spawn frequency -1 causing a lot of NPCs being spawned in some cases.
 - Fixed: ep1_c17_00a: Don't cancel scripted_sequence on player death.
+- Fixed: weapons not properly transitioning for NPCs.
 
 0.9.25
 - Improved: Hints will no longer show duplicates, instead it will renew the existing hint that has the same text.
