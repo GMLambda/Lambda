@@ -198,6 +198,10 @@ function ents.FindByPos(pos, class, name)
     local found = ents.FindInBox(pos - tolerance, pos + tolerance)
     local res = {}
     for _, v in pairs(found) do
+        local p2 = v:GetPos()
+        if pos:IsEqualTol(p2, 0.001) == false then
+            continue
+        end
         if class ~= nil and name ~= nil then
             if v:GetClass() == class and v:GetName() == name then
                 table.insert(res, v)
