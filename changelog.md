@@ -18,6 +18,7 @@
 - Fixed: d3_citadel_05: PODs colliding with each other at the map start causing the game to freeze.
 - Fixed: Level transition can carry some unwanted entities to the next map.
 - Fixed: d2_coast_08: Incorrect player spawn when directly starting from this map.
+- Fixed: Compatibility with addons that use GM:AddDeathNotice, this caused errors to appear.
 
 0.9.27
 - Fixed: Entity inputs/outputs are parsed incorrect.
