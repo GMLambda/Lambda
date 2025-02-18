@@ -75,7 +75,33 @@ local WEAPON_TYPES = {
     ["grenade_frag"] = true
 }
 
-function GM:AddDeathNotice(data)
+function GM:AddDeathNotice(attacker, attackerTeam, inflictor, victim, victimTeam)
+    local data = {
+        attacker = {
+            entIndex = attacker:EntIndex(),
+            class = attacker:GetClass(),
+            isNPC = attacker:IsNPC(),
+            isPlayer = attacker:IsPlayer(),
+            team = attackerTeam
+        },
+        victim = {
+            entIndex = victim:EntIndex(),
+            class = victim:GetClass(),
+            isNPC = victim:IsNPC(),
+            isPlayer = victim:IsPlayer(),
+            team = victimTeam
+        },
+        inflictor = {
+            entIndex = inflictor:EntIndex(),
+            class = inflictor:GetClass()
+        },
+        selfInflicted = attacker == victim,
+        dmgType = DMG_GENERIC,
+    }
+    self:AddDeathNoticeFromData(data)
+end
+
+function GM:AddDeathNoticeFromData(data)
     local death = {}
     death.time = CurTime()
     death.times = 1
