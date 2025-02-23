@@ -19,6 +19,7 @@
 - Fixed: Level transition can carry some unwanted entities to the next map.
 - Fixed: d2_coast_08: Incorrect player spawn when directly starting from this map.
 - Fixed: Compatibility with addons that use GM:AddDeathNotice, this caused errors to appear.
+- Fixed: Weapons from players respawning when picked up.
 
 0.9.27
 - Fixed: Entity inputs/outputs are parsed incorrect.
