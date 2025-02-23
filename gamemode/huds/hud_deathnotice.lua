@@ -62,7 +62,7 @@ local DeathsData = {
 
 local function RecieveDeathEvent()
     local data = net.ReadTable()
-    GAMEMODE:AddDeathNotice(data)
+    GAMEMODE:AddDeathNoticeFromData(data)
 end
 
 net.Receive("LambdaDeathEvent", RecieveDeathEvent)
@@ -75,30 +75,46 @@ local WEAPON_TYPES = {
     ["grenade_frag"] = true
 }
 
+local function ProcessDeathNotice(death, color1, color2)
+    -- Check for existing entries to merge times
+    for k, v in pairs(DeathsData.Entries) do
+        if v.left == death.left and v.icon == death.icon and v.right == death.right then
+            death.times = v.times + 1
+            death.lerpY = v.lerpY
+            table.remove(DeathsData.Entries, k)
+            break
+        end
+    end
+
+    -- Assign colors and add to entries
+    death.color1 = color1
+    death.color2 = color2
+    DeathsData.Bounds = nil
+    table.insert(DeathsData.Entries, death)
+end
+
 function GM:AddDeathNotice(attacker, attackerTeam, inflictor, victim, victimTeam)
-    local data = {
-        attacker = {
-            entIndex = attacker:EntIndex(),
-            class = attacker:GetClass(),
-            isNPC = attacker:IsNPC(),
-            isPlayer = attacker:IsPlayer(),
-            team = attackerTeam
-        },
-        victim = {
-            entIndex = victim:EntIndex(),
-            class = victim:GetClass(),
-            isNPC = victim:IsNPC(),
-            isPlayer = victim:IsPlayer(),
-            team = victimTeam
-        },
-        inflictor = {
-            entIndex = inflictor:EntIndex(),
-            class = inflictor:GetClass()
-        },
+    local death = {
+        time = CurTime(),
+        times = 1,
+        left = attacker,
+        attackerTeam = attackerTeam,
+        inflictor = inflictor,
+        right = victim,
+        victimTeam = victimTeam,
         selfInflicted = attacker == victim,
-        dmgType = DMG_GENERIC,
+        icon = inflictor or "default",
     }
-    self:AddDeathNoticeFromData(data)
+
+    if death.left == death.right and death.selfInflicted then
+        death.left = nil
+    end
+
+    -- Calculate colors based on team or NPC_Color
+    local color1 = attackerTeam and table.Copy(team.GetColor(attackerTeam)) or table.Copy(NPC_Color)
+    local color2 = victimTeam and table.Copy(team.GetColor(victimTeam)) or table.Copy(NPC_Color)
+
+    ProcessDeathNotice(death, color1, color2)
 end
 
 function GM:AddDeathNoticeFromData(data)
@@ -108,16 +124,16 @@ function GM:AddDeathNoticeFromData(data)
     local dmgType = data.dmgType
     local inflictor = data.inflictor
 
+    -- Icon determination
     if inflictor ~= nil then
         death.icon = inflictor.class
-
         if bit.band(dmgType, DMG_BLAST) ~= 0 and WEAPON_TYPES[inflictor.class] ~= true then
             death.icon = "env_explosion"
         end
     end
 
+    -- Attacker processing
     local attacker = data.attacker
-
     if attacker ~= nil then
         if attacker.isPlayer then
             death.left = Entity(attacker.entIndex):Name()
@@ -132,8 +148,8 @@ function GM:AddDeathNoticeFromData(data)
         end
     end
 
+    -- Victim processing
     local victim = data.victim
-
     if victim ~= nil then
         if victim.isPlayer then
             death.right = Entity(victim.entIndex):Name()
@@ -142,10 +158,12 @@ function GM:AddDeathNoticeFromData(data)
         end
     end
 
+    -- Self-inflicted handling
     if death.left == death.right and data.selfInflicted == true then
         death.left = nil
     end
 
+    -- Fallback damage type labels
     if death.left == nil then
         if bit.band(dmgType, DMG_BLAST) ~= 0 then
             death.left = "EXPLOSION"
@@ -168,33 +186,13 @@ function GM:AddDeathNoticeFromData(data)
         end
     end
 
-    if death.icon == nil then
-        death.icon = "default"
-    end
+    death.icon = death.icon or "default"
 
-    for k, v in pairs(DeathsData.Entries) do
-        if v.left == death.left and v.icon == death.icon and v.right == death.right then
-            death.times = v.times + 1
-            death.lerpY = v.lerpY
-            table.remove(DeathsData.Entries, k)
-            break
-        end
-    end
+    -- Calculate colors based on attacker/victim data
+    local color1 = (not data.attacker or not data.attacker.team) and table.Copy(NPC_Color) or table.Copy(team.GetColor(data.attacker.team))
+    local color2 = (not data.victim or not data.victim.team) and table.Copy(NPC_Color) or table.Copy(team.GetColor(data.victim.team))
 
-    if attacker == nil or attacker.team == nil then
-        death.color1 = table.Copy(NPC_Color)
-    else
-        death.color1 = table.Copy(team.GetColor(attacker.team))
-    end
-
-    if victim == nil or victim.team == nil then
-        death.color2 = table.Copy(NPC_Color)
-    else
-        death.color2 = table.Copy(team.GetColor(victim.team))
-    end
-
-    DeathsData.Bounds = nil
-    table.insert(DeathsData.Entries, death)
+    ProcessDeathNotice(death, color1, color2)
 end
 
 local function ComputeDeathNoticeSize(death, bounds)
@@ -222,7 +220,10 @@ local function ComputeDeathNoticeSize(death, bounds)
         bounds.height = math.max(bounds.height, txtH)
     end
 
-    local killiconW, killiconH = killicon.GetSize(death.icon)
+    local killiconW, killiconH
+    if death.icon ~= nil then
+        killiconW, killiconH = killicon.GetSize(death.icon)
+    end
 
     if killiconW ~= nil and killiconH ~= nil then
         death.killiconW = killiconW
