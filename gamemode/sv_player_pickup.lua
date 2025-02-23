@@ -197,7 +197,7 @@ function GM:PlayerCanPickupItem(ply, item)
     DbgPrintPickup("PlayerCanPickupItem", ply, item)
 
     if item.CreatedForPlayer ~= nil then
-        if item.CreatedForPlayer == ply then
+        if item.CreatedForPlayer == ply or item.CreatedForPlayer == NULL then
             DbgPrintPickup("Simple pickup, created for player: " .. tostring(ply))
 
             return true
@@ -252,7 +252,7 @@ function GM:PlayerCanPickupWeapon(ply, wep)
     end
 
     if wep.CreatedForPlayer ~= nil then
-        if wep.CreatedForPlayer == ply then
+        if wep.CreatedForPlayer == ply or wep.CreatedForPlayer == NULL then
             DbgPrintPickup(ply, "Simple pickup, created for player")
 
             return true
@@ -311,7 +311,7 @@ function GM:WeaponEquip(wep, owner)
         end
     end
 
-    if wep.CreatedForPlayer ~= owner and wep.DroppedByPlayer == nil then
+    if wep.CreatedForPlayer == nil and wep.DroppedByPlayer == nil then
         if AMMO_LIKE_WEAPONS[wep:GetClass()] ~= true and self:CallGameTypeFunc("ShouldRespawnWeapon", wep) == true then
             local respawnTime = self:CallGameTypeFunc("GetWeaponRespawnTime") or 0.5
 
@@ -321,5 +321,5 @@ function GM:WeaponEquip(wep, owner)
         end
     end
 
-    wep.CreatedForPlayer = nil
+    wep.CreatedForPlayer = NULL
 end
