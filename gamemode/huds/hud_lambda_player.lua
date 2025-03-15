@@ -226,7 +226,7 @@ function PANEL:Init()
     RebuildPanel()
 
     function mdlListPanel:OnActivePanelChanged(old, new)
-        if old != new then
+        if old ~= new then
             lambda_playermdl_skin:SetString("0")
             lambda_playermdl_bodygroup:SetString("0")
         end
