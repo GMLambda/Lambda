@@ -29,7 +29,7 @@ Half-Life 2: Episode 1
 - Fully supported.
 
 Half-Life 2: Episode 2
-- Planned 
+- 80% completion. 
 
 Half-Life 2: Deathmatch
 - Fully supported.
