@@ -78,6 +78,9 @@ function GM:DrawTauntsMenu()
     local ply = LocalPlayer()
     local categoryId = CategoryIndex:GetInt()
     local taunts = self:GetPlayerTaunts(ply, categoryId)
+    if taunts == nil then
+        return
+    end
     local count = 0
 
     if taunts ~= nil then
@@ -145,10 +148,13 @@ end
 function GM:SendSelectedTaunt()
     local ply = LocalPlayer()
     ply.LastTaunt = ply.LastTaunt or (RealTime() - 5)
-    if RealTime() - ply.LastTaunt < 2 then return false end
+    if RealTime() - ply.LastTaunt < 3 then return false end
     ply.LastTaunt = RealTime()
     local categoryId = CategoryIndex:GetInt()
     local taunts = self:GetPlayerTaunts(ply, categoryId)
+    if taunts == nil then
+        return
+    end
     local count = #taunts
     local tauntIndex = TauntIndex:GetInt()
     if tauntIndex < 1 or tauntIndex > count then return false end
@@ -189,6 +195,9 @@ function GM:TauntSelectionInput(ply, bind, pressed)
     if update == true then
         local categoryId = CategoryIndex:GetInt()
         local taunts = self:GetPlayerTaunts(ply, categoryId)
+        if taunts == nil then
+            return
+        end
         tauntIndex = math.Clamp(tauntIndex, 1, #taunts)
         TauntIndex:SetInt(tauntIndex)
     end

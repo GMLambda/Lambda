@@ -2,6 +2,8 @@
 - Improved: Better prediction handling for the Gravity Gun, should be more responsive with higher ping now.
 - Improved: d2_coast_08: Add more checkpoints.
 - Improved: d2_coast_08: If the Gunship is not destroyed it will transition to d2_coast_07.
+- Improved: Voice category detection baed on models, also added "lambda_voice_group" cvar to force it.
+- Added: Setting to override the detected voice category to the player settings menu.
 - Added: Setting to draw local player in vehicles, new tab under settings menu and "lambda_vehicle_draw_player" cvar.
 - Fixed: d2_prison_05: Not removing default spawn items.
 - Fixed: d3_c17_07: Player clip blocking other players at the start of the map.
