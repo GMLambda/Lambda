@@ -659,8 +659,8 @@ if SERVER then
     end
 else -- CLIENT
     function GM:CalcVehicleView(vehicle, ply, view)
-        --print("CalcVehicleView")
-        if ply.VehicleSteeringView == true then
+        local shouldDrawPlayer = lambda_vehicle_drawplayer:GetBool()
+        if shouldDrawPlayer == true then
             local viewPos = view.origin
             local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
             if headBone ~= nil then viewPos = ply:GetBonePosition(headBone) end
@@ -673,31 +673,38 @@ else -- CLIENT
             return
         end
 
-        if vehicle:GetThirdPersonMode() == false then return view end
-        local mn, mx = vehicle:GetRenderBounds()
-        local radius = (mn - mx):Length()
-        radius = radius + radius * vehicle:GetCameraDistance()
-        -- Trace back from the original eye position, so we don't clip through walls/objects
-        local TargetOrigin = view.origin + (view.angles:Forward() * -radius)
-        local WallOffset = 4
-        local tr = util.TraceHull({
-            start = view.origin,
-            endpos = TargetOrigin,
-            filter = function(e)
-                local c = e:GetClass() -- Avoid contact with entities that can potentially be attached to the vehicle. Ideally, we should check if "e" is constrained to "Vehicle".
-                return not c:StartWith("prop_physics") and not c:StartWith("prop_dynamic") and not c:StartWith("prop_ragdoll") and not e:IsVehicle() and not c:StartWith("gmod_")
-            end,
-            mins = Vector(-WallOffset, -WallOffset, -WallOffset),
-            maxs = Vector(WallOffset, WallOffset, WallOffset)
-        })
+        if vehicle:GetThirdPersonMode() == true then
+            local mn, mx = vehicle:GetRenderBounds()
+            local radius = (mn - mx):Length()
+            radius = radius + radius * vehicle:GetCameraDistance()
+            -- Trace back from the original eye position, so we don't clip through walls/objects
+            local TargetOrigin = view.origin + (view.angles:Forward() * -radius)
+            local WallOffset = 4
+            local tr = util.TraceHull({
+                start = view.origin,
+                endpos = TargetOrigin,
+                filter = function(e)
+                    local c = e:GetClass() -- Avoid contact with entities that can potentially be attached to the vehicle. Ideally, we should check if "e" is constrained to "Vehicle".
+                    return not c:StartWith("prop_physics") and not c:StartWith("prop_dynamic") and not c:StartWith("prop_ragdoll") and not e:IsVehicle() and not c:StartWith("gmod_")
+                end,
+                mins = Vector(-WallOffset, -WallOffset, -WallOffset),
+                maxs = Vector(WallOffset, WallOffset, WallOffset)
+            })
 
-        view.origin = tr.HitPos
-        view.drawviewer = true
-        --
-        -- If the trace hit something, put the camera there.
-        --
-        if tr.Hit and not tr.StartSolid then view.origin = view.origin + tr.HitNormal * WallOffset end
-        return view
+            view.origin = tr.HitPos
+            --
+            -- If the trace hit something, put the camera there.
+            --
+            if tr.Hit and not tr.StartSolid then
+                view.origin = view.origin + tr.HitNormal * WallOffset
+            end
+
+            -- Always draw the player in third person.
+            view.drawviewer = true
+
+            return view
+        end
+
     end
 end
 
