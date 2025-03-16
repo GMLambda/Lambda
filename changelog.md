@@ -1,4 +1,4 @@
-0.9.28 (in development)
+0.9.28
 - Improved: Better prediction handling for the Gravity Gun, should be more responsive with higher ping now.
 - Improved: d2_coast_08: Add more checkpoints.
 - Improved: d2_coast_08: If the Gunship is not destroyed it will transition to d2_coast_07.
