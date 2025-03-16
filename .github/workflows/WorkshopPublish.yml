@@ -7,7 +7,7 @@ on:
     secrets:
       STEAM_USERNAME:
         required: true
-      STEAM_PASSWORD:
+      STEAM_CONFIG_VDF:
         required: true
 jobs:
   Workshop-Update:
@@ -15,10 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-    env:
-      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
-      STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
-      STEAM_TFASEED : ${{ secrets.STEAM_TFASEED }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -58,9 +54,11 @@ jobs:
         mkdir dist
         ./gmod/bin/gmad_linux create -folder publish -out dist/lambda.gma
     - name: Upload to Workshop
-      uses: ZehMatt/steam-workshop-upload@569de82c2fdf3042af8491379fb698829ba63a9d
-      with: 
-        appid: 4000
-        itemid: ${{ inputs.workshop-id }}
+      uses: m00nl1ght-dev/steam-workshop-deploy@v3
+      with:
+        username: ${{ secrets.STEAM_USERNAME }}          
+        configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
         changenote: "List of changes: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}/changelog.md"
         path: 'dist'
+        appId: 4000
+        publishedFileId: ${{ inputs.workshop-id }}
