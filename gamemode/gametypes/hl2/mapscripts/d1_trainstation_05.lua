@@ -176,6 +176,12 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("t4_breen_destination_rl", function(ent)
             ent:Fire("AddOutput", "OnTrigger Breen_Cutscene,BeginSequence,,1,1")
         end)
+
+        -- Increase the trigger size as people can potentially escape it.
+        ents.WaitForEntityByName("9_waste2_trigger_teleport", function(ent)
+            ent:ResizeTriggerBox(Vector(-3500, -3500, -700), Vector(3500, 3500, 500))
+        end)
+
     end
 end
 
