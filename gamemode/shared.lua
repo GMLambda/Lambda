@@ -621,7 +621,7 @@ function GM:EntityKeyValue(ent, key, val)
         -- In case a map has a scripted_sequence with onplayerdeath set to 1, we want to know about it.
         if key == "onplayerdeath" and entClass == "scripted_sequence" and tostring(val) ~= "0" then
             -- Delay this check to make sure the map script had time to run.
-            timer.Simple(1, function()
+            timer.Simple(5, function()
                 self:CheckScriptedSequence(ent)
             end)
         end
