@@ -1,6 +1,7 @@
 0.9.29 (in development)
 - Fixed: d1_trainstation_05: players able to escape the teleport sequence.
 - Fixed: False positive warnings about unhandled onplayerdeath on scripted_sequence.
+- Fixed: Players spawning with the suit if there is no map script, there should be nothing.
 
 0.9.28
 - Improved: Better prediction handling for the Gravity Gun, should be more responsive with higher ping now.

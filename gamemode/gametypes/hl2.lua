@@ -224,7 +224,7 @@ function GAMETYPE:GetPlayerLoadout()
         Weapons = {},
         Ammo = {},
         Armor = 0,
-        HEV = true
+        HEV = false,
     }
 end
 
