@@ -157,6 +157,8 @@ function PANEL:Paint(w, h)
     local wep = ply:GetActiveWeapon()
     if not IsValid(wep) then return end
 
+    if ply:InVehicle() then return end
+
     local cenX, cenY = w / 2, h / 2
 
     DisableClipping(true)
