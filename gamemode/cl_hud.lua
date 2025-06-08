@@ -14,6 +14,7 @@ include("huds/hud_vote.lua")
 include("huds/hud_deathnotice.lua")
 include("huds/hud_scoreboard.lua")
 include("huds/hud_credits.lua")
+include("huds/hud_quickinfo.lua")
 --local DbgPrint = GetLogging("HUD")
 DEFINE_BASECLASS("gamemode_base")
 local IsValid = IsValid
@@ -37,12 +38,20 @@ function GM:HUDInit(reloaded)
         self.HUDRoundInfo:Remove()
     end
 
+    if reloaded == true and IsValid(self.HUDQuickInfo) then
+        self.HUDQuickInfo:Remove()
+    end
+
     if not IsValid(self.HUDSuit) then
         self.HUDSuit = vgui.Create("HudSuit")
     end
 
     if not IsValid(self.HUDRoundInfo) then
         self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
+    end
+
+    if not IsValid(self.HUDQuickInfo) then
+        self.HUDQuickInfo = vgui.Create("LQuickInfo")
     end
 
     -- We call this due to resolution changes.
@@ -120,6 +129,9 @@ function GM:HUDShouldDraw(hudName)
         return false
     elseif hudName == "CHudSquadStatus" then
         -- TODO: Reimplement me.
+        return false
+    elseif hudName == "CHUDQuickInfo" then
+        -- We make our own.
         return false
     end
 
