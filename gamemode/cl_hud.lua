@@ -29,18 +29,6 @@ local NextMenuHint = SysTime()
 local MenuHintInitialDelay = 5
 local MenuHintDelay = 120
 
--- Surely a better way exists but want to keep old cvars
-cvars.AddChangeCallback("lambda_crosshair", function(cvar, oldVal, newVal)
-    if newVal == "1" then
-        lambda_quickinfo:SetInt(0)
-    end
-end)
-cvars.AddChangeCallback("lambda_quickinfo", function(cvar, oldVal, newVal)
-    if newVal == "1" then
-        lambda_crosshair:SetInt(0)
-    end
-end)
-
 function GM:HUDInit(reloaded)
     if reloaded == true and IsValid(self.HUDSuit) then
         self.HUDSuit:Remove()
@@ -62,7 +50,7 @@ function GM:HUDInit(reloaded)
         self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
     end
 
-    if lambda_quickinfo:GetBool() == true and not IsValid(self.HUDQuickInfo) then
+    if lambda_crosshair:GetInt() == 2 and not IsValid(self.HUDQuickInfo) then
         self.HUDQuickInfo = vgui.Create("LQuickInfo")
     end
 
@@ -124,7 +112,7 @@ function GM:HUDShouldDraw(hudName)
     if hudName == "CHudCrosshair" then
         if self:ShouldDrawCrosshair() == false then return false end
 
-        if lambda_crosshair:GetBool() == true then
+        if lambda_crosshair:GetInt() >= 1 then
             local wep = ply:GetActiveWeapon()
             if wep and wep.DoDrawCrosshair == nil then return false end
         end
@@ -160,14 +148,17 @@ function GM:HUDPaint()
     hook.Run("DrawTauntsMenu")
     hook.Run("DrawMetrics")
 
-    if lambda_crosshair:GetBool() == true and self:ShouldDrawCrosshair() == true then
+    local chcVar = lambda_crosshair:GetInt()
+
+    if chcVar == 1 and self:ShouldDrawCrosshair() == true then
         if IsValid(self.HUDQuickInfo) then self.HUDQuickInfo:Remove() end
         hook.Run("DrawDynamicCrosshair")
-    end
-    if lambda_quickinfo:GetBool() == true and self:ShouldDrawCrosshair() == true then
+    elseif chcVar == 2 and self:ShouldDrawCrosshair() == true then
         if not IsValid(self.HUDQuickInfo) then
-        self.HUDQuickInfo = vgui.Create("LQuickInfo")
+            self.HUDQuickInfo = vgui.Create("LQuickInfo")
         end
+    else
+        if IsValid(self.HUDQuickInfo) then self.HUDQuickInfo:Remove() end
     end
 end
 
