@@ -42,11 +42,37 @@ vgui.Register("LambdaVehiclePanel", PANEL_VEHICLE, "DPanel")
 local PANEL_CROSSHAIR = {}
 
 function PANEL_CROSSHAIR:Init()
-    local dyn_cross = self:Add("DCheckBoxLabel")
-    dyn_cross:SetPos(5, 5)
-    dyn_cross:SetText("Enhanced Crosshair")
-    dyn_cross:SetConVar("lambda_crosshair")
-    dyn_cross:SetValue(cvars.Number("lambda_crosshair"))
+    local chVar = GetConVar("lambda_crosshair"):GetInt()
+    local chTbl = {
+        [0] = "Garry's Mod Default",
+        [1] = "Lambda",
+        [2] = "Half-Life 2"
+    }
+    local chSelectLbl = self:Add("DLabel")
+    chSelectLbl:SetPos(5, 7)
+    chSelectLbl:SetFont("HudHintTextLarge")
+    chSelectLbl:SetTextColor(Color(255, 255, 255, 255))
+    chSelectLbl:SetText("Crosshair style: ")
+    chSelectLbl:SizeToContents()
+    chSelectLbl.DontHide = true
+    local chSelect = self:Add("DComboBox")
+    chSelect:SetPos(chSelectLbl:GetWide() + 10, 5)
+    chSelect:SetSize(150, 20)
+    chSelect:SetTextColor(Color(255, 255, 255))
+    for k, v in pairs(chTbl) do
+        chSelect:AddChoice(v, k, chVar == k)
+    end
+    chSelect.DontHide = true
+
+    function chSelect:OnSelect(index, text, data)
+        local a = chSelect:GetParent()
+        if data == 1 then
+            a:HideAll(false)
+        else
+            a:HideAll(true)
+        end
+        lambda_crosshair:SetInt(data)
+    end
     local bgColor = Color(0, 0, 0, 255)
     local chPreview = self:Add("DImage")
     chPreview:SetPos(180, 135)
@@ -174,6 +200,22 @@ function PANEL_CROSSHAIR:Init()
     chDynamic:SetText("Dynamic")
     chDynamic:SetConVar("lambda_crosshair_dynamic")
     chDynamic:SetValue(cvars.Number("lambda_crosshair_dynamic"))
+
+    if chVar ~= 1 then
+        self:HideAll(true)
+    end
+end
+
+function PANEL_CROSSHAIR:HideAll(val)
+    for k, v in pairs(self:GetChildren()) do
+        if not v.DontHide then
+            if val == true then
+                v:SetVisible(false)
+            else
+                v:SetVisible(true)
+            end
+        end
+    end
 end
 
 vgui.Register("LambdaCrosshairPanel", PANEL_CROSSHAIR, "DPanel")

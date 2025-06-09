@@ -14,6 +14,7 @@ include("huds/hud_vote.lua")
 include("huds/hud_deathnotice.lua")
 include("huds/hud_scoreboard.lua")
 include("huds/hud_credits.lua")
+include("huds/hud_quickinfo.lua")
 --local DbgPrint = GetLogging("HUD")
 DEFINE_BASECLASS("gamemode_base")
 local IsValid = IsValid
@@ -37,12 +38,20 @@ function GM:HUDInit(reloaded)
         self.HUDRoundInfo:Remove()
     end
 
+    if reloaded == true and IsValid(self.HUDQuickInfo) then
+        self.HUDQuickInfo:Remove()
+    end
+
     if not IsValid(self.HUDSuit) then
         self.HUDSuit = vgui.Create("HudSuit")
     end
 
     if not IsValid(self.HUDRoundInfo) then
         self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
+    end
+
+    if lambda_crosshair:GetInt() == 2 and not IsValid(self.HUDQuickInfo) then
+        self.HUDQuickInfo = vgui.Create("LQuickInfo")
     end
 
     -- We call this due to resolution changes.
@@ -103,7 +112,7 @@ function GM:HUDShouldDraw(hudName)
     if hudName == "CHudCrosshair" then
         if self:ShouldDrawCrosshair() == false then return false end
 
-        if lambda_crosshair:GetBool() == true then
+        if lambda_crosshair:GetInt() >= 1 then
             local wep = ply:GetActiveWeapon()
             if wep and wep.DoDrawCrosshair == nil then return false end
         end
@@ -121,6 +130,9 @@ function GM:HUDShouldDraw(hudName)
     elseif hudName == "CHudSquadStatus" then
         -- TODO: Reimplement me.
         return false
+    elseif hudName == "CHUDQuickInfo" then
+        -- We make our own.
+        return false
     end
 
     return true
@@ -136,8 +148,17 @@ function GM:HUDPaint()
     hook.Run("DrawTauntsMenu")
     hook.Run("DrawMetrics")
 
-    if lambda_crosshair:GetBool() == true and self:ShouldDrawCrosshair() == true then
+    local chcVar = lambda_crosshair:GetInt()
+
+    if chcVar == 1 and self:ShouldDrawCrosshair() == true then
+        if IsValid(self.HUDQuickInfo) then self.HUDQuickInfo:Remove() end
         hook.Run("DrawDynamicCrosshair")
+    elseif chcVar == 2 and self:ShouldDrawCrosshair() == true then
+        if not IsValid(self.HUDQuickInfo) then
+            self.HUDQuickInfo = vgui.Create("LQuickInfo")
+        end
+    else
+        if IsValid(self.HUDQuickInfo) then self.HUDQuickInfo:Remove() end
     end
 end
 
