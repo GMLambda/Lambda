@@ -24,6 +24,18 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_pistol"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Narrow dark tunnels between helicopter attack
+        Pos = Vector(-114.632774, -1179.170288, -847.968750),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-114.632774, -1179.170288, -847.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         -- The map has two spawns both with the priority flag, so we gonna wipe them.
@@ -40,14 +52,6 @@ function MAPSCRIPT:PostInit()
 
         spawn.MasterSpawn = true
         ents.RemoveByClass("prop_physics", Vector(367, 70, -846.01397705078)) -- wooden plate shortcut
-        -- -114.632774 -1179.170288 -847.968750
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-114.632774, -1179.170288, -847.968750), Angle(0, 90, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-114.632774, -1179.170288, -847.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
     end
 end
 

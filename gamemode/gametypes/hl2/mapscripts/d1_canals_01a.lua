@@ -22,32 +22,38 @@ MAPSCRIPT.EntityFilterByName = {
     ["spawnitems_template"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Sewer tunnel before ladder to machine gun
+        Pos = Vector(2104.908447, 5759.881348, -95.968750),
+        Ang = Angle(0, 45, 0),
+        Trigger = {
+            Pos = Vector(2104.908447, 5759.881348, -95.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- Before sewer tunnel with barrels
+        Pos = Vector(-1183.380615, 6344.419922, -59.326172),
+        Ang = Angle(0, -180, 0),
+        Trigger = {
+            Pos = Vector(-1183.380615, 6344.419922, 6.326172),
+            Mins = Vector(-100, -100, -100),
+            Maxs = Vector(100, 100, 100)
+        }
+    },
+    { -- Barnacle slippery slope
+        Pos = Vector(-3002.406494, 7890.711426, 0),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(-3002.406494, 7870.711426, 48.031250),
+            Mins = Vector(-100, -100, -100),
+            Maxs = Vector(100, 100, 100)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-1183.380615, 6344.419922, -59.326172), Angle(0, -180, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-1183.380615, 6344.419922, 6.326172), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-3002.406494, 7870.711426, 12.031250), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-3002.406494, 7870.711426, 48.031250), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(2104.908447, 5759.881348, -95.968750), Angle(0, 45, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(2104.908447, 5759.881348, -95.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
         local npcMaker1 = ents.Create("npc_maker")
         npcMaker1:SetPos(Vector(-2174.593262, 9086.971680, 288.031250))
         npcMaker1:SetAngles(Angle(0, 180, 0))
