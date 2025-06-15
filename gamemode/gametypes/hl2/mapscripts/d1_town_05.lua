@@ -42,6 +42,28 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
     ["winston"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    {
+        Pos = Vector(-6533.443848, 8131.516602, 896.031250),
+        Ang = Angle(0, 0, 0),
+        RenderPos = Vector(-6447.585449, 8024.932129, 896.031250),
+        Trigger = {
+            Pos = Vector(-6381.103027, 8103.064453, 896.031250),
+            Mins = Vector(-100, -300, 0),
+            Maxs = Vector(100, 300, 170)
+        }
+    },
+    {
+        Pos = Vector(-1098.884766, 10457.261719, 896.031250),
+        Ang = Angle(0, -180, 0),
+        Trigger = {
+            Pos = Vector(-1123.785400, 10358.985352, 896.031250),
+            Mins = Vector(-100, -25, 0),
+            Maxs = Vector(100, 25, 170)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         ents.WaitForEntityByName("warehouse_citizen_jacobs", function(ent)
@@ -68,16 +90,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("warehouse_deadcombine_counter", function(ent)
             ent:SetName("lambda_warehouse_deadcombine_counter")
         end)
-
-        -- -6381.103027 8103.064453 896.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6533.443848, 8131.516602, 896.031250), Angle(0, 0, 0))
-        checkpoint1:SetVisiblePos(Vector(-6447.585449, 8024.932129, 896.031250))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-6381.103027, 8103.064453, 896.031250), Angle(0, 0, 0), Vector(-100, -300, 0), Vector(100, 300, 170))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
 
         -- Make sure to substract on our renamed math_counter.
         ents.WaitForEntityByName("end_reinforcements_trigger", function(ent)
@@ -123,6 +135,7 @@ function MAPSCRIPT:PostInit()
             ent:SetKeyValue("Radius", 328)
         end)
 
+        -- Leave this checkpoint as is since it has special outputs
         --ent:Fire("AddOutput", "OnAllSpawnedDead lambda_warehouse_deadcombine_counter,Add,1")
         -- -3500.986816 7756.634766 896.031250
         local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-4065.605957, 7748.239258, 896.032776), Angle(3.366, 19.338, 0.000))
@@ -168,16 +181,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("warehouse_leonleads_lcs", function(ent)
             ent:Fire("AddOutput", "OnTrigger2 !self,Resume,,2") -- Whoever gets picked as freeman, stop giving a fuck.
         end)
-
-        -- Checkpoint
-        -- -1123.785400 10358.985352 896.031250
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1098.884766, 10457.261719, 896.031250), Angle(0, -180, 0.000))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(-1123.785400, 10358.985352, 896.031250), Angle(0, 0, 0), Vector(-100, -25, 0), Vector(100, 25, 170))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
 
         -- Better changelevel trigger.
         local changelevelTrigger = ents.CreateSimple("trigger_changelevel", {
