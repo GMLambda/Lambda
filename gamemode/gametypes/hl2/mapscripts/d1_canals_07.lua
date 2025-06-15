@@ -25,17 +25,50 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_smg"] = true,
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Before going inside
+        Pos = Vector(11292.084961, 2207.724365, -255.968750),
+        Ang = Angle(0, -90, 0),
+        Vehicle = {
+            Pos = Vector(10367.498047, 1265.902466, -487.621826),
+            Ang = Angle(0, 90, 0)
+        },
+        Trigger = {
+            Pos = Vector(11296.274414, 2074.708008, -255.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- After opening the gates
+        Pos = Vector(6497, 758, -455),
+        Ang = Angle(0, -180, 0),
+        Vehicle = {
+            Pos = Vector(6434, 932, -464),
+            Ang = Angle(0, 180, 0)
+        },
+        Trigger = {
+            Pos = Vector(6695, 1017, -318),
+            Mins = Vector(-32, -367, -194),
+            Maxs = Vector(32, 367, 194)
+        }
+    },
+    { -- Inbetween APCs under bridge
+        Pos = Vector(-2430, -7882, -948),
+        Ang = Angle(0, 180, 0),
+        Vehicle = {
+            Pos = Vector(-2430, -7882, -948),
+            Ang = Angle(0, 180, 0)
+        },
+        Trigger = {
+            Pos = Vector(-1797, -7677, -880),
+            Mins = Vector(-128, -512, -144),
+            Maxs = Vector(128, 512, 144)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(11292.084961, 2207.724365, -255.968750), Angle(0, -90, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(11296.274414, 2074.708008, -255.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(10367.498047, 1265.902466, -487.621826), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
         -- Tell metrocop use the turret.
         ents.WaitForEntityByName("logic_room7_spawn_functank_cop", function(ent)
             ent:Fire("AddOutput", "OnTrigger turret_1,ForceNPCOff,,0.12,-1")

@@ -29,22 +29,29 @@ MAPSCRIPT.EntityFilterByName = {
     ["canals_trigger_elitrans"] = true -- Do not changelevel based on the output.
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- After gate
+        Pos = Vector(3435.695557, 1247.184448, -385.343903),
+        Ang = Angle(0, 90, 0),
+        RenderPos = Vector(3369.119873, 2166.538818, -367.946716),
+        Vehicle = {
+            Pos = Vector(3437.813477, 1579.182251, -455.238220),
+            Ang = Angle(0, -90, 0)
+        },
+        Trigger = {
+            Pos = Vector(3425.643555, 2139.872314, -476.733490),
+            Mins = Vector(-200, -400, 0),
+            Maxs = Vector(200, 400, 280)
+        }
+    }
+}
+
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:PostInit()
     if SERVER then
         -- TODO: Duplicate canals_npc_reservoircopter01 (player / 2) times
         -- TODO: Trigger helicopter OnDeath outputs only if all of them are dead.
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(3435.695557, 1247.184448, -385.343903), Angle(0, 90, 0))
-        checkpoint1:SetVisiblePos(Vector(3369.119873, 2166.538818, -367.946716))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(3425.643555, 2139.872314, -476.733490), Angle(0, 0, 0), Vector(-200, -400, 0), Vector(200, 400, 280))
-
-        --checkpointTrigger1:RemoveEffects(EF_NODRAW)
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(3437.813477, 1579.182251, -455.238220), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
 
         -- We gotta place a giant changelevel trigger here, the other one is dangling in the air and uses Input instead of touch.
         -- -1024.000000 -6656.000000 -1262.920044

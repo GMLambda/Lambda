@@ -27,20 +27,26 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_357"] = true,
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Before jump
+        Pos = Vector(-961.568787, -1598.274902, 192.031250),
+        Ang = Angle(0, 0, 0),
+        RenderPos = Vector(-496.403473, -2616.393066, 142.600739),
+        Vehicle = {
+            Pos = Vector(-845.746704, -1628.464966, 120.773956),
+            Ang = Angle(0, -180, 0)
+        },
+        Trigger = {
+            Pos = Vector(-520.426453, -2655.423828, 83.702911),
+            Mins = Vector(-500, -200, 0),
+            Maxs = Vector(500, 200, 280)
+        }
+    }
+}
+
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:PostInit()
-    if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-961.568787, -1598.274902, 192.031250), Angle(0, 0, 0))
-        checkpoint1:SetVisiblePos(Vector(-496.403473, -2616.393066, 142.600739))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-520.426453, -2655.423828, 83.702911), Angle(0, 0, 0), Vector(-500, -200, 0), Vector(500, 200, 280))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(-845.746704, -1628.464966, 120.773956), Angle(0, -180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-    end
 end
 
 function MAPSCRIPT:PostPlayerSpawn(ply)
