@@ -36,6 +36,51 @@ MAPSCRIPT.EntityFilterByName = {
     ["crane_soldier_kill"] = true -- Why?
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- rush / off pier checkpoint
+        Pos = Vector(1864.473999, -3026.903076, 256.031250),
+        Ang = Angle(0, 90, 0),
+        RenderPos = Vector(2385.852539, -2325.066406, 256.031250),
+        Vehicle = {
+            Pos = Vector(3377.796875, -1352.083008, 9.863693),
+            Ang = Angle(0, 0, 0)
+        },
+        Trigger = {
+            Pos = Vector(2385.852539, -2325.066406, 256.031250),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- bridge checkpoint
+        Pos = Vector(5189.114258, -2913.917236, 384.031250),
+        Ang = Angle(0, 90, 0),
+        RenderPos = Vector(5037.148438, -2688.796875, 384.031250),
+        Vehicle = {
+            Pos = Vector(5128.125488, -2679.885986, 384.031250),
+            Ang = Angle(0, -90, 0)
+        },
+        Trigger = {
+            Pos = Vector(5068.378418, -2688.673828, 384.031250),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- fall checkpoint
+        Pos = Vector(-1328.088135, -1649.725464, 958.014343),
+        Ang = Angle(0, 90, 0),
+        RenderPos = Vector(-1826.550537, -1218.092041, 928.031250),
+        Vehicle = {
+            Pos = Vector(-1352.137207, -1540.197876, 951.312805),
+            Ang = Angle(0, 90, 0)
+        },
+        Trigger = {
+            Pos = Vector(-1823.722290, -1220.703369, 928.031250),
+            Mins = Vector(-200, -100, 0),
+            Maxs = Vector(200, 100, 180)
+        }
+    },
+}
+
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:PostInit()
@@ -79,30 +124,6 @@ function MAPSCRIPT:PostInit()
                 ent:Fire("Enable")
             end)
         end)
-
-        -- rush checkpoint
-        -- 2835.472412 -1599.243896 142.031235, 1864.473999 -3026.903076 256.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(1864.473999, -3026.903076, 256.031250), Angle(0, 90, 0))
-        checkpoint1:SetVisiblePos(Vector(2385.852539, -2325.066406, 256.031250))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(2385.852539, -2325.066406, 256.031250), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(3377.796875, -1352.083008, 9.863693), Angle(0, 0, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        -- bridge checkpoint
-        -- 5068.378418 -2688.673828 384.031250
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(5189.114258, -2913.917236, 384.031250), Angle(0, 90, 0))
-        checkpoint2:SetVisiblePos(Vector(5037.148438, -2688.796875, 384.031250))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(5068.378418, -2688.673828, 384.031250), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(5128.125488, -2679.885986, 384.031250), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
 
         -- More enemies inside the warehouse
         local npc
@@ -149,18 +170,6 @@ function MAPSCRIPT:PostInit()
             elseif activator:IsPlayer() and activator:Alive() then
                 activator:Kill()
             end
-        end
-
-        -- fall checkpoint
-        -- 1826.217529 2.297394 928.031250
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1328.088135, -1649.725464, 958.014343), Angle(0, 90, 0))
-        checkpoint3:SetVisiblePos(Vector(-1826.550537, -1218.092041, 928.031250))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(-1823.722290, -1220.703369, 928.031250), Angle(0, 0, 0), Vector(-200, -100, 0), Vector(200, 100, 180))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(-1352.137207, -1540.197876, 951.312805), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
         end
     end
 end

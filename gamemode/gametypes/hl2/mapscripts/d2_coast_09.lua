@@ -34,6 +34,36 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_physcannon"] = true,
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- tunnel exit
+        Pos = Vector(-6203.434570, 4812.755859, 512.031250),
+        Ang = Angle(0, -90, 0),
+        RenderPos = Vector(-6399.345703, 4662.560059, 512.031250),
+        Vehicle = {
+            Pos = Vector(-6321.518555, 4750.143066, 532.837036),
+            Ang = Angle(0, 180, 0)
+        },
+        Trigger = {
+            Pos = Vector(-6397.890625, 4632.765625, 512.031250),
+            Mins = Vector(-300, -20, 0),
+            Maxs = Vector(300, 20, 200)
+        }
+    },
+    { -- before outpost
+        Pos = Vector(8648.458008, 11745.508789, -196.678345),
+        Ang = Angle(0, -50, 0),
+        Vehicle = {
+            Pos = Vector(8699.614258, 11645.158203, -192.527618),
+            Ang = Angle(0, -90, 0)
+        },
+        Trigger = {
+            Pos = Vector(8663.506836, 11871.029297, -191.968750),
+            Mins = Vector(-50, -600, 0),
+            Maxs = Vector(50, 450, 200)
+        }
+    }
+}
+
 MAPSCRIPT.VehicleGuns = true
 
 function MAPSCRIPT:PostInit()
@@ -100,25 +130,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("battery2", ProtectBattery)
         ents.WaitForEntityByName("battery3", ProtectBattery)
         ents.WaitForEntityByName("battery4", ProtectBattery)
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6203.434570, 4812.755859, 512.031250), Angle(0, -90, 0))
-        checkpoint1:SetVisiblePos(Vector(-6399.345703, 4662.560059, 512.031250))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-6397.890625, 4632.765625, 512.031250), Angle(0, 0, 0), Vector(-300, -20, 0), Vector(300, 20, 200))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(-6321.518555, 4750.143066, 532.837036), Angle(0, 180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        -- 8663.506836 11871.029297 -191.968750
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(8648.458008, 11745.508789, -196.678345), Angle(0, -50, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(8663.506836, 11871.029297, -191.968750), Angle(0, 0, 0), Vector(-50, -600, 0), Vector(50, 450, 200))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(8699.614258, 11645.158203, -192.527618), Angle(0, -90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
     end
 end
 
