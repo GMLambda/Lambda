@@ -41,6 +41,9 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
             GAMEMODE:SetVehicleCheckpoint(Vector(1227.954468, 6228.015137, 1531.526611), Angle(0, -90, 0))
 
+            -- Add weapon_crossbow to our loadout since we got it on coast_08
+            table.insert(self.DefaultLoadout.Weapons, "weapon_crossbow")
+
             -- Not sure how this worked before and why did it break
             -- That button at the other side of the bridge in coast_08 sets a global state
             -- It also tries to fire these outputs, unsuccessfully

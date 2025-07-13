@@ -25,6 +25,10 @@ MAPSCRIPT.DefaultLoadout = {
 MAPSCRIPT.InputFilters = {}
 MAPSCRIPT.EntityFilterByClass = {}
 
+MAPSCRIPT.GlobalStates = {
+    ["bridge_gate_open"] = GLOBAL_OFF
+}
+
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_ammo"] = true,
     ["global_newgame_template_local_items"] = true,
