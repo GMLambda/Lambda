@@ -23,6 +23,27 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
     ["lamarr_jumper"] = true -- In any case this should restart.
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Entering kleiner's lab
+        Pos = Vector(-6569.488281, -1150.120850, 0.031250),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-6482.711914, -1095.658813, 0.031250),
+            Mins = Vector(-50, -50, 0),
+            Maxs = Vector(50, 50, 180)
+        }
+    },
+    { -- Outside after tp scene
+        Pos = Vector(-10368, -4714, 320),
+        Ang = Angle(0, 180, 0),
+        Trigger = {
+            Pos = Vector(-10368, -4714, 320),
+            Mins = Vector(-50, -50, 0),
+            Maxs = Vector(50, 50, 180)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         self.DefaultLoadout.HEV = false
@@ -70,15 +91,6 @@ function MAPSCRIPT:PostInit()
         doorTrigger.OnTrigger = function()
             allowPlayerClip = true
             TriggerOutputs({{"brush_soda_clip_player", "Enable", 0.0, ""}, {"BarneyEnter_song", "PlaySound", 0.0, ""}, {"speaker_alyxsoda_nags", "Kill", 0.0, ""}, {"lab01_lcs", "Start", 0.1, ""}, {"kleiner_prepose_idle_1", "BeginSequence", 0.3, ""}})
-        end
-
-        -- -6569.488281 -1150.120850 0.031250
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-6569.488281, -1150.120850, 0.031250), Angle(0, 0, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-6482.711914, -1095.658813, 0.031250), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
         end
 
         ents.WaitForEntityByName("gman_fixtie_1", function(ent)
@@ -141,15 +153,6 @@ function MAPSCRIPT:PostInit()
             local cp = GAMEMODE:CreateCheckpoint(Vector(-7154, -1508.3, 1), Angle(0, 90, 0))
             GAMEMODE:SetPlayerCheckpoint(cp, nil)
         end)
-
-        -- Outdoor
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-10368, -4714, 320), Angle(0, 180, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-10368, -4714, 320), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
 
         -- Reposition alyx intro position a bit
         ents.WaitForEntityByName("mark_alyx_intro", function(ent)

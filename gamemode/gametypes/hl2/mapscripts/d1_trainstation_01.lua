@@ -99,9 +99,10 @@ function MAPSCRIPT:PostInit()
             ent:SetHealth(1000)
         end)
 
-        -- Fix point_viewcontrol, affect all players.
+        -- Fix point_viewcontrol, by setting correct flags.
+        local sf = bit.bor(4, 8, 16, 128)
         for k, v in pairs(ents.FindByClass("point_viewcontrol")) do
-            v:SetKeyValue("spawnflags", "128") -- SF_CAMERA_PLAYER_MULTIPLAYER_ALL
+            v:SetKeyValue("spawnflags", sf)
         end
 
         -- Make the cop go outside the hallway so other players can still pass by.

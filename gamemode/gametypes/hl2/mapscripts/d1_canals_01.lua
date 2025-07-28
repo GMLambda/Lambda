@@ -28,6 +28,55 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
     ["boxcar_vort"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- After equipping pistol
+        Pos = Vector(-704, -7064, 273),
+        Ang = Angle(0, 0, 0),
+        WeaponAdditions = { "weapon_pistol" },
+        Trigger = {
+            Pos = Vector(-704, -7064, 320),
+            Mins = Vector(-64, -64, -64),
+            Maxs = Vector(64, 64, 64)
+        }
+    },
+    { -- After jumping the train and entering house
+        Pos = Vector(619.656433, -6512.142578, 540.031250),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(614.625732, -6519.078613, 540.031250),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- Before stairs with those annoying barrels
+        Pos = Vector(473.498352, -3530.257324, 256.031250),
+        Ang = Angle(0, 90, 0),
+        Trigger = {
+            Pos = Vector(544.810791, -3423.548584, 322.719330),
+            Mins = Vector(-70, -70, -50),
+            Maxs = Vector(70, 70, 100)
+        }
+    },
+    { -- Narrow catwalk above tracks
+        Pos = Vector(447.302185, -2656.709961, 576.031250),
+        Ang = Angle(0, 180, 0),
+        Trigger = {
+            Pos = Vector(447.302185, -2656.709961, 576.031250),
+            Mins = Vector(-50, -50, 0),
+            Maxs = Vector(50, 50, 100)
+        }
+    },
+    { -- Boxcar / vort healing
+        Pos = Vector(853.600281, 2638.468018, 73.964828),
+        Ang = Angle(0, 180, 0),
+        Trigger = {
+            Pos = Vector(855.660400, 2638.366943, 30),
+            Mins = Vector(-60, -60, 0),
+            Maxs = Vector(60, 60, 180)
+        }
+    },
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         local jumpBox = ents.Create("prop_physics")
@@ -53,42 +102,7 @@ function MAPSCRIPT:PostInit()
             end)
         end)
 
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(650.433105, -6424.663086, 540.031250))
-        checkpoint1:SetVisiblePos(Vector(619.656433, -6512.142578, 540.031250))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(614.625732, -6519.078613, 540.031250), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        -- Boxcar checkpoint
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(877.780457, 2621.807617, -55.060749), Angle(0, 180, 0))
-        checkpoint2:SetVisiblePos(Vector(853.600281, 2638.468018, 73.964828))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(855.660400, 2638.366943, 30), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
-        -- 447.302185 -2656.709961 576.031250
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(447.302185, -2656.709961, 576.031250), Angle(0, 180, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(447.302185, -2656.709961, 576.031250), Angle(0, 0, 0), Vector(-50, -50, 0), Vector(50, 50, 180))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
-        -- 544.810791 -3423.548584 322.719330
-        local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(473.498352, -3530.257324, 256.031250), Angle(0, 90, 0))
-        local checkpointTrigger4 = ents.Create("trigger_once")
-        checkpointTrigger4:SetupTrigger(Vector(544.810791, -3423.548584, 322.719330), Angle(0, 0, 0), Vector(-70, -70, -50), Vector(70, 70, 100))
-
-        checkpointTrigger4.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
-        end
+        -- MAYBE TODO: Disable combine shield wall behind the train so players who fell off the train don't get stuck
     end
 end
 

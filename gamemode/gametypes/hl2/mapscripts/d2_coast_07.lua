@@ -2,6 +2,7 @@ if SERVER then
     AddCSLuaFile()
 end
 
+local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -39,6 +40,35 @@ function MAPSCRIPT:PostInit()
             local checkpointTransfer = GAMEMODE:CreateCheckpoint(Vector(3304.103271, 5262.621094, 1536.031250), Angle(0, 90, 0))
             GAMEMODE:SetPlayerCheckpoint(checkpointTransfer)
             GAMEMODE:SetVehicleCheckpoint(Vector(1227.954468, 6228.015137, 1531.526611), Angle(0, -90, 0))
+
+            -- Add weapon_crossbow to our loadout since we got it on coast_08
+            table.insert(self.DefaultLoadout.Weapons, "weapon_crossbow")
+
+            -- Not sure how this worked before and why did it break
+            -- That button at the other side of the bridge in coast_08 sets a global state
+            -- It also tries to fire these outputs, unsuccessfully
+            -- gunship_trigger_10 disappears on transition back to 07 so it's best to trigger it when spawned
+            if game.GetGlobalState("bridge_gate_open") == GLOBAL_ON then
+                DbgPrint("Global state bridge_gate_open is ON")
+                local returned = ents.Create("trigger_once")
+                returned:SetupTrigger(Vector(3306, 5280, 1592), Angle(0, 0, 0), Vector(-242, -96, -55), Vector(242, 96, 55))
+                -- Outputs from gunship_trigger_10 
+                returned:Fire("AddOutput", "OnTrigger antspawner,Enable,,0,1")
+                returned:Fire("AddOutput", "OnTrigger bridge_field_02,Disable,,0,1")
+                returned:Fire("AddOutput", "OnTrigger gate_sprite,color,0 255 0,0,1")
+                returned:Fire("AddOutput", "OnTrigger field_wall_poles,skin,1,0,1")
+                returned:Fire("AddOutput", "OnTrigger field_trigger,Disable,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger forcefield3_sound_far,StopSound,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger return_cliff_fight_spawn,ForceSpawn,,0,1")
+                returned:Fire("AddOutput", "OnTrigger zombie_blocker,Disable,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger forcefield3_sound_far,Kill,,0.1,-1")
+                returned:Fire("AddOutput", "OnTrigger forcefield3_sound_close,Kill,,0.1,-1")
+                -- Remove dropship and some assault triggers
+                returned:Fire("AddOutput", "OnTrigger dropship,Kill,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger el_gimp,Kill,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger halt_guy,Kill,,0,-1")
+                returned:Fire("AddOutput", "OnTrigger assault_trigger,Kill,,0,-1")
+            end
 
             ents.WaitForEntityByName("village_squad", function(ent)
                 ent:Fire("ForceSpawn")

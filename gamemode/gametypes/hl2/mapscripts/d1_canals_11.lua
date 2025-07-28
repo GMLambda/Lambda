@@ -38,6 +38,22 @@ MAPSCRIPT.ImportantPlayerNPCNames = {
     ["npc_cit_briefer"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- Airboat gun upgrade
+        Pos = Vector(6457.725586, 4986.333984, -953.968750),
+        Ang = Angle(0, 180, 0),
+        Vehicle = {
+            Pos = Vector(6363.024902, 4874.115234, -967.214539),
+            Ang = Angle(0, 90, 0)
+        },
+        Trigger = {
+            Pos = Vector(6338.301270, 5018.617188, -953.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    }
+}
+
 MAPSCRIPT.VehicleGuns = false
 
 function MAPSCRIPT:PostInit()
@@ -57,14 +73,6 @@ function MAPSCRIPT:PostInit()
         end)
 
         self.VehicleGuns = false
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(6457.725586, 4986.333984, -953.968750), Angle(0, 180, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(6338.301270, 5018.617188, -953.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(6363.024902, 4874.115234, -967.214539), Angle(0, 90, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
 
         GAMEMODE:WaitForInput("global_newgame_spawner_airboat", "Unlock", function(ent)
             self.VehicleGuns = true

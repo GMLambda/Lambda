@@ -25,24 +25,58 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template"] = true
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- End of narrow corridors
+        Pos = Vector(-722.162354, 1341.204834, -831.968750),
+        Ang = Angle(0, 135, 0),
+        Trigger = {
+            Ang = Angle(0, 45, 0),
+            Pos = Vector(-722.162354, 1341.204834, -831.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- Before the underwater part
+        Pos = Vector(-1584, -800, -1048),
+        Ang = Angle(0, 0, 0),
+        WeaponAdditions = { "weapon_smg1" },
+        Trigger = {
+            Pos = Vector(-1584, -638, -976),
+            Mins = Vector(-96, -32, -64),
+            Maxs = Vector(96, 32, 64)
+        }
+    },
+    { -- After the underwater part
+        Pos = Vector(-1066, -65, -1014),
+        Ang = Angle(0, 0, 0),
+        Trigger = {
+            Pos = Vector(-1141, -64, -968),
+            Mins = Vector(-27, -30, -72),
+            Maxs = Vector(27, 30, 72)
+        }
+    },
+    { -- Before the 2nd underwater part
+        Pos = Vector(-1833.402344, -775.765564, -895.968750),
+        Ang = Angle(0, -110, 0),
+        Trigger = {
+            Pos = Vector(-1808.799927, -958.450073, -895.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    },
+    { -- Before manhack and water puzzle
+        Pos = Vector(-347.239502, -525.000366, -1017.968750),
+        Ang = Angle(0, -180, 0),
+        Trigger = {
+            Pos = Vector(-446.415466, -526.288147, -1017.968750),
+            Mins = Vector(-60, -60, 0),
+            Maxs = Vector(60, 60, 60)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-722.162354, 1341.204834, -831.968750), Angle(0, 135, 0))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-722.162354, 1341.204834, -831.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-1368.427856, -69.149689, -1023.968750), Angle(0, 0, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-1058.438110, -66.407013, -959.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
-
         -- Let him stay alive if no one kills him.
         ents.RemoveByClass("trigger_once", Vector(378, 2620, -770))
         local matt
@@ -68,23 +102,6 @@ function MAPSCRIPT:PostInit()
         ents.WaitForEntityByName("underground_script_matt_spawn_mh1", function(ent)
             ent:Fire("AddOutput", "OnAllSpawnedDead logic_matt_survival,Trigger")
         end)
-
-        local checkpoint3 = GAMEMODE:CreateCheckpoint(Vector(-1833.402344, -775.765564, -895.968750), Angle(0, -110, 0))
-        local checkpointTrigger3 = ents.Create("trigger_once")
-        checkpointTrigger3:SetupTrigger(Vector(-1808.799927, -958.450073, -895.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger3.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint3, activator)
-        end
-
-        -- -446.415466 -526.288147 -1017.968750
-        local checkpoint4 = GAMEMODE:CreateCheckpoint(Vector(-347.239502, -525.000366, -1017.968750), Angle(0, -180, 0))
-        local checkpointTrigger4 = ents.Create("trigger_once")
-        checkpointTrigger4:SetupTrigger(Vector(-446.415466, -526.288147, -1017.968750), Angle(0, 0, 0), Vector(-60, -60, 0), Vector(60, 60, 60))
-
-        checkpointTrigger4.OnTrigger = function(_, activator)
-            GAMEMODE:SetPlayerCheckpoint(checkpoint4, activator)
-        end
 
         local a = ents.CreateSimple("prop_physics_override", {
             Pos = Vector(-2153.951416, -852.403381, -1028.920410),

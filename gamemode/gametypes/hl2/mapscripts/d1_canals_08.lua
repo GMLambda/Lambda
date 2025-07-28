@@ -26,6 +26,24 @@ MAPSCRIPT.EntityFilterByName = {
     ["relay_locks_closegates"] = true -- Dont close the doors if we pass thru the gate
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- After leaving airboat
+        Pos = Vector(-486.748169, -329.674469, -591.968750),
+        Ang = Angle(0, 90, 0),
+        WeaponAdditions = { "weapon_357" },
+        Vehicle = {
+            Pos = Vector(53.214970, -102.730621, -615.638123),
+            Ang = Angle(0, -180, 0)
+        },
+        Trigger = {
+            Pos = Vector(-480.402649, -58.779499, -575.968750),
+            Mins = Vector(-100, -100, 0),
+            Maxs = Vector(100, 100, 180)
+        }
+    }
+    -- Do we even need a second CP? If then we'd also need a third
+}
+
 function MAPSCRIPT:PostInit()
     if SERVER then
         for _, v in pairs(ents.FindByClass("info_player_start")) do
@@ -36,25 +54,16 @@ function MAPSCRIPT:PostInit()
         playerStart:SetPos(Vector(7504, -11398, -412))
         playerStart:Spawn()
         playerStart.MasterSpawn = true
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(-486.748169, -329.674469, -591.968750), Angle(0, 90, 0))
-        checkpoint1:SetVisiblePos(Vector(-420.171631, -97.050110, -591.968750))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(-480.402649, -58.779499, -575.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
+        -- Leave commented now for position reference
+        -- --841.505310 -1408.689331 -382.968750
+        --local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-841.505310, -1408.689331, -382.968750), Angle(0, 90, 0))
+        --local checkpointTrigger2 = ents.Create("trigger_once")
+        --checkpointTrigger2:SetupTrigger(Vector(-841.505310, -1408.689331, -382.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
 
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(53.214970, -102.730621, -615.638123), Angle(0, -180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
-
-        -- -841.505310 -1408.689331 -382.968750
-        local checkpoint2 = GAMEMODE:CreateCheckpoint(Vector(-841.505310, -1408.689331, -382.968750), Angle(0, 90, 0))
-        local checkpointTrigger2 = ents.Create("trigger_once")
-        checkpointTrigger2:SetupTrigger(Vector(-841.505310, -1408.689331, -382.968750), Angle(0, 0, 0), Vector(-100, -100, 0), Vector(100, 100, 180))
-
-        checkpointTrigger2.OnTrigger = function(_, activator)
-            --GAMEMODE:SetVehicleCheckpoint(Vector(53.214970, -102.730621, -615.638123), Angle(0, -180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
-        end
+        --checkpointTrigger2.OnTrigger = function(_, activator)
+        --    --GAMEMODE:SetVehicleCheckpoint(Vector(53.214970, -102.730621, -615.638123), Angle(0, -180, 0))
+        --    GAMEMODE:SetPlayerCheckpoint(checkpoint2, activator)
+        --end
 
         -- It looks odd when they spawn right infront of one.
         ents.WaitForEntityByName("bunker_copmaker1", function(ent)

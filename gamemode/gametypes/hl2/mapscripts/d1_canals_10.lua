@@ -28,6 +28,22 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_357"] = true,
 }
 
+MAPSCRIPT.Checkpoints = {
+    { -- At the lift
+        Pos = Vector(4246, 9650, -119),
+        Ang = Angle(0, -90, 0),
+        Vehicle = {
+            Pos = Vector(4270.903320, 9841.201172, -124.578499),
+            Ang = Angle(0, -90, 0)
+        },
+        Trigger = {
+            Pos = Vector(5046.067871, 9267.515625, -127.968750),
+            Mins = Vector(-1500, -1000, -300),
+            Maxs = Vector(100, 600, 180)
+        }
+    }
+}
+
 function MAPSCRIPT:PostInit()
     DbgPrint("MAPSCRIPT:PostInit")
 
@@ -41,15 +57,6 @@ function MAPSCRIPT:PostInit()
         playerStart:SetAngles(Angle(0, 100, 0))
         playerStart:Spawn()
         playerStart.MasterSpawn = true
-        local checkpoint1 = GAMEMODE:CreateCheckpoint(Vector(4757.852051, 9866.387695, -111.968750), Angle(0, 180, 0))
-        checkpoint1:SetVisiblePos(Vector(4269.533691, 9236.030273, -127.968750))
-        local checkpointTrigger1 = ents.Create("trigger_once")
-        checkpointTrigger1:SetupTrigger(Vector(5046.067871, 9267.515625, -127.968750), Angle(0, 0, 0), Vector(-1500, -1000, -300), Vector(100, 600, 180))
-
-        checkpointTrigger1.OnTrigger = function(_, activator)
-            GAMEMODE:SetVehicleCheckpoint(Vector(4270.903320, 9841.201172, -124.578499), Angle(0, 180, 0))
-            GAMEMODE:SetPlayerCheckpoint(checkpoint1, activator)
-        end
     end
 end
 

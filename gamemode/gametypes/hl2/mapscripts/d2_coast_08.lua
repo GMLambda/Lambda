@@ -2,6 +2,7 @@ if SERVER then
     AddCSLuaFile()
 end
 
+local DbgPrint = GetLogging("MapScript")
 local MAPSCRIPT = {}
 MAPSCRIPT.PlayersLocked = false
 
@@ -33,6 +34,7 @@ MAPSCRIPT.VehicleGuns = true
 function MAPSCRIPT:PostInit()
     if SERVER then
         ents.RemoveByClass("info_player_start")
+        local crossbow_added = false
 
         local newPlayerSpawn = ents.Create("info_player_start")
         newPlayerSpawn:SetPos(Vector(3328.9, 5241.59, 1536.1))
@@ -49,9 +51,17 @@ function MAPSCRIPT:PostInit()
             Vector(-250, -60, 0),
             Vector(250, 60, 580)
         )
+
         cp1Trigger.OnTrigger = function(_, activator)
             cp1Trigger:Input("Disable")
             GAMEMODE:SetPlayerCheckpoint(cp1, activator)
+            -- Add crossbow to loadout
+            if crossbow_added == false then
+                local loadout = GAMEMODE:GetMapScript().DefaultLoadout
+                table.insert(loadout.Weapons, "weapon_crossbow")
+                crossbow_added = true
+                DbgPrint("Added crossbow to loadout")
+            end
         end
 
         local cp2 = GAMEMODE:CreateCheckpoint(Vector(3257, -2004, 1551.6), Angle(0, -90, 0))
@@ -75,6 +85,7 @@ function MAPSCRIPT:PostInit()
             Vector(-70, -70, 0),
             Vector(70, 70, 80)
         )
+
         cp4Trigger:KeyValue("StartDisabled", "1")
         cp4Trigger.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(cp4, activator)
@@ -95,6 +106,7 @@ function MAPSCRIPT:PostInit()
             Vector(-30, -30, 0),
             Vector(230, 30, 80)
         )
+
         cp3Trigger.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(cp3, activator)
             if IsValid(cp4Trigger) then
