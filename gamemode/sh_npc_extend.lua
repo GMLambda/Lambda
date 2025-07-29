@@ -83,11 +83,12 @@ if SERVER then
         return ragdoll
     end
 
-    function META_NPC:IsEnemey()
-        return not self:IsFriendly()
-    end
+end
 
-    function META_NPC:IsFriendly()
-        return IsFriendEntityName(self:GetClass())
-    end
+function META_NPC:IsEnemey()
+    return not self:IsFriendly()
+end
+
+function META_NPC:IsFriendly()
+    return IsFriendEntityName(self:GetClass())
 end

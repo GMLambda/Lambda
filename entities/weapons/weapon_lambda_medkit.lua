@@ -166,7 +166,13 @@ function SWEP:GetActorForHealing()
         filter = owner
     })
 
-    if tr.Hit == true and IsValid(tr.Entity) and (tr.Entity:IsPlayer() or tr.Entity:IsNPC()) then return tr.Entity end
+    if tr.Hit == true and IsValid(tr.Entity) and (tr.Entity:IsPlayer() or tr.Entity:IsNPC()) then
+        local ent = tr.Entity
+        if ent:IsNPC() and ent:IsFriendly() == false then
+            return nil -- Do not heal enemies.
+        end
+        return ent
+    end
 
     return nil
 end
