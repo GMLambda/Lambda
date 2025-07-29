@@ -151,14 +151,5 @@ end
 function GM:ChangeToNextLevel()
     DbgPrint("GM:ChangeToNextLevel")
     local nextMap = self:GetNextMap()
-
-    for k, v in pairs(ents.FindByClass("trigger_changelevel")) do
-        if v.TargetMap == nextMap then
-            local landmark = v.Landmark
-
-            return self:RequestChangeLevel(nextMap, landmark, {})
-        end
-    end
-
-    return self:RequestChangeLevel(nextMap, nil, {})
+    return self:RequestChangeLevel(nextMap, nil, {}, true)
 end
