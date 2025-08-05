@@ -68,6 +68,13 @@ function GM:EntityTakeDamage(target, dmginfo)
         attackerIsPlayer = true
     end
 
+    if IsValid(attacker) and attacker:IsVehicle() then
+        local driver = attacker:GetDriver()
+        if IsValid(driver) and driver:IsPlayer() then
+            attackerIsPlayer = true
+        end
+    end
+
     DbgPrint("EntityTakeDamage -> Target: " .. tostring(target) .. ", Attacker: " .. tostring(attacker) .. ", Inflictor: " .. tostring(inflictor) .. ", Type: " .. dmgText)
     local dmgType = dmginfo:GetDamageType()
     target:SetLastDamageType(dmgType)
