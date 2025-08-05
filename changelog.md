@@ -1,11 +1,12 @@
 0.9.29 (in development)
+- Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
+- Added: QuickInfo HUD element (default Half-Life 2 crosshair).
 - Fixed: d1_trainstation_05: players able to escape the teleport sequence.
 - Fixed: False positive warnings about unhandled onplayerdeath on scripted_sequence.
 - Fixed: Players spawning with the suit if there is no map script, there should be nothing.
-- Added: QuickInfo HUD element (default Half-Life 2 crosshair).
 - Fixed: point_viewcontrol entities on d1_trainstation_01 having incorrect flags set.
 - Fixed: Force field on d2_coast_07 not disabled after coming back from d2_coast_08.
-- Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
+- Fixed: When voting to skip the map that could cause the next map to have important NPC's missing.
 
 0.9.28
 - Improved: Better prediction handling for the Gravity Gun, should be more responsive with higher ping now.
