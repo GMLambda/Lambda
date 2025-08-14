@@ -54,7 +54,7 @@ jobs:
         mkdir dist
         ./gmod/bin/gmad_linux create -folder publish -out dist/lambda.gma
     - name: Upload to Workshop
-      uses: m00nl1ght-dev/steam-workshop-deploy@v3
+      uses: m00nl1ght-dev/steam-workshop-deploy@v4
       with:
         username: ${{ secrets.STEAM_USERNAME }}          
         configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
