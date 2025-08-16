@@ -162,7 +162,7 @@ function SWEP:GetActorForHealing()
         endpos = endPos,
         mins = TRACE_HULL_MINS,
         maxs = TRACE_HULL_MAXS,
-        mask = MASK_SHOT_HULL,
+        mask = bit.bor(MASK_SHOT_HULL, MASK_PLAYERSOLID),
         filter = owner
     })
 
@@ -188,7 +188,7 @@ function SWEP:GetActorForReviving()
         endpos = endPos,
         mins = TRACE_HULL_MINS * 5,
         maxs = TRACE_HULL_MAXS * 5,
-        mask = MASK_SHOT_HULL,
+        mask = bit.bor(MASK_SHOT_HULL, MASK_PLAYERSOLID),
         filter = owner
     })
 
