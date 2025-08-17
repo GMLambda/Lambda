@@ -8,6 +8,7 @@
 - Fixed: Force field on d2_coast_07 not disabled after coming back from d2_coast_08.
 - Fixed: When voting to skip the map that could cause the next map to have important NPC's missing.
 - Fixed: Players being able to heal or revive through non-solid brushes.
+- Fixed: d1_canals_13: Players unable to use the lever to open the gate to progress.
 
 0.9.28
 - Improved: Better prediction handling for the Gravity Gun, should be more responsive with higher ping now.
