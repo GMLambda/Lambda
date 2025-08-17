@@ -659,16 +659,17 @@ if SERVER then
     end
 else -- CLIENT
     function GM:CalcVehicleView(vehicle, ply, view)
+        local modified = false
         local shouldDrawPlayer = lambda_vehicle_drawplayer:GetBool()
         if shouldDrawPlayer == true then
             local viewPos = view.origin
             local headBone = ply:LookupBone("ValveBiped.Bip01_Head1")
             if headBone ~= nil then viewPos = ply:GetBonePosition(headBone) end
-            view.origin = viewPos + (view.angles:Forward() * 3)
+            view.origin = viewPos + (view.angles:Forward() * 1) + Vector(0, 0, 1.5)
+            view.znear = 10
+            modified = true
         end
 
-        -- Don't roll the camera
-        view.angles.z = 0
         if vehicle.GetThirdPersonMode == nil or ply:GetViewEntity() ~= ply then -- This should never happen.
             return
         end
@@ -702,6 +703,11 @@ else -- CLIENT
             -- Always draw the player in third person.
             view.drawviewer = true
 
+            modified = true
+        end
+
+        if modified then
+            -- We modified the view, return it.
             return view
         end
 
