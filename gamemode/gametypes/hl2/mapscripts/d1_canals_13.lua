@@ -75,6 +75,15 @@ function MAPSCRIPT:PostInit()
     end
 end
 
+function MAPSCRIPT:FindUseEntity(ply, engineEnt)
+    -- Workaround for: https://github.com/Facepunch/garrysmod-issues/issues/6480
+    -- Remove this once it is fixed in GMod.
+    if IsValid(engineEnt) and engineEnt:GetName() == "water_control_lever" then
+        -- For some reason it picks up the wrong entity which is next to it, return the correct one.
+        return ents.FindFirstByName("gate_control_lever")
+    end
+end
+
 function MAPSCRIPT:PostPlayerSpawn(ply)
     --DbgPrint("PostPlayerSpawn")
 end
