@@ -1,3 +1,5 @@
+0.9.30 (in development)
+
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
 - Improved: Vehicle camera with player models enabled, should no longer have the majority models obstruct the view.
