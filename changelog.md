@@ -1,5 +1,6 @@
 0.9.29 (in development)
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
+- Improved: Vehicle camera with player models enabled, should no longer have the majority models obstruct the view.
 - Added: QuickInfo HUD element (default Half-Life 2 crosshair).
 - Fixed: d1_trainstation_05: players able to escape the teleport sequence.
 - Fixed: False positive warnings about unhandled onplayerdeath on scripted_sequence.
