@@ -1,4 +1,5 @@
 0.9.30 (in development)
+- Fixed: Bad lightning by forcing r_radiosity convar to 4.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
