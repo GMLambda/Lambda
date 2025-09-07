@@ -173,6 +173,16 @@ function GM:Initialize()
         self:TransferPlayers()
         self:InitializeResources()
     end
+
+    -- Force r_radiosity to 4 to fix weird lightning 
+    -- GMod's default is 3 unlike every other modern Source game that is set to 4... 
+    if CLIENT then
+        local r_radiosity = GetConVar("r_radiosity")
+        if r_radiosity:GetInt() ~= 4 then
+            print("Changing r_radiosity cvar to 4")
+            RunConsoleCommand("r_radiosity", "4")
+        end
+    end
 end
 
 function GM:OnReloaded()
