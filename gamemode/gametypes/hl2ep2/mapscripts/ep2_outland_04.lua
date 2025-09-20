@@ -30,6 +30,12 @@ MAPSCRIPT.EntityFilterByName = {
     ["vort_shaft_blocker_1"] = true,
     ["plank_2_kill_trigger"] = true,
     ["plank_2_break_trigger"] = true,
+    ["guardcaveentry_block_player"] = true,
+    ["maze_bridge_clip"] = true,
+    ["grub_tunnel_1_playerblock"] = true,
+    ["grub_tunnel_2_playerblock"] = true,
+    ["guard_leap_3_playerblock"] = true,
+    ["guard_exit_playerclip"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -104,6 +110,12 @@ function MAPSCRIPT:PostInit()
         ent:ResizeTriggerBox(Vector(-10, -40, -40), Vector(40, 40, 40))
         ent:SetKeyValue("teamwait", "1")
     end)
+
+    -- TODO:
+    -- Throughout the map there are some trigger_multiple entities that are being fired when player is in/out of crawl spaces.
+    -- It handles some player clips and the antlion guard NPC.
+    -- To top it all off, they are as a group of brushes with "complex" geometry. 
+    -- >>:( 
 
 end
 
