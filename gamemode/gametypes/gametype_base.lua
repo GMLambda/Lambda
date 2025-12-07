@@ -372,6 +372,15 @@ function GAMETYPE:InitSettings()
         Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
     })
 
+    GAMEMODE:AddSetting("vehiclecollision", {
+        Category = "SERVER",
+        NiceName = "#GM_VEHICLECOLLISION",
+        Description = "#GM_VEHICLECOLLISION_DESC",
+        Type = "bool",
+        Default = true,
+        Flags = bit.bor(0, FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED)
+    })
+
     GAMEMODE:AddSetting("friendlyfire", {
         Category = "SERVER",
         NiceName = "#GM_FRIENDLYFIRE",

@@ -15,6 +15,7 @@ local VEHICLE_PASSENGER = 4
 local NEXT_VEHICLE_SPAWN = CurTime()
 local VEHICLE_SPAWN_TIME = 2
 local VEHICLE_MIN_DESPAWN_DIST = 5000
+local VEHICLE_DISABLED_COLLISION_GROUP = COLLISION_GROUP_DEBRIS_TRIGGER
 
 if SERVER then
     AddCSLuaFile()
@@ -116,10 +117,12 @@ if SERVER then
         DbgPrint("InitializeMapVehicles")
 
         self.ActiveVehicles = {}
+        self.VehicleNoCollides = {}
         self.MapVehicles = {}
         self.SpawnPlayerVehicles = true
         self.NextVehicleThink = 0
         self.VehicleCheckpoint = nil
+        self.LastVehicleCollideSetting = self:GetSetting("vehiclecollision", true)
 
         if IsMapStartCreatingVehicle() then
             self.DeferredVehicleCreation = false
@@ -158,8 +161,22 @@ if SERVER then
             self:PlayerSetVehicleOwned(v, nil)
         end
 
+        DbgPrint("Cleaing vehicle collisions..")
+        for veh, entries in pairs(self.VehicleNoCollides) do
+            for other, noc in pairs(entries) do
+                if IsValid(noc) then
+                    noc:Remove()
+                end
+            end
+        end
+        self.VehicleNoCollides = {}
+
         self:ResetVehicleCheck()
         self:InitializeMapVehicles()
+    end
+
+    function GM:IsActiveVehicle(vehicle)
+        return self.ActiveVehicles[vehicle] ~= nil
     end
 
     function GM:ResetVehicleCheck()
@@ -190,10 +207,9 @@ if SERVER then
     end
 
     function GM:HandleVehicleCreation(vehicle)
-        DbgPrint("HandleVehicleCreation", tostring(vehicle))
+        DbgPrint("HandleVehicleCreation", vehicle)
         local class = vehicle:GetClass()
         local vehicleType = nil
-        if class ~= "prop_vehicle_airboat" and class ~= "prop_vehicle_jeep" then return end
 
         -- Akward hack to know if an NPC passenger is inside. We handle this with our AcceptInput hook.
         self.IsCreatingInternalOutputs = true
@@ -224,6 +240,9 @@ if SERVER then
                 return
             end
 
+            vehicle.LambdaVehicleSpawnPos = vehicle:GetPos()
+            self:DisableVehicleCollisions(vehicle)
+
             if self.DeferredVehicleCreation == true then
                 if vehicle:GetName() ~= "" and vehicle.VehicleIsCloned ~= true then
                     -- We have a map creation ID, we can use this to determine the vehicle type.
@@ -239,7 +258,6 @@ if SERVER then
 
             DbgPrint(vehicle, "Vehicle type: " .. tostring(vehicleType))
             self.ActiveVehicles[vehicle] = true
-            --vehicle:SetCustomCollisionCheck(true)
             vehicle:CallOnRemove("LambdaVehicleCleanup", function(ent) self.ActiveVehicles[ent] = nil end)
             vehicle.AllowVehicleCheckpoint = true
             self:SetVehicleType(vehicle, vehicleType)
@@ -263,6 +281,7 @@ if SERVER then
         seat:SetModel(mdl)
         seat:SetParent(parent)
         seat:Spawn()
+        seat:SetCollisionGroup(VEHICLE_DISABLED_COLLISION_GROUP)
         -- TODO: Remove this, legacy.
         seat:SetNWBool("IsPassengerSeat", true)
         GAMEMODE:SetVehicleType(seat, VEHICLE_PASSENGER)
@@ -280,6 +299,7 @@ if SERVER then
 
         seat = CreatePassengerSeat(jeep, Vector(19.369112, -37.018456, 18.896046), Angle(-0.497, -3.368, 0.259), "models/nova/jeep_seat.mdl")
         jeep:SetNWEntity("PassengerSeat", seat)
+        jeep.LambdaPassengerSeat = seat
     end
 
     function GM:HandleJalopyCreation(jalopy)
@@ -295,6 +315,7 @@ if SERVER then
         -- Make it invisible, we just want the functionality.
         seat:SetNoDraw(true)
         jalopy:SetNWEntity("PassengerSeat", seat)
+        jalopy.LambdaPassengerSeat = seat
 
         local mapScript = self.MapScript
         if mapScript ~= nil and mapScript.OnJalopyCreated ~= nil then
@@ -574,8 +595,11 @@ if SERVER then
         end
 
         if self.EnableVehicleGuns then newVehicle:SetKeyValue("EnableGun", "1") end
+        newVehicle:SetCollisionGroup(VEHICLE_DISABLED_COLLISION_GROUP)
         newVehicle:Spawn()
         newVehicle:Activate()
+        newVehicle.LambdaNextCollisionCheck = CurTime() + 1
+
         DbgPrint("Created new vehicle: " .. tostring(newVehicle))
         NEXT_VEHICLE_SPAWN = CurTime() + VEHICLE_SPAWN_TIME
     end
@@ -627,6 +651,75 @@ if SERVER then
         return true
     end
 
+    local VEHICLE_COLLISION_EXTEND = Vector(3, 3, 2)
+
+    function GM:TemporarilyDisableVehicleCollisions(ent)
+        ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)
+        ent.LambdaNextCollisionCheck = CurTime() + 0.5
+    end
+
+    function GM:DisableVehicleCollisions(ent)
+        ent:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
+        ent.LambdaNextCollisionCheck = CurTime() + 0.5
+    end
+
+    function GM:EnableVehicleCollisions(ent)
+        ent:SetCollisionGroup(COLLISION_GROUP_VEHICLE)
+    end
+
+    function GM:CheckVehicleCollision(vehicle)
+        local vehiclesCollide = self:GetSetting("vehiclecollision", true)
+        if vehiclesCollide == false then
+            -- Vehicle collisions are permanently disabled.
+            self:DisableVehicleCollisions(vehicle)
+            return
+        end
+
+        if vehicle.LambdaNextCollisionCheck == nil then
+            return
+        end
+
+        if CurTime() < vehicle.LambdaNextCollisionCheck then
+            return
+        end
+        vehicle.LambdaNextCollisionCheck = nil
+
+        local curPos = vehicle:GetPos()
+        if vehicle.LambdaVehicleSpawnPos ~= nil then
+            local dist = curPos:Distance(vehicle.LambdaVehicleSpawnPos)
+            DbgPrint("Distance to spawn position:", dist)
+            if dist < 100 then
+                -- Still at spawn position, don't check yet.
+                print("Vehicle " .. tostring(vehicle) .. " still at spawn position, delaying collision check.")
+                vehicle.LambdaNextCollisionCheck = CurTime() + 0.5
+                return
+            end
+        end
+
+        local filter = { vehicle, vehicle.LambdaPassengerSeat }
+
+        -- Run a hull trace see if we are colliding with something.
+        local mn, mx = vehicle:GetCollisionBounds()
+        local tr = util.TraceHull({
+            start = vehicle:GetPos(),
+            endpos = vehicle:GetPos(),
+            mins = mn - VEHICLE_COLLISION_EXTEND,
+            maxs = mx + VEHICLE_COLLISION_EXTEND,
+            filter = filter,
+            mask = MASK_SHOT_HULL,
+            ignoreworld = true,
+        })
+
+        if tr.Hit ~= true then
+            DbgPrint("Vehicle " .. tostring(vehicle) .. " is not colliding, enabling collisions.")
+            self:EnableVehicleCollisions(vehicle)
+        else
+            DbgPrint("Vehicle " .. tostring(vehicle) .. " is still colliding, will recheck later.", mn, mx, tr.Entity)
+            vehicle.LambdaNextCollisionCheck = CurTime() + 0.4
+            return
+        end
+    end
+
     function GM:VehiclesThink()
         if self:IsRoundRunning() == false and self:RoundElapsedTime() >= 1 then return end
         if #self.MapVehicles == 0 then
@@ -648,6 +741,7 @@ if SERVER then
                 if self:CheckRemoveVehicle(vehicle, additionalChecks) then
                     vehicleCount = vehicleCount - 1
                 end
+                self:CheckVehicleCollision(vehicle)
             end
         end
 
@@ -656,7 +750,9 @@ if SERVER then
                 self:SpawnVehicleAtSpot(v)
             end
         end
+
     end
+
 else -- CLIENT
     function GM:CalcVehicleView(vehicle, ply, view)
         local modified = false
