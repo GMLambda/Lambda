@@ -853,19 +853,6 @@ if SERVER then
         return true
     end
 
-    function GM:LimitPlayerAmmo(ply)
-        if self:GetSetting("limit_default_ammo") == false then return end
-        local curTime = CurTime()
-        ply.LastAmmoCheck = ply.LastAmmoCheck or curTime
-        if curTime - ply.LastAmmoCheck < 0.100 then return end
-        ply.LastAmmoCheck = curTime
-        for k, v in pairs(self.MAX_AMMO_DEF) do
-            local count = ply:GetAmmoCount(k)
-            local maxCount = v:GetInt()
-            if count > maxCount then ply:SetAmmo(maxCount, k) end
-        end
-    end
-
     function GM:AllowPlayerPickup(ply, ent)
         ply.LastPickupTime = ply.LastPickupTime or 0
         local pickupDelay = self:GetSetting("pickup_delay")
@@ -1368,10 +1355,26 @@ function GM:PlayerTick(ply, mv)
     self:UpdateSuit(ply, mv)
     self:PlayerWeaponTick(ply, mv)
     if SERVER then
-        self:LimitPlayerAmmo(ply)
         self:PlayerCheckDrowning(ply)
         if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped()) end
     end
+end
+
+function GM:LimitPlayerAmmo(ply, ammoType, newCount)
+    if self:GetSetting("limit_default_ammo") == false then return end
+    local ammoName = game.GetAmmoName(ammoType)
+    local maxAmmoConvar = self.MAX_AMMO_DEF[ammoName]
+    if maxAmmoConvar ~= nil then
+        local maxCount = maxAmmoConvar:GetInt()
+        if newCount > maxCount then
+            ply:SetAmmo(maxCount, ammoType)
+        end
+    end
+end
+
+function GM:PlayerAmmoChanged(ply, ammoType, oldCount, newCount)
+    DbgPrint("PlayerAmmoChanged", ply, ammoType, oldCount, newCount)
+    self:LimitPlayerAmmo(ply, ammoType, newCount)
 end
 
 function GM:CalculateMovementAccuracy(ent)
