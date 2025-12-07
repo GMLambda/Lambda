@@ -24,7 +24,6 @@ local LocalPlayer = LocalPlayer
 
 DEFINE_BASECLASS("gamemode_base")
 
-local SUIT_DEVICE_NONE = 0
 local SUIT_DEVICE_BREATHER = 1 -- 1 << 0
 local SUIT_DEVICE_SPRINT = 2 -- 1 << 1
 
