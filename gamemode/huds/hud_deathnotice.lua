@@ -2,6 +2,7 @@ local Color_Icon = Color(230, 230, 230, 130)
 local NPC_Color = Color(250, 50, 50, 255)
 local times_color = Color(255, 255, 255, 255)
 local font = "LambdaKillFont"
+local math_Clamp = math.Clamp
 
 local function CreateFonts()
     surface.CreateFont(font, {
@@ -245,7 +246,7 @@ local function ComputeDeathNoticeSize(death, bounds)
 end
 
 local function DrawDeathEntry(bounds, y, data, margin, remaining)
-    local alpha = math.Clamp(remaining * 255, 0, 255)
+    local alpha = math_Clamp(remaining * 255, 0, 255)
     data.color1.a = alpha
     data.color2.a = alpha
     times_color.a = alpha
@@ -324,7 +325,7 @@ function GM:DrawDeathNotice()
         local remaining = 1.0
 
         if elapsed > visibleTime then
-            remaining = math.Clamp(1.0 - ((elapsed - visibleTime) / fadeTime), 0.0, 1.0)
+            remaining = math_Clamp(1.0 - ((elapsed - visibleTime) / fadeTime), 0.0, 1.0)
         end
 
         if remaining > 0.0 then

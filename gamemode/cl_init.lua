@@ -11,6 +11,8 @@ local CurTime = CurTime
 local Vector = Vector
 local math = math
 local IsValid = IsValid
+local math_clamp = math.Clamp
+
 -- This is nasty
 function GM:OnSpawnMenuOpen()
     RunConsoleCommand("lastinv")
@@ -96,7 +98,7 @@ function GM:CalcViewModelBob(wep, vm, oldPos, oldAng, pos, ang)
         speed = Lerp(dt * 2, self.LastPlayerSpeed, 0)
     end
 
-    speed = math.Clamp(speed, -MAX_SPEED, MAX_SPEED)
+    speed = math_clamp(speed, -MAX_SPEED, MAX_SPEED)
     self.LastPlayerSpeed = speed
     local bob_offset = math.Remap(speed, 0, MAX_SPEED, 0.0, 1.0)
     self.ViewBobTime = (self.ViewBobTime or 0) + (dt * 1.3) * bob_offset
@@ -110,7 +112,7 @@ function GM:CalcViewModelBob(wep, vm, oldPos, oldAng, pos, ang)
 
     local vertBob = speed * 0.005
     vertBob = vertBob * 0.3 + vertBob * 0.7 * math.sin(cycle)
-    vertBob = math.Clamp(vertBob, -7.0, 4.0)
+    vertBob = math_clamp(vertBob, -7.0, 4.0)
     cycle = self.ViewBobTime - math.Round(self.ViewBobTime / HL2_BOB_CYCLE_MAX * 2, 0) * HL2_BOB_CYCLE_MAX * 2
     cycle = cycle / (HL2_BOB_CYCLE_MAX * 2)
     if cycle < HL2_BOB_UP then
@@ -121,7 +123,7 @@ function GM:CalcViewModelBob(wep, vm, oldPos, oldAng, pos, ang)
 
     local lateralBob = speed * 0.005
     lateralBob = lateralBob * 0.3 + lateralBob * 0.7 * math.sin(cycle)
-    lateralBob = math.Clamp(lateralBob, -7.0, 4.0)
+    lateralBob = math_clamp(lateralBob, -7.0, 4.0)
     local fwd = oldAng:Forward()
     local right = oldAng:Right()
     local newPos = oldPos + (fwd * (vertBob * 0.1))
@@ -337,6 +339,14 @@ function GM:ShouldDrawLocalPlayer(ply)
 
     local viewlock = ply:GetViewLock()
     if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then return true end
+end
+
+function GM:PrePlayerDraw(ply)
+    -- TODO: If the player is close to our camera we should disable
+    -- rendering of the player model to avoid clipping issues.
+end
+
+function GM:PostPlayerDraw(ply)
 end
 
 function GM:OnContextMenuOpen()

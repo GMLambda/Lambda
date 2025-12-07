@@ -6,6 +6,8 @@ local math = math
 local ents = ents
 local player = player
 local IsValid = IsValid
+local math_clamp = math.Clamp
+
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
@@ -177,8 +179,11 @@ function ENT:GetScaledMaxLiveChildren()
     local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
     local maxScaledLiveChildren = self:GetNWVar("MaxScaledLiveChildren")
     local scaledCount = self:GetScaleCount()
-    local res = math.Clamp(maxLiveChildren + scaledCount, 0, 100)
-    if maxScaledLiveChildren > 0 then res = math.Clamp(res, 0, maxScaledLiveChildren) end
+    local res = math_clamp(maxLiveChildren + scaledCount, 0, 100)
+    if maxScaledLiveChildren > 0 then
+        res = math_clamp(res, 0, maxScaledLiveChildren)
+    end
+
     self.CachedMaxLiveChildren = res
     return res
 end
@@ -188,8 +193,11 @@ function ENT:GetScaledMaxNPCs()
     local maxNPCCount = self:GetNWVar("MaxNPCCount")
     local maxScaledNPCCount = self:GetNWVar("MaxScaledNPCCount")
     local scaledCount = self:GetScaleCount()
-    local res = math.Clamp(maxNPCCount + scaledCount, 0, 100)
-    if maxScaledNPCCount > 0 then res = math.Clamp(res, 0, maxScaledNPCCount) end
+    local res = math_clamp(maxNPCCount + scaledCount, 0, 100)
+    if maxScaledNPCCount > 0 then
+        res = math_clamp(res, 0, maxScaledNPCCount)
+    end
+
     self.CachedMaxNPCCount = res
     return res
 end

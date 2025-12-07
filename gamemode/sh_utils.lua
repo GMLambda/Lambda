@@ -7,6 +7,13 @@ local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
+local math_Clamp = math.Clamp
+local math_Round = math.Round
+local math_random = math.random
+local bit_bxor = bit.bxor
+local bit_lshift = bit.lshift
+local bit_rshift = bit.rshift
+local bit_band = bit.band
 
 -- Any utility function should go in here.
 if SERVER then
@@ -518,12 +525,12 @@ hook.Add("Think", "LambdaRunNextFrame", function()
 end)
 
 function util.RandomFloat(min, max)
-    return min + (math.random() * (max - min))
+    return min + (math_random() * (max - min))
 end
 
 function util.RandomInt(min, max)
     -- This sucks, who cares tho.
-    return math.Clamp(math.Round(math.random(min, max)), min, max)
+    return math_Clamp(math_Round(math_random(min, max)), min, max)
 end
 
 local PLAYER_LIST_CACHE_TICK = 0
@@ -572,3 +579,20 @@ function util.IsPlayerNearby(entOrPos, radius)
 
     return false
 end
+
+local random_state = os.time()
+
+function util.SetRandomSeed(seed)
+    random_state = seed
+end
+
+-- Fast 32 bit random number generator.
+function util.FastRandom(min, max)
+    random_state = bit_bxor(random_state, bit_lshift(random_state, 13))
+    random_state = bit_bxor(random_state, bit_rshift(random_state, 17))
+    random_state = bit_bxor(random_state, bit_lshift(random_state, 5))
+
+    local range = max - min + 1
+    return (bit_band(random_state, 0x7fffffff) % range) + min
+end
+

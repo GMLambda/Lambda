@@ -18,12 +18,15 @@ local table = table
 local util = util
 local bit_band =  bit.band
 local bit_bnot = bit.bnot
+local math_Clamp = math.Clamp
+local util_FastRandom = util.FastRandom
 local LocalPlayer = LocalPlayer
 
 DEFINE_BASECLASS("gamemode_base")
 
-local SUIT_DEVICE_BREATHER = 1
-local SUIT_DEVICE_SPRINT = 2
+local SUIT_DEVICE_BREATHER = 1 -- 1 << 0
+local SUIT_DEVICE_SPRINT = 2 -- 1 << 1
+
 local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 -- We use this constant for kickback from the back.
 local HITGROUP_HEAD_BACK = 100
@@ -853,19 +856,6 @@ if SERVER then
         return true
     end
 
-    function GM:LimitPlayerAmmo(ply)
-        if self:GetSetting("limit_default_ammo") == false then return end
-        local curTime = CurTime()
-        ply.LastAmmoCheck = ply.LastAmmoCheck or curTime
-        if curTime - ply.LastAmmoCheck < 0.100 then return end
-        ply.LastAmmoCheck = curTime
-        for k, v in pairs(self.MAX_AMMO_DEF) do
-            local count = ply:GetAmmoCount(k)
-            local maxCount = v:GetInt()
-            if count > maxCount then ply:SetAmmo(maxCount, k) end
-        end
-    end
-
     function GM:AllowPlayerPickup(ply, ent)
         ply.LastPickupTime = ply.LastPickupTime or 0
         local pickupDelay = self:GetSetting("pickup_delay")
@@ -925,82 +915,88 @@ local GEIGER_SOUND_DELAY = 0.06
 function GM:UpdateGeigerCounter(ply, mv)
     local curTime = CurTime()
     local plyTab = ply:GetTable()
+
     if SERVER then
-        plyTab.GeigerDelay = ply.GeigerDelay or curTime
-        if curTime < plyTab.GeigerDelay then return end
+        local delay = plyTab.GeigerDelay or curTime
+        if curTime < delay then return end
         plyTab.GeigerDelay = curTime + GEIGER_DELAY
-        local range = math.Clamp(math.floor(ply:GetNearestRadiationRange() / 4), 0, 255)
-        if ply:InVehicle() then range = math.Clamp(range * 4, 0, 1000) end
-        local randChance = math.random(0, 5)
-        if randChance == 0 then
+
+        local range = ply:GetNearestRadiationRange() * 0.25
+        range = math_Clamp(range, 0, 255)
+
+        if ply:InVehicle() then
+            range = math_Clamp(range * 4, 0, 1000)
+        end
+
+        if util_FastRandom(0, 5) == 0 then
             ply:SetGeigerRange(1000)
             ply:SetNearestRadiationRange(1000, true)
         else
             ply:SetGeigerRange(range)
         end
+
+        return
+    end
+
+    if ply ~= LocalPlayer() or not ply:Alive() then return end
+
+    local sndDelay = plyTab.GeigerSoundDelay or curTime
+    if curTime < sndDelay then return end
+    plyTab.GeigerSoundDelay = curTime + GEIGER_SOUND_DELAY
+
+    local range = ply:GetGeigerRange() * 4
+    if range == 0 or range >= 1000 then return end
+
+    local pct, vol, highSnd
+    if range > 800 then
+        pct = 0
+        vol = 0
+    elseif range > 600 then
+        pct = 2
+        vol = 0.2
+    elseif range > 500 then
+        pct = 4
+        vol = 0.25
+    elseif range > 400 then
+        pct = 8
+        vol = 0.3
+        highSnd = true
+    elseif range > 300 then
+        pct = 8
+        vol = 0.35
+        highSnd = true
+    elseif range > 200 then
+        pct = 28
+        vol = 0.39
+        highSnd = true
+    elseif range > 150 then
+        pct = 40
+        vol = 0.40
+        highSnd = true
+    elseif range > 100 then
+        pct = 60
+        vol = 0.45
+        highSnd = true
+    elseif range > 75 then
+        pct = 80
+        vol = 0.45
+        highSnd = true
+    elseif range > 50 then
+        pct = 90
+        vol = 0.475
     else
-        if ply:Alive() == false or ply ~= LocalPlayer() then return end
-        plyTab.GeigerSoundDelay = plyTab.GeigerSoundDelay or curTime
-        if curTime < plyTab.GeigerSoundDelay then return end
-        plyTab.GeigerSoundDelay = curTime + GEIGER_SOUND_DELAY
-        local range = ply:GetGeigerRange() * 4
-        --DbgPrint(range)
-        if range == 0 or range >= 1000 then return end
-        local pct = 0
-        local vol = 0
-        local highSnd = false
-        if range > 800 then
-            pct = 0
-        elseif range > 600 then
-            pct = 2
-            vol = 0.2
-        elseif range > 500 then
-            pct = 4
-            vol = 0.25
-        elseif range > 400 then
-            pct = 8
-            vol = 0.3
-            highSnd = true
-        elseif range > 300 then
-            pct = 8
-            vol = 0.35
-            highSnd = true
-        elseif range > 200 then
-            pct = 28
-            vol = 0.39
-            highSnd = true
-        elseif range > 150 then
-            pct = 40
-            vol = 0.40
-            highSnd = true
-        elseif range > 100 then
-            pct = 60
-            vol = 0.45
-            highSnd = true
-        elseif range > 75 then
-            pct = 80
-            vol = 0.45
-            highSnd = true
-        elseif range > 50 then
-            pct = 90
-            vol = 0.475
-        else
-            pct = 95
-            vol = 0.5
-        end
+        pct = 95
+        vol = 0.5
+    end
 
-        vol = (vol * (math.random(0, 127) / 255)) + 0.25
-        if math.random(0, 127) < pct then
-            local snd
-            if highSnd then
-                snd = "Geiger.BeepHigh"
-            else
-                snd = "Geiger.BeepLow"
-            end
+    local r = util_FastRandom(0, 127)
+    vol = (vol * (r * (1 / 255))) + 0.25
 
-            --DbgPrint("EMITSOUND")
-            ply:EmitSound(snd, 75, 100, vol, CHAN_BODY)
-        end
+    if util_FastRandom(0, 127) < pct then
+        ply:EmitSound(
+            highSnd and "Geiger.BeepHigh" or "Geiger.BeepLow",
+            75, 100, vol, CHAN_BODY
+        )
     end
 end
 
@@ -1069,7 +1065,7 @@ function GM:StartCommand(ply, cmd)
         local vel = ply:GetVelocity()
         vel.x = 0
         vel.y = 0
-        vel.z = math.Clamp(vel.z, -2, 0)
+        vel.z = math_Clamp(vel.z, -2, 0)
         ply:SetVelocity(vel)
         cmd:ClearButtons()
         cmd:ClearMovement()
@@ -1222,7 +1218,7 @@ function GM:FinishMove(ply, mv)
     end
 end
 
-function GM:DrainSuit(ply, amount)
+local function DrainSuit(ply, amount)
     local current = ply:GetLambdaSuitPower()
     local res = true
     if ply:GetMoveType() == MOVETYPE_NOCLIP then -- Dont do anything in this case
@@ -1240,7 +1236,7 @@ function GM:DrainSuit(ply, amount)
     return res
 end
 
-function GM:ChargeSuitPower(ply, amount)
+local function ChargeSuitPower(ply, amount)
     local current = ply:GetLambdaSuitPower() + amount
     if current > 100.0 then current = 100.0 end
     ply:SetLambdaSuitPower(current)
@@ -1248,7 +1244,7 @@ function GM:ChargeSuitPower(ply, amount)
     ply:RemoveSuitDevice(SUIT_DEVICE_SPRINT)
 end
 
-function GM:ShouldChargeSuitPower(ply)
+local function ShouldChargeSuitPower(ply)
     local sprinting = ply:GetLambdaSprinting()
     local inWater = ply:WaterLevel() >= 3
     local powerDrain = sprinting or inWater --[[ or flashlightOn ]]
@@ -1278,9 +1274,9 @@ function GM:UpdateSuit(ply, mv)
     if ply:IsSuitEquipped() == false then return end
     local frameTime = FrameTime()
     -- Check if we should recharge.
-    if self:ShouldChargeSuitPower(ply) == true then
+    if ShouldChargeSuitPower(ply) == true then
         local amount = SUIT_CHARGE_RATE * frameTime
-        self:ChargeSuitPower(ply, amount)
+        ChargeSuitPower(ply, amount)
     else
         local powerLoad = 0
         if ply:GetLambdaSprinting() then
@@ -1297,14 +1293,12 @@ function GM:UpdateSuit(ply, mv)
 
         if powerLoad > 0 then
             ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
-            if self:DrainSuit(ply, powerLoad * frameTime) == false then
+            if DrainSuit(ply, powerLoad * frameTime) == false then
                 ply.NextSuitCharge = CurTime() + SUIT_CHARGE_DELAY
                 if ply:GetLambdaSprinting() == true then self:PlayerEndSprinting(ply, mv) end
             end
         end
     end
-
-    self:UpdateGeigerCounter(ply, mv)
 end
 
 local CHOKE_TIME = 1
@@ -1366,12 +1360,29 @@ end
 
 function GM:PlayerTick(ply, mv)
     self:UpdateSuit(ply, mv)
+    self:UpdateGeigerCounter(ply, mv)
     self:PlayerWeaponTick(ply, mv)
     if SERVER then
-        self:LimitPlayerAmmo(ply)
         self:PlayerCheckDrowning(ply)
         if ply:GetNWBool("LambdaHEVSuit", false) ~= ply:IsSuitEquipped() then ply:SetNWBool("LambdaHEVSuit", ply:IsSuitEquipped()) end
     end
+end
+
+function GM:LimitPlayerAmmo(ply, ammoType, newCount)
+    if self:GetSetting("limit_default_ammo") == false then return end
+    local ammoName = game.GetAmmoName(ammoType)
+    local maxAmmoConvar = self.MAX_AMMO_DEF[ammoName]
+    if maxAmmoConvar ~= nil then
+        local maxCount = maxAmmoConvar:GetInt()
+        if newCount > maxCount then
+            ply:SetAmmo(maxCount, ammoType)
+        end
+    end
+end
+
+function GM:PlayerAmmoChanged(ply, ammoType, oldCount, newCount)
+    DbgPrint("PlayerAmmoChanged", ply, ammoType, oldCount, newCount)
+    self:LimitPlayerAmmo(ply, ammoType, newCount)
 end
 
 function GM:CalculateMovementAccuracy(ent)
@@ -1383,7 +1394,7 @@ function GM:CalculateMovementAccuracy(ent)
     local scale = 100
     if len > 0 then scale = 20 end
     movementRecoil = Lerp(FrameTime() * scale, movementRecoil, target)
-    movementRecoil = math.Clamp(movementRecoil, 0, 2)
+    movementRecoil = math_Clamp(movementRecoil, 0, 2)
     ent.MovementRecoil = movementRecoil
 end
 
@@ -1577,7 +1588,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         if attacker == LocalPlayer() then self:OnPlayerDamage(attacker, ply, hitgroup, dmginfo:GetDamagePosition()) end
     end
 
-    local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
+    local dmgForceLen = math_Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
     local punchForce = dmgForceLen * 10
     local viewPunch = Angle(0, 0, 0)
     if hitgroup == HITGROUP_HEAD then
@@ -1599,7 +1610,7 @@ function GM:PlayerApplyViewPunch(ply, viewPunch)
         alpha = alpha
     end
 
-    viewPunch.x = math.Clamp(viewPunch.x, -60, 60)
+    viewPunch.x = math_Clamp(viewPunch.x, -60, 60)
     ply:ViewPunch(viewPunch * alpha)
     -- Prevent player view drifting way too far with fast impacts.
     ply.NextViewPunchTime = CurTime() + VIEWPUNCH_DECAY_TIME

@@ -2,6 +2,7 @@
 local CurTime = CurTime
 local Vector = Vector
 local math = math
+local math_clamp = math.Clamp
 local IsValid = IsValid
 GRAIN_RT = GRAIN_RT or GetRenderTarget("LambdaFilmGrain", ScrW(), ScrH(), true)
 
@@ -49,7 +50,7 @@ local LAST_GEIGER_RANGE = 1000
 
 function GM:RenderRadiationEffects(ply)
     GenerateFilmGrain()
-    local curGeigerRange = math.Clamp(ply:GetGeigerRange() * 4, 0, 1000)
+    local curGeigerRange = math_clamp(ply:GetGeigerRange() * 4, 0, 1000)
     local geigerRange = Lerp(FrameTime(), LAST_GEIGER_RANGE, curGeigerRange)
     LAST_GEIGER_RANGE = geigerRange
     local rv = LAST_GEIGER_RANGE / 1000

@@ -1,3 +1,6 @@
+local math_Clamp = math.Clamp
+local math_Round = math.Round
+
 GM.HintHistory = {}
 GM.HintHistoryLast = 0
 GM.HintHistoryMax = 3
@@ -99,16 +102,16 @@ function GM:HUDDrawHintHistory()
 
         -- Fade in/out
         if (delta > 1 - v.fadein) then
-            alpha = math.Clamp((1.0 - delta) * (255 / v.fadein), 0, 255)
+            alpha = math_Clamp((1.0 - delta) * (255 / v.fadein), 0, 255)
         elseif (delta < v.fadeout) then
-            alpha = math.Clamp(delta * (255 / v.fadeout), 0, 255)
+            alpha = math_Clamp(delta * (255 / v.fadeout), 0, 255)
         end
 
         v.x = x - v.width + (v.width - ((v.width + 20) * (alpha / 255))) + 20
-        local rx = math.Round(v.x)
-        local ry = math.Round(v.y - (v.height / 2) - 4)
-        local rw = math.Round(v.width)
-        local rh = math.Round(v.height)
+        local rx = math_Round(v.x)
+        local ry = math_Round(v.y - (v.height / 2) - 4)
+        local rw = math_Round(v.width)
+        local rh = math_Round(v.height)
         self:DrawHintHistory(rx, ry, rw, rh, v, alpha)
         y = y + (v.height + 2)
         tall = tall + v.height + 18
@@ -129,7 +132,7 @@ function GM:UpdateHintHistory()
     local i = 0
 
     for _, v in pairs(self.HintHistory) do
-        v.timescale = math.Clamp(table.Count(self.HintHistory) - i / self.HintHistoryMax * 10, 1, 10)
+        v.timescale = math_Clamp(table.Count(self.HintHistory) - i / self.HintHistoryMax * 10, 1, 10)
         v.targetY = (ScrH() * 0.8) - ((i + 1) * (HINT_HEIGHT + HINT_SPACING))
         i = i + 1
     end
