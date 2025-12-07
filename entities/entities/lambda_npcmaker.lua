@@ -20,6 +20,8 @@ SF_NPCMAKER_ALWAYSUSERADIUS = 256 -- Use radius spawn whenever spawning
 SF_NPCMAKER_NOPRELOADMODELS = 512 -- Suppress preloading into the cache of all referenced .mdl files
 local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
+-- The maximum target of players for enemy scaling.
+local MAX_PLAYER_COUNT = 20
 function ENT:PreInitialize()
     DbgPrint(self, "ENT:PreInitialize")
     BaseClass.PreInitialize(self)
@@ -37,89 +39,53 @@ function ENT:PreInitialize()
     self:SetInputFunction("SetMaxLiveChildren", self.SetMaxLiveChildren)
     self:SetInputFunction("SetScaledMaxLiveChildren", self.SetScaledMaxLiveChildren)
     self:SetInputFunction("SetSpawnFrequency", self.SetSpawnFrequency)
-    self:SetupNWVar(
-        "Disabled",
-        "bool",
-        {
-            Default = false,
-            KeyValue = "StartDisabled"
-        }
-    )
+    self:SetupNWVar("Disabled", "bool", {
+        Default = false,
+        KeyValue = "StartDisabled"
+    })
 
-    self:SetupNWVar(
-        "MaxNPCCount",
-        "int",
-        {
-            Default = 0,
-            KeyValue = "MaxNPCCount",
-            OnChange = self.OnChangedMaxValues
-        }
-    )
+    self:SetupNWVar("MaxNPCCount", "int", {
+        Default = 0,
+        KeyValue = "MaxNPCCount",
+        OnChange = self.OnChangedMaxValues
+    })
 
-    self:SetupNWVar(
-        "MaxScaledNPCCount",
-        "int",
-        {
-            Default = 0,
-            KeyValue = "MaxScaledNPCCount",
-            OnChange = self.OnChangedMaxValues
-        }
-    )
+    self:SetupNWVar("MaxScaledNPCCount", "int", {
+        Default = 0,
+        KeyValue = "MaxScaledNPCCount",
+        OnChange = self.OnChangedMaxValues
+    })
 
-    self:SetupNWVar(
-        "MaxLiveChildren",
-        "int",
-        {
-            Default = 0,
-            KeyValue = "MaxLiveChildren",
-            OnChange = self.OnChangedMaxValues
-        }
-    )
+    self:SetupNWVar("MaxLiveChildren", "int", {
+        Default = 0,
+        KeyValue = "MaxLiveChildren",
+        OnChange = self.OnChangedMaxValues
+    })
 
-    self:SetupNWVar(
-        "MaxScaledLiveChildren",
-        "int",
-        {
-            Default = 0,
-            KeyValue = "MaxScaledLiveChildren",
-            OnChange = self.OnChangedMaxValues
-        }
-    )
+    self:SetupNWVar("MaxScaledLiveChildren", "int", {
+        Default = 0,
+        KeyValue = "MaxScaledLiveChildren",
+        OnChange = self.OnChangedMaxValues
+    })
 
-    self:SetupNWVar(
-        "DisableScaling",
-        "bool",
-        {
-            Default = 0,
-            KeyValue = "DisableScaling",
-            OnChange = self.OnChangedMaxValues
-        }
-    )
+    self:SetupNWVar("DisableScaling", "bool", {
+        Default = 0,
+        KeyValue = "DisableScaling",
+        OnChange = self.OnChangedMaxValues
+    })
 
-    self:SetupNWVar(
-        "SpawnFrequency",
-        "float",
-        {
-            Default = 0,
-            KeyValue = "SpawnFrequency"
-        }
-    )
+    self:SetupNWVar("SpawnFrequency", "float", {
+        Default = 0,
+        KeyValue = "SpawnFrequency"
+    })
 
-    self:SetupNWVar(
-        "LiveChildren",
-        "int",
-        {
-            Default = 0
-        }
-    )
+    self:SetupNWVar("LiveChildren", "int", {
+        Default = 0
+    })
 
-    self:SetupNWVar(
-        "CreatedCount",
-        "int",
-        {
-            Default = 0
-        }
-    )
+    self:SetupNWVar("CreatedCount", "int", {
+        Default = 0
+    })
 end
 
 function ENT:OnChangedMaxValues()
@@ -173,23 +139,18 @@ end
 
 function ENT:InputSpawnNPC()
     DbgPrint(self, "ENT:InputSpawnNPC")
-    if not self:IsDepleted() then
-        self:MakeNPC()
-    end
+    if not self:IsDepleted() then self:MakeNPC() end
 end
 
 function ENT:HumanHullFits(pos)
     -- ai_hull_t  Human_Hull            (bits_HUMAN_HULL,           "HUMAN_HULL",           Vector(-13,-13,   0),   Vector(13, 13, 72),     Vector(-8,-8,   0),     Vector( 8,  8, 72) );
-    local tr = util.TraceHull(
-        {
-            start = pos,
-            endpos = pos + Vector(0, 0, 1),
-            mins = HULL_HUMAN_MINS,
-            maxs = HULL_HUMAN_MAXS,
-            mask = MASK_NPCSOLID
-        }
-    )
-
+    local tr = util.TraceHull({
+        start = pos,
+        endpos = pos + Vector(0, 0, 1),
+        mins = HULL_HUMAN_MINS,
+        maxs = HULL_HUMAN_MAXS,
+        mask = MASK_NPCSOLID
+    })
     return tr.Fraction == 1.0
 end
 
@@ -205,10 +166,9 @@ function ENT:GetScaleCount()
         if IsFriendEntityName(class) then return 0 end
     end
 
-    local playerCount = math.max(1, player.GetCount()) - 1
+    local playerCount = math.min(MAX_PLAYER_COUNT, math.max(1, player.GetCount()) - 1)
     local scale = GAMEMODE:GetNPCSpawningScale()
     local extraCount = math.ceil(playerCount * scale)
-
     return extraCount
 end
 
@@ -218,12 +178,8 @@ function ENT:GetScaledMaxLiveChildren()
     local maxScaledLiveChildren = self:GetNWVar("MaxScaledLiveChildren")
     local scaledCount = self:GetScaleCount()
     local res = math.Clamp(maxLiveChildren + scaledCount, 0, 100)
-    if maxScaledLiveChildren > 0 then
-        res = math.Clamp(res, 0, maxScaledLiveChildren)
-    end
-
+    if maxScaledLiveChildren > 0 then res = math.Clamp(res, 0, maxScaledLiveChildren) end
     self.CachedMaxLiveChildren = res
-
     return res
 end
 
@@ -233,12 +189,8 @@ function ENT:GetScaledMaxNPCs()
     local maxScaledNPCCount = self:GetNWVar("MaxScaledNPCCount")
     local scaledCount = self:GetScaleCount()
     local res = math.Clamp(maxNPCCount + scaledCount, 0, 100)
-    if maxScaledNPCCount > 0 then
-        res = math.Clamp(res, 0, maxScaledNPCCount)
-    end
-
+    if maxScaledNPCCount > 0 then res = math.Clamp(res, 0, maxScaledNPCCount) end
     self.CachedMaxNPCCount = res
-
     return res
 end
 
@@ -253,13 +205,11 @@ function ENT:ShouldUseDistance()
     end
 
     if self:HasSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER) == true and multiSpawn == true and self:GetNWVar("CreatedCount") > 0 then return true end
-
     return false
 end
 
 function ENT:IsDepleted()
     if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) or self:GetNWVar("CreatedCount") < self:GetScaledMaxNPCs() then return false end
-
     return true
 end
 
@@ -294,7 +244,6 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
     ignoreSolidEnts = ignoreSolidEnts or false
     if self:IsDepleted() then
         DbgPrint(self, "Depleted")
-
         return false
     end
 
@@ -303,7 +252,6 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
     local scaledMaxLiveChildren = self:GetScaledMaxLiveChildren()
     if maxLiveChildren > 0 and liveChildren >= scaledMaxLiveChildren then
         DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
-
         return false
     end
 
@@ -316,15 +264,13 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
             if bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0 then
                 -- This is used for striders because of the big bounding box,
                 -- NOTE: This is all based on monstermaker.cpp from the Source SDK
-                local tr = util.TraceHull(
-                    {
-                        start = self:GetPos() + Vector(0, 0, 2),
-                        endpos = self:GetPos() - Vector(0, 0, 8192),
-                        mins = HULL_HUMAN_MINS,
-                        maxs = HULL_HUMAN_MAXS,
-                        mask = MASK_NPCSOLID
-                    }
-                )
+                local tr = util.TraceHull({
+                    start = self:GetPos() + Vector(0, 0, 2),
+                    endpos = self:GetPos() - Vector(0, 0, 8192),
+                    mins = HULL_HUMAN_MINS,
+                    maxs = HULL_HUMAN_MAXS,
+                    mask = MASK_NPCSOLID
+                })
 
                 if not self:HumanHullFits(tr.HitPos + Vector(0, 0, 1)) then return false end
             end
@@ -336,7 +282,6 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
         -- Make sure we spawn friendlies and enforced npcs.
         if ForcedNPCS[class] == nil and IsFriendEntityName(class) == false and util.IsPosVisibleToPlayers(pos) == true then
             DbgPrint("Can not make NPC, maker is visible to player")
-
             return false
         end
 
@@ -345,16 +290,13 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
             for _, v in pairs(util.GetAllPlayers()) do
                 if v:IsFlagSet(FL_NOTARGET) then continue end
                 local dist = v:GetPos():Distance(pos)
-                if dist < closestDist then
-                    closestDist = dist
-                end
+                if dist < closestDist then closestDist = dist end
             end
 
             -- Seems to be optimal for now.
             if closestDist < 750 then return false end
         end
     end
-
     return true
 end
 
@@ -373,7 +315,6 @@ function ENT:MakerThink()
     end
 
     local curTime = CurTime()
-
     if self.NextSpawnTime == -1 or self.NextSpawnTime > curTime then
         self:NextThink(curTime + 0.1)
         return true
@@ -381,7 +322,6 @@ function ENT:MakerThink()
 
     -- Spawn the next NPC.
     self:MakeNPC()
-
     local spawnFrequency = self:GetNWVar("SpawnFrequency")
     if spawnFrequency ~= -1 then
         self.NextSpawnTime = curTime + spawnFrequency
@@ -390,17 +330,12 @@ function ENT:MakerThink()
         self.NextSpawnTime = -1
         self:NextThink(curTime + 0.1)
     end
-
     return true
 end
 
 function ENT:DeathNotice(ent)
-    if self:GetNWVar("LiveChildren", 0) <= 0 then
-        DbgError(self, "No live children but death notice! Investigate me")
-    end
-
+    if self:GetNWVar("LiveChildren", 0) <= 0 then DbgError(self, "No live children but death notice! Investigate me") end
     self:SetNWVar("LiveChildren", self:GetNWVar("LiveChildren") - 1)
-
     if self:GetNWVar("SpawnFrequency") == -1 then
         -- Allow it to spawn again.
         self.NextSpawnTime = CurTime()
@@ -412,9 +347,7 @@ function ENT:DeathNotice(ent)
         if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false and self:IsDepleted() == true then
             DbgPrint("All spawned NPCs are dead.")
             self:FireOutputs("OnAllSpawnedDead", nil, self)
-            if self.OnAllSpawnedDead ~= nil then
-                self:OnAllSpawnedDead()
-            end
+            if self.OnAllSpawnedDead ~= nil then self:OnAllSpawnedDead() end
         end
     end
 end
@@ -440,22 +373,16 @@ function ENT:ChildPostSpawn(ent)
     -- TODO: Check if ent is stuck and remove it.
     local maker = self
     -- Usually the entities would do that based on npc_template_maker but we are not C++ the object where it could call it.
-    ent:CallOnRemove(
-        self,
-        function(npc)
-            if IsValid(maker) then
-                DbgPrint("NPC (" .. tostring(npc) .. ") dead, notifying npc_maker: " .. tostring(maker))
-                self:DeathNotice(npc)
-            end
+    ent:CallOnRemove(self, function(npc)
+        if IsValid(maker) then
+            DbgPrint("NPC (" .. tostring(npc) .. ") dead, notifying npc_maker: " .. tostring(maker))
+            self:DeathNotice(npc)
         end
-    )
+    end)
 
     -- HACKHACK: Some of the weapons appear to have EF_NODRAW set, that shouldn't be the case.
     local wep = ent:GetActiveWeapon()
-    if IsValid(wep) then
-        wep:RemoveEffects(EF_NODRAW)
-    end
-
+    if IsValid(wep) then wep:RemoveEffects(EF_NODRAW) end
     DbgPrint(self, "Created new NPC: " .. tostring(ent))
 end
 
@@ -479,7 +406,6 @@ end
 
 function ENT:GetNPCClass()
     DbgPrint(self, "ENT:GetNPCClass", ent)
-
     return ""
 end
 
