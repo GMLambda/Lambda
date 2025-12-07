@@ -1,4 +1,5 @@
 0.9.30 (in development)
+- Improved: Enemy scaling now caps out at 20 players, doing more adds too much stress to the server.
 - Fixed: Bad lightning by forcing r_radiosity convar to 4.
 
 0.9.29
