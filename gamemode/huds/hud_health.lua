@@ -1,4 +1,7 @@
 include("hud_numeric.lua")
+
+local math_Clamp = math.Clamp
+
 local PANEL = {}
 
 function PANEL:Init()
@@ -52,7 +55,7 @@ function PANEL:Think()
         end
     end
 
-    local health = math.Clamp(ply:Health(), 0, ply:GetMaxHealth())
+    local health = math_Clamp(ply:Health(), 0, ply:GetMaxHealth())
     if health == self.LastHealth then return end
     self.LastHealth = health
 

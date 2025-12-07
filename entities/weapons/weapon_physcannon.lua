@@ -15,6 +15,7 @@ local TraceLine = util.TraceLine
 local TraceHull = util.TraceHull
 local Color = Color
 local CurTime = CurTime
+local math_clamp = math.Clamp
 local EffectsInvalidated = false
 local TraceMask = bor(MASK_SHOT, CONTENTS_GRATE)
 local ATTACHMENTS_GAPS_FP = {"fork1t", "fork2t"}
@@ -809,7 +810,7 @@ function SWEP:UpdateObject()
     if attachedObject:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then return false end
     if owner:GetGroundEntity() == attachedObject then return false end
     local fwd = owner:GetAimVector()
-    fwd.x = math.Clamp(fwd.x, -75, 75)
+    fwd.x = math_clamp(fwd.x, -75, 75)
     local start = owner:GetShootPos()
     local minDist = 24
     local playerLen = owner:OBBMaxs():Length2D()

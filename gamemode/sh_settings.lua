@@ -5,6 +5,9 @@ end
 local DbgPrint = GetLogging("Settings")
 local table = table
 local math = math
+local math_Clamp = math.Clamp
+local math_max = math.max
+local math_min = math.min
 
 function GM:InitSettings()
     DbgPrint("GM:InitSettings")
@@ -19,15 +22,15 @@ end
 
 -- NOTE: For performance reason we don't capture upvalues
 local function GetValueIntClampMinMax(s)
-    return math.Clamp(s.CVar:GetInt(), s.Clamp.Min, s.Clamp.Max)
+    return math_Clamp(s.CVar:GetInt(), s.Clamp.Min, s.Clamp.Max)
 end
 
 local function GetValueIntClampMin(s)
-    return math.max(s.CVar:GetInt(), s.Clamp.Min)
+    return math_max(s.CVar:GetInt(), s.Clamp.Min)
 end
 
 local function GetValueIntClampMax(s)
-    return math.min(s.CVar:GetInt(), s.Clamp.Max)
+    return math_min(s.CVar:GetInt(), s.Clamp.Max)
 end
 
 local function GetValueInt(s)
@@ -35,15 +38,15 @@ local function GetValueInt(s)
 end
 
 local function GetValueFloatClampMinMax(s)
-    return math.Clamp(s.CVar:GetFloat(), s.Clamp.Min, s.Clamp.Max)
+    return math_Clamp(s.CVar:GetFloat(), s.Clamp.Min, s.Clamp.Max)
 end
 
 local function GetValueFloatClampMin(s)
-    return math.max(s.CVar:GetFloat(), s.Clamp.Min)
+    return math_max(s.CVar:GetFloat(), s.Clamp.Min)
 end
 
 local function GetValueFloatClampMax(s)
-    return math.min(s.CVar:GetFloat(), s.Clamp.Max)
+    return math_min(s.CVar:GetFloat(), s.Clamp.Max)
 end
 
 local function GetValueFloat(s)

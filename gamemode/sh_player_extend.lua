@@ -8,6 +8,10 @@ local IsValid = IsValid
 local table = table
 local CurTime = CurTime
 local PLAYER_META = FindMetaTable("Player")
+local bit_band = bit.band
+local bit_bor = bit.bor
+local bit_bnot = bit.bnot
+
 -- Ensure autoreload will not screw this up.
 _PLAYER_META_GIVE = _PLAYER_META_GIVE or PLAYER_META.Give
 VIEWLOCK_NONE = 0
@@ -251,25 +255,30 @@ function PLAYER_META:GetGeigerRange()
 end
 
 function PLAYER_META:AddSuitDevice(device)
-    self.SuitDevices = self.SuitDevices or {}
-    self.SuitDevices[device] = true
+    self.SuitDevices = self.SuitDevices or 0
+    self.SuitDevices = bit_bor(self.SuitDevices, device)
 end
 
 function PLAYER_META:RemoveSuitDevice(device)
-    self.SuitDevices = self.SuitDevices or {}
-    self.SuitDevices[device] = false
+    self.SuitDevices = self.SuitDevices or 0
+    self.SuitDevices = bit_band(self.SuitDevices, bit_bnot(device))
 end
 
 function PLAYER_META:GetSuitDevices()
-    self.SuitDevices = self.SuitDevices or {}
-
-    return table.Copy(self.SuitDevices)
+    self.SuitDevices = self.SuitDevices or 0
+    local devices = {}
+    if bit_band(self.SuitDevices, SUIT_DEVICE_BREATHER) ~= 0 then
+        table.insert(devices, SUIT_DEVICE_BREATHER)
+    end
+    if bit_band(self.SuitDevices, SUIT_DEVICE_SPRINT) ~= 0 then
+        table.insert(devices, SUIT_DEVICE_SPRINT)
+    end
+    return devices
 end
 
 function PLAYER_META:UsingSuitDevice(device)
-    self.SuitDevices = self.SuitDevices or {}
-
-    return self.SuitDevices[device] or false
+    self.SuitDevices = self.SuitDevices or 0
+    return bit_band(self.SuitDevices, device) ~= 0
 end
 
 function PLAYER_META:GetFlexIndexByName(name)

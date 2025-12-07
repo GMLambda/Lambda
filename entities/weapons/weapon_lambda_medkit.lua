@@ -3,6 +3,8 @@ if SERVER then
 end
 
 local DbgPrint = GetLogging("Medkit")
+local math_clamp = math.Clamp
+
 SWEP.PrintName = "Medkit"
 SWEP.Author = "Lambda"
 SWEP.Instructions = ""
@@ -113,7 +115,7 @@ function SWEP:Recharge()
     self:SetNextRechargeTime(CurTime() + RECHARGE_DELAY)
 
     local currentEnergy = self:GetEnergy()
-    local energy = math.Clamp(currentEnergy + RECHARGE_AMOUNT, 0, RECHARGE_TARGET)
+    local energy = math_clamp(currentEnergy + RECHARGE_AMOUNT, 0, RECHARGE_TARGET)
     self:SetEnergy(energy)
 
     if energy >= RECHARGE_TARGET then
@@ -322,7 +324,7 @@ end
 
 function SWEP:ConsumeEnergy(amount)
     local energy = self:GetEnergy()
-    energy = math.Clamp(energy - amount, 0, 100)
+    energy = math_clamp(energy - amount, 0, 100)
     self:SetEnergy(energy)
 end
 
@@ -596,7 +598,7 @@ function SWEP:PreDrawViewModel(vm, wep, ply)
     self.EnergyLevel = math.Approach(self.EnergyLevel or 0, energy, FrameTime() * 100)
 
     self.ChargeBlink = math.Approach(self.ChargeBlink, 0, FrameTime() * 350)
-    local glow = math.Clamp(self.EnergyLevel / 100, 0, 1)
+    local glow = math_clamp(self.EnergyLevel / 100, 0, 1)
     local c = Color(0, 255, 0, 255)
     c.r = (255 * (1 - glow)) * 1
     c.g = ((1000 * glow) - (c.r * 0.8))

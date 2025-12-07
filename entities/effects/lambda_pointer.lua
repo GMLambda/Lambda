@@ -3,6 +3,8 @@ EFFECT.Mat2 = Material("lambda/ring2.png")
 EFFECT.Mat3 = Material("lambda/ring3.png")
 EFFECT.Mat4 = Material("lambda/run_point.vmt")
 
+local math_clamp = math.Clamp
+
 function EFFECT:Init(data)
     local size = 64
     local ply = data:GetEntity()
@@ -48,8 +50,8 @@ function EFFECT:Render()
     render.DrawQuadEasy(self:GetPos() + normal, normal, self.Size, self.Size, Color(255, 255, 255, (self.Alpha ^ 1.1) * 255), self.Alpha * 500)
     render.SetMaterial(self.Mat3)
     render.DrawQuadEasy(self:GetPos() + normal, normal, self.Size, self.Size, Color(255, 255, 255, (self.Alpha ^ 1.1) * 255), -(self.Alpha * 800))
-    local signsize = math.Clamp(dist / 20, self.Size / 2, self.Size * 5)
-    local offset_z = math.Clamp(dist / 20, 50, 200)
+    local signsize = math_clamp(dist / 20, self.Size / 2, self.Size * 5)
+    local offset_z = math_clamp(dist / 20, 50, 200)
     render.SetMaterial(self.Mat4)
     render.DrawQuadEasy(self:GetPos() + (dir:Forward() * (offset_z + self.Dist)), ang, signsize, signsize, Color(255, 255, 255, (self.Alpha ^ 1.1) * 255), 180)
 end

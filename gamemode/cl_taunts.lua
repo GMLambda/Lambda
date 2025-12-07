@@ -198,7 +198,7 @@ function GM:TauntSelectionInput(ply, bind, pressed)
         if taunts == nil then
             return
         end
-        tauntIndex = math.Clamp(tauntIndex, 1, #taunts)
+        tauntIndex = math_Clamp(tauntIndex, 1, #taunts)
         TauntIndex:SetInt(tauntIndex)
     end
 

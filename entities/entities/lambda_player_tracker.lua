@@ -5,7 +5,8 @@ end
 local IsValid = IsValid
 local Vector = Vector
 local util = util
-local math = math
+local math_clamp = math.Clamp
+
 ENT.Base = "base_anim"
 ENT.Type = "anim"
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
@@ -182,7 +183,7 @@ if CLIENT then
         ang:RotateAroundAxis(ang:Forward(), 90)
         ang:RotateAroundAxis(ang:Right(), 90)
         local dist = pos:Distance(localPly:GetPos())
-        dist = math.Clamp(dist, 0, 3000)
+        dist = math_clamp(dist, 0, 3000)
         local distScale = (2 * (dist / 3000))
         local distZ = distScale * 50
         local scale = 0.12 + distScale

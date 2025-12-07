@@ -5,6 +5,8 @@ local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
+local math_Clamp = math.Clamp
+
 local VEHICLE_THINK = 1
 VEHICLE_SPAWN_MINS = Vector(-85, -132, -40)
 VEHICLE_SPAWN_MAXS = Vector(85, 104, 110)
@@ -901,7 +903,7 @@ function GM:VehicleMove(ply, vehicle, mv)
         -- The distance is a multiplier
         -- Actual camera distance = ( renderradius + renderradius * dist )
         -- so -1 will be zero.. clamp it there.
-        local newdist = math.Clamp(vehicle:GetCameraDistance() - iWheel * 0.03 * (1.1 + vehicle:GetCameraDistance()), -1, 10)
+        local newdist = math_Clamp(vehicle:GetCameraDistance() - iWheel * 0.03 * (1.1 + vehicle:GetCameraDistance()), -1, 10)
         vehicle:SetCameraDistance(newdist)
     end
 

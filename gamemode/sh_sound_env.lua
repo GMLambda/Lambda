@@ -1,3 +1,5 @@
+local math_Clamp = math.Clamp
+
 if SERVER then
     AddCSLuaFile()
 end
@@ -36,7 +38,7 @@ function GM:EntityEmitSound(data)
             modified = true
         end
 
-        p = math.Clamp(p, 0, 255)
+        p = math_Clamp(p, 0, 255)
         data.Pitch = p
     end
 

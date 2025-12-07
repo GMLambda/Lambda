@@ -7,6 +7,9 @@ local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
+local math_Clamp = math.Clamp
+local math_Round = math.Round
+local math_random = math.random
 
 -- Any utility function should go in here.
 if SERVER then
@@ -518,12 +521,12 @@ hook.Add("Think", "LambdaRunNextFrame", function()
 end)
 
 function util.RandomFloat(min, max)
-    return min + (math.random() * (max - min))
+    return min + (math_random() * (max - min))
 end
 
 function util.RandomInt(min, max)
     -- This sucks, who cares tho.
-    return math.Clamp(math.Round(math.random(min, max)), min, max)
+    return math_Clamp(math_Round(math_random(min, max)), min, max)
 end
 
 local PLAYER_LIST_CACHE_TICK = 0

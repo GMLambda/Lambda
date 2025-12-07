@@ -18,12 +18,16 @@ local table = table
 local util = util
 local bit_band =  bit.band
 local bit_bnot = bit.bnot
+local math_Clamp = math.Clamp
+local math_random = math.random
 local LocalPlayer = LocalPlayer
 
 DEFINE_BASECLASS("gamemode_base")
 
-local SUIT_DEVICE_BREATHER = 1
-local SUIT_DEVICE_SPRINT = 2
+local SUIT_DEVICE_NONE = 0
+local SUIT_DEVICE_BREATHER = 1 -- 1 << 0
+local SUIT_DEVICE_SPRINT = 2 -- 1 << 1
+
 local sv_infinite_aux_power = GetConVar("sv_infinite_aux_power")
 -- We use this constant for kickback from the back.
 local HITGROUP_HEAD_BACK = 100
@@ -916,9 +920,9 @@ function GM:UpdateGeigerCounter(ply, mv)
         plyTab.GeigerDelay = ply.GeigerDelay or curTime
         if curTime < plyTab.GeigerDelay then return end
         plyTab.GeigerDelay = curTime + GEIGER_DELAY
-        local range = math.Clamp(math.floor(ply:GetNearestRadiationRange() / 4), 0, 255)
-        if ply:InVehicle() then range = math.Clamp(range * 4, 0, 1000) end
-        local randChance = math.random(0, 5)
+        local range = math_Clamp(math.floor(ply:GetNearestRadiationRange() / 4), 0, 255)
+        if ply:InVehicle() then range = math_Clamp(range * 4, 0, 1000) end
+        local randChance = math_random(0, 5)
         if randChance == 0 then
             ply:SetGeigerRange(1000)
             ply:SetNearestRadiationRange(1000, true)
@@ -976,8 +980,8 @@ function GM:UpdateGeigerCounter(ply, mv)
             vol = 0.5
         end
 
-        vol = (vol * (math.random(0, 127) / 255)) + 0.25
-        if math.random(0, 127) < pct then
+        vol = (vol * (math_random(0, 127) / 255)) + 0.25
+        if math_random(0, 127) < pct then
             local snd
             if highSnd then
                 snd = "Geiger.BeepHigh"
@@ -1056,7 +1060,7 @@ function GM:StartCommand(ply, cmd)
         local vel = ply:GetVelocity()
         vel.x = 0
         vel.y = 0
-        vel.z = math.Clamp(vel.z, -2, 0)
+        vel.z = math_Clamp(vel.z, -2, 0)
         ply:SetVelocity(vel)
         cmd:ClearButtons()
         cmd:ClearMovement()
@@ -1386,7 +1390,7 @@ function GM:CalculateMovementAccuracy(ent)
     local scale = 100
     if len > 0 then scale = 20 end
     movementRecoil = Lerp(FrameTime() * scale, movementRecoil, target)
-    movementRecoil = math.Clamp(movementRecoil, 0, 2)
+    movementRecoil = math_Clamp(movementRecoil, 0, 2)
     ent.MovementRecoil = movementRecoil
 end
 
@@ -1580,7 +1584,7 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         if attacker == LocalPlayer() then self:OnPlayerDamage(attacker, ply, hitgroup, dmginfo:GetDamagePosition()) end
     end
 
-    local dmgForceLen = math.Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
+    local dmgForceLen = math_Clamp(dmginfo:GetDamageForce():Length2D() / 1000, 0, 1)
     local punchForce = dmgForceLen * 10
     local viewPunch = Angle(0, 0, 0)
     if hitgroup == HITGROUP_HEAD then
@@ -1602,7 +1606,7 @@ function GM:PlayerApplyViewPunch(ply, viewPunch)
         alpha = alpha
     end
 
-    viewPunch.x = math.Clamp(viewPunch.x, -60, 60)
+    viewPunch.x = math_Clamp(viewPunch.x, -60, 60)
     ply:ViewPunch(viewPunch * alpha)
     -- Prevent player view drifting way too far with fast impacts.
     ply.NextViewPunchTime = CurTime() + VIEWPUNCH_DECAY_TIME

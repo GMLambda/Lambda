@@ -21,6 +21,7 @@ local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
+local math_Clamp = math.Clamp
 local STATE_NONE = -3
 local STATE_BOOTING = -2
 local STATE_IDLE = -1
@@ -126,7 +127,7 @@ if SERVER then
     function GM:RestartRound(reason)
         DbgPrint("Requested restart")
         local restartTime = self:GetSetting("map_restart_timeout")
-        restartTime = math.Clamp(restartTime, 0, 127)
+        restartTime = math_Clamp(restartTime, 0, 127)
 
         if self.RoundState ~= STATE_RUNNING then
             DbgPrint("Attempted to restart while restart is pending")

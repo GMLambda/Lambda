@@ -3,6 +3,7 @@ local CurTime = CurTime
 local Vector = Vector
 local math = math
 local IsValid = IsValid
+local math_Clamp = math.Clamp
 --local DbgPrint = GetLogging("Animation")
 local function HandlePlayerJumping(ply, data, velocity)
     if data.MoveType == MOVETYPE_NOCLIP then
@@ -158,7 +159,7 @@ end
 
 local function MouthMoveAnimation(ply)
     local flexes = {ply:GetFlexIDByName("jaw_drop"), ply:GetFlexIDByName("left_part"), ply:GetFlexIDByName("right_part"), ply:GetFlexIDByName("left_mouth_drop"), ply:GetFlexIDByName("right_mouth_drop")}
-    local weight = ply:IsSpeaking() and math.Clamp(ply:VoiceVolume() * 2, 0, 2) or 0
+    local weight = ply:IsSpeaking() and math_Clamp(ply:VoiceVolume() * 2, 0, 2) or 0
     for k, v in pairs(flexes) do
         ply:SetFlexWeight(v, weight)
     end
