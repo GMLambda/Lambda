@@ -341,43 +341,9 @@ function GM:ShouldDrawLocalPlayer(ply)
     if viewlock == VIEWLOCK_SETTINGS_ON or viewlock == VIEWLOCK_SETTINGS_RELEASE then return true end
 end
 
-local FADE_DIST = 25
-local FADE_DIST_SQR = FADE_DIST * FADE_DIST
-
 function GM:PrePlayerDraw(ply)
-    --[[
-    local lp = LocalPlayer()
-    if not IsValid(lp) or lp == ply then return end
-
-    local p1 = lp:GetPos()
-    local p2 = ply:GetPos()
-
-    local dx = p1.x - p2.x
-    local dy = p1.y - p2.y
-    local distSqr = dx * dx + dy * dy
-
-    if distSqr > FADE_DIST_SQR then return end
-
-    local dz = p1.z - p2.z
-    if dz > 60 or dz < -60 then return end
-
-    local fade = distSqr / FADE_DIST_SQR
-    local alpha = fade
-
-    if alpha < 0.15 then
-        return true
-    end
-
-    render.OverrideColorWriteEnable( true, false )
-    ply:DrawModel()
-    render.OverrideColorWriteEnable( false, false )
-
-    render.SetBlend(alpha)
-    ply:DrawModel()
-    render.SetBlend( 1 )
-
-    return true
-    ]]
+    -- TODO: If the player is close to our camera we should disable
+    -- rendering of the player model to avoid clipping issues.
 end
 
 function GM:PostPlayerDraw(ply)
