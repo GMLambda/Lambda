@@ -469,8 +469,20 @@ if SERVER then
         if self:GetNWVar("Disabled") == true or self:GetNWVar("Blocked") == true then return end --DbgPrint("Disabled")
         local waitForTeam = self:GetNWVar("WaitForTeam")
 
-        if waitForTeam == true and ent:IsPlayer() then
-            ent:DisablePlayerCollide(true)
+        if waitForTeam == true then
+            if ent:IsPlayer() then
+                ent:DisablePlayerCollide(true)
+            elseif ent:IsVehicle() then
+                local driver = ent:GetDriver()
+
+                if IsValid(driver) and driver:IsPlayer() then
+                    driver:DisablePlayerCollide(true)
+                end
+
+                if GAMEMODE:IsActiveVehicle(ent) then
+                    GAMEMODE:TemporarilyDisableVehicleCollisions(ent)
+                end
+            end
         end
 
         if self.NextWait ~= nil and self.NextWait ~= 0 then

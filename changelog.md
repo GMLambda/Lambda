@@ -1,5 +1,7 @@
 0.9.30 (in development)
 - Improved: Enemy scaling now caps out at 20 players, doing more adds too much stress to the server.
+- Improved: Vehicles now temporarily disable collisions when entering a changelevel trigger, remains disabled set by settings.
+- Added: Setting to disable vehicle collisions.
 - Fixed: Bad lightning by forcing r_radiosity convar to 4.
 
 0.9.29
