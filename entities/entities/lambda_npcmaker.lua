@@ -24,7 +24,7 @@ local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
 
 function ENT:PreInitialize()
-    DbgPrint(util.EntityName(self):GetDebugName(), "ENT:PreInitialize")
+    DbgPrint(util.EntityName(self), "ENT:PreInitialize")
     BaseClass.PreInitialize(self)
     self:SetupOutput("OnAllSpawned")
     self:SetupOutput("OnAllSpawnedDead")
@@ -69,10 +69,10 @@ function ENT:PreInitialize()
         OnChange = self.OnChangedMaxValues
     })
 
-    self:SetupNWVar("DisableScaling", "bool", {
+    self:SetupNWVar("EnableScaling", "bool", {
         Default = 0,
-        KeyValue = "DisableScaling",
-        OnChange = self.OnChangedMaxValues
+        KeyValue = "EnableScaling",
+        OnChange = self.OnDisableScaling
     })
 
     self:SetupNWVar("SpawnFrequency", "float", {
@@ -90,7 +90,14 @@ function ENT:PreInitialize()
 end
 
 function ENT:OnChangedMaxValues()
-    DbgPrint("ENT:OnChangedMaxValues")
+    DbgPrint(util.EntityName(self), "ENT:OnChangedMaxValues")
+    self.CachedMaxNPCCount = nil
+    self.CachedMaxLiveChildren = nil
+    self.CachedPlayerCount = player.GetCount()
+end
+
+function ENT:OnEnableScaling()
+    DbgPrint(util.EntityName(self), "ENT:OnEnableScaling")
     self.CachedMaxNPCCount = nil
     self.CachedMaxLiveChildren = nil
     self.CachedPlayerCount = player.GetCount()
@@ -161,8 +168,9 @@ function ENT:AcceptInput(name, activator, caller, data)
 end
 
 function ENT:ShouldScale()
-    if self:GetNWVar("DisableScaling") == true then return 0 end
-    if GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true then return 0 end
+    if self:GetNWVar("EnableScaling") == false then
+        return false
+    end
     if self.PrecacheData ~= nil then
         local class = self.PrecacheData["classname"]
         if IsFriendEntityName(class) then
@@ -428,7 +436,7 @@ function ENT:UpdateScaling()
     local maxCount = self:GetNWVar("MaxNPCCount")
     if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false and maxCount == 1 and self:GetNWVar("CreatedCount") == maxCount then
         -- From this point on only spawn when not visible.
-        DbgPrint("Adjusted flags, hiding from player, CreatedCount == 1 and MaxNPCCount == 1")
+        DbgPrint(util.EntityName(self), "Adjusted flags, hiding from player, CreatedCount == 1 and MaxNPCCount == 1")
         self:AddSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER)
     end
 

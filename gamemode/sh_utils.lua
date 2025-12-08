@@ -597,10 +597,12 @@ function util.FastRandom(min, max)
 end
 
 function util.EntityName(ent)
-    local name = ent:GetName()
+    local name = ent.GetName ~= nil and ent:GetName() or ""
+    local entClass = ent.GetClass ~= nil and ent:GetClass() or ""
+    local entIndex = ent:EntIndex()
     if name ~= "" then
-        return tostring(ent) .. " (" .. name .. ")"
+        return "Entity [" .. tostring(entIndex) .. "][" .. entClass .. ", " .. name .. "]"
     else
-        return tostring(ent)
+        return "Entity [" .. tostring(entIndex) .. "][" .. entClass .. "]"
     end
 end
