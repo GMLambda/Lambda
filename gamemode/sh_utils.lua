@@ -596,3 +596,11 @@ function util.FastRandom(min, max)
     return (bit_band(random_state, 0x7fffffff) % range) + min
 end
 
+function util.EntityName(ent)
+    local name = ent:GetName()
+    if name ~= "" then
+        return tostring(ent) .. " (" .. name .. ")"
+    else
+        return tostring(ent)
+    end
+end

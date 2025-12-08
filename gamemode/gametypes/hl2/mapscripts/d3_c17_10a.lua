@@ -37,6 +37,10 @@ function MAPSCRIPT:PostInit()
             v:SetKeyValue("DisableScaling", "1")
         end
 
+        for _, v in pairs(ents.FindByName("dropship_maker")) do
+            v:SetKeyValue("DisableScaling", "1")
+        end
+
         -- Adjust some logic to support npc scaling
         local newCounter = ents.Create("math_counter")
         newCounter:SetKeyValue("max", "3")

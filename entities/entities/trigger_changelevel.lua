@@ -59,17 +59,17 @@ if SERVER then
     end
 
     function ENT:OnTrigger()
-        DbgPrint(self, "OnTrigger")
+        DbgPrint(util.EntityName(self), "OnTrigger")
         self:DoChangeLevel()
     end
 
     function ENT:InputChangeLevel()
-        DbgPrint(self, "InputChangeLevel")
+        DbgPrint(util.EntityName(self), "InputChangeLevel")
         self:DoChangeLevel()
     end
 
     function ENT:DoChangeLevel()
-        DbgPrint(self, "DoChangeLevel")
+        DbgPrint(util.EntityName(self), "DoChangeLevel")
 
         self:FireOutputs("OnChangeLevel", nil, nil)
 

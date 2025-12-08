@@ -9,24 +9,24 @@ DEFINE_BASECLASS("lambda_entity")
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetupOutput("OnTrigger")
 end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self.Disabled = true
 end
 
 function ENT:AcceptInput(inputName, activator, called, data)
     if inputName:iequals("enable") then
-        DbgPrint(self, "Enabled")
+        DbgPrint(util.EntityName(self), "Enabled")
         self.Disabled = false
 
         return true
     elseif inputName:iequals("disable") then
-        DbgPrint(self, "Disabled")
+        DbgPrint(util.EntityName(self), "Disabled")
         self.Disabled = true
 
         return true
@@ -39,7 +39,7 @@ function ENT:Think()
     if self.Disabled == true then return end
 
     if self.GlobalState == nil or game.GetGlobalState(self.GlobalState) == GLOBAL_ON then
-        DbgPrint(self, "Firing OnTrigger")
+        DbgPrint(util.EntityName(self), "Firing OnTrigger")
         self:FireOutputs("OnTrigger", nil, self)
 
         if self:HasSpawnFlags(SF_AUTO_FIREONCE) then
@@ -54,7 +54,7 @@ end
 
 function ENT:KeyValue(key, val)
     BaseClass.KeyValue(self, key, val)
-    DbgPrint(self, "KeyValue(" .. key .. ", " .. val .. ")")
+    DbgPrint(util.EntityName(self), "KeyValue(" .. key .. ", " .. val .. ")")
 
     if key:iequals("globalstate") then
         self.GlobalState = val

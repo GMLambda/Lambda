@@ -6,7 +6,7 @@ if SERVER then
     DEFINE_BASECLASS("lambda_npcmaker")
 
     function ENT:PreInitialize()
-        DbgPrint(self, "ENT:PreInitialize")
+        DbgPrint(util.EntityName(self), "ENT:PreInitialize")
         BaseClass.PreInitialize(self)
         self.NPCType = ""
         self.NPCTargetname = ""
@@ -17,7 +17,7 @@ if SERVER then
     end
 
     function ENT:Initialize()
-        DbgPrint(self, "ENT:Initialize")
+        DbgPrint(util.EntityName(self), "ENT:Initialize")
         BaseClass.Initialize(self)
     end
 
@@ -44,13 +44,13 @@ if SERVER then
     end
 
     function ENT:MakeNPC()
-        --DbgPrint(self, "ENT:MakeNPC")
+        --DbgPrint(util.EntityName(self), "ENT:MakeNPC")
         if self:CanMakeNPC() == false then return end
         DbgPrint("Creating NPC: " .. self.NPCType)
         local ent = ents.Create(self.NPCType)
 
         if not IsValid(ent) then
-            DbgPrint(self, "Failed to create NPC: " .. self.NPCType)
+            DbgPrint(util.EntityName(self), "Failed to create NPC: " .. self.NPCType)
 
             return
         end
