@@ -30,6 +30,13 @@ function MAPSCRIPT:PostInit()
             cupcop_can = ent
         end)
 
+        ents.WaitForEntityByName("pathscanner_1_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+        ents.WaitForEntityByName("pathscanner_2_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+
         ents.WaitForEntityByName("cupcop", function(ent)
             cupcop = ent
         end)
