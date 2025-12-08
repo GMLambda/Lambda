@@ -921,12 +921,11 @@ function GM:CreateTransitionObjects()
                 DbgPrint("Using global entity!")
             else
                 ent = ents.Create(data.Class)
+                if not IsValid(ent) then
+                    DbgPrint("Failed to create entity of class: " .. data.Class)
+                    continue
+                end
                 ent.CreatedByLevelTransition = true
-            end
-
-            if not IsValid(ent) then
-                DbgPrint("Attempted to create bogus entity: " .. data.Class)
-                continue
             end
 
             ent.SourceMap = data.SourceMap
