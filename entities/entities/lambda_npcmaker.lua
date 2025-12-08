@@ -8,6 +8,9 @@ local player = player
 local IsValid = IsValid
 local math_clamp = math.Clamp
 
+-- Turn this off when we are sure it is all correct.
+local WARN_ON_FRIENDLY_SCALING = true
+
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
@@ -173,8 +176,8 @@ function ENT:ShouldScale()
     end
     if self.PrecacheData ~= nil then
         local class = self.PrecacheData["classname"]
-        if IsFriendEntityName(class) then
-            return false
+        if WARN_ON_FRIENDLY_SCALING and IsFriendEntityName(class) then
+            ErrorNoHalt(util.EntityName(self), "Warning: Scaling friendly NPCs")
         end
     end
     return true
