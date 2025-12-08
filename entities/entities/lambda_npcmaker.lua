@@ -75,7 +75,7 @@ function ENT:PreInitialize()
     self:SetupNWVar("EnableScaling", "bool", {
         Default = 0,
         KeyValue = "EnableScaling",
-        OnChange = self.OnDisableScaling
+        OnChange = self.OnEnableScaling
     })
 
     self:SetupNWVar("SpawnFrequency", "float", {
@@ -195,8 +195,14 @@ local SOFT_CAP_MULT   = 3.0
 local TAIL_BASE       = 0.3
 
 function ScaleCount(original, tightness)
+    if original == 0 then
+        return 0
+    end
     tightness = tightness or 1.0
-    local pc = math.max(GetPlayerCount(), 1)
+    local pc = GetPlayerCount()
+    if pc == 0 then
+        return 0
+    end
     local soft = math.min(pc, SOFT_CAP_PLAYERS)
     local tail = math.max(pc - SOFT_CAP_PLAYERS, 0)
     local targetMult = 1 + (SOFT_CAP_MULT - 1) * tightness
@@ -218,7 +224,7 @@ function ENT:GetScaledMaxLiveChildren()
         maxScaledLiveChildren = realMaxLiveChildren
     end
     local maxLiveChildren = math.min(realMaxLiveChildren, maxScaledLiveChildren)
-    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, 0.2))
+    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, 1.0))
     DbgPrint(util.EntityName(self), "Scaled max live children: " .. tostring(res), realMaxLiveChildren, maxScaledLiveChildren)
     self.CachedMaxLiveChildren = res
     return res
@@ -296,10 +302,9 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
         return false
     end
 
-    local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
+    local maxLiveChildren = self:GetScaledMaxLiveChildren()
     local liveChildren = self:GetNWVar("LiveChildren")
-    local scaledMaxLiveChildren = self:GetScaledMaxLiveChildren()
-    if maxLiveChildren > 0 and liveChildren >= scaledMaxLiveChildren then
+    if maxLiveChildren > 0 and liveChildren >= maxLiveChildren then
         DbgPrint(util.EntityName(self), "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
         return false
     end
@@ -343,7 +348,10 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
             end
 
             -- Seems to be optimal for now.
-            if closestDist < 750 then return false end
+            if closestDist < 750 then
+                DbgPrint(util.EntityName(self), "Maker is too close to player, distance: " .. tostring(closestDist))
+                return false
+            end
         end
     end
     return true

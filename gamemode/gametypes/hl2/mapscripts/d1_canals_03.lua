@@ -101,6 +101,23 @@ function MAPSCRIPT:PostInit()
 
         ents.WaitForEntityByName("underground_script_matt_spawn_mh1", function(ent)
             ent:Fire("AddOutput", "OnAllSpawnedDead logic_matt_survival,Trigger")
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+
+        ents.WaitForEntityByName("tunnel_manhack_1_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
+            ent:SetKeyValue("spawnflags", "128")
+        end)
+        ents.WaitForEntityByName("tunnel_manhack_2_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
+            ent:SetKeyValue("spawnflags", "128")
+        end)
+        ents.WaitForEntityByName("waterroom_manhack_1_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+
+        ents.WaitForEntityByName("rappeller_cop_1_maker", function(ent)
+            ent:SetKeyValue("EnableScaling", "1")
         end)
 
         local a = ents.CreateSimple("prop_physics_override", {
