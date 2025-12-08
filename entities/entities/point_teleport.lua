@@ -26,7 +26,7 @@ function ENT:AcceptInput(inputName, activator, called, data)
             local ang = self:GetAngles()
 
             for _, v in pairs(player.GetAll()) do
-                DbgPrint("[" .. self:GetName() .. "] Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
+                DbgPrint(self, "Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
                 v:TeleportPlayer(pos, ang)
             end
 
@@ -44,12 +44,12 @@ function ENT:AcceptInput(inputName, activator, called, data)
             local teleportPos = entryPos
 
             for _, v in pairs(ents.FindByName(self.Target)) do
-                DbgPrint("Teleporting target: " .. self.Target .. " to: " .. tostring(teleportPos))
+                DbgPrint(self, "Teleporting target: " .. self.Target .. " to: " .. tostring(teleportPos))
                 v:SetPos(teleportPos)
                 v:SetAngles(self:GetAngles())
 
                 if self.StackMode == true then
-                    DbgPrint("Using stack mode teleportation")
+                    DbgPrint(self, "Using stack mode teleportation")
                     teleportPos = teleportPos + (self.StackDir * self.StackLength)
                 end
             end
