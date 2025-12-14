@@ -9,7 +9,7 @@ local IsValid = IsValid
 
 -- Turn this off when we are sure it is all correct.
 local WARN_ON_FRIENDLY_SCALING = true
-local SIMULATE_HIGH_PLAYERCOUNT = false
+local SIMULATE_HIGH_PLAYERCOUNT = true
 
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
