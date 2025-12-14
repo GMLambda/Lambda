@@ -90,6 +90,16 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
         end
 
+        -- Move this idiot just outside those doors
+        local roomnpc = ents.FindByPos(Vector(1227, 11883, 5364), "npc_combine_s")
+        if roomnpc[1] then
+            roomnpc[1]:SetPos(Vector(1057, 12001, 5351))
+        end
+
+        ents.WaitForEntityByName("pclip_door1", function(ent)
+            ent:SetKeyValue("excludednpc", "npc_alyx")
+        end)
+
         local monitorSceneTrigger = ents.Create("trigger_once")
         monitorSceneTrigger:SetupTrigger(Vector(1200, 11676, 5536), Angle(0, 0, 0), Vector(-208, -156, -222), Vector(208, 156, 222))
         monitorSceneTrigger:SetName("trigger_startmonitor_scene_1")
@@ -98,6 +108,7 @@ function MAPSCRIPT:PostInit()
         monitorSceneTrigger:SetKeyValue("spawnflags", "1")
         monitorSceneTrigger:Fire("AddOutput", "OnTrigger trigger_door_comb_close,Enable,0.0,-1")
         monitorSceneTrigger:Fire("AddOutput", "OnTrigger lcs_core_control_scene,Start,0.0,1")
+        monitorSceneTrigger:Fire("AddOutput", "OnTrigger pclip_door1,Enable,0.0,-1")
         monitorSceneTrigger.OnTrigger = function(_, activator)
             local checkpoint = GAMEMODE:CreateCheckpoint(Vector(1224, 11835, 5317))
             GAMEMODE:SetPlayerCheckpoint(checkpoint, activator)
