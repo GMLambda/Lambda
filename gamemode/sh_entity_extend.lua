@@ -432,7 +432,3 @@ end
 function ENTITY_META:BlocksLOS()
     return self:IsEFlagSet(EFL_DONTBLOCKLOS) == false
 end
-
-function ENTITY_META:DispatchResponse(response)
-    self:Input("DispatchResponse", self, self, response)
-end
