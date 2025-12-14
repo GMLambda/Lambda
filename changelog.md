@@ -5,6 +5,7 @@
 - Fixed: Bad lightning by forcing r_radiosity convar to 4.
 - Fixed: Multiple weapons dissolving when an NPC dies.
 - Fixed: ep1_citadel_03 disabled clip so Alyx can go through the door sooner.
+- Fixed: Missing default crosshair and incomplete QuickInfo crosshair.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
