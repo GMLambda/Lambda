@@ -1,27 +1,32 @@
-"LightmappedGeneric"
+"UnlitGeneric"
 {
-	"$basetexture" 			"lambda/blocked.vtf"
-	"$receiveflashlight" 	"1"
-	"$selfillum"			"1"
-	"$translucent"			"1"
-	"$alpha"				"1"
+	"$basetexture" "Effects/Combineshield/comshieldwall"
 
-	Proxies 
+	"$translucent" "1"
+	"$additive" "1"
+	"$alpharesult" "1"
+	"$nodecal" "1"
+    
+	// Strong orange base color
+    "$color" "{220 112 0}"
+
+	"$envmap" "env_cubemap"
+    "$envmaptint" "[0 0 0]"
+
+	"Proxies"
 	{
-		Sine // a proxy which produces a sine wave
+    	Sine
 		{
 			resultVar		$alpha // The shader parameter to be manipulated
 			sineperiod		1
-			sinemin			0.3
-			sinemax			0.7
+			sinemin			0.2
+			sinemax			0.3
 		}
-		
-		TextureScroll
+		"TextureScroll"
 		{
-			textureScrollVar $basetexturetransform
-			textureScrollRate 0.1
-			textureScrollAngle 70
+			"texturescrollvar" "$basetexturetransform"
+			"texturescrollrate" .1
+			"texturescrollangle" 20
 		}
-		
 	}
 }
