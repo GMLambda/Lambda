@@ -50,7 +50,7 @@ function GM:HUDInit(reloaded)
         self.HUDRoundInfo = vgui.Create("HUDRoundInfo")
     end
 
-    if lambda_crosshair:GetInt() == 2 and not IsValid(self.HUDQuickInfo) then
+    if lambda_crosshair:GetInt() == 1 and not IsValid(self.HUDQuickInfo) then
         self.HUDQuickInfo = vgui.Create("LQuickInfo")
     end
 
@@ -110,12 +110,9 @@ function GM:HUDShouldDraw(hudName)
     if hidehud:GetBool() == true then return false end
 
     if hudName == "CHudCrosshair" then
-        if self:ShouldDrawCrosshair() == false then return false end
-
-        if lambda_crosshair:GetInt() >= 1 then
-            local wep = ply:GetActiveWeapon()
-            if wep and wep.DoDrawCrosshair == nil then return false end
-        end
+        local wep = ply:GetActiveWeapon()
+        if lambda_crosshair:GetInt() == 2 then return false end
+        if self:ShouldDrawCrosshair() == false or not wep and wep.DoDrawCrosshair == nil then return false end
     elseif hudName == "CHudGeiger" then
         if not ply:IsSuitEquipped() then return false end
     elseif hudName == "CHudBattery" then
@@ -150,10 +147,10 @@ function GM:HUDPaint()
 
     local chcVar = lambda_crosshair:GetInt()
 
-    if chcVar == 1 and self:ShouldDrawCrosshair() == true then
+    if chcVar == 2 and self:ShouldDrawCrosshair() == true then
         if IsValid(self.HUDQuickInfo) then self.HUDQuickInfo:Remove() end
         hook.Run("DrawDynamicCrosshair")
-    elseif chcVar == 2 and self:ShouldDrawCrosshair() == true then
+    elseif chcVar == 1 and self:ShouldDrawCrosshair() == true then
         if not IsValid(self.HUDQuickInfo) then
             self.HUDQuickInfo = vgui.Create("LQuickInfo")
         end
