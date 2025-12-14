@@ -1,4 +1,7 @@
 include("sh_taunts.lua")
+
+local math_Clamp = math.Clamp
+
 --local DbgPrint = GetLogging("Taunts")
 local TauntIndex = CreateClientConVar("_lambda_taunt_idx", "1", true)
 local CategoryIndex = CreateClientConVar("_lambda_taunt_cat_idx", "1", true)
