@@ -118,6 +118,17 @@ function MAPSCRIPT:PostInit()
             playerBlock:SetKeyValue("invert_exclusion", "1")
             playerBlock:Spawn()
 
+            -- Reposition the spawner.
+            ents.WaitForEntityByName("elevatorzombie_maker3", function(ent)
+                ent:SetPos(Vector(-3393.390869, 1116.819702, -3583.968750))
+                ent:SetKeyValue("MaxNPCCount", "3")
+                ent:SetKeyValue("EnableScaling", "1")
+            end)
+
+            ents.WaitForEntityByName("freight_lift_button_1", function(ent)
+                ent:Fire("AddOutput", "OnPressed elevatorzombie_maker3,Enable,,0,-1")
+            end)
+
         else
             -- We spawn the monk in the second part sooner, players should not see him being spawned.
             -- -3396.734619 417.609131 -3327.968750
