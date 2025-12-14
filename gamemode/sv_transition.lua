@@ -124,7 +124,7 @@ function GM:InitializeTransitionData()
     end)
 end
 
-function GM:TransitionToLevel(map, landmark, playersInTrigger, restart)
+function GM:TransitionToLevel(map, landmark, objectsInTrigger, playersInTrigger, restart)
     Profiled("GM:TransitionToLevel", function()
         -- 1. Lets collect all entities with the landmark name we have to seperate them by landmark and trigger
         local transitionTriggers = {}
