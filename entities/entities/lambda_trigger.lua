@@ -18,6 +18,8 @@ local TRIGGER_MSG_PLAYER_COUNT = 0
 local TRIGGER_MSG_SHOWWAIT = 1
 local TRIGGER_MSG_SETBLOCKED = 2
 local TRIGGER_MSG_REMOVED = 3
+local MAT_BLOCKED = "lambda/blocked"
+
 ENT.Base = "lambda_entity"
 ENT.Type = "brush"
 
@@ -203,31 +205,20 @@ if SERVER then
         DbgPrint(util.EntityName(self), "HandleBlockingUpdate", wasBlocked, wantsBlocking)
 
         if wasBlocked == true and wantsBlocking == false then
-            self:SetCustomCollisionCheck(false)
-
-            if IsValid(self:GetPhysicsObject()) then
-                self:PhysicsDestroy()
+            if IsValid(self.BlockerBrush) then
+                self.BlockerBrush:Remove()
+                self.BlockerBrush = nil
             end
-
-            if self.PrevModel ~= nil then
-                self:SetModel(self.PrevModel)
-            end
-
-            self:SetTrigger(true)
-            self:CollisionRulesChanged()
         elseif wasBlocked == false and wantsBlocking == true then
-            self:PhysicsInit(SOLID_BSP)
-            self:SetSolid(SOLID_BSP)
-            self:SetMoveType(MOVETYPE_NONE)
-            local phys = self:GetPhysicsObject()
-
-            if IsValid(phys) then
-                phys:EnableMotion(false)
-            end
-
-            self:SetCustomCollisionCheck(true)
-            self:CollisionRulesChanged()
-            self.PrevModel = self:GetModel()
+            local blocker = ents.Create("func_brush")
+            blocker:SetPos(self:GetPos())
+            blocker:SetAngles(self:GetAngles())
+            blocker:SetModel(self:GetModel())
+            blocker:SetMaterial(MAT_BLOCKED)
+            -- Let all NPCs pass through except players.
+            blocker:SetKeyValue("invert_exclusion", "1")
+            blocker:Spawn()
+            self.BlockerBrush = blocker
         end
 
         self:CmdSetBlocked(nil)
@@ -637,23 +628,11 @@ if SERVER then
             return
         end
 
-        if self:PassesTriggerFilters(ent) == false then return end --DbgPrint("Object " .. tostring(ent) .. " did not pass trigger filter")
-
         if self:GetNWVar("Blocked") == true and ent:IsPlayer() then
-            local dir = self:OBBCenter() - ent:GetPos()
-            local ang = dir:Angle()
-            local force = 1400
-
-            if ent:IsOnGround() == false then
-                force = 200
-            end
-
-            local vel = -ang:Forward() * force
-            vel.z = 0
-            ent:SetVelocity(vel)
-
             return
         end
+
+        if self:PassesTriggerFilters(ent) == false then return end --DbgPrint("Object " .. tostring(ent) .. " did not pass trigger filter")
 
         if self.OnStartTouch ~= nil and isfunction(self.OnStartTouch) then
             self:OnStartTouch(ent)
@@ -882,17 +861,7 @@ if SERVER then
         net.WriteUInt(TRIGGER_MSG_SETBLOCKED, 4)
         net.WriteBool(blocked)
 
-        if blocked == true then
-            local phys = self:GetPhysicsObject()
-
-            if IsValid(phys) then
-                local meshData = phys:GetMesh()
-                net.WriteTable(meshData)
-            else
-                DbgError(self, "No valid phys object while blocking!")
-                net.WriteTable({})
-            end
-
+        if blocked == true and false then
             net.WriteVector(self:GetPos())
             net.WriteVector(self:OBBCenter())
             net.WriteVector(self:OBBMins())
@@ -975,7 +944,6 @@ else -- CLIENT
         local state = net.ReadBool()
 
         if state == true then
-            local meshData = net.ReadTable()
             local pos = net.ReadVector()
             local center = net.ReadVector()
             local maxs = net.ReadVector()
@@ -1175,60 +1143,6 @@ else -- CLIENT
             end
         end)
     end
-
-    local MAT_BLOCKED = Material("lambda/blocked.vmt")
-
-    local function DrawTriggerBlockade(data)
-        local cachedMesh = data.Mesh
-
-        if cachedMesh == nil then
-            cachedMesh = Mesh(MAT_BLOCKED)
-            local meshData = table.Copy(data.MeshData)
-            local texture_w = 48
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                v1.normal = Vector(0, 0, 0)
-            end
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                local v2 = meshData[i + 1]
-                local v3 = meshData[i + 2]
-                if v1 == nil or v2 == nil or v3 == nil then continue end
-                local e1 = v1.pos - v2.pos
-                local e2 = v3.pos - v2.pos
-                local no = e1:Cross(e2)
-                v1.normal = v1.normal + no
-                v2.normal = v2.normal + no
-                v3.normal = v3.normal + no
-            end
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                v1.normal:Normalize()
-                local rel = v1.pos
-                meshData[i].v = (rel.y % texture_w) / texture_w
-                meshData[i].u = (rel.x % texture_w) / texture_w
-            end
-
-            cachedMesh:BuildFromTriangles(meshData)
-            data.Mesh = cachedMesh
-        end
-
-        render.SetMaterial(MAT_BLOCKED)
-        cachedMesh:Draw()
-    end
-
-    hook.Add("PostDrawTranslucentRenderables", "LambdaTrigger", function(bDrawingDepth, bDrawingSkybox)
-        if bDrawingSkybox == true then return end
-
-        for k, data in pairs(LAMBDA_TRIGGERS) do
-            if data.Blocked == true then
-                DrawTriggerBlockade(data)
-            end
-        end
-    end)
 
     hook.Add("HUDPaint", "LambdaTrigger", function()
         for k, data in pairs(LAMBDA_TRIGGERS) do
