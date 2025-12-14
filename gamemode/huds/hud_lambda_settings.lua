@@ -45,8 +45,8 @@ function PANEL_CROSSHAIR:Init()
     local chVar = GetConVar("lambda_crosshair"):GetInt()
     local chTbl = {
         [0] = "Garry's Mod Default",
-        [1] = "Lambda",
-        [2] = "Half-Life 2"
+        [1] = "Half-Life 2",
+        [2] = "Lambda"
     }
     local chSelectLbl = self:Add("DLabel")
     chSelectLbl:SetPos(5, 7)
@@ -66,7 +66,7 @@ function PANEL_CROSSHAIR:Init()
 
     function chSelect:OnSelect(index, text, data)
         local a = chSelect:GetParent()
-        if data == 1 then
+         if index == 3 then
             a:HideAll(false)
         else
             a:HideAll(true)
@@ -201,7 +201,7 @@ function PANEL_CROSSHAIR:Init()
     chDynamic:SetConVar("lambda_crosshair_dynamic")
     chDynamic:SetValue(cvars.Number("lambda_crosshair_dynamic"))
 
-    if chVar ~= 1 then
+    if chVar ~= 2 then
         self:HideAll(true)
     end
 end
