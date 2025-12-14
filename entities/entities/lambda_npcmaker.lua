@@ -6,10 +6,10 @@ local math = math
 local ents = ents
 local player = player
 local IsValid = IsValid
-local math_clamp = math.Clamp
 
 -- Turn this off when we are sure it is all correct.
 local WARN_ON_FRIENDLY_SCALING = true
+local SIMULATE_HIGH_PLAYERCOUNT = false
 
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
@@ -184,9 +184,11 @@ function ENT:ShouldScale()
 end
 
 local function GetPlayerCount()
+    if SIMULATE_HIGH_PLAYERCOUNT then
+        return 35 -- Simulate
+    end
     local actual = player.GetCount()
-    --return actual
-    return 35 -- Simulate
+    return actual
 end
 
 -- The officially recommended supported maximum player count for scaling.
