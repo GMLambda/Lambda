@@ -4,6 +4,7 @@ end
 
 local DbgPrint = GetLogging("Medkit")
 local math_clamp = math.Clamp
+local CurTime = CurTime
 
 SWEP.PrintName = "Medkit"
 SWEP.Author = "Lambda"
@@ -64,6 +65,7 @@ local HEAL_DELAY = 0.5
 local PLAYER_HULL_MINS = Vector(-16, -16, 0)
 local PLAYER_HULL_MAXS = Vector(16, 16, 72)
 local CUSTOM_MAT_NAME = "LambdaMedKitMat" .. math.random(1, 1000)
+local UPDATE_TIME = 1 / 30
 
 --
 -- ConVars
@@ -94,9 +96,6 @@ function SWEP:Initialize()
         -- For interpolation.
         self.EnergyLevel = RECHARGE_TARGET
         self.ChargeBlink = 0
-
-        hook.Add("PreDrawPlayerHands", self, self.PreDrawPlayerHands)
-        hook.Add("PostDrawPlayerHands", self, self.PostDrawPlayerHands)
     end
 end
 
@@ -106,6 +105,14 @@ function SWEP:Think()
     if IsValid(owner) and owner:KeyDown(IN_ATTACK2) == false and not self:IsCurrentlyIdle() then
         self:StopCharging()
     end
+
+    if CLIENT then
+        self:SetNextClientThink(CurTime() + UPDATE_TIME)
+    else
+        self:NextThink(CurTime() + UPDATE_TIME)
+    end
+
+    return true
 end
 
 function SWEP:Recharge()
@@ -642,14 +649,6 @@ function SWEP:PreDrawViewModel(vm, wep, ply)
 end
 
 function SWEP:PostDrawViewModel(vm, wep, ply)
-    render.MaterialOverride(nil)
-end
-
-function SWEP:PreDrawPlayerHands(hands, vm, ply, wep)
-    render.MaterialOverride(nil)
-end
-
-function SWEP:PostDrawPlayerHands(hands, vm, ply, wep)
     render.MaterialOverride(nil)
 end
 

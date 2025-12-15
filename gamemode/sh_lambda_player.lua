@@ -565,7 +565,8 @@ if SERVER then
             if self.MapScript.PostPlayerSpawn ~= nil then self.MapScript:PostPlayerSpawn(ply) end
             -- In case the map script decides to put us in a vehicle lets not do this.
             if useSpawnpoint == true and IsValid(ply:GetVehicle()) == false and IsValid(ply.SelectedSpawnpoint) then
-                ply:TeleportPlayer(ply.SelectedSpawnpoint:GetPos(), ply.SelectedSpawnpoint:GetAngles())
+                local spawnPos = ply.SelectedSpawnpoint:GetPos()
+                ply:TeleportPlayer(spawnPos, ply.SelectedSpawnpoint:GetAngles())
                 ply.SelectedSpawnpoint = nil
             end
 
@@ -1171,7 +1172,12 @@ function GM:FinishMove(ply, mv)
         local modifiedPlayer = false
         if ply.TeleportQueue ~= nil and #ply.TeleportQueue > 0 then
             local data = ply.TeleportQueue[1]
-            ply:SetPos(data.pos)
+            -- Compensate for issue https://github.com/Facepunch/garrysmod-issues/issues/6658
+            local teleportPos = data.pos
+            if true then
+                teleportPos = teleportPos + (VectorRand() * Vector(0.1, 0.1, 0.0))
+            end
+            ply:SetPos(teleportPos)
             ply:SetAngles(data.ang)
             ply:SetVelocity(data.vel)
             ply:SetEyeAngles(data.ang)

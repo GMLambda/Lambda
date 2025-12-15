@@ -114,6 +114,8 @@ local FLESH_MAT = Material("models/flesh")
 local MAX_SPEED_THRESHOLD = 300
 local MAX_GIBS = 100
 local GIBS_MAX_LIFETIME = 10
+local UPDATE_TIME = 1 / 30
+
 game.AddParticles("particles/blood_impact.pcf")
 game.AddParticles("particles/fire_01.pcf")
 
@@ -392,9 +394,9 @@ function ENT:Think()
     end
 
     if SERVER then
-        self:NextThink(CurTime() + 0.2)
+        self:NextThink(CurTime() + UPDATE_TIME)
     else
-        self:SetNextClientThink(CurTime())
+        self:SetNextClientThink(CurTime() + UPDATE_TIME)
     end
 
     return true
