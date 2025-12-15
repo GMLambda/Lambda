@@ -14,7 +14,7 @@ local TS_DIST_FARTHEST = 1
 local TS_DIST_DONT_CARE = 2
 
 function ENT:PreInitialize()
-    DbgPrint(self, "ENT:PreInitialize")
+    DbgPrint(util.EntityName(self), "ENT:PreInitialize")
     BaseClass.PreInitialize(self)
     self.TemplateName = ""
     self.Radius = 256
@@ -93,7 +93,7 @@ function ENT:GetNPCClass()
 end
 
 function ENT:Initialize()
-    DbgPrint(self, "ENT:Initialize")
+    DbgPrint(util.EntityName(self), "ENT:Initialize")
     BaseClass.Initialize(self)
     self:Precache()
     -- NOTE: Should we add the flag only under specific circumstances?
@@ -206,7 +206,7 @@ function ENT:FindSpawnDestination()
 end
 
 function ENT:MakeNPC()
-    --DbgPrint(self, "ENT:MakeNPC")
+    --DbgPrint(util.EntityName(self), "ENT:MakeNPC")
     if self.Radius > 0 and self:HasSpawnFlags(SF_NPCMAKER_ALWAYSUSERADIUS) then return self:MakeNPCInRadius() end
     if self:CanMakeNPC(self.DestinationGroup ~= nil) == false then return end
     local dest = nil
@@ -215,7 +215,7 @@ function ENT:MakeNPC()
         dest = self:FindSpawnDestination()
 
         if dest == nil then
-            DbgPrint(self, "Failed to find valid spawnpoint in destination group: " .. self.DestinationGroup)
+            DbgPrint(util.EntityName(self), "Failed to find valid spawnpoint in destination group: " .. self.DestinationGroup)
 
             return
         end
@@ -223,8 +223,8 @@ function ENT:MakeNPC()
 
     self:Precache()
     local ent = ents.CreateFromData(self.PrecacheData)
-    if not IsValid(ent) then return end --DbgPrint(self, "Unable to create NPC!")
-    DbgPrint(self, "Created NPC: " .. tostring(ent))
+    if not IsValid(ent) then return end --DbgPrint(util.EntityName(self), "Unable to create NPC!")
+    DbgPrint(util.EntityName(self), "Created NPC: " .. tostring(ent))
     local destObj = nil
 
     if dest == nil then
@@ -291,7 +291,7 @@ local KNOWN_HULLS = {
 }
 
 function ENT:GetSpawnPosInRadius(hull, checkVisible)
-    DbgPrint(self, "ENT:GetSpawnPosInRadius")
+    DbgPrint(util.EntityName(self), "ENT:GetSpawnPosInRadius")
     local pos = self:GetPos()
     local radius = self.Radius
     local ang = Angle(0, 0, 0)
@@ -351,7 +351,7 @@ function ENT:GetSpawnPosInRadius(hull, checkVisible)
 end
 
 function ENT:PlaceNPCInRadius(npc, checkVisible)
-    DbgPrint(self, "ENT:PlaceNPCInRadius")
+    DbgPrint(util.EntityName(self), "ENT:PlaceNPCInRadius")
     local hull = {npc:GetHullMins(), npc:GetHullMaxs()}
     local spawnPos = self:GetSpawnPosInRadius(hull, checkVisible)
     if spawnPos == nil then return false end
@@ -361,7 +361,7 @@ function ENT:PlaceNPCInRadius(npc, checkVisible)
 end
 
 function ENT:MakeNPCInRadius()
-    DbgPrint(self, "ENT:MakeNPCInRadius")
+    DbgPrint(util.EntityName(self), "ENT:MakeNPCInRadius")
     if not self:CanMakeNPC(true) then return end
     local ent
     local classname = self.PrecacheData["classname"]
@@ -474,7 +474,7 @@ function ENT:PlaceNPCInLine(npc)
 end
 
 function ENT:MakeNPCInLine()
-    DbgPrint(self, "ENT:MakeNPCInRadius")
+    DbgPrint(util.EntityName(self), "ENT:MakeNPCInRadius")
     if not self:CanMakeNPC(true) then return end
     local ent = ents.CreateFromData(self.PrecacheData)
 

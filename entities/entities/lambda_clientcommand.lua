@@ -17,7 +17,7 @@ if SERVER then
     end
 
     function ENT:InputCommand(data, activator, caller)
-        DbgPrint("Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
+        DbgPrint(util.EntityName(self), "Command: " .. data .. ", " .. tostring(activator) .. ", " .. tostring(caller))
 
         return self:Command(data, activator, caller)
     end

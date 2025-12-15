@@ -7,12 +7,12 @@ DEFINE_BASECLASS("lambda_entity")
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
 end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
 end
 
 local COND_SEE_PLAYER = 32

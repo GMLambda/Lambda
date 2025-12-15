@@ -110,7 +110,7 @@ function GM:EnablePreviousMap()
     end
 end
 
-function GM:PreChangelevel(map, landmark, playersInTrigger, restart)
+function GM:PreChangelevel(map, landmark, objectsInTrigger, playersInTrigger, restart)
     DbgPrint("GM:PreChangelevel", map, landmark, playersInTrigger, restart)
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "PrevMap", self:GetCurrentMap())
     util.SetPData("Lambda" .. lambda_instance_id:GetString(), "NextMap", map)
@@ -123,20 +123,20 @@ function GM:PreChangelevel(map, landmark, playersInTrigger, restart)
     end
 
     hook.Call("LambdaPreChangelevel", GAMEMODE, map, landmark, restart)
-    self:TransitionToLevel(map, landmark, playersInTrigger, restart)
+    self:TransitionToLevel(map, landmark, objectsInTrigger, playersInTrigger, restart)
 end
 
-function GM:RequestChangeLevel(map, landmark, playersInTrigger, restart)
+function GM:RequestChangeLevel(map, landmark, objectsInTrigger, playersInTrigger, restart)
     if self.ChangingLevel == true then return end
 
     if playersInTrigger == nil then
         playersInTrigger = {}
     end
 
-    DbgPrint("GM:ChangeLevel", map, landmark, playersInTrigger, restart)
+    DbgPrint("GM:ChangeLevel", map, landmark, objectsInTrigger,playersInTrigger, restart)
     self.ChangingLevel = true
     DbgPrint("Changing to level: " .. map)
-    self:PreChangelevel(map, landmark, playersInTrigger, restart)
+    self:PreChangelevel(map, landmark, objectsInTrigger, playersInTrigger, restart)
 
     if g_debug_transitions:GetBool() ~= true then
         local changeLevelDelay = self:GetSetting("changelevel_delay", 0)
@@ -151,5 +151,5 @@ end
 function GM:ChangeToNextLevel()
     DbgPrint("GM:ChangeToNextLevel")
     local nextMap = self:GetNextMap()
-    return self:RequestChangeLevel(nextMap, nil, {}, true)
+    return self:RequestChangeLevel(nextMap, nil, {}, {}, true)
 end

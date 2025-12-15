@@ -10,7 +10,7 @@ local OVERLAY_LOOP = "-1"
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetInputFunction("StartOverlays", self.StartOverlays)
     self:SetInputFunction("StopOverlays", self.StopOverlays)
     self:SetInputFunction("SwitchOverlay", self.SwitchOverlay)
@@ -36,7 +36,7 @@ end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime())
 end
 
@@ -50,7 +50,7 @@ function ENT:Think()
 end
 
 function ENT:AcceptInput(fn, data, activator, caller)
-    DbgPrint(self, "AcceptInput", fn, data, activator, caller)
+    DbgPrint(util.EntityName(self), "AcceptInput", fn, data, activator, caller)
 
     return BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
@@ -64,7 +64,7 @@ function ENT:KeyValue(key, val)
 end
 
 function ENT:StartOverlays(data, activator, caller)
-    DbgPrint(self, "StartOverlays", activator, caller)
+    DbgPrint(util.EntityName(self), "StartOverlays", activator, caller)
     self.Active = true
 
     local OverlayName = self.OverlayTable["OverlayName1"]
@@ -91,7 +91,7 @@ function ENT:StartOverlays(data, activator, caller)
 end
 
 function ENT:SwitchOverlay()
-    DbgPrint(self, "SwitchOverlay", self.Activator, self.ActiveNum)
+    DbgPrint(util.EntityName(self), "SwitchOverlay", self.Activator, self.ActiveNum)
 
     if self.ShouldStop then
         -- Timed out, we'll help player disable the overlay.
@@ -133,7 +133,7 @@ function ENT:SwitchOverlay()
 end
 
 function ENT:StopOverlays(data, activator, caller)
-    DbgPrint(self, "StopOverlays", activator, caller)
+    DbgPrint(util.EntityName(self), "StopOverlays", activator, caller)
     if not self.Active then return end
     local ply = self:PropagatePlayerActivator(activator)
 

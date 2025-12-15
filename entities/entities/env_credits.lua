@@ -30,7 +30,7 @@ end
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
 
     local gametype_name = GAMEMODE:GetGameTypeData("InternalName") or "hl2"
     local path = ""
@@ -78,7 +78,7 @@ end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime())
 end
 
@@ -165,7 +165,7 @@ function ENT:GetCreditsLength(creditsType)
 end
 
 function ENT:CreditsTypeChanged(key, oldVal, newVal)
-    DbgPrint(self, "CreditsTypeChanged: " .. key .. ", " .. tostring(oldVal) .. "," .. newVal)
+    DbgPrint(util.EntityName(self), "CreditsTypeChanged: " .. key .. ", " .. tostring(oldVal) .. "," .. newVal)
     if self.Credits == nil and self:ReloadCreditsFile(self:GetNWVar("CreditsFile")) == false then return end
 
     if newVal == CREDITS_TYPE_NONE then
@@ -218,7 +218,7 @@ function ENT:Think()
 end
 
 function ENT:AcceptInput(fn, data, activator, caller)
-    DbgPrint(self, "AcceptInput", fn, data, activator, caller)
+    DbgPrint(util.EntityName(self), "AcceptInput", fn, data, activator, caller)
     BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
 
@@ -259,7 +259,7 @@ function ENT:StopCredits()
 end
 
 function ENT:KeyValue(key, val)
-    DbgPrint(self, "KeyValue", key, val)
+    DbgPrint(util.EntityName(self), "KeyValue", key, val)
 
     return BaseClass.KeyValue(self, key, val)
 end

@@ -18,6 +18,8 @@ local TRIGGER_MSG_PLAYER_COUNT = 0
 local TRIGGER_MSG_SHOWWAIT = 1
 local TRIGGER_MSG_SETBLOCKED = 2
 local TRIGGER_MSG_REMOVED = 3
+local MAT_BLOCKED = "lambda/blocked"
+
 ENT.Base = "lambda_entity"
 ENT.Type = "brush"
 
@@ -44,7 +46,7 @@ if SERVER then
     end
 
     function ENT:PreInitialize()
-        DbgPrint(self, "PreInitialize")
+        DbgPrint(util.EntityName(self), "PreInitialize")
         BaseClass.PreInitialize(self)
         self:SetupOutput("OnTrigger")
         self:SetupOutput("OnStartTouch")
@@ -133,7 +135,7 @@ if SERVER then
 
     function ENT:Initialize()
         BaseClass.Initialize(self)
-        DbgPrint(self, "Initialize")
+        DbgPrint(util.EntityName(self), "Initialize")
         self:SetNotSolid(true)
         self:SetTrigger(true)
 
@@ -167,8 +169,8 @@ if SERVER then
             self:AddSpawnFlags(SF_TRIGGER_ALLOW_CLIENTS)
         end
 
-        --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
-        --DbgPrint(self, "OnStartTouchEvents: " .. #self.OnStartTouchEvents)
+        --DbgPrint(util.EntityName(self), "OnTriggerEvents: " .. #self.OnTriggerEvents)
+        --DbgPrint(util.EntityName(self), "OnStartTouchEvents: " .. #self.OnStartTouchEvents)
         if showtriggers:GetBool() == false then
             self:AddEffects(EF_NODRAW)
             self:AddDebugOverlays(OVERLAY_BBOX_BIT)
@@ -200,34 +202,23 @@ if SERVER then
     end
 
     function ENT:HandleBlockingUpdate(key, wasBlocked, wantsBlocking)
-        DbgPrint(self, "HandleBlockingUpdate", wasBlocked, wantsBlocking)
+        DbgPrint(util.EntityName(self), "HandleBlockingUpdate", wasBlocked, wantsBlocking)
 
         if wasBlocked == true and wantsBlocking == false then
-            self:SetCustomCollisionCheck(false)
-
-            if IsValid(self:GetPhysicsObject()) then
-                self:PhysicsDestroy()
+            if IsValid(self.BlockerBrush) then
+                self.BlockerBrush:Remove()
+                self.BlockerBrush = nil
             end
-
-            if self.PrevModel ~= nil then
-                self:SetModel(self.PrevModel)
-            end
-
-            self:SetTrigger(true)
-            self:CollisionRulesChanged()
         elseif wasBlocked == false and wantsBlocking == true then
-            self:PhysicsInit(SOLID_BSP)
-            self:SetSolid(SOLID_BSP)
-            self:SetMoveType(MOVETYPE_NONE)
-            local phys = self:GetPhysicsObject()
-
-            if IsValid(phys) then
-                phys:EnableMotion(false)
-            end
-
-            self:SetCustomCollisionCheck(true)
-            self:CollisionRulesChanged()
-            self.PrevModel = self:GetModel()
+            local blocker = ents.Create("func_brush")
+            blocker:SetPos(self:GetPos())
+            blocker:SetAngles(self:GetAngles())
+            blocker:SetModel(self:GetModel())
+            blocker:SetMaterial(MAT_BLOCKED)
+            -- Let all NPCs pass through except players.
+            blocker:SetKeyValue("invert_exclusion", "1")
+            blocker:Spawn()
+            self.BlockerBrush = blocker
         end
 
         self:CmdSetBlocked(nil)
@@ -262,7 +253,7 @@ if SERVER then
     end
 
     function ENT:Enable()
-        DbgPrint(self, "ENT:Enable")
+        DbgPrint(util.EntityName(self), "ENT:Enable")
 
         -- This is a lame workaround but sadly theres no binding to invalidate touch links.
         -- To explain this scenario:
@@ -301,7 +292,7 @@ if SERVER then
     end
 
     function ENT:Disable()
-        DbgPrint(self, "ENT:Disable")
+        DbgPrint(util.EntityName(self), "ENT:Disable")
         --self:RemoveSolidFlags(FSOLID_TRIGGER)
         self:SetNWVar("Disabled", true)
         self:RemoveEFlags(EFL_CHECK_UNTOUCH)
@@ -314,7 +305,7 @@ if SERVER then
     end
 
     function ENT:Toggle()
-        DbgPrint(self, "ENT:Toggle")
+        DbgPrint(util.EntityName(self), "ENT:Toggle")
 
         if self:GetNWVar("Disabled") == false then
             self:Disable()
@@ -324,7 +315,7 @@ if SERVER then
     end
 
     function ENT:TouchTest()
-        DbgPrint(self, "ENT:TouchTest")
+        DbgPrint(util.EntityName(self), "ENT:TouchTest")
         if table.Count(self.TouchingObjects) == 0 then
             self:FireOutputs("OnNotTouching", nil, nil)
         else
@@ -333,13 +324,13 @@ if SERVER then
     end
 
     function ENT:InputStartTouch(data, activator, caller)
-        DbgPrint(self, "ENT:InputStartTouch")
+        DbgPrint(util.EntityName(self), "ENT:InputStartTouch")
         if not IsValid(caller) then return end
         self:StartTouch(caller)
     end
 
     function ENT:InputEndTouch(data, activator, caller)
-        DbgPrint(self, "ENT:InputEndTouch")
+        DbgPrint(util.EntityName(self), "ENT:InputEndTouch")
         if not IsValid(caller) then return end
         self:EndTouch(caller)
     end
@@ -410,7 +401,7 @@ if SERVER then
             --
             -- HACKHACK: Sometimes the player slips thru the trigger so it stops calling Touch.
             if CurTime() - v >= 0.2 and ent:IsPlayer() == true then
-                DbgPrint(self, "Enforcing Touch")
+                DbgPrint(util.EntityName(self), "Enforcing Touch")
                 self:Touch(ent)
             end
         end
@@ -463,7 +454,7 @@ if SERVER then
 
     -- This is basically OnTriggerEvents
     function ENT:Touch(ent)
-        --DbgPrint(self, "Touch")
+        --DbgPrint(util.EntityName(self), "Touch")
         self.LastTouch = CurTime()
         local waitTime = self:GetNWVar("WaitTime")
         if self:GetNWVar("Disabled") == true or self:GetNWVar("Blocked") == true then return end --DbgPrint("Disabled")
@@ -490,12 +481,12 @@ if SERVER then
             self.NextWait = nil
         end
 
-        if self.PassesTriggerFilters and self:PassesTriggerFilters(ent) == false then return end --DbgPrint(self, "Object " .. tostring(ent) .. " did not pass trigger filter")
+        if self.PassesTriggerFilters and self:PassesTriggerFilters(ent) == false then return end --DbgPrint(util.EntityName(self), "Object " .. tostring(ent) .. " did not pass trigger filter")
         local entIndex = ent:EntIndex()
         self.TouchingObjects[entIndex] = CurTime()
         DbgPrint2(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. waitTime)
-        --DbgPrint(self, "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. tostring(self.WaitTime))
-        --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
+        --DbgPrint(util.EntityName(self), "Touch(" .. tostring(ent) .. ") -> flags: " .. tostring(self:GetSpawnFlags()) .. ", wait: " .. tostring(self.WaitTime))
+        --DbgPrint(util.EntityName(self), "OnTriggerEvents: " .. #self.OnTriggerEvents)
         local timeoutEvent = false
 
         local isTeamWait = self:GetNWVar("WaitForTeam")
@@ -528,7 +519,7 @@ if SERVER then
         end
 
         if isTeamWait and self.PendingStartTouch == true then
-            DbgPrint(self, "Firing pending StartTouch")
+            DbgPrint(util.EntityName(self), "Firing pending StartTouch")
 
             -- We also have to fire StartTouch because if teamwait is set it will not fire it in StartTouch.
             self:FireOutputs("OnStartTouch", nil, ent)
@@ -626,7 +617,7 @@ if SERVER then
     end
 
     function ENT:StartTouch(ent)
-        --DbgPrint(self, "StartTouch(" .. tostring(ent) .. ")")
+        --DbgPrint(util.EntityName(self), "StartTouch(" .. tostring(ent) .. ")")
         local entIndex = ent:EntIndex()
 
         if self:GetNWVar("Disabled") == true then
@@ -637,23 +628,11 @@ if SERVER then
             return
         end
 
-        if self:PassesTriggerFilters(ent) == false then return end --DbgPrint("Object " .. tostring(ent) .. " did not pass trigger filter")
-
         if self:GetNWVar("Blocked") == true and ent:IsPlayer() then
-            local dir = self:OBBCenter() - ent:GetPos()
-            local ang = dir:Angle()
-            local force = 1400
-
-            if ent:IsOnGround() == false then
-                force = 200
-            end
-
-            local vel = -ang:Forward() * force
-            vel.z = 0
-            ent:SetVelocity(vel)
-
             return
         end
+
+        if self:PassesTriggerFilters(ent) == false then return end --DbgPrint("Object " .. tostring(ent) .. " did not pass trigger filter")
 
         if self.OnStartTouch ~= nil and isfunction(self.OnStartTouch) then
             self:OnStartTouch(ent)
@@ -666,7 +645,7 @@ if SERVER then
 
             --[[ self.LockPlayers ]]
             if ent:IsPlayer() and self:GetNWVar("LockPlayers") == true then
-                DbgPrint(self, "StartTouch: Locking player " .. tostring(ent))
+                DbgPrint(util.EntityName(self), "StartTouch: Locking player " .. tostring(ent))
                 ent:LockPosition(true)
             end
 
@@ -675,15 +654,15 @@ if SERVER then
             --local disabled = self:GetNWVar("Disabled")
             --DbgPrint("WaitForTeam: " .. tostring(waitForTeam), "Disabled: " .. tostring(disabled))
             if waitForTeam == false or (waitForTeam == true and self.TeamInside == true) then
-                DbgPrint(self, CurTime() .. ", OnStartTouch")
+                DbgPrint(util.EntityName(self), CurTime() .. ", OnStartTouch")
                 self:FireOutputs("OnStartTouch", nil, ent)
             else
-                DbgPrint(self, "Delaying StartTouch until condition is met")
+                DbgPrint(util.EntityName(self), "Delaying StartTouch until condition is met")
                 self.PendingStartTouch = true
             end
 
             if table.Count(self.TouchingObjects) == 1 then
-                DbgPrint(self, CurTime() .. ", OnStartTouchAll")
+                DbgPrint(util.EntityName(self), CurTime() .. ", OnStartTouchAll")
                 self:FireOutputs("OnStartTouchAll", nil, ent)
             end
         end
@@ -843,7 +822,7 @@ if SERVER then
 
     function ENT:CmdShowTeamWaiting(ply, state, timeout)
         if self:GetNWVar("ShowWait") == false then return end
-        DbgPrint(self, "Sending trigger update: ", state, timeout)
+        DbgPrint(util.EntityName(self), "Sending trigger update: ", state, timeout)
 
         if ply == nil then
             ply = player.GetHumans()
@@ -870,7 +849,7 @@ if SERVER then
 
     function ENT:CmdSetBlocked(ply)
         local blocked = self:GetNWVar("Blocked")
-        DbgPrint(self, "Sending trigger blocked: ", blocked)
+        DbgPrint(util.EntityName(self), "Sending trigger blocked: ", blocked)
 
         if ply == nil then
             ply = player.GetHumans()
@@ -882,17 +861,7 @@ if SERVER then
         net.WriteUInt(TRIGGER_MSG_SETBLOCKED, 4)
         net.WriteBool(blocked)
 
-        if blocked == true then
-            local phys = self:GetPhysicsObject()
-
-            if IsValid(phys) then
-                local meshData = phys:GetMesh()
-                net.WriteTable(meshData)
-            else
-                DbgError(self, "No valid phys object while blocking!")
-                net.WriteTable({})
-            end
-
+        if blocked == true and false then
             net.WriteVector(self:GetPos())
             net.WriteVector(self:OBBCenter())
             net.WriteVector(self:OBBMins())
@@ -975,7 +944,6 @@ else -- CLIENT
         local state = net.ReadBool()
 
         if state == true then
-            local meshData = net.ReadTable()
             local pos = net.ReadVector()
             local center = net.ReadVector()
             local maxs = net.ReadVector()
@@ -1175,60 +1143,6 @@ else -- CLIENT
             end
         end)
     end
-
-    local MAT_BLOCKED = Material("lambda/blocked.vmt")
-
-    local function DrawTriggerBlockade(data)
-        local cachedMesh = data.Mesh
-
-        if cachedMesh == nil then
-            cachedMesh = Mesh(MAT_BLOCKED)
-            local meshData = table.Copy(data.MeshData)
-            local texture_w = 48
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                v1.normal = Vector(0, 0, 0)
-            end
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                local v2 = meshData[i + 1]
-                local v3 = meshData[i + 2]
-                if v1 == nil or v2 == nil or v3 == nil then continue end
-                local e1 = v1.pos - v2.pos
-                local e2 = v3.pos - v2.pos
-                local no = e1:Cross(e2)
-                v1.normal = v1.normal + no
-                v2.normal = v2.normal + no
-                v3.normal = v3.normal + no
-            end
-
-            for i = 1, #meshData do
-                local v1 = meshData[i]
-                v1.normal:Normalize()
-                local rel = v1.pos
-                meshData[i].v = (rel.y % texture_w) / texture_w
-                meshData[i].u = (rel.x % texture_w) / texture_w
-            end
-
-            cachedMesh:BuildFromTriangles(meshData)
-            data.Mesh = cachedMesh
-        end
-
-        render.SetMaterial(MAT_BLOCKED)
-        cachedMesh:Draw()
-    end
-
-    hook.Add("PostDrawTranslucentRenderables", "LambdaTrigger", function(bDrawingDepth, bDrawingSkybox)
-        if bDrawingSkybox == true then return end
-
-        for k, data in pairs(LAMBDA_TRIGGERS) do
-            if data.Blocked == true then
-                DrawTriggerBlockade(data)
-            end
-        end
-    end)
 
     hook.Add("HUDPaint", "LambdaTrigger", function()
         for k, data in pairs(LAMBDA_TRIGGERS) do

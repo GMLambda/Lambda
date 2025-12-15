@@ -268,7 +268,7 @@ function ENT:HurtEntity(ent, amount)
         ent:TakeDamageInfo(d)
     end
 
-    --DbgPrint(self, "Causing damage to " .. tostring(ent))
+    --DbgPrint(util.EntityName(self), "Causing damage to " .. tostring(ent))
     if ent:IsPlayer() then
         self:FireOutputs("OnHurtPlayer", ent, self)
     else

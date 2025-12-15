@@ -91,6 +91,44 @@ function MAPSCRIPT:PostInit()
 
                 return true -- Suppress.
             end)
+
+            -- Anti rush.
+            -- -3190.385254 508.148438 -3583.968750
+            local antiRush01 = ents.Create("trigger_hurt")
+            antiRush01:SetupTrigger(Vector(-3190.385254, 508.148438, -3583.968750),
+                Angle(0, 0, 0),
+                Vector(-300, -500, 0),
+                Vector(330, 300, 135))
+            antiRush01:SetKeyValue("damagetype", tostring(DMG_FALL))
+            antiRush01:SetKeyValue("damage", "2000")
+            antiRush01:SetName("lambda_anti_rush_01")
+
+            local antiRush01Done = ents.Create("trigger_once")
+            antiRush01Done:SetupTrigger(Vector(-2935, 828, -3516),
+                Angle(0, 0, 0),
+                Vector(-60, -20, 0),
+                Vector(60, 20, 120))
+            antiRush01Done:Fire("AddOutput", "OnTrigger lambda_anti_rush_01,Kill,,0,-1")
+
+            -- Block another spot where players could skip a large part.
+            local playerBlock = ents.Create("func_brush")
+            playerBlock:SetPos(Vector(-3363.836670, 651.215271, -3196))
+            playerBlock:SetModel("*71")
+            -- Let all NPCs pass but not players.
+            playerBlock:SetKeyValue("invert_exclusion", "1")
+            playerBlock:Spawn()
+
+            -- Reposition the spawner.
+            ents.WaitForEntityByName("elevatorzombie_maker3", function(ent)
+                ent:SetPos(Vector(-3393.390869, 1116.819702, -3583.968750))
+                ent:SetKeyValue("MaxNPCCount", "3")
+                ent:SetKeyValue("EnableScaling", "1")
+            end)
+
+            ents.WaitForEntityByName("freight_lift_button_1", function(ent)
+                ent:Fire("AddOutput", "OnPressed elevatorzombie_maker3,Enable,,0,-1")
+            end)
+
         else
             -- We spawn the monk in the second part sooner, players should not see him being spawned.
             -- -3396.734619 417.609131 -3327.968750

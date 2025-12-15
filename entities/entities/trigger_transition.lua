@@ -4,7 +4,7 @@ if SERVER then
     DEFINE_BASECLASS("lambda_trigger")
 
     function ENT:Initialize()
-        --DbgPrint(self, "trigger_once:Initialize")
+        --DbgPrint(util.EntityName(self), "trigger_once:Initialize")
         BaseClass.Initialize(self)
         BaseClass.SetWaitTime(self, 0) -- Never remove.
         self:AddSolidFlags(FSOLID_TRIGGER_TOUCH_DEBRIS)
@@ -16,12 +16,12 @@ if SERVER then
     end
 
     function ENT:StartTouch(ent)
-        --DbgPrint(self, "StartTouch(" .. tostring(ent) .. ")")
+        --DbgPrint(util.EntityName(self), "StartTouch(" .. tostring(ent) .. ")")
         return BaseClass.StartTouch(self, ent)
     end
 
     function ENT:Touch(ent)
-        --DbgPrint(self, "Touch(" .. tostring(ent) .. ")")
+        --DbgPrint(util.EntityName(self), "Touch(" .. tostring(ent) .. ")")
         return BaseClass.Touch(self, ent)
     end
 

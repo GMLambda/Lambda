@@ -21,7 +21,7 @@ local vec3_origin = Vector(0, 0, 0)
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetupOutput("OnEndFollow")
     self:SetInputFunction("Enable", self.Enable)
     self:SetInputFunction("Disable", self.Disable)
@@ -49,7 +49,7 @@ end
 
 function ENT:KeyValue(key, val)
     BaseClass.KeyValue(self, key, val)
-    DbgPrint(self, "KeyValue", key, val)
+    DbgPrint(util.EntityName(self), "KeyValue", key, val)
 
     if key:iequals("globalstate") then
         self.GlobalState = val
@@ -71,14 +71,14 @@ function ENT:KeyValue(key, val)
 end
 
 function ENT:AcceptInput(name, activator, caller, data)
-    DbgPrint(self, name, activator, caller, data)
+    DbgPrint(util.EntityName(self), name, activator, caller, data)
 
     return BaseClass.AcceptInput(self, name, activator, caller, data)
 end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime())
     self:SetMoveType(MOVETYPE_NOCLIP)
     self:SetSolid(SOLID_NONE)
@@ -150,12 +150,12 @@ function ENT:FollowTarget()
     -- If the flag is set it has to be disabled explicitly.
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_INFINITE_WAIT) == false then
         if CurTime() > self.ReturnTime then
-            DbgPrint(self, "Reached return time, disabling")
+            DbgPrint(util.EntityName(self), "Reached return time, disabling")
             self:Disable()
 
             return
         elseif isTargetValid == false then
-            DbgPrint(self, "Target not valid, disabling")
+            DbgPrint(util.EntityName(self), "Target not valid, disabling")
             self:Disable()
         end
     end
@@ -259,7 +259,7 @@ function ENT:Move()
 
     if self.MoveDistance <= 0 then
         self.TargetPath:Input("InPass", self, self)
-        DbgPrint(self, "Reached pass", self.TargetPath)
+        DbgPrint(util.EntityName(self), "Reached pass", self.TargetPath)
         local nextPath = GetNextTarget(self.TargetPath)
 
         if not IsValid(nextPath) then
@@ -303,7 +303,7 @@ function ENT:GetPlayerRestoreData(ply)
 end
 
 function ENT:AddPlayerToControl(ply)
-    DbgPrint(self, "Adding player: " .. tostring(ply))
+    DbgPrint(util.EntityName(self), "Adding player: " .. tostring(ply))
     local activeWeapon = ply:GetActiveWeapon()
     local viewEntity = ply:GetViewEntity()
     local restoreData = {}
@@ -312,7 +312,7 @@ function ENT:AddPlayerToControl(ply)
 
     if IsValid(viewEntity) and viewEntity:GetClass() == "point_viewcontrol" then
         -- Remove the player from the previous one, transition data over.
-        DbgPrint(self, "Removing player from previous viewcontrol")
+        DbgPrint(util.EntityName(self), "Removing player from previous viewcontrol")
         restoreData = viewEntity:GetPlayerRestoreData(ply)
         viewEntity:RemovePlayerFromControl(ply, true)
     else
@@ -347,7 +347,7 @@ end
 
 function ENT:RestorePlayer(ply, restoreData)
     if not IsValid(ply) then return end
-    DbgPrint(self, "Restoring player " .. tostring(ply))
+    DbgPrint(util.EntityName(self), "Restoring player " .. tostring(ply))
     ply:SetViewEntity(restoreData.ViewEntity)
     ply:SetSolidFlags(restoreData.SolidFlags)
 
@@ -374,14 +374,14 @@ function ENT:RemovePlayerFromControl(ply, switching)
         self.ActivePlayers[k] = nil
 
         if table.Count(self.ActivePlayers) == 0 then
-            DbgPrint(self, "All players removed, disabling")
+            DbgPrint(util.EntityName(self), "All players removed, disabling")
             self:Disable()
         end
 
         return true
     end
 
-    DbgPrint(self, "Failed to restore player " .. tostring(ply))
+    DbgPrint(util.EntityName(self), "Failed to restore player " .. tostring(ply))
 
     return false
 end
@@ -407,7 +407,7 @@ function ENT:EnableControl(ply)
     self.TargetEntity = ents.FindFirstByName(targetEntityName)
 
     if not IsValid(self.TargetEntity) then
-        DbgPrint(self, self:GetName(), "Failed to find target entity: \"" .. tostring(targetEntityName) .. "\"")
+        DbgPrint(util.EntityName(self), self:GetName(), "Failed to find target entity: \"" .. tostring(targetEntityName) .. "\"")
     else
         self.TargetActive = true
     end
@@ -421,7 +421,7 @@ function ENT:EnableControl(ply)
     if IsValid(self.TargetEntity) then
         if self.TargetAttachment ~= "" then
             self.AttachmentIndex = self.TargetEntity:LookupAttachment(self.TargetAttachment)
-            DbgPrint(self, "Attachment Name", self.TargetAttachment, self.AttachmentIndex)
+            DbgPrint(util.EntityName(self), "Attachment Name", self.TargetAttachment, self.AttachmentIndex)
         end
     end
 
@@ -431,7 +431,7 @@ function ENT:EnableControl(ply)
         self.TargetPath = ents.FindFirstByName(pathName)
 
         if not IsValid(self.TargetPath) then
-            DbgPrint(self, "Unable to find path", pathName)
+            DbgPrint(util.EntityName(self), "Unable to find path", pathName)
         end
     end
 
@@ -487,11 +487,11 @@ function ENT:DisableControl()
 end
 
 function ENT:Enable(data, activator, caller)
-    DbgPrint(self, "Enable", data, activator, caller)
+    DbgPrint(util.EntityName(self), "Enable", data, activator, caller)
 
     -- Avoid doing this.
     if self:GetNWVar("Disabled") == false then
-        DbgPrint(self, "Not disabled trying to re-enable?")
+        DbgPrint(util.EntityName(self), "Not disabled trying to re-enable?")
 
         return
     end
@@ -520,7 +520,7 @@ function ENT:Enable(data, activator, caller)
 end
 
 function ENT:Disable()
-    DbgPrint(self, "Disable")
+    DbgPrint(util.EntityName(self), "Disable")
     -- Avoid doing this.
     if self:GetNWVar("Disabled") == true then return end
     self:DisableControl()

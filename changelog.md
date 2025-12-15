@@ -6,6 +6,7 @@
 - Fixed: Multiple weapons dissolving when an NPC dies.
 - Fixed: ep1_citadel_03 disabled clip so Alyx can go through the door sooner.
 - Fixed: Missing default crosshair and incomplete QuickInfo crosshair.
+- Fixed: Players that did not reach the changelevel trigger could sometimes be softlocked in the next map.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).

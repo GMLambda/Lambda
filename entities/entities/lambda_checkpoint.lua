@@ -12,7 +12,7 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 DEFINE_BASECLASS("lambda_entity")
 
 function ENT:PreInitialize()
-    DbgPrint(self, "ENT:PreInitialize")
+    DbgPrint(util.EntityName(self), "ENT:PreInitialize")
     BaseClass.PreInitialize(self)
 end
 

@@ -13,7 +13,7 @@ DEFINE_BASECLASS("lambda_entity")
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetInputFunction("Zoom", self.Zoom)
     self:SetInputFunction("UnZoom", self.UnZoom)
     self.Rate = 1
@@ -23,7 +23,7 @@ end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime())
 end
 
@@ -31,7 +31,7 @@ function ENT:Think()
 end
 
 function ENT:AcceptInput(fn, data, activator, caller)
-    DbgPrint(self, fn, data, activator, caller)
+    DbgPrint(util.EntityName(self), fn, data, activator, caller)
     return BaseClass.AcceptInput(self, fn, data, activator, caller)
 end
 
@@ -86,7 +86,7 @@ function ENT:UnZoomPlayer(ply, data, isExchange)
         if data == nil then return end
     end
 
-    DbgPrint(self, "Restoring player " .. tostring(ply), data.FOV, data.FOVOwner)
+    DbgPrint(util.EntityName(self), "Restoring player " .. tostring(ply), data.FOV, data.FOVOwner)
 
     if IsValid(ply) then
         if isExchange ~= true then
@@ -101,7 +101,7 @@ function ENT:UnZoomPlayer(ply, data, isExchange)
 end
 
 function ENT:Zoom(data, activator, caller)
-    DbgPrint(self, "Zoom", activator, caller)
+    DbgPrint(util.EntityName(self), "Zoom", activator, caller)
     -- HACKHACK: d2_coast_03 uses func_door to relay the input.
     activator = self:PropagatePlayerActivator(activator)
     DbgPrint("Propagated Activator", activator)
@@ -120,7 +120,7 @@ function ENT:Zoom(data, activator, caller)
 end
 
 function ENT:UnZoom(data, activator, caller)
-    DbgPrint(self, "UnZoom", activator, caller)
+    DbgPrint(util.EntityName(self), "UnZoom", activator, caller)
     -- HACKHACK: d2_coast_03 uses func_door to relay the input.
     activator = self:PropagatePlayerActivator(activator)
     DbgPrint("Propagated Activator", activator)

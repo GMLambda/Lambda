@@ -8,7 +8,7 @@ DEFINE_BASECLASS("lambda_entity")
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetupOutput("OnMapSpawn")
     self:SetupOutput("OnNewGame")
     self:SetupOutput("OnLoadGame")
@@ -32,7 +32,7 @@ end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime() + 0.2)
 end
 

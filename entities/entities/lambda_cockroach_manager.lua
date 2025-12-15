@@ -39,7 +39,7 @@ end
 
 function ENT:PreInitialize()
     BaseClass.PreInitialize(self)
-    DbgPrint(self, "PreInitialize")
+    DbgPrint(util.EntityName(self), "PreInitialize")
     self:SetInputFunction("Enable", self.Enable)
     self:SetInputFunction("Disable", self.Disable)
     self:SetupNWVar(
@@ -57,7 +57,7 @@ end
 
 function ENT:Initialize()
     BaseClass.Initialize(self)
-    DbgPrint(self, "Initialize")
+    DbgPrint(util.EntityName(self), "Initialize")
     self:NextThink(CurTime() + 1)
 end
 
@@ -107,7 +107,7 @@ function ENT:SpawnRoach()
 
     table.insert(self.Roaches, roach)
     local maxRoaches = GetMaxCockroaches()
-    DbgPrint(self, "Spawned roach " .. #self.Roaches .. " / " .. maxRoaches)
+    DbgPrint(util.EntityName(self), "Spawned roach " .. #self.Roaches .. " / " .. maxRoaches)
 
     return true
 end
@@ -169,7 +169,7 @@ function ENT:Think()
     while #self.Roaches > maxRoaches do
         local roach = self.Roaches[1]
         if IsValid(roach) then
-            DbgPrint(self, "Removing roach", roach)
+            DbgPrint(util.EntityName(self), "Removing roach", roach)
             roach:Remove()
         end
 

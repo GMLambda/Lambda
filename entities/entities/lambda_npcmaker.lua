@@ -6,7 +6,10 @@ local math = math
 local ents = ents
 local player = player
 local IsValid = IsValid
-local math_clamp = math.Clamp
+
+-- Turn this off when we are sure it is all correct.
+local WARN_ON_FRIENDLY_SCALING = true
+local SIMULATE_HIGH_PLAYERCOUNT = true
 
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
@@ -22,10 +25,9 @@ SF_NPCMAKER_ALWAYSUSERADIUS = 256 -- Use radius spawn whenever spawning
 SF_NPCMAKER_NOPRELOADMODELS = 512 -- Suppress preloading into the cache of all referenced .mdl files
 local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
--- The maximum target of players for enemy scaling.
-local MAX_PLAYER_COUNT = 20
+
 function ENT:PreInitialize()
-    DbgPrint(self, "ENT:PreInitialize")
+    DbgPrint(util.EntityName(self), "ENT:PreInitialize")
     BaseClass.PreInitialize(self)
     self:SetupOutput("OnAllSpawned")
     self:SetupOutput("OnAllSpawnedDead")
@@ -70,10 +72,10 @@ function ENT:PreInitialize()
         OnChange = self.OnChangedMaxValues
     })
 
-    self:SetupNWVar("DisableScaling", "bool", {
+    self:SetupNWVar("EnableScaling", "bool", {
         Default = 0,
-        KeyValue = "DisableScaling",
-        OnChange = self.OnChangedMaxValues
+        KeyValue = "EnableScaling",
+        OnChange = self.OnEnableScaling
     })
 
     self:SetupNWVar("SpawnFrequency", "float", {
@@ -91,6 +93,14 @@ function ENT:PreInitialize()
 end
 
 function ENT:OnChangedMaxValues()
+    DbgPrint(util.EntityName(self), "ENT:OnChangedMaxValues")
+    self.CachedMaxNPCCount = nil
+    self.CachedMaxLiveChildren = nil
+    self.CachedPlayerCount = player.GetCount()
+end
+
+function ENT:OnEnableScaling()
+    DbgPrint(util.EntityName(self), "ENT:OnEnableScaling")
     self.CachedMaxNPCCount = nil
     self.CachedMaxLiveChildren = nil
     self.CachedPlayerCount = player.GetCount()
@@ -101,7 +111,7 @@ function ENT:KeyValue(key, val)
 end
 
 function ENT:Initialize()
-    DbgPrint(self, "ENT:Initialize")
+    DbgPrint(util.EntityName(self), "ENT:Initialize")
     BaseClass.Initialize(self)
     self:SetSolid(SOLID_NONE)
     if self:GetNWVar("Disabled") == false then
@@ -140,7 +150,7 @@ function ENT:SetSpawnFrequency(data)
 end
 
 function ENT:InputSpawnNPC()
-    DbgPrint(self, "ENT:InputSpawnNPC")
+    DbgPrint(util.EntityName(self), "ENT:InputSpawnNPC")
     if not self:IsDepleted() then self:MakeNPC() end
 end
 
@@ -160,44 +170,83 @@ function ENT:AcceptInput(name, activator, caller, data)
     return BaseClass.AcceptInput(self, name, activator, caller, data)
 end
 
-function ENT:GetScaleCount()
-    if self:GetNWVar("DisableScaling") == true then return 0 end
-    if GAMEMODE.MapScript and GAMEMODE.MapScript.DisableNPCScaling == true then return 0 end
+function ENT:ShouldScale()
+    if self:GetNWVar("EnableScaling") == false then
+        return false
+    end
     if self.PrecacheData ~= nil then
         local class = self.PrecacheData["classname"]
-        if IsFriendEntityName(class) then return 0 end
+        if WARN_ON_FRIENDLY_SCALING and IsFriendEntityName(class) then
+            ErrorNoHalt(util.EntityName(self), "Warning: Scaling friendly NPCs")
+        end
     end
+    return true
+end
 
-    local playerCount = math.min(MAX_PLAYER_COUNT, math.max(1, player.GetCount()) - 1)
-    local scale = GAMEMODE:GetNPCSpawningScale()
-    local extraCount = math.ceil(playerCount * scale)
-    return extraCount
+local function GetPlayerCount()
+    if SIMULATE_HIGH_PLAYERCOUNT then
+        return 35 -- Simulate
+    end
+    local actual = player.GetCount()
+    return actual
+end
+
+-- The officially recommended supported maximum player count for scaling.
+local SOFT_CAP_PLAYERS = 12
+local SOFT_CAP_MULT   = 3.0
+local TAIL_BASE       = 0.3
+
+function ScaleCount(original, tightness)
+    if original == 0 then
+        return 0
+    end
+    tightness = tightness or 1.0
+    local pc = GetPlayerCount()
+    if pc == 0 then
+        return 0
+    end
+    local soft = math.min(pc, SOFT_CAP_PLAYERS)
+    local tail = math.max(pc - SOFT_CAP_PLAYERS, 0)
+    local targetMult = 1 + (SOFT_CAP_MULT - 1) * tightness
+    local linear = 1 + (soft - 1) * ((targetMult - 1) / (SOFT_CAP_PLAYERS - 1))
+    local extra  = math.sqrt(tail) * TAIL_BASE * tightness
+    return math.max(1, math.ceil(original * (linear + extra)))
 end
 
 function ENT:GetScaledMaxLiveChildren()
     if self.CachedMaxLiveChildren ~= nil then return self.CachedMaxLiveChildren end
-    local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
-    local maxScaledLiveChildren = self:GetNWVar("MaxScaledLiveChildren")
-    local scaledCount = self:GetScaleCount()
-    local res = math_clamp(maxLiveChildren + scaledCount, 0, 100)
-    if maxScaledLiveChildren > 0 then
-        res = math_clamp(res, 0, maxScaledLiveChildren)
+    if self:ShouldScale() == false then
+        DbgPrint(util.EntityName(self), "Scaling disabled, returning real max live children")
+        self.CachedMaxLiveChildren = self:GetNWVar("MaxLiveChildren")
+        return self.CachedMaxLiveChildren
     end
-
+    local realMaxLiveChildren = self:GetNWVar("MaxLiveChildren")
+    local maxScaledLiveChildren = self:GetNWVar("MaxScaledLiveChildren")
+    if maxScaledLiveChildren == 0 then
+        maxScaledLiveChildren = realMaxLiveChildren
+    end
+    local maxLiveChildren = math.min(realMaxLiveChildren, maxScaledLiveChildren)
+    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, 1.0))
+    DbgPrint(util.EntityName(self), "Scaled max live children: " .. tostring(res), realMaxLiveChildren, maxScaledLiveChildren)
     self.CachedMaxLiveChildren = res
     return res
 end
 
 function ENT:GetScaledMaxNPCs()
     if self.CachedMaxNPCCount ~= nil then return self.CachedMaxNPCCount end
-    local maxNPCCount = self:GetNWVar("MaxNPCCount")
-    local maxScaledNPCCount = self:GetNWVar("MaxScaledNPCCount")
-    local scaledCount = self:GetScaleCount()
-    local res = math_clamp(maxNPCCount + scaledCount, 0, 100)
-    if maxScaledNPCCount > 0 then
-        res = math_clamp(res, 0, maxScaledNPCCount)
+    if self:ShouldScale() == false then
+        DbgPrint(util.EntityName(self), "Scaling disabled, returning real max npc count")
+        self.CachedMaxNPCCount = self:GetNWVar("MaxNPCCount")
+        return self.CachedMaxNPCCount
     end
-
+    local realMaxNPCCount = self:GetNWVar("MaxNPCCount")
+    local maxScaledNPCCount = self:GetNWVar("MaxScaledNPCCount")
+    if maxScaledNPCCount == 0 then
+        maxScaledNPCCount = realMaxNPCCount
+    end
+    local maxNPCCount = math.min(realMaxNPCCount, maxScaledNPCCount)
+    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, 1.0))
+    DbgPrint(util.EntityName(self), "Scaled max NPC count: " .. tostring(res), realMaxNPCCount, maxScaledNPCCount)
     self.CachedMaxNPCCount = res
     return res
 end
@@ -251,15 +300,14 @@ local ForcedNPCS = {
 function ENT:CanMakeNPC(ignoreSolidEnts)
     ignoreSolidEnts = ignoreSolidEnts or false
     if self:IsDepleted() then
-        DbgPrint(self, "Depleted")
+        DbgPrint(util.EntityName(self), "Depleted")
         return false
     end
 
-    local maxLiveChildren = self:GetNWVar("MaxLiveChildren")
+    local maxLiveChildren = self:GetScaledMaxLiveChildren()
     local liveChildren = self:GetNWVar("LiveChildren")
-    local scaledMaxLiveChildren = self:GetScaledMaxLiveChildren()
-    if maxLiveChildren > 0 and liveChildren >= scaledMaxLiveChildren then
-        DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
+    if maxLiveChildren > 0 and liveChildren >= maxLiveChildren then
+        DbgPrint(util.EntityName(self), "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
         return false
     end
 
@@ -302,7 +350,10 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
             end
 
             -- Seems to be optimal for now.
-            if closestDist < 750 then return false end
+            if closestDist < 750 then
+                DbgPrint(util.EntityName(self), "Maker is too close to player, distance: " .. tostring(closestDist))
+                return false
+            end
         end
     end
     return true
@@ -313,9 +364,8 @@ function ENT:StubThink()
     return true
 end
 
---DbgPrint(self, "ENT:StubThink", ent)
 function ENT:MakerThink()
-    --DbgPrint(self, "ENT:MakerThink", ent)
+    --DbgPrint(util.EntityName(self), "ENT:MakerThink", ent)
     if self.CachedPlayerCount ~= player.GetCount() then
         self.CachedMaxNPCCount = nil
         self.CachedMaxLiveChildren = nil
@@ -361,7 +411,7 @@ function ENT:DeathNotice(ent)
 end
 
 function ENT:DispatchSpawn(ent)
-    DbgPrint(self, "ENT:DispatchSpawn", ent)
+    DbgPrint(util.EntityName(self), "ENT:DispatchSpawn", ent)
     if not IsValid(ent) then return end
     ent:Spawn()
     -- Check again, spawn can remove the ent.
@@ -369,7 +419,7 @@ function ENT:DispatchSpawn(ent)
 end
 
 function ENT:DispatchActivate(ent)
-    DbgPrint(self, "ENT:DispatchActivate", ent)
+    DbgPrint(util.EntityName(self), "ENT:DispatchActivate", ent)
     if not IsValid(ent) then return end
     ent:Activate()
 end
@@ -391,15 +441,15 @@ function ENT:ChildPostSpawn(ent)
     -- HACKHACK: Some of the weapons appear to have EF_NODRAW set, that shouldn't be the case.
     local wep = ent:GetActiveWeapon()
     if IsValid(wep) then wep:RemoveEffects(EF_NODRAW) end
-    DbgPrint(self, "Created new NPC: " .. tostring(ent))
+    DbgPrint(util.EntityName(self), "Created new NPC: " .. tostring(ent))
 end
 
 function ENT:UpdateScaling()
-    DbgPrint(self, "ENT:UpdateScaling", ent)
+    DbgPrint(util.EntityName(self), "ENT:UpdateScaling", ent)
     local maxCount = self:GetNWVar("MaxNPCCount")
     if self:HasSpawnFlags(SF_NPCMAKER_INF_CHILD) == false and maxCount == 1 and self:GetNWVar("CreatedCount") == maxCount then
         -- From this point on only spawn when not visible.
-        DbgPrint("Adjusted flags, hiding from player, CreatedCount == 1 and MaxNPCCount == 1")
+        DbgPrint(util.EntityName(self), "Adjusted flags, hiding from player, CreatedCount == 1 and MaxNPCCount == 1")
         self:AddSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER)
     end
 
@@ -409,11 +459,11 @@ end
 
 function ENT:MakeNPC()
     -- Override me.
-    DbgPrint(self, "ENT:MakeNPC", ent)
+    DbgPrint(util.EntityName(self), "ENT:MakeNPC", ent)
 end
 
 function ENT:GetNPCClass()
-    DbgPrint(self, "ENT:GetNPCClass", ent)
+    DbgPrint(util.EntityName(self), "ENT:GetNPCClass", ent)
     return ""
 end
 

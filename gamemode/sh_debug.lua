@@ -148,6 +148,16 @@ if _DEBUG then
             print(k)
         end
     end)
+
+    concommand.Add("lambda_nearby_ents", function(ply, cmd, args)
+        local pos = ply:GetPos()
+        local mins = Vector(-30, -30, -30)
+        local maxs = Vector(30, 30, 30)
+        for _,v in pairs(ents.FindInBox(pos + mins, pos + maxs)) do
+            print(v)
+        end
+    end)
+
 else
     function DbgPrint(...)
     end
