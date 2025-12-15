@@ -16,12 +16,11 @@ local TraceHull = util.TraceHull
 local Color = Color
 local CurTime = CurTime
 local math_clamp = math.Clamp
-local EffectsInvalidated = false
 local TraceMask = bor(MASK_SHOT, CONTENTS_GRATE)
 local ATTACHMENTS_GAPS_FP = {"fork1t", "fork2t"}
 local ATTACHMENTS_GAPS_TP = {"fork1t", "fork2t", "fork3t"}
 local ATTACHMENTS_GLOW_FP = {"fork1b", "fork1m", "fork1t", "fork2b", "fork2m", "fork2t"}
-local ATTACHMENTS_GLOW_TP = {"fork1m", "fork1t", "fork1b", "fork2m", "fork2t", "fork3m", "fork3t"}
+local ATTACHMENTS_GLOW_TP = {"fork1m", "fork1t", "fork2m", "fork2t", "fork3m", "fork3t"}
 local PRIMARY_FIRE_DELAY = 0.6
 local SECONDARY_FIRE_DELAY = 0.5
 local SECONDARY_FIRE_PULL_DELAY = 0.1
@@ -115,6 +114,79 @@ end
 
 -- ConVar physcannon_maxmass( "physcannon_maxmass", "250" );
 local SPRITE_SCALE = 12
+
+local FX_BEAM_SCALE_NONE = 0.0
+local FX_BEAM_SCALE_CLOSED = 0.0
+local FX_BEAM_SCALE_READY = 0.0
+local FX_BEAM_SCALE_VM_HOLDING = 0.5
+local FX_BEAM_SCALE_WORLD_HOLDING = 0.6
+
+local FX_BLAST_SCALE_SETUP = 1.0
+local FX_BLAST_ALPHA_SETUP = 255
+
+local FX_CORE_SCALE_VM_READY = 20.0
+local FX_CORE_SCALE_WORLD_READY = 12.0
+local FX_CORE_ALPHA_READY = 128.0
+local FX_CORE_SCALE_VM_HOLDING = 57.0
+local FX_CORE_SCALE_WORLD_HOLDING = 56.0
+local FX_CORE_ALPHA_HOLDING = 255.0
+local FX_CORE_SCALE_SETUP = 0.0
+local FX_CORE_ALPHA_SETUP = 255
+
+local FX_CORE2_SCALE_NONE = 0.0
+local FX_CORE2_ALPHA_NONE = 255
+local FX_CORE2_SCALE_CLOSED = 0.0
+local FX_CORE2_ALPHA_CLOSED = 64
+local FX_CORE2_RESET_SCALE_READY = 0.0
+local FX_CORE2_SCALE_READY = 12.0
+local FX_CORE2_ALPHA_READY = 255
+local FX_CORE2_SCALE_HOLDING = 22.0
+local FX_CORE2_ALPHA_HOLDING = 230
+local FX_CORE2_SCALE_SETUP = 0.0
+local FX_CORE2_TIME_SETUP = 0.5
+
+local FX_ENDCAP_SCALE_SETUP = 0.15 * SPRITE_SCALE
+local FX_ENDCAP_ALPHA_SETUP = 255
+local FX_ENDCAP_SCALE_MIN = 3
+local FX_ENDCAP_SCALE_MAX = 10
+local FX_ENDCAP_ALPHA_MIN = 200
+local FX_ENDCAP_ALPHA_MAX = 255
+
+local FX_GLOW_SCALE_CLOSED = 0.4 * SPRITE_SCALE
+local FX_GLOW_ALPHA_CLOSED = 64.0
+local FX_GLOW_SCALE_READY = 10 * SPRITE_SCALE
+local FX_GLOW_ALPHA_READY = 256.0
+local FX_GLOW_SCALE_HOLDING = 0.5 * SPRITE_SCALE
+local FX_GLOW_ALPHA_HOLDING = 64.0
+local FX_GLOW_SCALE_SETUP = 0.05 * SPRITE_SCALE
+local FX_GLOW_ALPHA_SETUP = 64
+local FX_GLOW_PULSE_SCALE_MIN = 0.075
+local FX_GLOW_PULSE_SCALE_MAX = 0.05
+local FX_GLOW_PULSE_BASE = 30
+local FX_GLOW_ALPHA_BASE = 100
+local FX_GLOW_ALPHA_MIN = 75
+local FX_GLOW_ALPHA_MAX = 128
+
+local FX_PULSE_SCALE_IDLE = 2
+local FX_PULSE_SCALE_READY = 7
+local FX_PULSE_SCALE_HOLDING = 30
+
+local FX_TIME_FAST = 0.1
+local FX_TIME_SLOW = 0.2
+
+local FX_ZAP_BEAM_SCALE = 0.5
+local FX_ZAP_VOLUME = 1.0
+local FX_ZAP_SOUNDS = {
+    "weapons/physcannon/superphys_small_zap1.wav",
+    "weapons/physcannon/superphys_small_zap2.wav",
+    "weapons/physcannon/superphys_small_zap3.wav",
+    "weapons/physcannon/superphys_small_zap4.wav"
+}
+
+local GAUGE_BONE_NAME = "square"
+local VM_MODEL_NORMAL = "models/weapons/c_physcannon.mdl"
+local VM_MODEL_MEGA = "models/weapons/c_superphyscannon.mdl"
+local VM_SHEET_MEGA = "models/weapons/v_physcannon/v_superphyscannon_sheet"
 --
 -- States
 local ELEMENT_STATE_NONE = -1
@@ -170,7 +242,8 @@ local PHYSCANNON_CENTER_GLOW = "sprites/physcannon_core"
 local PHYSCANNON_BLAST_SPRITE = "sprites/physcannon_blast"
 local PHYSCANNON_CORE_WARP = "particle/warp1_warp"
 local MAT_PHYSBEAM = Material("sprites/physbeam.vmt")
-local MAT_WORLDMDL = Material("models/weapons/w_physics/w_physics_sheet2")
+local WORLDMDL_BASE_TEXTURE = "models/weapons/w_physics/w_physics_sheet2"
+local WORLDMDL_MATERIAL_PREFIX = "lambda_physcannon_world_"
 local GLOW_UPDATE_DT = 1 / 40
 --
 -- Code
@@ -215,6 +288,14 @@ function SWEP:Initialize()
         self.DrawUsingViewModel = false
         self.EffectsSetup = false
         self.CurrentWeaponColor = Color(0, 0, 0, 0)
+        local matName = WORLDMDL_MATERIAL_PREFIX .. self:EntIndex()
+        self.WorldMaterialName = "!" .. matName
+        self.WorldMaterial = CreateMaterial(matName, "VertexLitGeneric", {
+            ["$basetexture"] = WORLDMDL_BASE_TEXTURE,
+            ["$selfillum"] = "1"
+        })
+
+        self.WorldMaterialApplied = nil
     end
 
     self.ChangeState = ELEMENT_STATE_NONE
@@ -231,6 +312,12 @@ function SWEP:Initialize()
         end
     end
 
+    if self:IsMegaPhysCannon() == true then
+        self.ViewModel = VM_MODEL_MEGA
+    else
+        self.ViewModel = VM_MODEL_NORMAL
+    end
+
     if SERVER then
         local motionController = ents.Create("lambda_motioncontroller")
         motionController:Spawn()
@@ -239,6 +326,7 @@ function SWEP:Initialize()
 
     if CLIENT then
         self:UpdateDrawUsingViewModel()
+        self:FrameUpdate()
     end
 
     self:DoEffect(EFFECT_CLOSED)
@@ -248,15 +336,6 @@ function SWEP:Initialize()
     if SERVER then
         self:SetLastWeaponColor(VectorRand(0.0, 1.0))
     end
-
-    local ThinkHook = self.ThinkHook
-    hook.Add(
-        "Think",
-        self,
-        function(s)
-            ThinkHook(s)
-        end
-    )
 end
 
 function SWEP:WeaponSound(snd)
@@ -340,6 +419,7 @@ function SWEP:Supercharge()
     -- Allow pickup again.
     self:AddSolidFlags(FSOLID_TRIGGER)
     self:OpenElements()
+    self:SetNextIdleTime(CurTime())
 end
 
 function SWEP:AcceptInput(inputName, activator, callee, data)
@@ -487,8 +567,18 @@ function SWEP:CanSecondaryAttack()
 end
 
 function SWEP:SecondaryAttack()
-    if CLIENT then return end
     if self:CanSecondaryAttack() == false then return end
+
+    if CLIENT then
+        local controller = self:GetMotionController()
+
+        if controller:IsObjectAttached() == true then
+            self:SetNextPrimaryFire(CurTime() + PRIMARY_FIRE_DELAY)
+            self:SetNextSecondaryFire(CurTime() + SECONDARY_FIRE_DELAY)
+        end
+
+        return
+    end
     if SERVER then
         SuppressHostEvents(NULL)
     end
@@ -809,16 +899,39 @@ function SWEP:UpdateObject()
     local attachedObject = controller:GetAttachedObject()
     if attachedObject:IsEFlagSet(EFL_NO_PHYSCANNON_INTERACTION) == true then return false end
     if owner:GetGroundEntity() == attachedObject then return false end
-    local fwd = owner:GetAimVector()
-    fwd.x = math_clamp(fwd.x, -75, 75)
+
+    return true
+end
+
+function SWEP:PredictedThink()
+    local owner = self:GetOwner()
+    if IsValid(owner) ~= true then return end
+    local controller = self:GetMotionController()
+    if IsValid(controller) ~= true then return end
+    if controller:IsObjectAttached() == false then return end
+    local attachedObject = controller:GetAttachedObject()
+    if IsValid(attachedObject) ~= true then return end
+    local cmd = owner:GetCurrentCommand()
+    local eyeAng
+
+    if cmd ~= nil then
+        local cmdAng = cmd:GetViewAngles()
+        eyeAng = Angle(cmdAng.p, cmdAng.y, cmdAng.r)
+    else
+        eyeAng = owner:EyeAngles()
+    end
+
+    local carryAng = Angle(0, eyeAng.y, 0)
+    eyeAng.x = math_clamp(math.AngleDifference(eyeAng.x, 0), -75, 75)
+    local fwd = eyeAng:Forward()
     local start = owner:GetShootPos()
     local minDist = 24
     local playerLen = owner:OBBMaxs():Length2D()
     local objLen = attachedObject:OBBMaxs():Length2D()
     local distance = minDist + playerLen + objLen
-    local targetAng = self:GetTargetAngle() --self:GetNW2Angle("TargetAng")
-    local targetAttachment = self:GetTargetOffset() --self:GetNW2Vector("AttachmentPoint")
-    local ang = owner:LocalToWorldAngles(targetAng)
+    local targetAng = self:GetTargetAngle()
+    local targetAttachment = self:GetTargetOffset()
+    local _, ang = LocalToWorld(Vector(0, 0, 0), targetAng, Vector(0, 0, 0), carryAng)
     local endPos = start + (fwd * distance)
     local attachmentPoint = Vector(targetAttachment)
     attachmentPoint:Rotate(ang)
@@ -1030,19 +1143,25 @@ function SWEP:EmitLight(glowMode, pos, brightness, color)
 end
 
 function SWEP:GetLightPosition()
-    local owner = self:GetOwner()
-    local pos
-    if self:ShouldDrawUsingViewModel() == true and IsValid(owner) == true then
-        local vm = owner:GetViewModel()
-        local attachmentData = vm:GetAttachment(1)
-        if attachmentData == nil then return end
-        local fwd = attachmentData.Ang:Forward()
-        pos = self:FormatViewModelAttachment(attachmentData.Pos, true) - (fwd * 60)
-        pos = pos + (attachmentData.Ang:Up() * 5)
+    local effectParameters = self.EffectParameters
+    if effectParameters == nil then return end
+
+    local coreData = effectParameters[PHYSCANNON_CORE]
+    if coreData == nil then return end
+
+    local pos = coreData.Pos
+    local ang = coreData.Ang
+    if pos == nil or ang == nil then
+        -- This should never happen, but just in case.
+        return self:GetPos()
+    end
+
+    if self:ShouldDrawUsingViewModel() == true then
+        local fwd = ang:Forward()
+        pos = pos - (fwd * 60)
+        pos = pos + (ang:Up() * 5)
     else
-        local attachment = self:GetAttachment(1)
-        if attachment == nil then return end
-        pos = attachment.Pos + (attachment.Ang:Forward() * 4.5)
+        pos = pos + (ang:Forward() * 4.5)
     end
 
     return pos
@@ -1091,19 +1210,8 @@ function SWEP:UpdateGlow()
     self.NextGlowUpdate = curTime + GLOW_UPDATE_DT
 end
 
-function SWEP:ThinkHook()
-    if SERVER then
-        if game_GetGlobalState("super_phys_gun") == GLOBAL_ON then
-            self:SetMegaEnabled(true)
-        else
-            self:SetMegaEnabled(false)
-        end
-    else
-        self:UpdateEffects()
-    end
-end
-
 function SWEP:UpdateEffectState()
+    if self.EffectsSetup ~= true then return end
     local effectState = self:GetEffectState()
     if effectState ~= self.CurrentEffect and effectState ~= EFFECT_LAUNCH then
         self:DoEffect(effectState)
@@ -1122,6 +1230,12 @@ function SWEP:Think()
         self:UpdateEffectState()
         self:UpdateElementPosition()
         self:StartEffects()
+    else
+        if game_GetGlobalState("super_phys_gun") == GLOBAL_ON then
+            self:SetMegaEnabled(true)
+        else
+            self:SetMegaEnabled(false)
+        end
     end
 
     if controller:IsObjectAttached() == true and self:UpdateObject() == false then
@@ -1316,7 +1430,7 @@ function SWEP:DetachObject(launched)
     end
 
     local motionController = self:GetMotionController()
-    motionController:DetachObject()
+    motionController:DetachObject(launched)
     if self:IsMegaPhysCannon() == false then
         self:SendWeaponAnim(ACT_VM_DRYFIRE)
     end
@@ -1521,12 +1635,12 @@ function SWEP:DoEffectNone(pos)
         local beamdata = self.BeamParameters[i]
         if beamdata == nil then continue end
         beamdata.Visible = true
-        beamdata.Scale:InitFromCurrent(0.0, 0.1)
+        beamdata.Scale:InitFromCurrent(FX_BEAM_SCALE_NONE, FX_TIME_FAST)
     end
 
     local core2 = self.EffectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(24.0, 0.1)
-    core2.Alpha:InitFromCurrent(255, 0.2)
+    core2.Scale:InitFromCurrent(FX_CORE2_SCALE_NONE, FX_TIME_FAST)
+    core2.Alpha:InitFromCurrent(FX_CORE2_ALPHA_NONE, FX_TIME_SLOW)
 end
 
 function SWEP:DoEffectClosed(pos)
@@ -1534,8 +1648,8 @@ function SWEP:DoEffectClosed(pos)
     DbgPrint("DoEffectClosed")
     for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
         local data = self.EffectParameters[i]
-        data.Scale:InitFromCurrent(0.4 * SPRITE_SCALE, 0.2)
-        data.Alpha:InitFromCurrent(64.0, 0.2)
+        data.Scale:InitFromCurrent(FX_GLOW_SCALE_CLOSED, FX_TIME_SLOW)
+        data.Alpha:InitFromCurrent(FX_GLOW_ALPHA_CLOSED, FX_TIME_SLOW)
         data.Visible = true
     end
 
@@ -1545,12 +1659,12 @@ function SWEP:DoEffectClosed(pos)
         --data.Visible = false
         local beamdata = self.BeamParameters[i]
         beamdata.Visible = true
-        beamdata.Scale:InitFromCurrent(0.0, 0.1)
+        beamdata.Scale:InitFromCurrent(FX_BEAM_SCALE_CLOSED, FX_TIME_FAST)
     end
 
     local core2 = self.EffectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(14.0, 0.1)
-    core2.Alpha:InitFromCurrent(64, 0.2)
+    core2.Scale:InitFromCurrent(FX_CORE2_SCALE_CLOSED, FX_TIME_FAST)
+    core2.Alpha:InitFromCurrent(FX_CORE2_ALPHA_CLOSED, FX_TIME_SLOW)
 end
 
 function SWEP:DoEffectReady(pos)
@@ -1558,18 +1672,18 @@ function SWEP:DoEffectReady(pos)
     DbgPrint("DoEffectReady")
     local core = self.EffectParameters[PHYSCANNON_CORE]
     if self:ShouldDrawUsingViewModel() == true then
-        core.Scale:InitFromCurrent(20.0, 0.2)
+        core.Scale:InitFromCurrent(FX_CORE_SCALE_VM_READY, FX_TIME_SLOW)
     else
-        core.Scale:InitFromCurrent(12.0, 0.2)
+        core.Scale:InitFromCurrent(FX_CORE_SCALE_WORLD_READY, FX_TIME_SLOW)
     end
 
-    core.Alpha:InitFromCurrent(128.0, 0.2)
+    core.Alpha:InitFromCurrent(FX_CORE_ALPHA_READY, FX_TIME_SLOW)
     core.Visible = true
-    self.EffectParameters[PHYSCANNON_CORE_2].Scale:InitFromCurrent(0.0, 0.2)
+    self.EffectParameters[PHYSCANNON_CORE_2].Scale:InitFromCurrent(FX_CORE2_RESET_SCALE_READY, FX_TIME_SLOW)
     for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
         local data = self.EffectParameters[i]
-        data.Scale:InitFromCurrent(10 * SPRITE_SCALE, 0.2)
-        data.Alpha:InitFromCurrent(256.0, 0.2)
+        data.Scale:InitFromCurrent(FX_GLOW_SCALE_READY, FX_TIME_SLOW)
+        data.Alpha:InitFromCurrent(FX_GLOW_ALPHA_READY, FX_TIME_SLOW)
         data.Visible = true
     end
 
@@ -1582,13 +1696,13 @@ function SWEP:DoEffectReady(pos)
         local beamdata = self.BeamParameters[i]
         if beamdata ~= nil then
             beamdata.Visible = true
-            beamdata.Scale:InitFromCurrent(0.0, 0.1)
+            beamdata.Scale:InitFromCurrent(FX_BEAM_SCALE_READY, FX_TIME_FAST)
         end
     end
 
     local core2 = self.EffectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(5.0, 0.1)
-    core2.Alpha:InitFromCurrent(255, 0.2)
+    core2.Scale:InitFromCurrent(FX_CORE2_SCALE_READY, FX_TIME_FAST)
+    core2.Alpha:InitFromCurrent(FX_CORE2_ALPHA_READY, FX_TIME_SLOW)
 end
 
 function SWEP:DoEffectHolding(pos)
@@ -1598,14 +1712,14 @@ function SWEP:DoEffectHolding(pos)
     local beamParameters = self.BeamParameters
     if self:ShouldDrawUsingViewModel() == true then
         local core = effectParameters[PHYSCANNON_CORE]
-        core.Scale:InitFromCurrent(20.0, 0.2)
-        core.Alpha:InitFromCurrent(255.0, 0.1)
+        core.Scale:InitFromCurrent(FX_CORE_SCALE_VM_HOLDING, FX_TIME_SLOW)
+        core.Alpha:InitFromCurrent(FX_CORE_ALPHA_HOLDING, FX_TIME_FAST)
         local blast = effectParameters[PHYSCANNON_BLAST]
         blast.Visible = false
         for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
             local data = effectParameters[i]
-            data.Scale:InitFromCurrent(0.5 * SPRITE_SCALE, 0.2)
-            data.Alpha:InitFromCurrent(64.0, 0.2)
+            data.Scale:InitFromCurrent(FX_GLOW_SCALE_HOLDING, FX_TIME_SLOW)
+            data.Alpha:InitFromCurrent(FX_GLOW_ALPHA_HOLDING, FX_TIME_SLOW)
             data.Visible = true
         end
 
@@ -1618,19 +1732,20 @@ function SWEP:DoEffectHolding(pos)
             local beamdata = beamParameters[i]
             if beamdata ~= nil then
                 beamdata.Lifetime = -1
-                beamdata.Scale:InitFromCurrent(0.5, 0.1)
+                beamdata.Visible = true
+                beamdata.Scale:InitFromCurrent(FX_BEAM_SCALE_VM_HOLDING, FX_TIME_FAST)
             end
         end
     else
         local core = effectParameters[PHYSCANNON_CORE]
-        core.Scale:InitFromCurrent(16.0, 0.2)
-        core.Alpha:InitFromCurrent(255.0, 0.1)
+        core.Scale:InitFromCurrent(FX_CORE_SCALE_WORLD_HOLDING, FX_TIME_SLOW)
+        core.Alpha:InitFromCurrent(FX_CORE_ALPHA_HOLDING, FX_TIME_FAST)
         local blast = effectParameters[PHYSCANNON_BLAST]
         blast.Visible = false
         for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
             local data = effectParameters[i]
-            data.Scale:InitFromCurrent(0.5 * SPRITE_SCALE, 0.2)
-            data.Alpha:InitFromCurrent(64.0, 0.2)
+            data.Scale:InitFromCurrent(FX_GLOW_SCALE_HOLDING, FX_TIME_SLOW)
+            data.Alpha:InitFromCurrent(FX_GLOW_ALPHA_HOLDING, FX_TIME_SLOW)
             data.Visible = true
         end
 
@@ -1640,15 +1755,16 @@ function SWEP:DoEffectHolding(pos)
             data.Visible = true
             local beamdata = beamParameters[i]
             if beamdata ~= nil then
-                beamdata.Scale:InitFromCurrent(0.6, 0.1)
+                beamdata.Scale:InitFromCurrent(FX_BEAM_SCALE_WORLD_HOLDING, FX_TIME_FAST)
+                beamdata.Visible = true
                 beamdata.Lifetime = -1
             end
         end
     end
 
     local core2 = effectParameters[PHYSCANNON_CORE_2]
-    core2.Scale:InitFromCurrent(38.0, 0.1)
-    core2.Alpha:InitFromCurrent(150, 0.2)
+    core2.Scale:InitFromCurrent(FX_CORE2_SCALE_HOLDING, FX_TIME_FAST)
+    core2.Alpha:InitFromCurrent(FX_CORE2_ALPHA_HOLDING, FX_TIME_SLOW)
 end
 
 function SWEP:DoEffectLaunch(pos, matType, normal)
@@ -1767,23 +1883,9 @@ function SWEP:DoEffect(effect, pos, matType, normal)
     self.HandlingEffect = false
 end
 
-function SWEP:DrawWorldModel()
-    self:UpdateEffectState()
-
-    local wepColor = self:GetWeaponColor(true)
-    MAT_WORLDMDL:SetVector("$selfillumtint", wepColor)
-    self:UpdateElementPosition()
-    self:DrawModel()
-end
-
-function SWEP:DrawWorldModelTranslucent()
-    self:UpdateDrawUsingViewModel()
-    self:DrawModel()
-    self:DrawEffects()
-end
-
 function SWEP:Holster(ent)
-    if not IsFirstTimePredicted() then return end
+    -- According to the wiki we should do this but this breaks singleplayer and multiplayer.
+    --if not IsFirstTimePredicted() then return end
 
     DbgPrint(self, "Holster")
     local controller = self:GetMotionController()
@@ -1794,7 +1896,18 @@ function SWEP:Holster(ent)
     self:DetachObject()
     self:StopSounds()
     self:StopEffects()
-    self:SendWeaponAnim(ACT_VM_HOLSTER)
+    self:CloseElements()
+    if CLIENT then
+        local owner = self:GetOwner()
+        if IsValid(owner) == true then
+            local vm = owner:GetViewModel()
+            if IsValid(vm) == true then
+                vm:SetSubMaterial(0)
+            end
+        end
+
+        self.VMSheetApplied = nil
+    end
 
     return true
 end
@@ -1809,6 +1922,8 @@ function SWEP:Startup()
     end
 
     if CLIENT then
+        self.GaugeBone = nil
+        self.VMSheetApplied = nil
         self:StartEffects()
         self:UpdateEffects()
     end
@@ -1834,11 +1949,13 @@ end
 
 function SWEP:OnDrop()
     self:DetachObject()
+    self:CloseElements()
 end
 
 function SWEP:OwnerChanged()
     self:DetachObject()
     self:StopEffects()
+    self:CloseElements()
 end
 
 function SWEP:FormatViewModelAttachment(vOrigin, bFrom)
@@ -1885,11 +2002,6 @@ function SWEP:FormatViewModelAttachment(vOrigin, bFrom)
 end
 
 function SWEP:UpdateDrawUsingViewModel()
-    if EffectsInvalidated == true then
-        self:InvalidateEffects()
-        EffectsInvalidated = false
-    end
-
     local newValue = self:IsCarriedByLocalPlayer() and LocalPlayer():ShouldDrawLocalPlayer() == false
     local owner = self:GetOwner()
     if IsValid(owner) == false then
@@ -1900,9 +2012,15 @@ function SWEP:UpdateDrawUsingViewModel()
         end
     end
 
-    -- Mark for next frame otherwise positions are incorrect.
-    EffectsInvalidated = newValue ~= self.DrawUsingViewModel
+    local effectsInvalidated = newValue ~= self.DrawUsingViewModel
     self.DrawUsingViewModel = newValue
+
+    if effectsInvalidated == true then
+        self:InvalidateEffects()
+        local curEffect = self.CurrentEffect
+        self.CurrentEffect = nil
+        self:DoEffect(curEffect)
+    end
 end
 
 function SWEP:ShouldDrawUsingViewModel()
@@ -1925,22 +2043,9 @@ function SWEP:DrawEffectType(id, data, owner, vm)
     local curTime = CurTime()
     local alpha = data.Alpha:Interp(curTime)
     if alpha < 0 then return end
-    local pos
-    if self:ShouldDrawUsingViewModel() == true then
-        if IsValid(owner) == true then
-            if vm == nil then
-                vm = owner:GetViewModel()
-            end
 
-            local attachmentData = vm:GetAttachment(data.Attachment)
-            if attachmentData == nil then return end
-            pos = self:FormatViewModelAttachment(attachmentData.Pos, true)
-        end
-    else
-        local attachmentData = self:GetAttachment(data.Attachment)
-        if attachmentData == nil then return end --print("Missing attachment: " .. attachmentId)
-        pos = attachmentData.Pos
-    end
+    local pos = data.Pos
+    if pos == nil then return end
 
     render.SetMaterial(data.Mat)
     local color = data.Col
@@ -1987,32 +2092,24 @@ function SWEP:DrawBeam(startPos, endPos, width, color)
 end
 
 function SWEP:GetCorePos(owner, vm)
-    local corePos
+    local effectParameters = self.EffectParameters
+    if effectParameters == nil then return end
+
+    local coreData = effectParameters[PHYSCANNON_CORE]
+    if coreData == nil then return end
+
+    local corePos = coreData.Pos
+    if corePos == nil then return end
+
     local maxEndCap = PHYSCANNON_ENDCAP3
-    local shouldDrawUsingViewModel = self:ShouldDrawUsingViewModel()
-    if shouldDrawUsingViewModel == true then
-        if owner ~= nil then
-            if IsValid(vm) == false then
-                vm = owner:GetViewModel()
-            end
-
-            local attachmentData = vm:GetAttachment(1)
-            if attachmentData == nil then return end
-            corePos = self:FormatViewModelAttachment(attachmentData.Pos, true)
-        end
-
+    if self:ShouldDrawUsingViewModel() == true then
         maxEndCap = PHYSCANNON_ENDCAP2
-    else
-        local attachmentData = self:GetAttachment(1)
-        if attachmentData == nil then return end --print("Missing attachment: " .. attachmentId)
-        corePos = attachmentData.Pos
     end
 
     return corePos, maxEndCap
 end
 
 function SWEP:DrawCoreBeams(owner, vm)
-    local shouldDrawUsingViewModel = self:ShouldDrawUsingViewModel()
     if vm == nil and IsValid(owner) == true then
         vm = owner:GetViewModel()
     elseif vm == nil then
@@ -2042,19 +2139,10 @@ function SWEP:DrawCoreBeams(owner, vm)
 
         local params = effectParameters[i]
         if params == nil then continue end
-        local attachmentData = self:GetAttachment(params.Attachment)
-        if attachmentData == nil then continue end
-        if shouldDrawUsingViewModel == true then
-            if owner ~= nil then
-                attachmentData = vm:GetAttachment(params.Attachment)
-                if attachmentData == nil then continue end
-                endPos = self:FormatViewModelAttachment(attachmentData.Pos, true)
-            end
-        else
-            attachmentData = self:GetAttachment(params.Attachment)
-            if attachmentData == nil then continue end
-            endPos = attachmentData.Pos
-        end
+
+        -- Use cached position from UpdateEffectsParameter
+        endPos = params.Pos
+        if endPos == nil then continue end
 
         local width = (5 + util.SharedRandom("beam" .. tostring(i), 1, 15)) * beamdata.Scale:Interp(curTime)
         if width <= 0.0 then continue end
@@ -2088,22 +2176,35 @@ function SWEP:SetupEffects()
     -- Core
     do
         local data = {
-            Scale = InterpValue(0.0, 1.0, 0.1),
-            Alpha = InterpValue(255, 255, 0.1),
+            Scale = InterpValue(FX_CORE_SCALE_SETUP, FX_CORE_SCALE_SETUP, FX_TIME_FAST),
+            Alpha = InterpValue(FX_CORE_ALPHA_SETUP, FX_CORE_ALPHA_SETUP, FX_TIME_FAST),
             Attachment = 1,
             Mat = Material(PHYSCANNON_CENTER_GLOW),
-            Visible = false,
+            Visible = true,
             Col = Color(255, 255, 255)
         }
 
         effects[PHYSCANNON_CORE] = data
     end
 
+    do
+        local data = {
+            Scale = InterpValue(FX_CORE2_SCALE_SETUP, FX_CORE2_SCALE_SETUP, FX_CORE2_TIME_SETUP),
+            Alpha = InterpValue(FX_CORE_ALPHA_SETUP, FX_CORE_ALPHA_SETUP, FX_TIME_FAST),
+            Attachment = 1,
+            Mat = Material(PHYSCANNON_CORE_WARP),
+            Visible = true,
+            Col = Color(255, 0, 0)
+        }
+
+        effects[PHYSCANNON_CORE_2] = data
+    end
+
     -- Blast
     do
         local data = {
-            Scale = InterpValue(0.0, 1.0, 0.1),
-            Alpha = InterpValue(255, 255, 0.1),
+            Scale = InterpValue(FX_CORE_SCALE_SETUP, FX_BLAST_SCALE_SETUP, FX_TIME_FAST),
+            Alpha = InterpValue(FX_BLAST_ALPHA_SETUP, FX_BLAST_ALPHA_SETUP, FX_TIME_FAST),
             Attachment = 1,
             Mat = Material(PHYSCANNON_BLAST_SPRITE),
             Visible = false,
@@ -2117,8 +2218,8 @@ function SWEP:SetupEffects()
     local n = 1
     for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
         local data = {
-            Scale = InterpValue(0.05 * SPRITE_SCALE, 0.05 * SPRITE_SCALE, 0.0),
-            Alpha = InterpValue(64, 64, 0),
+            Scale = InterpValue(FX_GLOW_SCALE_SETUP, FX_GLOW_SCALE_SETUP, 0.0),
+            Alpha = InterpValue(FX_GLOW_ALPHA_SETUP, FX_GLOW_ALPHA_SETUP, 0),
             Mat = Material(PHYSCANNON_GLOW_SPRITE),
             Visible = true,
             Col = Color(255, 128, 0)
@@ -2152,7 +2253,7 @@ function SWEP:SetupEffects()
     for i = PHYSCANNON_ENDCAP1, PHYSCANNON_ENDCAP3 do
         local beamdata = {
             Scale = InterpValue(0, 0, 0),
-            Alpha = InterpValue(255, 255, 0),
+            Alpha = InterpValue(FX_ENDCAP_ALPHA_SETUP, FX_ENDCAP_ALPHA_SETUP, 0),
             Visible = false,
             Col = Color(255, 128, 0, 255),
             Lifetime = -1
@@ -2162,8 +2263,8 @@ function SWEP:SetupEffects()
         local attachmentName = attachmentGaps[n]
         if attachmentName == nil then continue end
         local data = {
-            Scale = InterpValue(0.15 * SPRITE_SCALE, 0.15 * SPRITE_SCALE, 0.0),
-            Alpha = InterpValue(255, 255, 0),
+            Scale = InterpValue(FX_ENDCAP_SCALE_SETUP, FX_ENDCAP_SCALE_SETUP, 0.0),
+            Alpha = InterpValue(FX_ENDCAP_ALPHA_SETUP, FX_ENDCAP_ALPHA_SETUP, 0),
             Attachment = vm:LookupAttachment(attachmentName),
             Visible = false,
             Mat = Material(PHYSCANNON_ENDCAP_SPRITE),
@@ -2172,19 +2273,6 @@ function SWEP:SetupEffects()
 
         effects[i] = data
         n = n + 1
-    end
-
-    do
-        local data = {
-            Scale = InterpValue(0.0, 0.0, 1.1),
-            Alpha = InterpValue(255, 255, 0.1),
-            Attachment = 1,
-            Mat = Material(PHYSCANNON_CORE_WARP),
-            Visible = true,
-            Col = Color(255, 0, 0)
-        }
-
-        effects[PHYSCANNON_CORE_2] = data
     end
 
     if init == true then
@@ -2204,7 +2292,6 @@ function SWEP:InvalidateEffects()
     self.BeamParameters = nil
     self.EffectsSetup = false
     self:StartEffects()
-    self:UpdateEffects()
     if effectParameters ~= nil then
         for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
             if self.EffectParameters[i] == nil or effectParameters[i] == nil then continue end
@@ -2248,9 +2335,11 @@ function SWEP:StartEffects()
     self.BeamParameters = beamParams
 
     self.EffectsSetup = true
+    self:UpdateEffectsParameter()
 end
 
 function SWEP:StopEffects()
+    if CLIENT and self.EffectsSetup ~= true then return end
     self:DoEffect(EFFECT_NONE)
     self:StopLights()
     self.EffectsSetup = false
@@ -2273,7 +2362,7 @@ end
 function SWEP:UpdateEffects()
     local owner = self:GetOwner()
     local usingViewModel = self:ShouldDrawUsingViewModel()
-    if IsValid(owner) and owner:GetActiveWeapon() ~= self or self:GetNoDraw() then
+    if IsValid(owner) ~= true or owner:GetActiveWeapon() ~= self or self:GetNoDraw() == true then
         self:StopEffects()
         return
     end
@@ -2282,11 +2371,11 @@ function SWEP:UpdateEffects()
     self:UpdateGlow()
     local isMegaPhysCannon = self:IsMegaPhysCannon()
     local wepColor = self:GetWeaponColor()
-    local pulseScale = 2
+    local pulseScale = FX_PULSE_SCALE_IDLE
     if self:GetEffectState() == EFFECT_READY then
-        pulseScale = 7
+        pulseScale = FX_PULSE_SCALE_READY
     elseif self:GetEffectState() == EFFECT_HOLDING then
-        pulseScale = 30
+        pulseScale = FX_PULSE_SCALE_HOLDING
     end
 
     local pulseTime = CurTime() * pulseScale
@@ -2294,15 +2383,15 @@ function SWEP:UpdateEffects()
     local effectParameters = self.EffectParameters
     for i = PHYSCANNON_GLOW1, PHYSCANNON_GLOW6 do
         local data = effectParameters[i]
-        data.Scale:SetAbsolute(util.RandomFloat(0.075, 0.05) * (30 + (30 * pulse)))
-        data.Alpha:SetAbsolute(100 + (util.RandomFloat(75, 128) * pulse))
+        data.Scale:SetAbsolute(util.RandomFloat(FX_GLOW_PULSE_SCALE_MIN, FX_GLOW_PULSE_SCALE_MAX) * (FX_GLOW_PULSE_BASE + (FX_GLOW_PULSE_BASE * pulse)))
+        data.Alpha:SetAbsolute(FX_GLOW_ALPHA_BASE + (util.RandomFloat(FX_GLOW_ALPHA_MIN, FX_GLOW_ALPHA_MAX) * pulse))
     end
 
     for i = PHYSCANNON_ENDCAP1, PHYSCANNON_ENDCAP3 do
         local data = effectParameters[i]
         if data == nil then continue end
-        data.Scale:SetAbsolute(util.RandomFloat(3, 10))
-        data.Alpha:SetAbsolute(util.RandomFloat(200, 255))
+        data.Scale:SetAbsolute(util.RandomFloat(FX_ENDCAP_SCALE_MIN, FX_ENDCAP_SCALE_MAX))
+        data.Alpha:SetAbsolute(util.RandomFloat(FX_ENDCAP_ALPHA_MIN, FX_ENDCAP_ALPHA_MAX))
     end
 
     for i, data in pairs(effectParameters) do
@@ -2318,8 +2407,8 @@ function SWEP:UpdateEffects()
         local i = math.random(PHYSCANNON_ENDCAP1, endCapMax)
         local beamdata = self.BeamParameters[i]
         if self.CurrentEffect ~= EFFECT_HOLDING and self:IsObjectAttached() ~= true and math.random(0, 200) == 0 then
-            self:EmitSound("Weapon_MegaPhysCannon.ChargeZap")
-            beamdata.Scale:InitFromCurrent(0.5, 0.1)
+            self:EmitSound(FX_ZAP_SOUNDS[math.random(1, #FX_ZAP_SOUNDS)], SNDLVL_NONE, math.random(90, 110), FX_ZAP_VOLUME, CHAN_AUTO)
+            beamdata.Scale:InitFromCurrent(FX_ZAP_BEAM_SCALE, FX_TIME_FAST)
             beamdata.Lifetime = 0.05 + (math.random() * 0.1)
             if physcannon_glow_mode > 0 then
                 local params = self.EffectParameters[i]
@@ -2333,8 +2422,176 @@ function SWEP:UpdateEffects()
     end
 end
 
-function SWEP:ViewModelDrawn(vm)
+function SWEP:UpdateEffectsParameter()
+    local owner = self:GetOwner()
+    local shouldDrawUsingViewModel = self:ShouldDrawUsingViewModel()
+    local vm = self
+
+    if shouldDrawUsingViewModel and IsValid(owner) then
+        vm = owner:GetViewModel()
+        if not IsValid(vm) then
+            vm = self
+        end
+    end
+
+    local effectParameters = self.EffectParameters
+    if effectParameters == nil then return end
+
+    -- Update positions and angles for all effect parameters
+    for k, data in pairs(effectParameters) do
+        if data.Attachment == nil then continue end
+
+        local attachmentData
+        if shouldDrawUsingViewModel and IsValid(owner) then
+            attachmentData = vm:GetAttachment(data.Attachment)
+        else
+            attachmentData = self:GetAttachment(data.Attachment)
+        end
+
+        if attachmentData ~= nil then
+            if shouldDrawUsingViewModel then
+                data.Pos = self:FormatViewModelAttachment(attachmentData.Pos, true)
+                data.Ang = attachmentData.Ang
+            else
+                data.Pos = attachmentData.Pos
+                data.Ang = attachmentData.Ang
+            end
+        end
+    end
+end
+
+function SWEP:FrameUpdate()
+    local frameNum = FrameNumber()
+    if self.LastFrameNumber == frameNum then return end
+    self.LastFrameNumber = frameNum
+
     self:UpdateDrawUsingViewModel()
+    self:UpdateEffectsParameter()
+    self:UpdateEffectState()
+    self:UpdateEffects()
+
+    local unowned = IsValid(self:GetOwner()) ~= true
+    if unowned == true then
+        self.WorldMaterial:SetVector("$selfillumtint", self:GetLastWeaponColor())
+    end
+
+    if self.WorldMaterialApplied ~= unowned then
+        self.WorldMaterialApplied = unowned
+        if unowned == true then
+            self:SetSubMaterial(0, self.WorldMaterialName)
+        else
+            self:SetSubMaterial(0)
+        end
+    end
+end
+
+function SWEP:DrawWorldModel()
+    self:FrameUpdate()
+    self:UpdateElementPosition()
+    self:DrawModel()
+end
+
+function SWEP:DrawWorldModelTranslucent()
+    self:FrameUpdate()
+    self:DrawModel()
+    self:DrawEffects()
+end
+
+local GAUGE_DIRECTION = -1
+local GAUGE_ANGLE_MAX = 90
+local GAUGE_ANGLE_HOLDING = 45
+local GAUGE_ANGLE_REST = 0
+local GAUGE_APPROACH = 16
+local GAUGE_TWITCH_CHANCE = 40
+local GAUGE_TWITCH_MAX = 12
+local GAUGE_TWITCH_DECAY = 14
+local GAUGE_END_VARIATION = 5
+local GAUGE_PULSE_SLOW_SPEED = 7.0
+local GAUGE_PULSE_SLOW_AMOUNT = 4
+local GAUGE_PULSE_FAST_SPEED = 22.0
+local GAUGE_PULSE_FAST_AMOUNT = 1.5
+local GAUGE_PULSE_SCALE_MEGA = 1.0
+local GAUGE_PULSE_SCALE_NORMAL = 0.5
+local GAUGE_RELEASE_DELAY_MIN = 0.8
+local GAUGE_RELEASE_DELAY_MAX = 2.0
+local GAUGE_RELEASE_TIME = 0.35
+local GAUGE_RELEASE_DROP_MIN = 6
+local GAUGE_RELEASE_DROP_MAX = 14
+
+function SWEP:UpdateGauge()
+    local frameTime = FrameTime()
+    local holding = self:IsObjectAttached()
+    local target = GAUGE_ANGLE_REST
+    local pulse = 0
+
+    local mega = self:IsMegaPhysCannon()
+    if holding == true then
+        local curTime = CurTime()
+        local pulseScale = GAUGE_PULSE_SCALE_NORMAL
+
+        if mega == true then
+            pulseScale = GAUGE_PULSE_SCALE_MEGA
+            if self.GaugeNextRelease == nil or curTime >= self.GaugeNextRelease then
+                self.GaugeNextRelease = curTime + util.RandomFloat(GAUGE_RELEASE_DELAY_MIN, GAUGE_RELEASE_DELAY_MAX)
+                self.GaugeReleaseEnd = curTime + GAUGE_RELEASE_TIME
+                self.GaugeReleaseDrop = util.RandomFloat(GAUGE_RELEASE_DROP_MIN, GAUGE_RELEASE_DROP_MAX)
+                self.GaugeEndAngle = GAUGE_ANGLE_MAX - util.RandomFloat(0, GAUGE_END_VARIATION)
+            end
+
+            target = self.GaugeEndAngle
+            if curTime < self.GaugeReleaseEnd then
+                target = self.GaugeEndAngle - self.GaugeReleaseDrop
+            end
+        else
+            target = GAUGE_ANGLE_HOLDING
+        end
+
+        pulse = ((math.sin(curTime * GAUGE_PULSE_SLOW_SPEED) * GAUGE_PULSE_SLOW_AMOUNT) + (math.sin(curTime * GAUGE_PULSE_FAST_SPEED) * GAUGE_PULSE_FAST_AMOUNT)) * pulseScale
+    elseif mega == true and math.random(0, GAUGE_TWITCH_CHANCE) == 0 then
+        self.GaugeTwitch = util.RandomFloat(-GAUGE_TWITCH_MAX, GAUGE_TWITCH_MAX)
+    end
+
+    local base = self.GaugeBase or GAUGE_ANGLE_REST
+    local twitch = self.GaugeTwitch or 0
+    self.GaugeBase = base + ((target - base) * math.min(1, frameTime * GAUGE_APPROACH))
+    self.GaugeTwitch = twitch * math.max(0, 1 - (frameTime * GAUGE_TWITCH_DECAY))
+
+    return math_clamp(self.GaugeBase + twitch + pulse, -GAUGE_ANGLE_MAX, GAUGE_ANGLE_MAX) * GAUGE_DIRECTION
+end
+
+function SWEP:PreDrawViewModel(vm)
+    local wantedModel = VM_MODEL_NORMAL
+    if self:IsMegaPhysCannon() == true then
+        wantedModel = VM_MODEL_MEGA
+    end
+
+    if string.lower(vm:GetModel()) ~= wantedModel then
+        vm:SetWeaponModel(wantedModel, self)
+        self.GaugeBone = nil
+        self.VMSheetApplied = nil
+    end
+
+    if self.VMSheetApplied ~= true then
+        self.VMSheetApplied = true
+        vm:SetSubMaterial(0, VM_SHEET_MEGA)
+    end
+
+    local boneIdx = self.GaugeBone
+    if boneIdx == nil then
+        boneIdx = vm:LookupBone(GAUGE_BONE_NAME)
+        if boneIdx == nil then return end
+        self.GaugeBone = boneIdx
+    end
+
+    vm:SetupBones()
+    local mtx = vm:GetBoneMatrix(boneIdx)
+    if mtx == nil then return end
+    mtx:Rotate(Angle(self:UpdateGauge(), 0, 0))
+    vm:SetBoneMatrix(boneIdx, mtx)
+end
+
+function SWEP:ViewModelDrawn(vm)
+    self:FrameUpdate()
     self:DrawEffects(vm)
 end
 

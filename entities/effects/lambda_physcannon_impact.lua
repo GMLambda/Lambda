@@ -116,7 +116,10 @@ function EFFECT:RenderBeam(startPos, endPos, seed)
 end
 
 function EFFECT:Render()
+    local ent = self.SourceEntity
+    if not IsValid(ent) then return end
     local wepPos = self:GetStartPos()
+    if wepPos == nil then return end
     render.SetMaterial(MAT_PHYSBEAM)
     local targetPos = self.TargetPos
     for n = 1, 5 do

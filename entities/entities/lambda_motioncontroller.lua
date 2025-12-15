@@ -13,6 +13,23 @@ local PREDICTION_TOLERANCE = 33
 local PREDICTION_THRESHOLD = 1
 local DEFAULT_MAX_ANGULAR = 360.0 * 10.0
 local REDUCED_CARRY_MASS = 1.0
+local DROP_MAX_ANGULAR = 2.0 * 360.0
+
+local function ClampPhysicsVelocity(physObj, linearLimit, angularLimit)
+    local vel = physObj:GetVelocity()
+    local speed = vel:Length()
+
+    if speed > linearLimit then
+        physObj:AddVelocity(vel:GetNormalized() * (linearLimit - speed))
+    end
+
+    local angVel = physObj:GetAngleVelocity()
+    local angSpeed = angVel:Length()
+
+    if angSpeed > angularLimit then
+        physObj:AddAngleVelocity(angVel:GetNormalized() * (angularLimit - angSpeed))
+    end
+end
 DEFINE_BASECLASS("base_entity")
 ENT.Base = "base_entity"
 ENT.Type = "anim"
@@ -38,14 +55,19 @@ function ENT:ResetState()
     self.ShadowParams = shadowParams
     self.SavedMass = {}
     self.SavedRotDamping = {}
+    self.SavedGravity = {}
     self.ErrorTime = -1.0
     self.Error = -1.0
+    self.LocalTargetPos = nil
+    self.LocalTargetAng = nil
     self.ContactAmount = 0
     self.LoadWeight = 0
 end
 
 function ENT:Initialize()
     DbgPrint(self, "Initialize")
+    local normSpeed = GetConVar("lambda_normspeed")
+    self.DropMaxSpeed = (normSpeed ~= nil and normSpeed:GetFloat() or 190.0) * 1.5
     self:SetTargetTransform(Vector(0, 0, 0), Angle(0, 0, 0))
     self:ResetState()
     -- We don't need anything visible.
@@ -55,10 +77,12 @@ function ENT:Initialize()
 end
 
 function ENT:SetTargetTransform(pos, ang)
-    self:SetTargetPos(pos)
-    self:SetTargetAng(ang)
+    self.LocalTargetPos = Vector(pos)
+    self.LocalTargetAng = Angle(ang.p, ang.y, ang.r)
 
     if SERVER then
+        self:SetTargetPos(pos)
+        self:SetTargetAng(ang)
         self:SetTimeToArrive(FrameTime())
     end
 end
@@ -133,11 +157,9 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
     if IsValid(self.AttachedObject) then return end
     DbgPrint(self, "AttachObject", obj)
     self:StartMotionController()
-    local physObj
+    local physObj = obj:GetPhysicsObject()
 
-    if SERVER then
-        physObj = obj:GetPhysicsObject()
-    else
+    if CLIENT and not IsValid(physObj) then
         -- Valve decided to make the combine ball special so it overrides propdata.
         if obj:GetClass() == "prop_combine_ball" then
             -- They have no physics on the client?
@@ -150,6 +172,8 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
 
         if not IsValid(physObj) then
             DbgPrint("Unable to create physics on client")
+        else
+            self.DestroyPhysics = true
         end
     end
 
@@ -186,70 +210,108 @@ function ENT:AttachObject(obj, grabPos, useGrabPos)
         local linear, angular = phys2:GetDamping()
         self.SavedRotDamping[i] = angular
         phys2:SetDamping(linear, 10)
+        self.SavedGravity[i] = phys2:IsGravityEnabled()
+        phys2:EnableGravity(false)
     end
 
     self.LoadWeight = totalWeight
     physObj:SetMass(REDUCED_CARRY_MASS)
+
+    self.SavedDrag = physObj:IsDragEnabled()
     physObj:EnableDrag(false)
+
     physObj:Wake()
+    physObj:AddGameFlag(FVPHYSICS_PLAYER_HELD)
     obj:SetBlocksLOS(false)
     self:AddToMotionController(physObj)
     self.AttachedObject = obj
+
+    if CLIENT then
+        self.SavedPredictable = obj:GetPredictable()
+        obj:SetPredictable(true)
+    end
 
     if SERVER then
         self:SetTargetObject(obj)
     end
 end
 
-function ENT:DetachObject()
-    DbgPrint(self, "DetachObject")
+function ENT:DetachObject(clearVelocity)
+    DbgPrint(self, "DetachObject", clearVelocity)
 
-    if IsValid(self.AttachedObject) then
-        local obj = self.AttachedObject
-        local phys = obj:GetPhysicsObject()
-
-        if IsValid(phys) then
-            self:RemoveFromMotionController(phys)
-
-            for i = 0, obj:GetPhysicsObjectCount() - 1 do
-                local physObj = obj:GetPhysicsObjectNum(i)
-                if not IsValid(physObj) then continue end
-
-                if self.SavedMass ~= nil and self.SavedMass[i] ~= nil then
-                    physObj:SetMass(self.SavedMass[i])
-                end
-
-                if self.SavedRotDamping ~= nil and self.SavedRotDamping[i] ~= nil then
-                    local linear, _ = physObj:GetDamping()
-                    physObj:SetDamping(linear, self.SavedRotDamping[i])
-                end
-
-                physObj:SetVelocity(Vector(0, 0, 0))
-            end
-
-            phys:EnableDrag(true)
-            phys:Wake()
-            obj:SetBlocksLOS(self.SavedBlocksLOS)
-            self.SavedMass = {}
-            self.SavedRotDamping = {}
-
-            if CLIENT then
-                obj:PhysicsDestroy()
-            end
-        else
-            DbgPrint(self, "No valid physics: " .. tostring(phys))
-        end
-    else
-        DbgPrint(self, "No valid object: " .. tostring(self.AttachedObject))
+    if self.AttachedObject == nil then
+        return
     end
 
     -- Always reset in case the entity left PVS on client.
+    local obj = self.AttachedObject
     self.AttachedObject = nil
 
     if SERVER then
-        --self:SetNW2Entity("AttachedObj", nil)
         self:SetTargetObject(NULL)
     end
+
+    if not IsValid(obj) then
+        DbgPrint(self, "No valid object: " .. tostring(obj))
+        return
+    end
+
+    if self.SavedPredictable ~= nil then
+        obj:SetPredictable(self.SavedPredictable)
+        self.SavedPredictable = nil
+    end
+
+    if self.SavedBlocksLOS ~= nil then
+        obj:SetBlocksLOS(self.SavedBlocksLOS)
+        self.SavedBlocksLOS = nil
+    end
+
+    local phys = obj:GetPhysicsObject()
+    if IsValid(phys) then
+        self:RemoveFromMotionController(phys)
+        for i = 0, obj:GetPhysicsObjectCount() - 1 do
+            local physObj = obj:GetPhysicsObjectNum(i)
+            if not IsValid(physObj) then continue end
+
+            if self.SavedMass ~= nil and self.SavedMass[i] ~= nil then
+                physObj:SetMass(self.SavedMass[i])
+            end
+
+            if self.SavedRotDamping ~= nil and self.SavedRotDamping[i] ~= nil then
+                local linear, _ = physObj:GetDamping()
+                physObj:SetDamping(linear, self.SavedRotDamping[i])
+            end
+
+            if self.SavedGravity ~= nil and self.SavedGravity[i] ~= nil then
+                physObj:EnableGravity(self.SavedGravity[i])
+            end
+
+            if clearVelocity == true then
+                physObj:SetVelocity(Vector(0, 0, 0))
+            elseif SERVER then
+                ClampPhysicsVelocity(physObj, self.DropMaxSpeed, DROP_MAX_ANGULAR)
+            end
+        end
+
+        if self.SavedDrag ~= nil then
+            phys:EnableDrag(self.SavedDrag)
+            self.SavedDrag = nil
+        end
+
+        phys:ClearGameFlag(FVPHYSICS_PLAYER_HELD)
+        phys:Wake()
+
+        self.SavedMass = {}
+        self.SavedRotDamping = {}
+
+        if self.DestroyPhysics then
+            obj:PhysicsDestroy()
+            self.DestroyPhysics = false
+        end
+    else
+        DbgPrint(self, "No valid physics: " .. tostring(phys))
+    end
+
 end
 
 function ENT:Think()
@@ -260,18 +322,6 @@ function ENT:Think()
     if ent ~= nil and not IsValid(ent) then
         self:DetachObject()
         ent = nil
-    end
-
-    if ent ~= nil then
-        local obj = self.AttachedObject
-
-        if IsValid(obj) then
-            local phys = obj:GetPhysicsObject()
-
-            if CLIENT and IsValid(phys) then
-                self:PhysicsSimulate2(phys, FrameTime())
-            end
-        end
     end
 
     if SERVER then
@@ -340,7 +390,6 @@ local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
 
     if phys.GetFrictionSnapshot ~= nil then
         local contacts = phys:GetFrictionSnapshot()
-
         for _, v in pairs(contacts) do
             local other = v.Other
             if not IsValid(other) then continue end
@@ -361,8 +410,7 @@ local function PhysComputeSlideDirection(phys, inVel, inAngVel, minMass)
 end
 
 function ENT:PhysicsSimulate(phys, dt)
-    -- For better interpolation the client runs this in Think
-    if SERVER then return self:PhysicsSimulate2(phys, dt) end
+    return self:PhysicsSimulate2(phys, dt)
 end
 
 function ENT:PhysicsSimulate2(phys, dt)
@@ -374,10 +422,10 @@ function ENT:PhysicsSimulate2(phys, dt)
         timeToArrive = engine.TickInterval() * 2
     else
         timeToArrive = self:GetTimeToArrive()
-    end
 
-    if timeToArrive <= 0 then
-        timeToArrive = FrameTime()
+        if timeToArrive <= 0 then
+            timeToArrive = dt
+        end
     end
 
     if InContactWithHeavyObject(phys, self.LoadWeight) == true then
@@ -386,10 +434,18 @@ function ENT:PhysicsSimulate2(phys, dt)
         self.ContactAmount = math.Approach(self.ContactAmount, 1.0, dt * 2.0)
     end
 
+    local targetPos = self.LocalTargetPos
+    local targetAng = self.LocalTargetAng
+
+    if targetPos == nil or targetAng == nil then
+        targetPos = self:GetTargetPos()
+        targetAng = self:GetTargetAng()
+    end
+
     shadowParams.dt = dt
     shadowParams.maxangular = DEFAULT_MAX_ANGULAR * self.ContactAmount * self.ContactAmount * self.ContactAmount
-    shadowParams.pos = self:GetTargetPos()
-    shadowParams.angle = self:GetTargetAng()
+    shadowParams.pos = targetPos
+    shadowParams.angle = targetAng
     shadowParams.secondstoarrive = timeToArrive
     phys:ComputeShadowControl(shadowParams)
     local vel = phys:GetVelocity()
@@ -403,7 +459,10 @@ function ENT:PhysicsSimulate2(phys, dt)
     end
 
     self.ErrorTime = self.ErrorTime + dt
-    self:SetTimeToArrive(timeToArrive)
+
+    if SERVER then
+        self:SetTimeToArrive(timeToArrive)
+    end
 
     return Vector(0, 0, 0), Vector(0, 0, 0), SIM_LOCAL_ACCELERATION
 end
