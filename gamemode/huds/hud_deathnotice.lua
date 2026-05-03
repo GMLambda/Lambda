@@ -94,7 +94,15 @@ local function ProcessDeathNotice(death, color1, color2)
     table.insert(DeathsData.Entries, death)
 end
 
+local lastProceedData = {}
+
 function GM:AddDeathNotice(attacker, attackerTeam, inflictor, victim, victimTeam)
+    -- Check if 'lastProceedData' has valid data from 'AddDeathNoticeFromData', if so we can skip processing and just use that data.
+    if lastProceedData ~= nil then
+        ProcessDeathNotice(lastProceedData.death, lastProceedData.color1, lastProceedData.color2)
+        return
+    end
+
     local death = {
         time = CurTime(),
         times = 1,
@@ -153,7 +161,7 @@ function GM:AddDeathNoticeFromData(data)
     local victim = data.victim
     if victim ~= nil then
         if victim.isPlayer then
-            death.right = Entity(victim.entIndex):Name()
+            death.right = Entity(victim.entIndex):Nick()
         else
             death.right = "#" .. victim.class
         end
@@ -193,7 +201,16 @@ function GM:AddDeathNoticeFromData(data)
     local color1 = (not data.attacker or not data.attacker.team) and table.Copy(NPC_Color) or table.Copy(team.GetColor(data.attacker.team))
     local color2 = (not data.victim or not data.victim.team) and table.Copy(NPC_Color) or table.Copy(team.GetColor(data.victim.team))
 
-    ProcessDeathNotice(death, color1, color2)
+    lastProceedData = {
+        death = death,
+        color1 = color1,
+        color2 = color2
+    }
+
+    hook.Run("AddDeathNotice", death.left, data.attacker and data.attacker.team or 2, death.icon, death.right, data.victim and data.victim.team or 2)
+    lastProceedData = nil
+
+    --ProcessDeathNotice(death, color1, color2)
 end
 
 local function ComputeDeathNoticeSize(death, bounds)
