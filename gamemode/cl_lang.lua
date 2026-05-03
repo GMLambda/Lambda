@@ -2,11 +2,12 @@ local DbgPrint = GetLogging("Language")
 
 local SUPPORTED_LANGUAGES = {
     ["en"] = "english",
+    ["zh-cn"] = "schinese"
 }
 
 local function GetCurrentLanguage()
     local gmod_language = GetConVar("gmod_language")
-    local lang = gmod_language:GetString()
+    local lang = gmod_language:GetString():lower()
     local realLang = SUPPORTED_LANGUAGES[lang]
     if realLang == nil then
         DbgPrint("Language '" .. lang .. "' is not supported, falling back to 'en'")

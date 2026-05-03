@@ -116,7 +116,7 @@ end
 function GAMETYPE:GetDifficultyData()
     return {
         [0] = {
-            Name = "Very Easy",
+            Name = "#GM_DIFFICULTY_MODE_VERY_EASY",
             Proficiency = WEAPON_PROFICIENCY_POOR,
             Skill = 1,
             NPCSpawningScale = 0.0,
@@ -148,7 +148,7 @@ function GAMETYPE:GetDifficultyData()
             }
         },
         [1] = {
-            Name = "Easy",
+            Name = "#GM_DIFFICULTY_MODE_EASY",
             Proficiency = WEAPON_PROFICIENCY_AVERAGE,
             Skill = 1,
             NPCSpawningScale = 0.2,
@@ -180,7 +180,7 @@ function GAMETYPE:GetDifficultyData()
             }
         },
         [2] = {
-            Name = "Normal",
+            Name = "#GM_DIFFICULTY_MODE_NORMAL",
             Proficiency = WEAPON_PROFICIENCY_GOOD,
             Skill = 2,
             NPCSpawningScale = 0.4,
@@ -212,7 +212,7 @@ function GAMETYPE:GetDifficultyData()
             }
         },
         [3] = {
-            Name = "Hard",
+            Name = "#GM_DIFFICULTY_MODE_HARD",
             Proficiency = WEAPON_PROFICIENCY_VERY_GOOD,
             Skill = 2,
             NPCSpawningScale = 0.7,
@@ -244,7 +244,7 @@ function GAMETYPE:GetDifficultyData()
             }
         },
         [4] = {
-            Name = "Very Hard",
+            Name = "#GM_DIFFICULTY_MODE_VERY_HARD",
             Proficiency = WEAPON_PROFICIENCY_PERFECT,
             Skill = 3,
             NPCSpawningScale = 1,
@@ -276,7 +276,7 @@ function GAMETYPE:GetDifficultyData()
             }
         },
         [5] = {
-            Name = "Realism",
+            Name = "#GM_DIFFICULTY_MODE_REALISM",
             Proficiency = WEAPON_PROFICIENCY_PERFECT,
             Skill = 3,
             NPCSpawningScale = 1,
@@ -518,9 +518,9 @@ function GAMETYPE:InitSettings()
         Extra = {
             Type = "combo",
             Choices = {
-                [0] = "Nothing",
-                [1] = "Active",
-                [2] = "Everything"
+                [0] = "#GM_WEAPONDROP_MODE_NONE",
+                [1] = "#GM_WEAPONDROP_MODE_ACTIVE",
+                [2] = "#GM_WEAPONDROP_MODE_ALL"
             }
         }
     })

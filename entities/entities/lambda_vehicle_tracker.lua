@@ -134,13 +134,13 @@ elseif CLIENT then
         local text = ""
 
         if belongsToUs == true then
-            text = "Your Vehicle"
+            text = "#LAMBDA_VEHICLE_OWNED"
         elseif isTaken == false then
             if haveVehicle == true then
-                text = "Reserved Vehicle"
+                text = "#LAMBDA_VEHICLE_RESERVED"
                 alpha = alpha * 0.08
             else
-                text = "Available Vehicle"
+                text = "#LAMBDA_VEHICLE_AVAILABLE"
             end
         elseif isTaken == true then
             local ownerName = "???"
@@ -149,7 +149,7 @@ elseif CLIENT then
                 ownerName = owner:GetName()
             end
 
-            text = "Vehicle belongs to " .. ownerName
+            text = language.GetPhrase("LAMBDA_VEHICLE_OWNED_BY_OTHERS"):format(ownerName)
             alpha = alpha * 0.08
         end
 
