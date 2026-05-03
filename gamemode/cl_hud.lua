@@ -130,6 +130,9 @@ function GM:HUDShouldDraw(hudName)
     elseif hudName == "CHUDQuickInfo" then
         -- We make our own.
         return false
+    elseif hudName == "CHudSuitPower" then
+        -- We have our own AUX power display.
+        return false
     end
 
     return true
