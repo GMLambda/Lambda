@@ -277,6 +277,8 @@ function ENT:CreateRagdoll(dmgForce, gibPlayer, didExplode)
     ragdoll:Spawn()
     ragdoll:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 
+    hook.Run("CreateEntityRagdoll", self:GetOwner(), ragdoll)
+
     ragdoll.GetPlayerColor = function(s)
         if IsValid(owner) and owner.GetPlayerColor ~= nil then return owner:GetPlayerColor() end
     end
