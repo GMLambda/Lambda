@@ -584,6 +584,24 @@ function SWEP:Holster(ent)
     return true
 end
 
+function SWEP:DrawHUD()
+    if self:GetState() ~= STATE_CHARGING then return end
+
+    local bgColor = Color(0, 0, 0, 150)
+    local barColor = Color(0, 200, 0, 255)
+    local textColor = Color(255, 255, 255, 255)
+
+    local progress = self:GetChargeEnergy() / REVIVE_AMOUNT
+
+    local w, h = 600, 30
+    local x = (ScrW() / 2) - (w / 2)
+    local y = (ScrH() * 0.8) - (h / 2)
+
+    draw.RoundedBox(8, x, y, w, h, bgColor)
+    draw.RoundedBox(8, x + 2, y + 2, (w - 4) * progress, h - 4, barColor)
+    draw.SimpleText("Reviving...", "DermaDefault", x + (w / 2), y - 15, textColor, TEXT_ALIGN_CENTER)
+end
+
 function SWEP:DrawWorldModel()
     self:DrawModel()
 end
@@ -654,13 +672,21 @@ function SWEP:PostDrawPlayerHands(hands, vm, ply, wep)
 end
 
 function SWEP:Ammo1()
-    local energy = math.Clamp(self:GetEnergy() - self:GetChargeEnergy(), 0, 100)
+    local energy = math.Round(math.Clamp(self:GetEnergy() - self:GetChargeEnergy(), 0, 100))
 
     return energy
 end
 
 function SWEP:Ammo2()
     return 0
+end
+
+function SWEP:CustomAmmoDisplay()
+    local display = {}
+    display.Draw = true
+    display.PrimaryClip = self:Ammo1()
+
+    return display
 end
 
 if CLIENT then
