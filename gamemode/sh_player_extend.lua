@@ -316,6 +316,9 @@ function PLAYER_META:IsInactive()
 end
 
 function PLAYER_META:SetInactive(state)
+    -- This is bad, but currently there is no better way.
+    gmod_suit_enabled = GetConVar("gmod_suit"):GetBool()
+
     self:SetNWBool("Inactive", state)
 
     if state == true then
@@ -326,11 +329,16 @@ function PLAYER_META:SetInactive(state)
 end
 
 function PLAYER_META:SetLambdaSuitPower(val)
-    if gmod_suit_enabled and SERVER then
-        self:SetSuitPower(val)
-    else
-        self:SetNW2Float("LambdaSuitPower", val)
+    if gmod_suit_enabled then
+        -- This function does not exists in client-side.
+        if SERVER then
+            self:SetSuitPower(val)
+        end
+
+        return
     end
+
+    self:SetNW2Float("LambdaSuitPower", val)
 end
 
 function PLAYER_META:GetLambdaSuitPower()
