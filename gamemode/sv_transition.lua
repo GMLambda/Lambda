@@ -921,7 +921,9 @@ function GM:CreateTransitionObjects()
                 DbgPrint("Using global entity!")
             else
                 ent = ents.Create(data.Class)
-                ent.CreatedByLevelTransition = true
+                if IsValid(ent) then
+                    ent.CreatedByLevelTransition = true
+                end
             end
 
             if not IsValid(ent) then
