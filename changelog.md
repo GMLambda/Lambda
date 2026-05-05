@@ -1,11 +1,16 @@
 0.9.30 (in development)
 - Improved: Enemy scaling now caps out at 20 players, doing more adds too much stress to the server.
 - Improved: Vehicles now temporarily disable collisions when entering a changelevel trigger, remains disabled set by settings.
+- Improved: When using medkit to revive the teammate now have a progress bar.
+- Improved: Compatibility with "Enhanced PlayerModel Selector" addon.
+- Improved: Simplified Chinese localization.
 - Added: Setting to disable vehicle collisions.
 - Fixed: Bad lightning by forcing r_radiosity convar to 4.
 - Fixed: Multiple weapons dissolving when an NPC dies.
 - Fixed: ep1_citadel_03 disabled clip so Alyx can go through the door sooner.
 - Fixed: Missing default crosshair and incomplete QuickInfo crosshair.
+- Fixed: Rare game freeze on community maps when it's playing a cutscene.
+- Fixed: Incorrect AUX power when server have "gmod_suit 1".
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).

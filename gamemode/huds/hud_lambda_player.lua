@@ -3,6 +3,26 @@ local border_w = 5
 local matHover = Material("gui/ps_hover.png", "nocull")
 local boxHover = GWEN.CreateTextureBorder(border, border, 64 - border * 2, 64 - border * 2, border_w, border_w, border_w, border_w, matHover)
 
+--- Detect if the "Enhanced Playermodel Selector" is installed and enabled "Enforce your player model" for enforcing playermodels, so we can do the compat.
+--- If "cl_playermodel_selector_force" and "sv_playermodel_selector_force" are both existing, we assume the user / server has it installed.
+-- @param enforced boolean Check if the "Enforce your player model" option is enabled, if false, it will only check if the enhanced playermodel selector is installed.
+-- @return boolean "Enhanced Playermodel Selector" is installed or not. If "enforced" is true, also check if "Enforce your player model" is enabled.
+local function ThirdParty_EnhancedPlayermodelSelector(enforced)
+    local cl_playermodel_selector_force, sv_playermodel_selector_force = GetConVar("cl_playermodel_selector_force"), GetConVar("sv_playermodel_selector_force")
+    if enforced then
+        return cl_playermodel_selector_force and sv_playermodel_selector_force
+        and cl_playermodel_selector_force:GetBool() and sv_playermodel_selector_force:GetBool()
+    end
+
+    return cl_playermodel_selector_force and sv_playermodel_selector_force
+end
+
+--- Detect if the "Outfitter" is installed, so we can add it to the model selection page, as this is the only hot-reloading playermodel selector that I know of.
+-- @return boolean "Outfitter" is installed or not.
+local function ThirdParty_Outfitter()
+    return outfitter ~= nil
+end
+
 local PANEL = {}
 
 cvars.AddChangeCallback("lambda_playermdl", function()
@@ -37,21 +57,50 @@ function PANEL:Init()
     local mdlListPanel = mdlPanel:Add("DPanelSelect")
     mdlListPanel:Dock(FILL)
 
-    local modelTbl = GAMEMODE:GetAvailablePlayerModels()
-    for name, v in pairs(modelTbl) do
-        local item = mdlListPanel:Add("SpawnIcon")
-        item:SetModel(v)
-        item:SetSize(64, 64)
-        item:SetTooltip(name)
-        item.plymdl = name
-        item.mdlPath = player_manager.TranslatePlayerModel(name)
-        item.PaintOver = function(this, w, h)
-            if this.OverlayFade > 0 then
-                boxHover(0, 0, w, h, Color(255, 255, 255, this.OverlayFade))
+    if ThirdParty_EnhancedPlayermodelSelector() then
+        local enhancedPlayerSelectorbutton = mdlPanel:Add("DButton")
+        enhancedPlayerSelectorbutton:Dock(BOTTOM)
+        enhancedPlayerSelectorbutton:SetText("Open Enhanced Playermodel Selector")
+        enhancedPlayerSelectorbutton:SetTextColor(Color(255, 255, 255, 255))
+        enhancedPlayerSelectorbutton:SetIcon("icon16/user.png")
+        enhancedPlayerSelectorbutton:SetConsoleCommand("playermodel_selector")
+    end
+
+    if ThirdParty_EnhancedPlayermodelSelector(true) then
+        searchBar:SetVisible(false)
+
+        local warningLabel = mdlListPanel:Add("DLabel")
+        warningLabel:Dock(TOP)
+        warningLabel:SetText("#LAMBDA_THIRDPARTY_EPS_WARNING")
+        warningLabel:SetTextColor(Color(255, 255, 255, 255))
+        warningLabel:SetFont("TargetIDSmall")
+        warningLabel:SizeToContents()
+    else
+        local modelTbl = GAMEMODE:GetAvailablePlayerModels()
+        for name, v in pairs(modelTbl) do
+            local item = mdlListPanel:Add("SpawnIcon")
+            item:SetModel(v)
+            item:SetSize(64, 64)
+            item:SetTooltip(name)
+            item.plymdl = name
+            item.mdlPath = player_manager.TranslatePlayerModel(name)
+            item.PaintOver = function(this, w, h)
+                if this.OverlayFade > 0 then
+                    boxHover(0, 0, w, h, Color(255, 255, 255, this.OverlayFade))
+                end
+                this:DrawSelections()
             end
-            this:DrawSelections()
+            mdlListPanel:AddPanel(item, {lambda_playermdl = name})
         end
-        mdlListPanel:AddPanel(item, {lambda_playermdl = name})
+    end
+
+    if ThirdParty_Outfitter() then
+        local outfitterButton = mdlPanel:Add("DButton")
+        outfitterButton:Dock(BOTTOM)
+        outfitterButton:SetText("Open Outfitter")
+        outfitterButton:SetTextColor(Color(255, 255, 255, 255))
+        outfitterButton:SetIcon("icon64/outfitter.png")
+        outfitterButton:SetConsoleCommand("outfitter")
     end
 
     searchBar.OnValueChange = function(s, str)
@@ -135,6 +184,10 @@ function PANEL:Init()
     nobgLabel:SetVisible(false)
 
     local bgTab = sheetPanel:AddSheet("BODYGROUPS", bgPanel)
+
+    if ThirdParty_EnhancedPlayermodelSelector(true) then
+        bgTab.Tab:SetVisible(false)
+    end
 
     local function HighlightTab(state)
         if state then
