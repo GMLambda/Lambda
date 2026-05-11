@@ -48,6 +48,7 @@ MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_template_ammo"] = true,
     ["global_newgame_template_local_items"] = true,
     ["template_barn_vclip"] = true, -- Has a template that doesn't exist.
+    ["barn_hole_playerclip"] = true
 }
 
 MAPSCRIPT.GlobalStates = {
