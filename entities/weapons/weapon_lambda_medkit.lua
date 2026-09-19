@@ -654,7 +654,7 @@ function SWEP:PostDrawPlayerHands(hands, vm, ply, wep)
 end
 
 function SWEP:Ammo1()
-    local energy = math.Clamp(self:GetEnergy() - self:GetChargeEnergy(), 0, 100)
+    local energy = math_clamp(self:GetEnergy() - self:GetChargeEnergy(), 0, 100)
 
     return energy
 end
