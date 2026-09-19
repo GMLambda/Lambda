@@ -4,6 +4,7 @@ local TauntIndex = CreateClientConVar("_lambda_taunt_idx", "1", true)
 local CategoryIndex = CreateClientConVar("_lambda_taunt_cat_idx", "1", true)
 local TauntMaxDisplay = 3 -- Each direction
 local TauntSelection = false
+local math_Clamp = math.Clamp
 
 surface.CreateFont("TauntFont", {
     font = "Arial",
