@@ -692,7 +692,7 @@ if SERVER then
             DbgPrint("Distance to spawn position:", dist)
             if dist < 100 then
                 -- Still at spawn position, don't check yet.
-                print("Vehicle " .. tostring(vehicle) .. " still at spawn position, delaying collision check.")
+                DbgPrint(vehicle, "Still at spawn position, delaying collision check.")
                 vehicle.LambdaNextCollisionCheck = CurTime() + 0.5
                 return
             end
