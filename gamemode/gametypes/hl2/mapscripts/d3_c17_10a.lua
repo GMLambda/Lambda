@@ -33,10 +33,6 @@ MAPSCRIPT.EntityFilterByName = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
-        for _, v in pairs(ents.FindByName("steps_soldier_makers")) do
-            v:SetKeyValue("DisableScaling", "1")
-        end
-
         -- Adjust some logic to support npc scaling
         local newCounter = ents.Create("math_counter")
         newCounter:SetKeyValue("max", "3")
