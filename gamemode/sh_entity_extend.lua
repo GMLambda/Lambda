@@ -41,7 +41,7 @@ end
 
 function ENTITY_META:GetActivator()
     -- Scripted entities don't have this field so we have to do it ourselves.
-    if self.LambdaLastActivator ~= nil then return self.LambdaLastActivator end
+    if self.LambdaLastActivator ~= nil and self ~= self.LambdaLastActivator then return self.LambdaLastActivator end
     -- Native entities.
 
     return self:GetInternalVariable("m_hActivator")

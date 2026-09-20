@@ -1133,7 +1133,7 @@ else -- CLIENT
 
         local _, h = 0, 0
         local text = ""
-        local remaining = scheduledTime - GetSyncedTimestamp()
+        local remaining = math.Round(scheduledTime - GetSyncedTimestamp())
 
         if remaining < 0 then
             remaining = 0
@@ -1149,18 +1149,19 @@ else -- CLIENT
             surface.SetFont("LAMBDA_2")
             local textY = 0
             local spacing = 10
-            text = "Waiting for players: " .. tostring(activePlayerCount) .. " / " .. tostring(playerCount)
+            text = language.GetPhrase("LAMBDA_CHECKPOINT_WAITING"):format(activePlayerCount, playerCount)
             draw.DrawText(text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER)
             draw.DrawText(text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER)
             w, h = surface.GetTextSize(text)
             textY = textY + h + spacing
-            text = "Game will continue once all players are here"
+            text = language.GetPhrase("LAMBDA_CHECKPOINT_WAITING_2")
+
             draw.DrawText(text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER)
             draw.DrawText(text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER)
             textY = textY + h + spacing
 
             if scheduledTime > 0 then
-                text = "Timeout in " .. string.format("%.02f", remaining) .. " seconds"
+                text = language.GetPhrase("LAMBDA_CHECKPOINT_WAITING_3"):format(remaining)
                 draw.DrawText(text, "LAMBDA_1", x, y + textY, colorBg, TEXT_ALIGN_CENTER)
                 draw.DrawText(text, "LAMBDA_2", x, y + textY, textColor, TEXT_ALIGN_CENTER)
                 textY = textY + h + spacing

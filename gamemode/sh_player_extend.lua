@@ -22,6 +22,8 @@ VIEWLOCK_SETTINGS_ON = 4
 VIEWLOCK_SETTINGS_RELEASE = 5
 VIEWLOCK_RELEASE_TIME = 1.0 -- Seconds
 
+local gmod_suit_enabled = GetConVar("gmod_suit"):GetBool()
+
 if SERVER then
     function PLAYER_META:TeleportPlayer(pos, ang, vel)
         local data = {}
@@ -314,6 +316,9 @@ function PLAYER_META:IsInactive()
 end
 
 function PLAYER_META:SetInactive(state)
+    -- This is bad, but currently there is no better way.
+    gmod_suit_enabled = GetConVar("gmod_suit"):GetBool()
+
     self:SetNWBool("Inactive", state)
 
     if state == true then
@@ -324,10 +329,23 @@ function PLAYER_META:SetInactive(state)
 end
 
 function PLAYER_META:SetLambdaSuitPower(val)
+    if gmod_suit_enabled then
+        -- This function does not exists in client-side.
+        if SERVER then
+            self:SetSuitPower(val)
+        end
+
+        return
+    end
+
     self:SetNW2Float("LambdaSuitPower", val)
 end
 
 function PLAYER_META:GetLambdaSuitPower()
+    if gmod_suit_enabled then
+        return self:GetSuitPower()
+    end
+
     return self:GetNW2Float("LambdaSuitPower", 0.0)
 end
 
