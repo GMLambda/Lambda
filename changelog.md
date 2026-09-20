@@ -14,6 +14,7 @@
 - Fixed: Incorrect AUX power when server have "gmod_suit 1".
 - Fixed: Players that did not reach the changelevel trigger could sometimes be softlocked in the next map.
 - Fixed: Sprinting could cut off dialogue relayed to the player, such as Breen's speech in d3_breen_01.
+- Fixed: Ragdoll gibs spamming console errors.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).

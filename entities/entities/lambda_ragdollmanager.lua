@@ -415,11 +415,11 @@ function ENT:UpdateGibPart(gib)
     gib.LastDroplet = curTime
 
     if math.random() < 0.5 then
-        ParticleEffectAttach("blood_impact_red_01_droplets", PATTACH_POINT_FOLLOW, gib, -1)
+        ParticleEffectAttach("blood_impact_red_01_droplets", PATTACH_ABSORIGIN_FOLLOW, gib, 0)
     end
 
     if math.random() < 0.5 then
-        ParticleEffectAttach("blood_impact_red_01_goop", PATTACH_POINT_FOLLOW, gib, -1)
+        ParticleEffectAttach("blood_impact_red_01_goop", PATTACH_ABSORIGIN_FOLLOW, gib, 0)
     end
 
     return true
@@ -558,15 +558,15 @@ function ENT:CreateGibPart(boneName, pos, ang, posOffset, angOffset, mdl, dmgFor
     gib.LastDroplet = 0
     gib.DropletTimeEnd = CurTime() + (math.random() * 4)
     -- Particles
-    ParticleEffectAttach("blood_impact_red_01_goop", PATTACH_POINT_FOLLOW, gib, 0)
+    ParticleEffectAttach("blood_impact_red_01_goop", PATTACH_ABSORIGIN_FOLLOW, gib, 0)
 
     if sizeType > 1 then
         local spray = BLOOD_SPRAY[sizeType]
-        ParticleEffectAttach(spray, PATTACH_POINT_FOLLOW, gib, 0)
+        ParticleEffectAttach(spray, PATTACH_ABSORIGIN_FOLLOW, gib, 0)
     end
 
     if exploded == true and math.random() > 0.8 then
-        ParticleEffectAttach("env_fire_tiny", PATTACH_POINT_FOLLOW, gib, 0)
+        ParticleEffectAttach("env_fire_tiny", PATTACH_ABSORIGIN_FOLLOW, gib, 0)
     end
 
     table.insert(self.GibParts, gib)
