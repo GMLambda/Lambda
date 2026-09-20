@@ -77,7 +77,16 @@ if SERVER then
         local touchingObjects = self:GetTouchingObjects()
         local targetMap = string.lower(self.TargetMap)
         local landmarkName = self.Landmark
+        local playersInTrigger = {}
 
+        -- Don't transition players that are not inside the trigger.
+        for _, ent in pairs(touchingObjects) do
+            if ent:IsPlayer() then
+                playersInTrigger[ent:EntIndex()] = ent
+            end
+        end
+
+        -- Collect objects touching the landmark trigger_transition, if any.
         if landmarkName ~= nil and landmarkName ~= "" then
             for _, landmark in pairs(ents.FindByName(landmarkName)) do
                 if landmark:GetClass() == "trigger_transition" and landmark.GetTouching ~= nil then
@@ -99,7 +108,7 @@ if SERVER then
                 end
             end
             -- Request a change level.
-            GAMEMODE:RequestChangeLevel(targetMap, landmarkName, touchingObjects, restart)
+            GAMEMODE:RequestChangeLevel(targetMap, landmarkName, touchingObjects, playersInTrigger, restart)
         end, CurTime() + 0.1)
     end
 end

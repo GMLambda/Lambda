@@ -11,6 +11,7 @@
 - Fixed: Missing default crosshair and incomplete QuickInfo crosshair.
 - Fixed: Rare game freeze on community maps when it's playing a cutscene.
 - Fixed: Incorrect AUX power when server have "gmod_suit 1".
+- Fixed: Players that did not reach the changelevel trigger could sometimes be softlocked in the next map.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
