@@ -596,3 +596,13 @@ function util.FastRandom(min, max)
     return (bit_band(random_state, 0x7fffffff) % range) + min
 end
 
+function util.EntityName(ent)
+    local name = ent.GetName ~= nil and ent:GetName() or ""
+    local entClass = ent.GetClass ~= nil and ent:GetClass() or ""
+    local entIndex = ent:EntIndex()
+    if name ~= "" then
+        return "Entity [" .. tostring(entIndex) .. "][" .. entClass .. ", " .. name .. "]"
+    else
+        return "Entity [" .. tostring(entIndex) .. "][" .. entClass .. "]"
+    end
+end
