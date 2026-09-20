@@ -74,12 +74,20 @@ if _DEBUG then
         return string.format("(%.03f)", CurTime())
     end
 
+    local function FormatLogValue(v)
+        if isentity(v) == true and IsValid(v) == true and v:IsPlayer() == false then
+            return util.EntityName(v)
+        end
+
+        return tostring(v)
+    end
+
     function LogGroup(group, color, ...)
         if IsGroupLogActive(group) == false then return end
         local printResult = ""
 
         for i, v in ipairs({...}) do
-            printResult = printResult .. tostring(v) .. "\t"
+            printResult = printResult .. FormatLogValue(v) .. "\t"
         end
 
         printResult = printResult
@@ -104,7 +112,7 @@ if _DEBUG then
         local printResult = ""
 
         for i, v in ipairs({...}) do
-            printResult = printResult .. tostring(v) .. "\t"
+            printResult = printResult .. FormatLogValue(v) .. "\t"
         end
 
         if SERVER then
