@@ -1022,8 +1022,31 @@ local function CanPlaySound(ply)
     return false
 end
 
+local soundScriptCache = {}
+
+local function EmitSoundScript(ply, name, channel)
+    local props = soundScriptCache[name]
+    if props == nil then
+        props = sound.GetProperties(name) or false
+        soundScriptCache[name] = props
+    end
+
+    if props == false then return end
+
+    local snd = props.sound
+    if istable(snd) then snd = snd[math.random(#snd)] end
+
+    local pitch = props.pitch
+    if istable(pitch) then pitch = math.random(pitch[1], pitch[2]) end
+
+    local volume = props.volume
+    if istable(volume) then volume = math.Rand(volume[1], volume[2]) end
+
+    ply:EmitSound(snd, props.level, pitch, volume, channel)
+end
+
 function GM:PlayerRejectSprinting(ply, mv)
-    if CanPlaySound(ply) then ply:EmitSound("HL2Player.SprintNoPower") end
+    if CanPlaySound(ply) then EmitSoundScript(ply, "HL2Player.SprintNoPower", CHAN_ITEM) end
 end
 
 function GM:PlayerStartSprinting(ply, mv)
@@ -1034,7 +1057,7 @@ function GM:PlayerStartSprinting(ply, mv)
     ply:SetMaxSpeed(self:GetSetting("sprintspeed"))
     ply:SetLambdaSprinting(true)
     local suitPower = ply:GetLambdaSuitPower()
-    if CanPlaySound(ply) and suitPower > 0 then ply:EmitSound("HL2Player.SprintStart") end
+    if CanPlaySound(ply) and suitPower > 0 then EmitSoundScript(ply, "HL2Player.SprintStart", CHAN_ITEM) end
     --DbgPrint("Sprint State: " .. tostring(ply:GetLambdaSprinting()))
 end
 
