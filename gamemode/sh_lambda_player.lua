@@ -1500,9 +1500,9 @@ function GM:GravGunPunt(ply, ent)
     return BaseClass.GravGunPickupAllowed(ply, ent)
 end
 
-function GM:PlayerFootstep(ply, pos, foot, sound, volume, filter)
+function GM:PlayerFootstep(ply, pos, foot, snd, volume, filter)
     if ply:KeyDown(IN_WALK) then return true end
-    if SERVER then self:NotifyNPCFootsteps(ply, pos, foot, sound, volume) end
+    if SERVER then self:NotifyNPCFootsteps(ply, pos, foot, snd, volume) end
 end
 
 function GM:PlayerSwitchWeapon(ply, old, new)
