@@ -25,6 +25,11 @@ local LOOK_DISTANCE = 200
 local THINK_MAX_TIME = 0.15
 local THINK_DISTRIBUTION = 100
 local DEBUG_COCKROACH = false
+local MOVE_SPEED = 150
+local TURN_SPEED = 720
+local STEP_HEIGHT = 8
+local MOVE_HULL_MINS = Vector(-2, -2, 0)
+local MOVE_HULL_MAXS = Vector(2, 2, 4)
 ENT.Base = "base_ai"
 ENT.Type = "ai"
 ENT.Spawnable = true
@@ -109,6 +114,9 @@ function ENT:Initialize()
     self.LambdaCockroach = true
     self:UseClientSideAnimation(true)
     self:SetPlaybackRate(1.0)
+    if SERVER then
+        self:SetNPCClass(CLASS_NONE)
+    end
     self:SetModel(COCKROACH_MDL)
     self:AddEffects(EF_NOSHADOW)
     self:SetModelScale(0.5, 0)
@@ -171,7 +179,7 @@ function ENT:Look(lookDistance)
     self:ClearCondition(COND_SEE_ENEMY)
     self:ClearCondition(COND_SEE_FEAR)
     local curPos = self:GetPos()
-    local lookMin = Vector(1, 1, 0) * LOOK_DISTANCE
+    local lookMin = Vector(1, 1, 1) * LOOK_DISTANCE
     local lookMax = Vector(1, 1, 1) * LOOK_DISTANCE
     local nearby = ents.FindInBox(curPos - lookMin, curPos + lookMax)
     local dangerPos = nil
@@ -245,8 +253,8 @@ function ENT:SetGoal(pos)
 end
 
 function GetOpenDirections(ent, ang, pos)
-    local lookDist = 4
-    local dirs = {ang:Forward(), ang:Forward(), ang:Forward(), ang:Forward()}
+    local lookDist = 32
+    local dirs = {}
     -- Check forward.
     local fwd = pos + (ang:Forward() * lookDist)
     local tr = util.TraceLine(
@@ -290,6 +298,8 @@ function GetOpenDirections(ent, ang, pos)
     end
     -- Return random possible direction.
 
+    if #dirs == 0 then return ang:Forward() end
+
     return dirs[math.random(1, #dirs)]
 end
 
@@ -320,7 +330,9 @@ function ENT:SetNextMode(mode)
         -- First try to find something to hide under.
         local dangerDistance = self.DangerPosition:Distance(curPos)
         local hidingSpot = self:GetClosestHidingSpot()
-        if hidingSpot ~= nil and dangerDistance > 128 then
+        local skipHidingSpot = self.SkipHidingSpot == true
+        self.SkipHidingSpot = false
+        if hidingSpot ~= nil and dangerDistance > 128 and skipHidingSpot == false then
             local randOffset = VectorRand() * 5
             randOffset.z = 0
             vecDest = hidingSpot + randOffset
@@ -339,6 +351,8 @@ function ENT:SetNextMode(mode)
         vecDest = nil
         --self:SetMovementActivity(ACT_IDLE)
         self.IsCurrentlyMoving = false
+        self:SetActivity(ACT_IDLE)
+        self:SetIdealActivity(ACT_IDLE)
     end
 
     -- If we have no where to go just return.
@@ -355,11 +369,11 @@ function ENT:SetNextMode(mode)
             }
         )
 
-        vecDest = tr.HitPos
+        vecDest = tr.HitPos + tr.HitNormal * 8
     end
 
     self:SetGoal(vecDest)
-    self:SetSchedule(SCHED_FORCED_GO)
+    self.MoveBlocked = false
     self:SetActivity(ACT_WALK)
     self:SetIdealActivity(ACT_WALK)
     self:SetMovementActivity(ACT_WALK)
@@ -371,25 +385,23 @@ end
 
 function ENT:Move(dt)
     local curPos = self:GetPos()
-    local dist = self.TargetPosition:Distance(curPos)
+    local toTarget = self.TargetPosition - curPos
+    toTarget.z = 0
+    local dist = toTarget:Length()
     self:SetArrivalSpeed(500)
     self:SetArrivalDistance(dist)
     if self:GetMovementActivity() ~= ACT_WALK then
         self:SetMovementActivity(ACT_WALK)
     end
 
-    local curAng = self:GetAngles()
-    local destAng = (self.TargetPosition - curPos):Angle()
-    local interp = dt * 10
-    local newAng = Angle(0, math.Approach(curAng.y, destAng.y, interp), 0)
-    self:SetAngles(newAng)
     -- Randomly switch direction if we are not scared.
     if math.random(0, 160) == 1 and self.Mode ~= MODE_SCARED_BY_ENT then
         self:SetNextMode(self.Mode)
     end
 
+    local scheduleDone = self.MoveBlocked == true
     local failedGoal = false
-    if self:IsCurrentSchedule(SCHED_FORCED_GO) == false and dist >= 20 then
+    if scheduleDone == true and dist >= 20 then
         -- Task failed.
         if DEBUG_COCKROACH then
             debugoverlay.Text(self:GetPos() + Vector(0, 0, 7), "Failed", 1, 0.1)
@@ -399,6 +411,7 @@ function ENT:Move(dt)
     end
 
     if failedGoal == true and self.Mode == MODE_SCARED_BY_ENT then
+        self.SkipHidingSpot = true
         self:SetNextMode(self.Mode)
         if DEBUG_COCKROACH then
             debugoverlay.Text(self:GetPos() + Vector(0, 0, 7), "Failed to run away", 1, 0.1)
@@ -407,7 +420,7 @@ function ENT:Move(dt)
         return
     end
 
-    if dist <= 4 or failedGoal == true then
+    if dist <= 4 or scheduleDone == true then
         -- Reached target.
         if DEBUG_COCKROACH then
             debugoverlay.Text(self:GetPos() + Vector(0, 0, 15), "Arrived at the target", 1, 0.1)
@@ -420,9 +433,54 @@ function ENT:Move(dt)
         end
     end
 
-    if math.random(0, 149) == 1 and self.Mode ~= MODE_SCARED_BY_LIGHT and self.Mode ~= MODE_SMELL_FOOD then
+    if math.random(0, 149) == 1 and self.Mode ~= MODE_SCARED_BY_LIGHT and self.Mode ~= MODE_SCARED_BY_ENT and self.Mode ~= MODE_SMELL_FOOD then
         self:SetNextMode(MODE_IDLE)
     end
+end
+
+function ENT:MoveStep(dt)
+    if self.MoveBlocked == true then return end
+    local curPos = self:GetPos()
+    local toGoal = self.TargetPosition - curPos
+    toGoal.z = 0
+    local dist = toGoal:Length()
+    if dist <= 1 then return end
+    local dir = toGoal / dist
+    local ang = self:GetAngles()
+    self:SetAngles(Angle(0, math.ApproachAngle(ang.y, dir:Angle().y, TURN_SPEED * dt), 0))
+    if self:GetActivity() ~= ACT_WALK then
+        self:SetActivity(ACT_WALK)
+    end
+
+    local stepUp = Vector(0, 0, STEP_HEIGHT)
+    local nextPos = curPos + dir * math.min(dist, MOVE_SPEED * dt)
+    local tr = util.TraceHull({
+        start = curPos + stepUp,
+        endpos = nextPos + stepUp,
+        mins = MOVE_HULL_MINS,
+        maxs = MOVE_HULL_MAXS,
+        mask = MASK_NPCSOLID,
+        filter = self
+    })
+
+    if tr.Hit == true or tr.StartSolid == true then
+        self.MoveBlocked = true
+        return
+    end
+
+    local ground = util.TraceLine({
+        start = tr.HitPos,
+        endpos = tr.HitPos - stepUp * 2,
+        mask = MASK_NPCSOLID,
+        filter = self
+    })
+
+    if ground.Hit == false or ground.StartSolid == true then
+        self.MoveBlocked = true
+        return
+    end
+
+    self:SetPos(ground.HitPos)
 end
 
 function ENT:NPCThink(dt)
@@ -434,12 +492,12 @@ function ENT:NPCThink(dt)
     end
 
     self:Look(LOOK_DISTANCE)
-    if self.Mode == MODE_IDLE or self.Mode == MODE_EAT then
-        if self:HasCondition(COND_SEE_FEAR) == true then
-            -- Ignore food for a while.
-            self:SetNextHungerTime(30 + math.random(0, 14))
-            self:SetNextMode(MODE_SCARED_BY_ENT)
-        elseif math.random(0, 10) == 1 and (self.Mode == MODE_IDLE or self.Mode == MODE_EAT) then
+    if self.Mode ~= MODE_SCARED_BY_ENT and self:HasCondition(COND_SEE_FEAR) == true then
+        -- Ignore food for a while.
+        self:SetNextHungerTime(30 + math.random(0, 14))
+        self:SetNextMode(MODE_SCARED_BY_ENT)
+    elseif self.Mode == MODE_IDLE or self.Mode == MODE_EAT then
+        if math.random(0, 10) == 1 then
             -- Currently eating or doing nothing, lets do something.
             if self.Mode == MODE_EAT then
                 -- Done eating, lets not be hungry for a while.
@@ -471,6 +529,7 @@ function ENT:ClientThink(dt)
 end
 
 function ENT:TranslateActivity(act)
+    if act == ACT_RUN then return ACT_WALK end
 end
 
 function ENT:GetThinkDelay()
@@ -484,17 +543,29 @@ function ENT:Think()
     local curTime = CurTime()
     local dt = curTime - (self.LastThinkTime or curTime)
     self.LastThinkTime = curTime
+    local thinkDelay = self:GetThinkDelay()
     if ai_disabled:GetBool() == false then
         if SERVER then
-            self:NPCThink(dt)
+            if self.IsCurrentlyMoving == true then
+                self:MoveStep(dt)
+            end
+
+            if curTime >= (self.NextAIThinkTime or 0) then
+                self:NPCThink(curTime - (self.LastAIThinkTime or curTime))
+                self.LastAIThinkTime = curTime
+                self.NextAIThinkTime = curTime + thinkDelay
+            end
         else
             self:ClientThink(dt)
         end
     end
 
-    local thinkDelay = self:GetThinkDelay()
     if SERVER then
-        self:NextThink(CurTime() + thinkDelay)
+        if self.IsCurrentlyMoving == true then
+            self:NextThink(curTime)
+        else
+            self:NextThink(curTime + thinkDelay)
+        end
     else
         self:SetNextClientThink(CurTime() + thinkDelay)
     end
