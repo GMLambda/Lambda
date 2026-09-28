@@ -38,10 +38,10 @@ function ENT:PreInitialize()
     self:SetInputFunction("Toggle", self.Toggle)
     self:SetInputFunction("Spawn", self.InputSpawnNPC)
     self:SetInputFunction("SetMaxChildren", self.SetMaxChildren)
-    self:SetInputFunction("SetScaledMaxChildren", self.SetScaledMaxChildren)
+    self:SetInputFunction("SetScaledMaxChildren", self.SetMaxScaledChildren)
     self:SetInputFunction("AddMaxChildren", self.AddMaxChildren)
     self:SetInputFunction("SetMaxLiveChildren", self.SetMaxLiveChildren)
-    self:SetInputFunction("SetScaledMaxLiveChildren", self.SetScaledMaxLiveChildren)
+    self:SetInputFunction("SetScaledMaxLiveChildren", self.SetMaxScaledLiveChildren)
     self:SetInputFunction("SetSpawnFrequency", self.SetSpawnFrequency)
     self:SetupNWVar("Disabled", "bool", {
         Default = false,
@@ -307,7 +307,7 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
     local maxLiveChildren = self:GetScaledMaxLiveChildren()
     local liveChildren = self:GetNWVar("LiveChildren")
     if maxLiveChildren > 0 and liveChildren >= maxLiveChildren then
-        DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(scaledMaxLiveChildren))
+        DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(maxLiveChildren))
         return false
     end
 
