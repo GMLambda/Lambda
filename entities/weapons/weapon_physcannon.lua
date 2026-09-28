@@ -340,17 +340,7 @@ end
 
 function SWEP:WeaponSound(snd)
     DbgPrint(self, "WeaponSound", snd)
-    local ent = self
-    if CLIENT then
-        ent = self:GetOwner()
-        if IsValid(ent) ~= true then
-            ent = self
-        end
-    else
-        self:EmitSound(snd)
-    end
-
-    self:EmitSound(snd)
+    util.EmitSoundScript(self, snd, CHAN_WEAPON)
 end
 
 function SWEP:GetMotorSound()
@@ -375,11 +365,11 @@ function SWEP:StopSounds()
         self.SndMotor:Stop()
     end
     self:StopSound("Weapon_MegaPhysCannon.ChargeZap")
-    self:StopSound("Weapon_PhysCannon.Pickup")
-    self:StopSound("Weapon_PhysCannon.TooHeavy")
-    self:StopSound("Weapon_PhysCannon.OpenClaws")
-    self:StopSound("Weapon_PhysCannon.CloseClaws")
-    self:StopSound("Weapon_PhysCannon.Drop")
+    util.StopSoundScript(self, "Weapon_PhysCannon.Pickup")
+    util.StopSoundScript(self, "Weapon_PhysCannon.TooHeavy")
+    util.StopSoundScript(self, "Weapon_PhysCannon.OpenClaws")
+    util.StopSoundScript(self, "Weapon_PhysCannon.CloseClaws")
+    util.StopSoundScript(self, "Weapon_PhysCannon.Drop")
 end
 
 function SWEP:IsObjectAttached()

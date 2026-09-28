@@ -606,3 +606,44 @@ function util.EntityName(ent)
         return "Entity [" .. tostring(entIndex) .. "][" .. entClass .. "]"
     end
 end
+
+local soundScriptCache = {}
+
+local function GetSoundScript(name)
+    local props = soundScriptCache[name]
+    if props == nil then
+        props = sound.GetProperties(name) or false
+        soundScriptCache[name] = props
+    end
+    return props
+end
+
+function util.EmitSoundScript(ent, name, channel)
+    local props = GetSoundScript(name)
+    if props == false then return end
+
+    local snd = props.sound
+    if istable(snd) then snd = snd[math.random(#snd)] end
+
+    local pitch = props.pitch
+    if istable(pitch) then pitch = math.random(pitch[1], pitch[2]) end
+
+    local volume = props.volume
+    if istable(volume) then volume = math.Rand(volume[1], volume[2]) end
+
+    ent:EmitSound(snd, props.level, pitch, volume, channel)
+end
+
+function util.StopSoundScript(ent, name)
+    local props = GetSoundScript(name)
+    if props == false then return end
+
+    local snd = props.sound
+    if istable(snd) then
+        for _, v in ipairs(snd) do
+            ent:StopSound(v)
+        end
+    else
+        ent:StopSound(snd)
+    end
+end
