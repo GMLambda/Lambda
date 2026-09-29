@@ -43,7 +43,23 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    print("-- Incomplete mapscript --")
+    ents.WaitForEntityByName("siege_soldier_maker", function(ent)
+        ent:SetKeyValue("EnableScaling", "1")
+    end)
+
+    local smgCrate = ents.Create("item_ammo_crate")
+    smgCrate:SetKeyValue("AmmoType", "1")
+    smgCrate:SetPos(Vector(2840.099854, -724.954407, -127.968750))
+    smgCrate:SetAngles(Angle(0, 12, 0))
+    smgCrate:Spawn()
+    smgCrate:SetPos(smgCrate:GetPos() - Vector(0, 0, smgCrate:OBBMins().z))
+
+    local grenadeCrate = ents.Create("item_ammo_crate")
+    grenadeCrate:SetKeyValue("AmmoType", "5")
+    grenadeCrate:SetPos(Vector(2839.100098, -652.590820, -127.968750))
+    grenadeCrate:SetAngles(Angle(0, -3, 0))
+    grenadeCrate:Spawn()
+    grenadeCrate:SetPos(grenadeCrate:GetPos() - Vector(0, 0, grenadeCrate:OBBMins().z))
 
     -- Find trigger_once at 3448 -384 0.05
     local triggerAmbush = ents.FindByPos(Vector(3448.000000, -384.000000, 0.050000), "trigger_once")
@@ -59,7 +75,6 @@ function MAPSCRIPT:PostInit()
             Vector(-900, -430, -100),
             Vector(250, 350, 300)
         )
-        print("Disabling")
     end
 
     -- Area for players to wait for the real ambush.
