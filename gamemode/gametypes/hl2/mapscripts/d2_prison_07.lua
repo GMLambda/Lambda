@@ -81,6 +81,16 @@ function MAPSCRIPT:PostInit()
             DbgPrint("All players left")
         end
 
+        for _, name in pairs({"maker_croom2_1", "maker_croom2_2", "maker_croom2_3", "maker_croom2_4"}) do
+            ents.WaitForEntityByName(name, function(ent)
+                util.RunNextFrame(function()
+                    if IsValid(ent) then ent:RemoveTemplateData("OnDeath") end
+                end)
+                ent:SetKeyValue("EnableScaling", "1")
+                ent:Fire("AddOutput", "OnAllSpawnedDead math_croom2_combine_counter,Add,1,0,-1")
+            end)
+        end
+
         GAMEMODE:WaitForInput("teleport_alyx_to_croom2", "BeginSequence", function()
             checkpoint1:Reset()
             GAMEMODE:SetPlayerCheckpoint(checkpoint1)

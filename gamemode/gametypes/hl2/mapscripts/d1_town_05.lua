@@ -93,7 +93,7 @@ function MAPSCRIPT:PostInit()
 
         -- Make sure to substract on our renamed math_counter.
         ents.WaitForEntityByName("end_reinforcements_trigger", function(ent)
-            ent:Fire("AddOutput", "OnTrigger lambda_warehouse_deadcombine_counter,Subtractw,2")
+            ent:Fire("AddOutput", "OnTrigger lambda_warehouse_deadcombine_counter,Subtract,2")
         end)
 
         -- Because those npcs are created via point_template, this is a good hooking spot to correct the output.
@@ -149,7 +149,6 @@ function MAPSCRIPT:PostInit()
         end
 
         ents.WaitForEntityByName("end_soldier_4_maker", function(ent)
-            --ent:KeyValue("DisableScaling", "1")
             ent:SetPos(Vector(-2003.583618, 9071.959961, 897.031250))
             ent:AddSpawnFlags(SF_NPCMAKER_ALWAYSUSERADIUS)
             --ent:AddSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER)
@@ -164,7 +163,6 @@ function MAPSCRIPT:PostInit()
         end)
 
         ents.WaitForEntityByName("end_soldier_5_maker", function(ent)
-            --ent:KeyValue("DisableScaling", "1")
             ent:SetPos(Vector(-1969.444214, 8991.776367, 897.031250))
             ent:AddSpawnFlags(SF_NPCMAKER_ALWAYSUSERADIUS)
             --ent:AddSpawnFlags(SF_NPCMAKER_HIDEFROMPLAYER)

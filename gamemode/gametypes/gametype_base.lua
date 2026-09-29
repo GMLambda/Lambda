@@ -119,7 +119,7 @@ function GAMETYPE:GetDifficultyData()
             Name = "#GM_DIFFICULTY_MODE_VERY_EASY",
             Proficiency = WEAPON_PROFICIENCY_POOR,
             Skill = 1,
-            NPCSpawningScale = 0.0,
+            NPCSpawningScale = 0.1,
             DamageScale = {
                 [DMG_SCALE_PVN] = 1.6,
                 [DMG_SCALE_NVP] = 0.7,

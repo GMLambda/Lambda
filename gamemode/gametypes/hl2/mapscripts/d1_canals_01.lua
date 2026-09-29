@@ -79,6 +79,19 @@ MAPSCRIPT.Checkpoints = {
 
 function MAPSCRIPT:PostInit()
     if SERVER then
+        ents.WaitForEntityByName("traintrackcops_north_makers", function(ent)
+            ent:SetKeyValue("spawnflags", "128")
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+        ents.WaitForEntityByName("assault3cop_1_maker", function(ent)
+            ent:SetKeyValue("spawnflags", "128")
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+        ents.WaitForEntityByName("assault3cop_2_maker", function(ent)
+            ent:SetKeyValue("spawnflags", "128")
+            ent:SetKeyValue("EnableScaling", "1")
+        end)
+
         local jumpBox = ents.Create("prop_physics")
         jumpBox:SetPos(Vector(363.177521, -4154.399902, 277.458130))
         jumpBox:SetAngles(Angle(0, 180, 0))
