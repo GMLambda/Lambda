@@ -442,43 +442,6 @@ function GM:ProcessAntlionCollision(ent)
     end
 end
 
-function GM:GetVehicleClipFilter()
-    if IsValid(self.VehicleClipFilter) then return self.VehicleClipFilter end
-    local jeepFilter = ents.Create("filter_activator_class")
-    jeepFilter:SetKeyValue("targetname", "lambda_filter_vehicle_jeep")
-    jeepFilter:SetKeyValue("filterclass", "prop_vehicle_jeep")
-    jeepFilter:Spawn()
-    local airboatFilter = ents.Create("filter_activator_class")
-    airboatFilter:SetKeyValue("targetname", "lambda_filter_vehicle_airboat")
-    airboatFilter:SetKeyValue("filterclass", "prop_vehicle_airboat")
-    airboatFilter:Spawn()
-    local filter = ents.Create("filter_multi")
-    filter:SetKeyValue("targetname", "lambda_filter_vehicles")
-    filter:SetKeyValue("filtertype", "1")
-    filter:SetKeyValue("Filter01", "lambda_filter_vehicle_jeep")
-    filter:SetKeyValue("Filter02", "lambda_filter_vehicle_airboat")
-    filter:Spawn()
-    filter:Activate()
-    self.VehicleClipFilter = filter
-    return filter
-end
-
-function GM:ProcessFuncVehicleClip(ent)
-    local filter = self:GetVehicleClipFilter()
-    local clip = ents.Create("func_clip_vphysics")
-    clip:SetPos(ent:GetPos())
-    clip:SetAngles(ent:GetAngles())
-    clip:SetModel(ent:GetModel())
-    clip:SetKeyValue("targetname", ent:GetName())
-    clip:SetKeyValue("filtername", filter:GetName())
-    clip:Spawn()
-    clip:Activate()
-    if bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) ~= 0 then
-        clip:Fire("Disable")
-    end
-    ent:DeleteOnRemove(clip)
-end
-
 local ENTITY_PROCESSORS = {
     ["env_hudhint"] = {
         PostFrame = true,
@@ -507,10 +470,6 @@ local ENTITY_PROCESSORS = {
     ["npc_antlion"] = {
         PostFrame = true,
         Fn = GM.ProcessAntlionCollision
-    },
-    ["func_vehicleclip"] = {
-        PostFrame = true,
-        Fn = GM.ProcessFuncVehicleClip
     }
 }
 

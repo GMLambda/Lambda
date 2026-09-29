@@ -597,9 +597,9 @@ if SERVER then
         end
 
         if self.EnableVehicleGuns then newVehicle:SetKeyValue("EnableGun", "1") end
-        newVehicle:SetCollisionGroup(VEHICLE_DISABLED_COLLISION_GROUP)
         newVehicle:Spawn()
         newVehicle:Activate()
+        self:DisableVehicleCollisions(newVehicle)
         newVehicle.LambdaNextCollisionCheck = CurTime() + 1
 
         DbgPrint("Created new vehicle: " .. tostring(newVehicle))
@@ -655,18 +655,46 @@ if SERVER then
 
     local VEHICLE_COLLISION_EXTEND = Vector(3, 3, 2)
 
-    function GM:TemporarilyDisableVehicleCollisions(ent)
-        ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)
-        ent.LambdaNextCollisionCheck = CurTime() + 0.5
-    end
-
     function GM:DisableVehicleCollisions(ent)
-        ent:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
         ent.LambdaNextCollisionCheck = CurTime() + 0.5
+        if ent.LambdaVehicleCollisionsDisabled == true and ent.LambdaVehicleWantsCollisions ~= true then return end
+        ent.LambdaVehicleWantsCollisions = nil
+        ent.LambdaVehicleCollisionsDisabled = true
+        for other, _ in pairs(self.ActiveVehicles) do
+            if other ~= ent and IsValid(other) then
+                local constr = constraint.NoCollide(ent, other, 0, 0)
+                if IsValid(constr) then constr.LambdaVehicleNoCollide = true end
+            end
+        end
     end
 
     function GM:EnableVehicleCollisions(ent)
-        ent:SetCollisionGroup(COLLISION_GROUP_VEHICLE)
+        ent.LambdaVehicleWantsCollisions = true
+    end
+
+    local function VehiclesOverlap(a, b)
+        local aMin, aMax = a:WorldSpaceAABB()
+        local bMin, bMax = b:WorldSpaceAABB()
+        aMin:Sub(VEHICLE_COLLISION_EXTEND)
+        aMax:Add(VEHICLE_COLLISION_EXTEND)
+        return aMin.x <= bMax.x and aMax.x >= bMin.x and aMin.y <= bMax.y and aMax.y >= bMin.y and aMin.z <= bMax.z and aMax.z >= bMin.z
+    end
+
+    function GM:UpdateVehicleNoCollides(vehicle)
+        local remaining = false
+        for _, constr in ipairs(vehicle.Constraints or {}) do
+            if IsValid(constr) and constr.LambdaVehicleNoCollide == true then
+                local other = constr.Ent1 == vehicle and constr.Ent2 or constr.Ent1
+                if IsValid(other) and VehiclesOverlap(vehicle, other) then
+                    remaining = true
+                else
+                    constr:Input("EnableCollisions")
+                    constr:Remove()
+                end
+            end
+        end
+
+        if remaining == false then vehicle.LambdaVehicleCollisionsDisabled = nil end
     end
 
     function GM:CheckVehicleCollision(vehicle)
@@ -675,6 +703,10 @@ if SERVER then
             -- Vehicle collisions are permanently disabled.
             self:DisableVehicleCollisions(vehicle)
             return
+        end
+
+        if vehicle.LambdaVehicleWantsCollisions == true and vehicle.LambdaVehicleCollisionsDisabled == true then
+            self:UpdateVehicleNoCollides(vehicle)
         end
 
         if vehicle.LambdaNextCollisionCheck == nil then
@@ -690,7 +722,7 @@ if SERVER then
         if vehicle.LambdaVehicleSpawnPos ~= nil then
             local dist = curPos:Distance(vehicle.LambdaVehicleSpawnPos)
             DbgPrint("Distance to spawn position:", dist)
-            if dist < 100 then
+            if dist < 80 then
                 -- Still at spawn position, don't check yet.
                 DbgPrint(vehicle, "Still at spawn position, delaying collision check.")
                 vehicle.LambdaNextCollisionCheck = CurTime() + 0.5
@@ -698,7 +730,10 @@ if SERVER then
             end
         end
 
-        local filter = { vehicle, vehicle.LambdaPassengerSeat }
+        local passengerSeat = vehicle.LambdaPassengerSeat
+        local filter = function(ent)
+            return ent ~= vehicle and ent ~= passengerSeat and ent:IsVehicle()
+        end
 
         -- Run a hull trace see if we are colliding with something.
         local mn, mx = vehicle:GetCollisionBounds()

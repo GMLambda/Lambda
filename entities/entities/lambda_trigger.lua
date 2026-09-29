@@ -484,7 +484,7 @@ if SERVER then
                 end
 
                 if GAMEMODE:IsActiveVehicle(ent) then
-                    GAMEMODE:TemporarilyDisableVehicleCollisions(ent)
+                    GAMEMODE:DisableVehicleCollisions(ent)
                 end
             end
         end
