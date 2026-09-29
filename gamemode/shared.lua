@@ -41,7 +41,6 @@ include("sh_admin_config.lua")
 include("sh_voting.lua")
 include("sh_metrics.lua")
 include("sh_maplist.lua")
-include("sh_collisions.lua")
 include("sh_gametypes.lua")
 local DbgPrint = GetLogging("Shared")
 local CurTime = CurTime
