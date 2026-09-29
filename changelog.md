@@ -23,6 +23,9 @@
 - Fixed: Vehicles passing through vehicle clips while their collisions are disabled.
 - Fixed: Doors closing area portals for all players, causing missing geometry for players on the other side.
 - Fixed: Gravity gun clearing the owner of held objects.
+- Fixed: Level transitions carrying over global entities from outside the transition volume, causing duplicate entities.
+- Fixed: Level transitions breaking global triggers and other brush entities, losing their state when returning to a map.
+- Fixed: Large objects such as the gunship not transitioning when only partially inside the transition volume.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).

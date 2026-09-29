@@ -298,9 +298,8 @@ function GM:ShouldTransitionObject(obj, playersInTrigger)
         end
 
         local globalName = obj:GetNWString("GlobalName", obj:GetInternalVariable("globalname") or "")
-        if globalName ~= "" and obj:IsDormant() == false then
+        if globalName ~= "" then
             transition = true
-            obj.ForceTransition = true
         end
 
         if isNPC and TRANSITION_ENFORCED_NPC[class] == true then
@@ -612,13 +611,15 @@ local function CheckTouchingVolume(volume, obj)
         -- Check if the volume registered the object as touching.
         if IsTouchingVolume(volume, obj) == true then return true end
         -- Check against bounding box.
-        local pos = obj:GetPos()
         local volPos = volume:GetPos()
         local volMins = volPos + volume:OBBMins()
         local volMaxs = volPos + volume:OBBMaxs()
+        local objMins, objMaxs = obj:WorldSpaceAABB()
 
-        if pos:WithinAABox(volMins, volMaxs) == true then return true end
-        return false
+        if objMins.x > volMaxs.x or objMaxs.x < volMins.x then return false end
+        if objMins.y > volMaxs.y or objMaxs.y < volMins.y then return false end
+        if objMins.z > volMaxs.z or objMaxs.z < volMins.z then return false end
+        return true
     end)
 end
 
@@ -866,8 +867,9 @@ function GM:CreateTransitionObjects()
             if data.GlobalName ~= nil and isstring(data.GlobalName) and data.GlobalName ~= "" then
                 local k, obj = findByGlobalName(data.GlobalName)
                 if k ~= nil then
-                    DbgPrint("Removing duplicate global entity: " .. tostring(obj))
-                    obj:Remove()
+                    DbgPrint("Using existing global entity: " .. tostring(obj))
+                    data.GlobalEnt = obj
+                    landmarkEntities[obj:EntIndex()] = nil
                 end
             end
         end
@@ -885,15 +887,15 @@ function GM:CreateTransitionObjects()
 
             if k == nil and data.Name ~= nil and data.Name ~= "" then k = findByName(data.Name) end
             if k ~= nil then
-                obj = landmarkEntities[k]
                 if isGlobal ~= true then
+                    obj = landmarkEntities[k]
                     DbgPrint("Removing duplicate entity", obj, data.Name or data.GlobalName or "")
                     obj:Remove()
+                    landmarkEntities[k] = nil
                 else
                     data.GlobalEnt = obj
+                    landmarkEntities[obj:EntIndex()] = nil
                 end
-
-                landmarkEntities[k] = nil
             else
                 -- We don't spawn things that already exist in this world and can't be referenced.
                 data.Ignored = true
@@ -906,8 +908,13 @@ function GM:CreateTransitionObjects()
         local entityTransitionData = {}
         for _, data in pairs(objects) do
             if data.Ignored == true then continue end
+            local hasGlobalEnt = IsValid(data.GlobalEnt)
+            if hasGlobalEnt == false and data.Mdl ~= nil and string.sub(data.Mdl, 1, 1) == "*" then
+                DbgPrint("Ignoring creation of brush entity without counterpart: " .. data.Class)
+                continue
+            end
             -- NOTE/FIXME: Observed different results on linux
-            if util.IsInWorld(data.Pos) == false then
+            if hasGlobalEnt == false and util.IsInWorld(data.Pos) == false then
                 DbgPrint("Ignoring creation of " .. data.Class .. ", position out of world: " .. tostring(data.Pos))
                 continue
             end
@@ -933,9 +940,12 @@ function GM:CreateTransitionObjects()
 
             ent.SourceMap = data.SourceMap
             ent.ShouldDispatchSpawn = dispatchSpawn
+            local isBrushGlobal = hasGlobalEnt and string.sub(ent:GetModel() or "", 1, 1) == "*"
             -- Do key values first because we might override a few things with setters.
             for k, v in pairs(data.KeyValues) do
                 if KEYVALUE_BLACKLIST[k] == true then continue end
+                if hasGlobalEnt and string.match(k, "^On%u") ~= nil then continue end
+                if isBrushGlobal and (k:iequals("model") or k:iequals("origin") or k:iequals("angles")) then continue end
                 v = tostring(v)
                 DbgPrint(ent, "KeyValue: ", k, v)
                 -- Deal with specifics.
@@ -951,7 +961,7 @@ function GM:CreateTransitionObjects()
                 end
             end
 
-            for k, v in pairs(data.EntityOutputs or {}) do
+            for k, v in pairs(hasGlobalEnt and {} or data.EntityOutputs or {}) do
                 if istable(v) then
                     for _, output in pairs(v) do
                         ent:SetKeyValue(k, output)
@@ -963,13 +973,15 @@ function GM:CreateTransitionObjects()
                 end
             end
 
-            ent:SetPos(data.Pos)
-            if data.Type ~= ENT_TYPE_DOOR then
-                ent:SetAngles(data.Ang)
-            end
-            ent:SetVelocity(data.Vel)
-            if data.Mdl ~= nil then
-                ent:SetModel(data.Mdl)
+            if isBrushGlobal == false then
+                ent:SetPos(data.Pos)
+                if data.Type ~= ENT_TYPE_DOOR then
+                    ent:SetAngles(data.Ang)
+                end
+                ent:SetVelocity(data.Vel)
+                if data.Mdl ~= nil then
+                    ent:SetModel(data.Mdl)
+                end
             end
 
             ent:SetName(data.Name)
@@ -1005,7 +1017,7 @@ function GM:CreateTransitionObjects()
                 if data.VehicleScript ~= nil then ent:SetKeyValue("VehicleScript", data.VehicleScript) end
             end
 
-            if data.Outputs ~= nil then
+            if data.Outputs ~= nil and hasGlobalEnt == false then
                 ent:SetOutputsTable(table.Copy(data.Outputs)) -- Dont mess with the references on cleanups.
             end
 

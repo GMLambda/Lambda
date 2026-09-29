@@ -118,17 +118,6 @@ function MAPSCRIPT:PostInit()
         GAMEMODE:WaitForInput("button_trigger", "Use", function()
             GAMEMODE:EnablePreviousMap()
         end)
-
-        -- Resize the trigger_transition volume, its too small so the gunship can sometimes
-        -- get lost when its not killed.
-        ents.WaitForEntityByName("landmark_d2_coast_07-08", function(ent)
-            if ent:GetClass() == "trigger_transition" then
-                ent:ResizeTriggerBox(
-                    Vector(-1060, -560, 0),
-                    Vector(6560, 8560, 3060)
-                )
-            end
-        end)
     end
 end
 
