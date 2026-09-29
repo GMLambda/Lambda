@@ -394,6 +394,7 @@ function GM:ProcessFuncAreaPortal(ent)
     DbgPrint(ent, "Opening func_areaportal")
     -- TODO: This is not ideal at all on larger maps, however can can not get a position for them.
     ent:SetKeyValue("StartOpen", "1")
+    ent:SetKeyValue("target", "")
     ent:Fire("Open")
     ent:SetName("Lambda_" .. ent:GetName())
 end
