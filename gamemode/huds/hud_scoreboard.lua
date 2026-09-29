@@ -377,7 +377,7 @@ function SB_PANEL:Think()
     self.ScoreEntries = self.ScoreEntries or {}
     self.InfoEntries = ComputeEntries(GetScoreboardInfo())
 
-    for k, v in pairs(player.GetAll()) do
+    for k, v in pairs(util.GetAllPlayers()) do
         if self.ScoreEntries[v] ~= nil then continue end
         local entry = vgui.CreateFromTable(SBPlayerLine, v.ScoreEntry)
         entry:Setup(v)

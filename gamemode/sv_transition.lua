@@ -2,7 +2,6 @@ local DbgPrint = GetLogging("Transition")
 local g_debug_transitions = GetConVar("g_debug_transitions")
 local util = util
 local ents = ents
-local player = player
 local IsValid = IsValid
 local table = table
 local ENT_TYPE_NPC = 0
@@ -578,7 +577,7 @@ function GM:TransitionObjects(landmarkEnt, objects, objectTable, playerTable, pl
         end
 
         -- Matt: Special case, we include them all because of some refactored code that relys on this.
-        for _, ply in pairs(player.GetAll()) do
+        for _, ply in pairs(util.GetAllPlayers()) do
             if processedPlayers[ply] == nil and ply:IsBot() == false then
                 local data = self:SerializePlayerData(landmarkEnt, ply, playersInTrigger)
                 data.Include = false

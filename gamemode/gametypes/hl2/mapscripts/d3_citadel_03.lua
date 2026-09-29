@@ -34,7 +34,7 @@ function MAPSCRIPT:PostInit()
         GAMEMODE:WaitForInput("logic_weapon_strip_strip", "Trigger", function(logic_strip)
             util.RunDelayed(function()
                 local ply = nil
-                for _, v in ipairs(player.GetAll()) do
+                for _, v in ipairs(util.GetAllPlayers()) do
                     if v:Alive() then
                         if not IsValid(ply) and v:HasWeapon("weapon_physcannon") then
                             ply = v
@@ -95,7 +95,7 @@ function MAPSCRIPT:PostInit()
 
         GAMEMODE:WaitForInput("weapon_strip", "Disable", function(ent)
             -- I don't understand how this works in HL2, simply Disabling it wont call StopTouch and reset the value.
-            for k, v in pairs(player.GetAll()) do
+            for k, v in pairs(util.GetAllPlayers()) do
                 v:SetSaveValue("m_bPreventWeaponPickup", false)
             end
         end)

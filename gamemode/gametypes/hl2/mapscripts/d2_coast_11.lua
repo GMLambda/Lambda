@@ -124,7 +124,7 @@ function MAPSCRIPT:PostInit()
 
         -- Give everyone weapon_bugbait just in case
         GAMEMODE:WaitForInput("leadgoal_vortigaunt", "OnSuccess", function(ent)
-            for _, ply in pairs(player.GetAll()) do
+            for _, ply in pairs(util.GetAllPlayers()) do
                 DbgPrint("Giving all players bugbait")
                 ply:Give("weapon_bugbait")
             end

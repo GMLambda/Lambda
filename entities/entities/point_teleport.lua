@@ -3,7 +3,6 @@
 local DbgPrint = GetLogging("Trigger")
 local util = util
 local ents = ents
-local player = player
 ENT.Base = "base_point"
 ENT.Type = "point"
 SF_TELEPORT_LAMBDA_CHECKPOINT = 8192
@@ -25,7 +24,7 @@ function ENT:AcceptInput(inputName, activator, called, data)
             local pos = self:GetPos()
             local ang = self:GetAngles()
 
-            for _, v in pairs(player.GetAll()) do
+            for _, v in pairs(util.GetAllPlayers()) do
                 DbgPrint(self, "Teleporting player " .. tostring(v) .. "to  pos: " .. tostring(pos) .. ", ang: " .. tostring(ang))
                 v:TeleportPlayer(pos, ang)
             end

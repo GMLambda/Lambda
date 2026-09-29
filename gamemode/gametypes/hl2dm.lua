@@ -36,7 +36,7 @@ end
 
 function GAMETYPE:GetAllFrags()
     local f = 0
-    for k, v in pairs(player.GetAll()) do
+    for k, v in pairs(util.GetAllPlayers()) do
         f = f + v:Frags()
     end
     return f
@@ -48,7 +48,7 @@ end
 
 function GAMETYPE:ShouldEndRound(roundTime)
     if roundTime >= self:GetTimeLimit() then return true end
-    for _, ply in pairs(player.GetAll()) do
+    for _, ply in pairs(util.GetAllPlayers()) do
         if ply:Frags() >= self:GetFragLimit() then return true end
     end
     return false

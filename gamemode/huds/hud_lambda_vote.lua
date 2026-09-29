@@ -92,7 +92,7 @@ function PANEL:Extend(vote)
     end
 
     if vote == "lambda_votekick" then
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if v == LocalPlayer() then continue end
             self.Combo:AddChoice(v:Name(), v:UserID())
         end

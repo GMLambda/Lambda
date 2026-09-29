@@ -81,7 +81,7 @@ if SERVER then
                 elseif entname == "!self" then
                     targetents = {this}
                 elseif entname == "!player" or entname == "player" then
-                    targetents = player.GetAll()
+                    targetents = util.GetAllPlayers()
                 elseif entname == "!pvsplayer" then
                     ErrorNoHalt("Unhandled output targetname: " .. entname)
                     targetents = {}
@@ -149,7 +149,7 @@ if SERVER then
                 elseif entname == "!self" then
                     targetents = {myself}
                 elseif entname == "!player" or entname == "player" then
-                    targetents = player.GetAll()
+                    targetents = util.GetAllPlayers()
                 elseif entname == "!pvsplayer" then
                     ErrorNoHalt("Unhandled output targetname: " .. entname)
                     targetents = {}
@@ -419,7 +419,7 @@ if SERVER then
     end
 
     function util.IsEntVisibleToPlayers(ent)
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if v:IsFlagSet(FL_NOTARGET) then continue end
             if v:Visible(ent) == true then return true end
         end
@@ -428,7 +428,7 @@ if SERVER then
     end
 
     function util.IsPosVisibleToPlayers(pos)
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if v:IsFlagSet(FL_NOTARGET) then continue end
             if v:InsideViewCone(pos) == true and v:VisibleVec(pos) == true then return true end
         end

@@ -98,7 +98,7 @@ if SERVER then
         if self.WaitingForRoundStart ~= true then return end
         DbgPrint("GM:NotifyPlayerListChanged")
 
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_WAITING_FOR_PLAYER, {
+        self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_WAITING_FOR_PLAYER, {
             StartTime = self.ServerStartupTime,
             Timeout = self:GetSetting("connect_timeout"),
             FullyConnected = self:GetFullyConnectedCount(),
@@ -140,7 +140,7 @@ if SERVER then
         self.ScheduledRestartTime = self.RestartStartTime + restartTime
         self.RealTimeScale = game.GetTimeScale()
 
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_ROUNDRESTART, {
+        self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_ROUNDRESTART, {
             StartTime = self.RestartStartTime,
             Timeout = restartTime
         })
@@ -258,14 +258,14 @@ if SERVER then
     function GM:SetRoundChangingLevel(nextMap, delay)
         self:SetRoundState(STATE_CHANGING_LEVEL)
 
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             v:Freeze(true)
         end
 
         self.ChangeLevelTime = GetSyncedTimestamp() + delay
         self.ChangeLevelMap = nextMap
 
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_CHANGELEVEL, {
+        self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_CHANGELEVEL, {
             NextMap = nextMap,
             ChangeLevelTime = self.ChangeLevelTime
         })
@@ -274,11 +274,11 @@ if SERVER then
     function GM:FinishRound()
         self:SetRoundState(STATE_FINISHED)
 
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             v:Freeze(true)
         end
 
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_FINISHED, {})
+        self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_FINISHED, {})
 
         if self:GetGameTypeData("PostRoundMapVote") == true then
             local gameType = self:GetGameType()
@@ -395,7 +395,7 @@ function GM:PreCleanupMap()
         end
 
         -- Reset player state.
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             v:LockPosition(false)
             v:Freeze(false)
             v:KillSilent()
@@ -585,7 +585,7 @@ function GM:OnNewGame()
         end
 
         -- Notify clients.
-        self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_NONE, {})
+        self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_NONE, {})
         self:SetupRoundRelevantObjects()
         self:ResetVehicleCheck()
 
@@ -600,7 +600,7 @@ function GM:PostRoundSetup()
     self:SetRoundState(STATE_RUNNING)
     self:SetRoundStartTime(GetSyncedTimestamp())
 
-    self:NotifyRoundStateChanged(player.GetAll(), ROUND_INFO_STARTED, {
+    self:NotifyRoundStateChanged(util.GetAllPlayers(), ROUND_INFO_STARTED, {
         -- Is this required? GetRoundStartTime is networked, but as an event, why not?
         StartTime = self:GetRoundStartTime()
     })
@@ -608,7 +608,7 @@ function GM:PostRoundSetup()
     self:ResetPlayerRespawnQueue()
     DbgPrint("Spawning players")
 
-    for _, v in pairs(player.GetAll()) do
+    for _, v in pairs(util.GetAllPlayers()) do
         v.TransitionData = self:GetPlayerTransitionData(v)
         v:Spawn()
     end

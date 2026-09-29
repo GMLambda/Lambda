@@ -244,7 +244,7 @@ function MAPSCRIPT:PostInit()
             "vehicle_blackout",
             "EnterVehicle",
             function(ent)
-                for k, v in pairs(player.GetAll()) do
+                for k, v in pairs(util.GetAllPlayers()) do
                     if v:Alive() == false then continue end
                     local vehicle = GetNextVehicle()
                     if IsValid(vehicle) then

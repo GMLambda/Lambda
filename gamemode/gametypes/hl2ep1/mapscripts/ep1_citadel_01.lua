@@ -159,7 +159,7 @@ function MAPSCRIPT:PostInit()
             "Enable",
             function(ent)
                 local lastPly = nil
-                for _, v in pairs(player.GetAll()) do
+                for _, v in pairs(util.GetAllPlayers()) do
                     if lastPly ~= nil then
                         lastPly:StripWeapon("weapon_physcannon")
                     end

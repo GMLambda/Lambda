@@ -22,6 +22,7 @@ local MODE_SCARED_BY_ENT = 4
 local MODE_SCARED_BY_LIGHT = 5
 local COCKROACH_MDL = "models/decay/cockroach.mdl"
 local LOOK_DISTANCE = 200
+local THINK_MIN_TIME = 0.1
 local THINK_MAX_TIME = 0.15
 local THINK_DISTRIBUTION = 100
 local DEBUG_COCKROACH = false
@@ -185,10 +186,8 @@ function ENT:Look(lookDistance)
     local dangerPos = nil
     local dangerDist = 999999
     for _, v in pairs(nearby) do
-        -- Check if we can see the entity.
         if v:IsFlagSet(FL_NOTARGET) == true then continue end
         if v == self then continue end
-        if self:Visible(v) == false then continue end
         -- Check if this is a hiding place.
         local mdl = v:GetModel()
         local pos = v:GetPos()
@@ -196,27 +195,29 @@ function ENT:Look(lookDistance)
             local center = v:WorldSpaceCenter()
             center.z = pos.z
             table.insert(self.NearbyHidingSpots, center)
+            continue
         end
 
         -- Check if we are afraid of the object.
         local entClass = v:GetClass()
         if entClass == "beam" then
-            self:SetCondition(COND_SEE_FEAR)
-            dangerPos = pos
+            if self:Visible(v) == true then
+                self:SetCondition(COND_SEE_FEAR)
+                dangerPos = pos
+            end
+
+            continue
         end
 
         if v:IsNPC() == false and v:IsPlayer() == false then continue end
         if entClass == "npc_furniture" then continue end
+        if self:GetRelationship(v) ~= D_FR then continue end
+        local dist = curPos:Distance(pos)
+        if dist >= dangerDist then continue end
         if self:Visible(v) == false then continue end
-        local relation = self:GetRelationship(v)
-        if relation == D_FR then
-            self:SetCondition(COND_SEE_FEAR)
-            local dist = curPos:Distance(pos)
-            if dist < dangerDist then
-                dangerPos = pos
-                dangerDist = dist
-            end
-        end
+        self:SetCondition(COND_SEE_FEAR)
+        dangerPos = pos
+        dangerDist = dist
     end
 
     if dangerPos ~= nil then
@@ -261,7 +262,7 @@ function GetOpenDirections(ent, ang, pos)
         {
             start = pos + Vector(0, 0, 1),
             endpos = fwd,
-            filter = function(e) return e ~= ent end
+            filter = ent
         }
     )
 
@@ -275,7 +276,7 @@ function GetOpenDirections(ent, ang, pos)
         {
             start = pos + Vector(0, 0, 1),
             endpos = left,
-            filter = function(e) return e ~= ent end
+            filter = ent
         }
     )
 
@@ -289,7 +290,7 @@ function GetOpenDirections(ent, ang, pos)
         {
             start = pos + Vector(0, 0, 1),
             endpos = right,
-            filter = function(e) return e ~= ent end
+            filter = ent
         }
     )
 
@@ -536,7 +537,7 @@ function ENT:GetThinkDelay()
     -- Better distribution, if all of them think at the same frame its a bit horrible.
     local idx = self:EntIndex() % THINK_DISTRIBUTION
 
-    return (idx / THINK_DISTRIBUTION) * THINK_MAX_TIME
+    return THINK_MIN_TIME + (idx / THINK_DISTRIBUTION) * THINK_MAX_TIME
 end
 
 function ENT:Think()

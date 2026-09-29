@@ -27,7 +27,7 @@ function GAMETYPE:ShouldRestartRound()
     local aliveCount = 0
     -- Collect how many players exist and how many are alive, in case they are all dead
     -- we have to restart the round.
-    for _, ply in pairs(player.GetAll()) do
+    for _, ply in pairs(util.GetAllPlayers()) do
         if ply:Alive() then aliveCount = aliveCount + 1 end
         playerCount = playerCount + 1
     end

@@ -5,7 +5,6 @@ end
 --local DbgPrint = print
 local DbgPrint = GetLogging("EnvZoom")
 local CurTime = CurTime
-local player = player
 local IsValid = IsValid
 ENT.Base = "lambda_entity"
 ENT.Type = "point"
@@ -110,7 +109,7 @@ function ENT:Zoom(data, activator, caller)
         self:ZoomPlayer(activator)
     else
         -- We can currently only assume this is supposed to zoom everyone.
-        for _, v in pairs(player.GetAll()) do
+        for _, v in pairs(util.GetAllPlayers()) do
             if v:Alive() == false then continue end
             self:ZoomPlayer(v)
         end

@@ -390,7 +390,7 @@ function ENT:EnableControl(ply)
     local plys = {}
 
     if self:HasSpawnFlags(SF_CAMERA_PLAYER_MULTIPLAYER_ALL) == true then
-        plys = player.GetAll()
+        plys = util.GetAllPlayers()
     elseif IsValid(ply) then
         plys = {ply}
     end

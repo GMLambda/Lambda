@@ -3,7 +3,6 @@ if SERVER then
 end
 
 local util = util
-local player = player
 local IsValid = IsValid
 local table = table
 
@@ -11,7 +10,7 @@ if SERVER then
     util.AddNetworkString("LambdaHudHint")
 
     function GM:AddHint(text, time, ply)
-        ply = ply or player.GetAll()
+        ply = ply or util.GetAllPlayers()
         net.Start("LambdaHudHint")
         net.WriteString(text)
         net.WriteFloat(time)

@@ -4,7 +4,6 @@ local ents = ents
 local IsValid = IsValid
 local table = table
 local CurTime = CurTime
-local IsFriendEntityName = IsFriendEntityName
 
 local SPEECH_GROUPS = {
     ["teammate_death"] = {
@@ -348,6 +347,16 @@ local ENTITY_CLASS_HANDLER = {
     ["npc_grenade_frag"] = GM.HandleGrenadeContact
 }
 
+local ENCOUNTER_CLASSES = {}
+for group in pairs(SPEECH_GROUPS) do
+    local class = string.match(group, "^encounter_(.+)$")
+    if class ~= nil then ENCOUNTER_CLASSES[class] = true end
+end
+
+local SPEECH_VIEW_RANGE = 500
+local SPEECH_BACK_TO_BACK_DIST = 50
+local SPEECH_MAX_TRACES = 4
+
 function GM:UpdatePlayerSpeech()
     if self:GetSetting("player_speech", false) ~= true then return end
     -- Update one player per tick.
@@ -365,72 +374,59 @@ function GM:UpdatePlayerSpeech()
     ply.FriendlyNearby = false
     ply.EnemyInSight = false
     ply.EnemyNearby = false
-    local nearbyEnts = ents.FindInBox(pos - Vector(500, 500, 0), pos + Vector(500, 500, 250))
-    local actions = {}
     local isCriminal = game.GetGlobalState("gordon_precriminal") ~= GLOBAL_ON
 
-    for k, v in pairs(nearbyEnts) do
-        if v == ply then continue end
-        local executeHandler = false
-        local isVisible = ply:InsideViewCone(v)
-        local class = v:GetClass()
-
-        if isVisible == true then
-            isVisible = ply:Visible(v)
-        end
-
-        if isVisible == true then
-            if v:IsNPC() then
-                if IsFriendEntityName(class) == false and isCriminal == true then
-                    ply.EnemyInSight = isVisible
-                    ply.EnemyNearby = true
-                end
-            elseif v:IsPlayer() == true and v:Alive() == true and self:IsPlayerEnemy(ply, v) == false then
-                ply.FriendlyInSight = isVisible
-                ply.FriendlyNearby = true
-            end
-
-            executeHandler = true
-        else
-            if v:IsPlayer() and v:Alive() == true and self:IsPlayerEnemy(ply, v) ~= true then
-                local otherPos = v:GetPos()
-                local dist = otherPos:Distance(pos)
-
-                if dist <= 50 then
-                    ply.FriendlyInSight = false -- Back to back
-                    ply.FriendlyNearby = true
-                    executeHandler = true
-                end
-            end
-        end
-
-        if executeHandler == true then
-            local handler = ENTITY_CLASS_HANDLER[class]
-
-            if handler ~= nil then
-                table.insert(actions, function()
-                    handler(self, ply, v)
-                end)
-            else
-                if v:IsNPC() then
-                    table.insert(actions, function()
-                        self:HandleNPCContact(ply, v, isCriminal)
-                    end)
-                elseif v:IsPlayer() then
-                    table.insert(actions, function()
-                        self:HandlePlayerContact(ply, v, isCriminal)
-                    end)
-                elseif v:IsWeapon() then
-                    table.insert(actions, function()
-                        self:HandleWeaponContact(ply, v, isCriminal)
-                    end)
-                end
-            end
+    for _, v in ipairs(plys) do
+        if v ~= ply and v:Alive() == true and v:GetPos():Distance(pos) <= SPEECH_BACK_TO_BACK_DIST and self:IsPlayerEnemy(ply, v) ~= true then
+            ply.FriendlyNearby = true
+            break
         end
     end
 
-    for _, v in pairs(actions) do
-        v()
+    local inCone = ents.FindInCone(ply:EyePos(), ply:GetAimVector(), SPEECH_VIEW_RANGE, ply:GetInternalVariable("m_flFieldOfView"))
+    local traces = 0
+    local deadPlayer = nil
+
+    for _, v in ipairs(inCone) do
+        if traces >= SPEECH_MAX_TRACES then break end
+        if v == ply or v:IsPlayer() == false then continue end
+
+        if v:Alive() == true then
+            if ply.FriendlyInSight == false and self:IsPlayerEnemy(ply, v) == false then
+                traces = traces + 1
+                if ply:Visible(v) == true then
+                    ply.FriendlyInSight = true
+                    ply.FriendlyNearby = true
+                end
+            end
+        elseif deadPlayer == nil and v.DeathAcknowledged ~= true then
+            traces = traces + 1
+            if ply:Visible(v) == true then deadPlayer = v end
+        end
+    end
+
+    if deadPlayer ~= nil then
+        self:HandlePlayerContact(ply, deadPlayer, isCriminal)
+    end
+
+    for _, v in ipairs(inCone) do
+        if traces >= SPEECH_MAX_TRACES then break end
+        local class = v:GetClass()
+        local handler = ENTITY_CLASS_HANDLER[class]
+
+        if handler ~= nil then
+            if ply.FriendlyNearby == true and v.Acknowledged ~= true then
+                traces = traces + 1
+                if ply:Visible(v) == true then handler(self, ply, v) end
+            end
+        elseif ENCOUNTER_CLASSES[class] == true and isCriminal == true and ply.FriendlyInSight == true then
+            traces = traces + 1
+            if ply:Visible(v) == true then
+                ply.EnemyInSight = true
+                ply.EnemyNearby = true
+                self:HandleNPCContact(ply, v, isCriminal)
+            end
+        end
     end
 
     InSpeechUpdate = true
