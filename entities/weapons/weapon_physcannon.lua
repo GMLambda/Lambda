@@ -1319,9 +1319,9 @@ function SWEP:AttachObject(ent, tr)
     self.ObjectAttached = true
     phys:AddGameFlag(FVPHYSICS_PLAYER_HELD)
     --if SERVER then
-    if IsValid(ent:GetOwner()) ~= true then
+    self.PreviousOwner = ent:GetOwner()
+    if IsValid(self.PreviousOwner) ~= true then
         ent:SetOwner(owner)
-        self.ResetOwner = true
     end
 
     --end
@@ -1411,9 +1411,10 @@ function SWEP:DetachObject(launched)
     end
 
     phys:ClearGameFlag(FVPHYSICS_PLAYER_HELD)
-    if self.ResetOwner == true then
-        ent:SetOwner(nil)
+    if self.PreviousOwner ~= nil and ent:GetOwner() == owner and self.PreviousOwner ~= owner then
+        ent:SetOwner(self.PreviousOwner)
     end
+    self.PreviousOwner = nil
 
     if SERVER and IsValid(owner) == true then
         owner:SimulateGravGunDrop(ent, launched)

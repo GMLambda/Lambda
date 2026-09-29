@@ -22,6 +22,7 @@
 - Fixed: NPC makers with a spawn frequency of -1 only keeping one NPC alive at a time, which could softlock enemy waves.
 - Fixed: Vehicles passing through vehicle clips while their collisions are disabled.
 - Fixed: Doors closing area portals for all players, causing missing geometry for players on the other side.
+- Fixed: Gravity gun clearing the owner of held objects.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
