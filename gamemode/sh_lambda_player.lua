@@ -1407,40 +1407,77 @@ end
 function GM:PlayerUpdateSettings(ply)
 end
 
-function GM:CheckPlayerCollision(ply)
-    local curTime = CurTime()
-    if ply.NextPlayerCollideTest == nil or curTime < ply.NextPlayerCollideTest then return end
-    if ply:IsPositionLocked() ~= false then return end
-    -- If server set collisions off don't bother reverting.
-    local playersCollide = self:GetSetting("playercollision", true)
-    if playersCollide == false then return end
-    if ply:IsPlayerCollisionEnabled() == true then return end
-    local hullMin, hullMax = ply:GetHull()
-    -- Extend the hull so we keep collisions off in tight spaces.
-    hullMin.x = hullMin.x * 2
-    hullMin.y = hullMin.y * 2
-    hullMax.x = hullMax.x * 2
-    hullMax.y = hullMax.y * 2
-    local plyPos = ply:GetPos()
-    local tr = util.TraceHull({
-        start = plyPos,
-        endpos = plyPos,
-        filter = ply,
-        mins = hullMin,
-        maxs = hullMax,
-        mask = MASK_SHOT_HULL,
-        ignoreworld = true,
-        collisiongroup = COLLISION_GROUP_PLAYER,
-    })
+local PLAYER_COLLISION_PAIRS_PER_TICK = 24
+local PLAYER_COLLISION_MARGIN = 4
 
-    if tr.Hit == false and tr.Fraction == 1 then
-        ply:DisablePlayerCollide(false)
-        ply:SetNoCollideWithTeammates(false)
-        DbgPrint(ply, "Reset player collision.")
-    else
-        DbgPrint(ply, "Colliding with " .. tostring(tr.Entity))
-        ply.NextPlayerCollideTest = curTime + 1
+function GM:CheckPlayerPairCollision(a, b, width, height)
+    if a:Alive() == false or b:Alive() == false then return end
+    local aEnabled = a:IsPlayerCollisionEnabled()
+    local bEnabled = b:IsPlayerCollisionEnabled()
+    local margin = (aEnabled and bEnabled) and 0 or PLAYER_COLLISION_MARGIN
+    local posA = a:GetPos()
+    local posB = b:GetPos()
+    local dx = math.abs(posA.x - posB.x)
+    local dy = math.abs(posA.y - posB.y)
+    local dz = math.abs(posA.z - posB.z)
+    if dx >= width + margin or dy >= width + margin or dz >= height + margin then return end
+    local sweep = self.PlayerCollisionSweep
+    a.PlayerCollisionSweep = sweep
+    b.PlayerCollisionSweep = sweep
+    if dx >= width or dy >= width or dz >= height then return end
+    DbgPrint(a, "Colliding with " .. tostring(b))
+    if aEnabled then a:DisablePlayerCollide(true) end
+    if bEnabled then b:DisablePlayerCollide(true) end
+end
+
+function GM:FinishPlayerCollisionSweep(plys)
+    local sweep = self.PlayerCollisionSweep
+    local curTime = CurTime()
+    for _, ply in ipairs(plys) do
+        if ply.PlayerCollisionSweep ~= sweep and ply:Alive() and ply:IsPositionLocked() == false and ply:IsPlayerCollisionEnabled() == false and ply.NextPlayerCollideTest ~= nil and curTime >= ply.NextPlayerCollideTest then
+            ply:DisablePlayerCollide(false)
+            ply:SetNoCollideWithTeammates(false)
+            DbgPrint(ply, "Reset player collision.")
+        end
     end
+
+    self.PlayerCollisionSweep = sweep + 1
+end
+
+function GM:UpdatePlayerCollisions()
+    -- If server set collisions off don't bother reverting.
+    if self:GetSetting("playercollision", true) == false then return end
+    local plys = util.GetAllPlayers()
+    local count = #plys
+    self.PlayerCollisionSweep = self.PlayerCollisionSweep or 0
+    if count < 2 then
+        self:FinishPlayerCollisionSweep(plys)
+        return
+    end
+
+    local hullMin, hullMax = plys[1]:GetHull()
+    local width = hullMax.x - hullMin.x - 1
+    local height = hullMax.z - hullMin.z - 1
+    local i = self.PlayerCollisionIndexA or 1
+    local j = self.PlayerCollisionIndexB or 2
+    for _ = 1, PLAYER_COLLISION_PAIRS_PER_TICK do
+        if j > count then
+            i = i + 1
+            j = i + 1
+        end
+
+        if i >= count then
+            self:FinishPlayerCollisionSweep(plys)
+            i = 1
+            j = 2
+        end
+
+        self:CheckPlayerPairCollision(plys[i], plys[j], width, height)
+        j = j + 1
+    end
+
+    self.PlayerCollisionIndexA = i
+    self.PlayerCollisionIndexB = j
 end
 
 function GM:PlayerThink(ply)
@@ -1451,8 +1488,6 @@ function GM:PlayerThink(ply)
             local viewlockTime = ply:GetNWFloat("ViewLockTime")
             if viewlockTime + VIEWLOCK_RELEASE_TIME < CurTime() then ply:LockPosition(false) end
         end
-
-        self:CheckPlayerCollision(ply)
     end
 end
 

@@ -247,6 +247,7 @@ function GM:Tick()
     end
 
     if SERVER then
+        self:UpdatePlayerCollisions()
         self:UpdatePlayerSpeech()
     end
 

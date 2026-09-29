@@ -541,6 +541,7 @@ function util.GetAllPlayers()
 
     if PLAYER_LIST_CACHE_TICK ~= curTick then
         PLAYER_LIST_CACHE = player.GetAll()
+        PLAYER_LIST_CACHE_TICK = curTick
     else
         local curCount = player.GetCount()
 
