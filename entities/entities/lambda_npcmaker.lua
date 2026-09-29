@@ -23,6 +23,8 @@ SF_NPCMAKER_NO_DROP = 64 -- Do not adjust for the ground's position when checkin
 SF_NPCMAKER_HIDEFROMPLAYER = 128 -- Don't spawn if the player's looking at me
 SF_NPCMAKER_ALWAYSUSERADIUS = 256 -- Use radius spawn whenever spawning
 SF_NPCMAKER_NOPRELOADMODELS = 512 -- Suppress preloading into the cache of all referenced .mdl files
+local SCALED_SQUAD_SIZE = 6
+local ScaledSquadMembers = {}
 local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
 
@@ -73,7 +75,7 @@ function ENT:PreInitialize()
     })
 
     self:SetupNWVar("EnableScaling", "bool", {
-        Default = 0,
+        Default = false,
         KeyValue = "EnableScaling",
         OnChange = self.OnEnableScaling
     })
@@ -192,9 +194,9 @@ local function GetPlayerCount()
 end
 
 -- The officially recommended supported maximum player count for scaling.
-local SOFT_CAP_PLAYERS = 12
-local SOFT_CAP_MULT   = 3.0
-local TAIL_BASE       = 0.3
+local SOFT_CAP_PLAYERS = 24
+local SOFT_CAP_MULT   = 6.0
+local TAIL_BASE       = 1.0
 
 function ScaleCount(original, tightness)
     if original == 0 then
@@ -226,7 +228,7 @@ function ENT:GetScaledMaxLiveChildren()
         maxScaledLiveChildren = realMaxLiveChildren
     end
     local maxLiveChildren = math.min(realMaxLiveChildren, maxScaledLiveChildren)
-    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, 1.0))
+    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, GAMEMODE:GetNPCSpawningScale()))
     DbgPrint(self, "Scaled max live children: " .. tostring(res), realMaxLiveChildren, maxScaledLiveChildren)
     self.CachedMaxLiveChildren = res
     return res
@@ -245,7 +247,7 @@ function ENT:GetScaledMaxNPCs()
         maxScaledNPCCount = realMaxNPCCount
     end
     local maxNPCCount = math.min(realMaxNPCCount, maxScaledNPCCount)
-    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, 1.0))
+    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, GAMEMODE:GetNPCSpawningScale()))
     DbgPrint(self, "Scaled max NPC count: " .. tostring(res), realMaxNPCCount, maxScaledNPCCount)
     self.CachedMaxNPCCount = res
     return res
@@ -424,7 +426,33 @@ function ENT:DispatchActivate(ent)
     ent:Activate()
 end
 
+function ENT:GetChildSquadName()
+    return ""
+end
+
+function ENT:AssignScaledSquad(ent)
+    local baseName = self:GetChildSquadName()
+    if baseName == nil or baseName == "" then return end
+    local index = 1
+    local squadName = baseName
+    while (ScaledSquadMembers[squadName] or 0) >= SCALED_SQUAD_SIZE do
+        index = index + 1
+        squadName = baseName .. "_" .. index
+    end
+
+    ScaledSquadMembers[squadName] = (ScaledSquadMembers[squadName] or 0) + 1
+    ent:SetKeyValue("squadname", squadName)
+    ent:CallOnRemove("LambdaScaledSquad", function()
+        local count = ScaledSquadMembers[squadName]
+        if count ~= nil then
+            ScaledSquadMembers[squadName] = math.max(count - 1, 0)
+        end
+    end)
+end
+
 function ENT:ChildPreSpawn(ent)
+    if self:ShouldScale() == false then return end
+    self:AssignScaledSquad(ent)
 end
 
 function ENT:ChildPostSpawn(ent)

@@ -92,6 +92,14 @@ function ENT:GetNPCClass()
     return ""
 end
 
+function ENT:GetChildSquadName()
+    for k, v in pairs(self.PrecacheData or {}) do
+        if k:iequals("squadname") and isstring(v) then return v end
+    end
+
+    return ""
+end
+
 function ENT:Initialize()
     DbgPrint(self, "ENT:Initialize")
     BaseClass.Initialize(self)

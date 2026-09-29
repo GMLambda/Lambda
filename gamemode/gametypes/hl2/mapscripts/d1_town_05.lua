@@ -93,7 +93,7 @@ function MAPSCRIPT:PostInit()
 
         -- Make sure to substract on our renamed math_counter.
         ents.WaitForEntityByName("end_reinforcements_trigger", function(ent)
-            ent:Fire("AddOutput", "OnTrigger lambda_warehouse_deadcombine_counter,Subtractw,2")
+            ent:Fire("AddOutput", "OnTrigger lambda_warehouse_deadcombine_counter,Subtract,2")
         end)
 
         -- Because those npcs are created via point_template, this is a good hooking spot to correct the output.

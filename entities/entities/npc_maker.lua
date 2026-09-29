@@ -43,6 +43,10 @@ if SERVER then
         return self.NPCType or ""
     end
 
+    function ENT:GetChildSquadName()
+        return self.NPCSquadName or ""
+    end
+
     function ENT:MakeNPC()
         --DbgPrint(self, "ENT:MakeNPC")
         if self:CanMakeNPC() == false then return end
