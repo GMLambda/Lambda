@@ -382,14 +382,9 @@ function ENT:MakerThink()
 
     -- Spawn the next NPC.
     self:MakeNPC()
-    local spawnFrequency = self:GetNWVar("SpawnFrequency")
-    if spawnFrequency ~= -1 then
-        self.NextSpawnTime = curTime + spawnFrequency
-        self:NextThink(self.NextSpawnTime)
-    else
-        self.NextSpawnTime = -1
-        self:NextThink(curTime + 0.1)
-    end
+    local spawnFrequency = math.max(self:GetNWVar("SpawnFrequency"), 0)
+    self.NextSpawnTime = curTime + spawnFrequency
+    self:NextThink(self.NextSpawnTime)
     return true
 end
 
