@@ -70,7 +70,7 @@ function MAPSCRIPT:PostInit()
 
         --ent:SetKeyValue("dmg", "0") -- Don`t hurt the player
         -- Enable HEV as soon someone gets it.
-        GAMEMODE:WaitForInput("suiton", "Enable", function(ent)
+        GAMEMODE:WaitForInput("lambda_suit_trigger", "Enable", function(ent)
             local loadout = GAMEMODE:GetMapScript().DefaultLoadout
             loadout.HEV = true
         end)
@@ -112,7 +112,7 @@ function MAPSCRIPT:PostInit()
         suitTrigger:Fire("AddOutput", "OnTrigger phys_knocked_nag_rl,Kill,,0,-1")
 
         suitTrigger.OnWaitTimeout = function(s)
-            for _, v in pairs(player.GetAll()) do
+            for _, v in pairs(util.GetAllPlayers()) do
                 v:EquipSuit()
             end
         end
