@@ -6,6 +6,7 @@
 - Improved: Changelevel triggers that lead back now use a func_brush to block players instead of pushing them away.
 - Improved: Cockroach behavior, they now flee properly, avoid walls and move faster.
 - Improved: Enemy scaling is now based on the difficulty setting.
+- Improved: Rebalance enemy spawn scaling.
 - Added: Setting to disable vehicle collisions.
 - Fixed: Bad lightning by forcing r_radiosity convar to 4.
 - Fixed: Multiple weapons dissolving when an NPC dies.

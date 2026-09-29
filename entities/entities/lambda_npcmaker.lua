@@ -24,7 +24,38 @@ SF_NPCMAKER_HIDEFROMPLAYER = 128 -- Don't spawn if the player's looking at me
 SF_NPCMAKER_ALWAYSUSERADIUS = 256 -- Use radius spawn whenever spawning
 SF_NPCMAKER_NOPRELOADMODELS = 512 -- Suppress preloading into the cache of all referenced .mdl files
 local SCALED_SQUAD_SIZE = 6
+
 local ScaledSquadMembers = {}
+local SCALED_CLASS_LIVE_LIMITS = {
+    ["npc_combine_s"] = 40,
+    ["npc_metropolice"] = 40,
+    ["npc_zombie"] = 40,
+    ["npc_fastzombie"] = 40,
+    ["npc_poisonzombie"] = 40,
+    ["npc_zombine"] = 40,
+    ["npc_headcrab"] = 30,
+    ["npc_headcrab_fast"] = 30,
+    ["npc_headcrab_black"] = 30,
+    ["npc_manhack"] = 40,
+    ["npc_antlion"] = 40
+}
+local SCALED_CLASS_LIVE_LIMIT_DEFAULT = 32
+local CLASS_SCALE_FACTORS = {
+    ["npc_hunter"] = 0.3,
+    ["npc_antlionguard"] = 0.2,
+    ["npc_poisonzombie"] = 0.5,
+    ["npc_zombine"] = 0.7,
+    ["npc_headcrab"] = 1.2,
+    ["npc_headcrab_fast"] = 1.2,
+    ["npc_headcrab_black"] = 1.2
+}
+local MakerChildrenPerClass = {}
+
+hook.Add("PostCleanupMap", "LambdaNPCMakerCounters", function()
+    ScaledSquadMembers = {}
+    MakerChildrenPerClass = {}
+end)
+
 local HULL_HUMAN_MINS = Vector(-13, -13, 0)
 local HULL_HUMAN_MAXS = Vector(13, 13, 72)
 
@@ -215,6 +246,10 @@ function ScaleCount(original, tightness)
     return math.max(1, math.ceil(original * (linear + extra)))
 end
 
+function ENT:GetScaleTightness()
+    return GAMEMODE:GetNPCSpawningScale() * (CLASS_SCALE_FACTORS[self:GetNPCClass()] or 1.0)
+end
+
 function ENT:GetScaledMaxLiveChildren()
     if self.CachedMaxLiveChildren ~= nil then return self.CachedMaxLiveChildren end
     if self:ShouldScale() == false then
@@ -228,7 +263,7 @@ function ENT:GetScaledMaxLiveChildren()
         maxScaledLiveChildren = realMaxLiveChildren
     end
     local maxLiveChildren = math.min(realMaxLiveChildren, maxScaledLiveChildren)
-    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, GAMEMODE:GetNPCSpawningScale()))
+    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, self:GetScaleTightness()))
     DbgPrint(self, "Scaled max live children: " .. tostring(res), realMaxLiveChildren, maxScaledLiveChildren)
     self.CachedMaxLiveChildren = res
     return res
@@ -247,7 +282,7 @@ function ENT:GetScaledMaxNPCs()
         maxScaledNPCCount = realMaxNPCCount
     end
     local maxNPCCount = math.min(realMaxNPCCount, maxScaledNPCCount)
-    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, GAMEMODE:GetNPCSpawningScale()))
+    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, self:GetScaleTightness()))
     DbgPrint(self, "Scaled max NPC count: " .. tostring(res), realMaxNPCCount, maxScaledNPCCount)
     self.CachedMaxNPCCount = res
     return res
@@ -311,6 +346,15 @@ function ENT:CanMakeNPC(ignoreSolidEnts)
     if maxLiveChildren > 0 and liveChildren >= maxLiveChildren then
         DbgPrint(self, "Too many live children, live: " .. tostring(liveChildren) .. ", max scaled: " .. tostring(maxLiveChildren))
         return false
+    end
+
+    if liveChildren >= self:GetNWVar("MaxLiveChildren") and self:ShouldScale() == true then
+        local class = self:GetNPCClass()
+        local classLimit = SCALED_CLASS_LIVE_LIMITS[class] or SCALED_CLASS_LIVE_LIMIT_DEFAULT
+        if (MakerChildrenPerClass[class] or 0) >= classLimit then
+            DbgPrint(self, "Class live limit reached for " .. tostring(class))
+            return false
+        end
     end
 
     local pos = self:GetPos()
@@ -445,7 +489,19 @@ function ENT:AssignScaledSquad(ent)
     end)
 end
 
+function ENT:TrackClassChild(ent)
+    local class = ent:GetClass()
+    MakerChildrenPerClass[class] = (MakerChildrenPerClass[class] or 0) + 1
+    ent:CallOnRemove("LambdaMakerClassCount", function()
+        local count = MakerChildrenPerClass[class]
+        if count ~= nil then
+            MakerChildrenPerClass[class] = math.max(count - 1, 0)
+        end
+    end)
+end
+
 function ENT:ChildPreSpawn(ent)
+    self:TrackClassChild(ent)
     if self:ShouldScale() == false then return end
     self:AssignScaledSquad(ent)
 end
