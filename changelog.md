@@ -19,6 +19,7 @@
 - Fixed: d2_prison_08: Lua error from a malformed AddOutput and Eli's pod skipping its approach animation.
 - Fixed: Scaled enemies overfilling squads, leaving many of them idle instead of attacking.
 - Fixed: NPC makers with a spawn frequency of -1 only keeping one NPC alive at a time, which could softlock enemy waves.
+- Fixed: Vehicles passing through vehicle clips while their collisions are disabled.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
