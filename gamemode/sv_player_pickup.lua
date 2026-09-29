@@ -37,9 +37,6 @@ local function respawnItem(gm, data)
         end
     end
 
-    -- FIXME: This is a bit hacky as calling Entity:Fire will not call our hooks
-    -- to populate this.
-    e.EntityOutputs = data.outputs
     e:Spawn()
     e:Activate()
 
