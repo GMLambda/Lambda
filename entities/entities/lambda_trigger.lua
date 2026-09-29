@@ -26,6 +26,16 @@ ENT.Type = "brush"
 if SERVER then
     util.AddNetworkString("LambdaTriggerUpdate")
     DEFINE_BASECLASS("lambda_entity")
+
+    cvars.AddChangeCallback("showtriggers", function(_, _, newValue)
+        local show = tobool(newValue)
+        for _, ent in ipairs(ents.GetAll()) do
+            if ent.IsLambdaTrigger ~= nil and ent:IsLambdaTrigger() == true then
+                ent:UpdateTriggerVisibility(show)
+            end
+        end
+    end, "LambdaTriggerVisibility")
+
     SF_TRIGGER_ALLOW_CLIENTS = 0x01 -- Players can fire this trigger
     SF_TRIGGER_ALLOW_NPCS = 0x02 -- NPCS can fire this trigger
     SF_TRIGGER_ALLOW_PUSHABLES = 0x04 -- Pushables can fire this trigger
@@ -129,8 +139,6 @@ if SERVER then
         self.TouchingObjects = {}
         self.LastTouch = CurTime()
         self.PendingStartTouch = false
-
-        self:AddDebugOverlays(bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT))
     end
 
     function ENT:Initialize()
@@ -171,13 +179,7 @@ if SERVER then
 
         --DbgPrint(self, "OnTriggerEvents: " .. #self.OnTriggerEvents)
         --DbgPrint(self, "OnStartTouchEvents: " .. #self.OnStartTouchEvents)
-        if showtriggers:GetBool() == false then
-            self:AddEffects(EF_NODRAW)
-            self:AddDebugOverlays(OVERLAY_BBOX_BIT)
-        else
-            self:RemoveEffects(EF_NODRAW)
-            self:RemoveDebugOverlays(OVERLAY_BBOX_BIT)
-        end
+        self:UpdateTriggerVisibility(showtriggers:GetBool())
 
         if self:GetNWVar("Blocked") == true then
             self:HandleBlockingUpdate(nil, false, true)
@@ -190,6 +192,17 @@ if SERVER then
 
     function ENT:KeyValue(key, val)
         BaseClass.KeyValue(self, key, val)
+    end
+
+    function ENT:UpdateTriggerVisibility(show)
+        local overlays = bit.bor(OVERLAY_PIVOT_BIT, OVERLAY_BBOX_BIT, OVERLAY_NAME_BIT)
+        if show == true then
+            self:RemoveEffects(EF_NODRAW)
+            self:AddDebugOverlays(overlays)
+        else
+            self:AddEffects(EF_NODRAW)
+            self:RemoveDebugOverlays(overlays)
+        end
     end
 
     function ENT:HandleDisableChange(key, wasDisabled, isDisabled)
