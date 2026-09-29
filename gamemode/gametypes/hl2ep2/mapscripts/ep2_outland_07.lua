@@ -36,7 +36,10 @@ MAPSCRIPT.DefaultLoadout = {
     HEV = true
 }
 
-MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.InputFilters = {
+    ["jeep"] = {"Kill"},
+    ["jalopy_spawn_2"] = {"ForceSpawn"}
+}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
     -- FIXME: Contains alyx.
@@ -110,9 +113,14 @@ function MAPSCRIPT:PostInit()
         return true
     end)
 
-    -- Prevent the deletion of the vehicle.
-    GAMEMODE:WaitForInput("jeep", "Kill", function(ent, caller)
-        return true
+    ents.WaitForEntityByName("chopper_spawn_trigger", function(ent)
+        ent:SetupTrigger(
+            Vector(-9152.68, -10526.67, 112),
+            Angle(0, 0, 0),
+            Vector(-1117.14, -352.93, 0),
+            Vector(1117.14, 352.93, 184),
+            false
+        )
     end)
 
     -- Resize the trigger and make it wait for all players.
