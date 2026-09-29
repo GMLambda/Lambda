@@ -370,51 +370,63 @@ if SERVER then
         ["weapon_crowbar"] = 100,
     }
 
-    function GM:GetNextBestWeapon(ply)
-        local weps = ply:GetWeapons()
-        local defaultAmmoData = {
-            npcdmg = 0,
-            plydmg = 0,
-            dmgtype = 0,
-        }
+    local DEFAULT_AMMO_DATA = {
+        npcdmg = 0,
+        plydmg = 0,
+        dmgtype = 0,
+    }
 
-        -- Sort them by damage and ammo count.
-        table.sort(weps, function(a, b)
-            local ammoDataPrimaryA = game.GetAmmoData(a:GetPrimaryAmmoType()) or defaultAmmoData
-            local ammoDataSecondaryA = game.GetAmmoData(a:GetSecondaryAmmoType()) or defaultAmmoData
-            local ammoDataPrimaryB = game.GetAmmoData(b:GetPrimaryAmmoType()) or defaultAmmoData
-            local ammoDataSecondaryB = game.GetAmmoData(b:GetSecondaryAmmoType()) or defaultAmmoData
-            local weightA = a:GetWeight() * 3
-            local weightB = b:GetWeight() * 3
-            local dmgPrimaryA = GetDamageValue(ammoDataPrimaryA.npcdmg) + GetDamageValue(ammoDataPrimaryA.plydmg)
-            if bit_band(ammoDataPrimaryA.dmgtype, DMG_BUCKSHOT) ~= 0 then dmgPrimaryA = dmgPrimaryA * 4 end
-            local dmgSecondaryA = GetDamageValue(ammoDataSecondaryA.npcdmg) + GetDamageValue(ammoDataSecondaryA.plydmg)
-            local dmgPrimaryB = GetDamageValue(ammoDataPrimaryB.npcdmg) + GetDamageValue(ammoDataPrimaryB.plydmg)
-            if bit_band(ammoDataPrimaryB.dmgtype, DMG_BUCKSHOT) ~= 0 then dmgPrimaryB = dmgPrimaryB * 4 end
-            local dmgSecondaryB = GetDamageValue(ammoDataSecondaryB.npcdmg) + GetDamageValue(ammoDataSecondaryB.plydmg)
-            local ammoCountPrimaryA = ply:GetAmmoCount(a:GetPrimaryAmmoType())
-            local ammoCountSecondaryA = ply:GetAmmoCount(a:GetSecondaryAmmoType())
-            local ammoCountPrimaryB = ply:GetAmmoCount(b:GetPrimaryAmmoType())
-            local ammoCountSecondaryB = ply:GetAmmoCount(b:GetSecondaryAmmoType())
-            local bonusDualA = (a:GetPrimaryAmmoType() ~= -1 and a:GetSecondaryAmmoType() ~= -1) and 1 or 0
-            local bonusDualB = (b:GetPrimaryAmmoType() ~= -1 and b:GetSecondaryAmmoType() ~= -1) and 1 or 0
-            -- Combine all the values to get a weight.
-            weightA = weightA + ((ammoCountPrimaryA * dmgPrimaryA) * 0.1) + ((ammoCountSecondaryA * dmgSecondaryA) * 0.5) + bonusDualA
-            weightB = weightB + ((ammoCountPrimaryB * dmgPrimaryB) * 0.1) + ((ammoCountSecondaryB * dmgSecondaryB) * 0.5) + bonusDualB
-            -- Penalize certain weapons.
-            local penaltyA = WEAPON_PRIORITY_PENALTY[a:GetClass()] or 0
-            local penaltyB = WEAPON_PRIORITY_PENALTY[b:GetClass()] or 0
-            weightA = weightA - penaltyA
-            weightB = weightB - penaltyB
-            return weightA > weightB
-        end)
-
-        if #weps == 0 then return nil end
-        return weps[1]
+    function GM:WeaponHasAmmo(ply, wep)
+        local primaryType = wep:GetPrimaryAmmoType()
+        local secondaryType = wep:GetSecondaryAmmoType()
+        if primaryType == -1 and secondaryType == -1 then return true end
+        if wep:Clip1() > 0 or wep:Clip2() > 0 then return true end
+        if primaryType ~= -1 and ply:GetAmmoCount(primaryType) > 0 then return true end
+        if secondaryType ~= -1 and ply:GetAmmoCount(secondaryType) > 0 then return true end
+        return false
     end
 
-    function GM:SelectBestWeapon(ply)
-        local betterWep = self:GetNextBestWeapon(ply)
+    function GM:GetWeaponScore(ply, wep)
+        local primaryType = wep:GetPrimaryAmmoType()
+        local secondaryType = wep:GetSecondaryAmmoType()
+        local ammoDataPrimary = game.GetAmmoData(primaryType) or DEFAULT_AMMO_DATA
+        local ammoDataSecondary = game.GetAmmoData(secondaryType) or DEFAULT_AMMO_DATA
+        local dmgPrimary = GetDamageValue(ammoDataPrimary.npcdmg) + GetDamageValue(ammoDataPrimary.plydmg)
+        if bit_band(ammoDataPrimary.dmgtype, DMG_BUCKSHOT) ~= 0 then dmgPrimary = dmgPrimary * 4 end
+        local dmgSecondary = GetDamageValue(ammoDataSecondary.npcdmg) + GetDamageValue(ammoDataSecondary.plydmg)
+        local bonusDual = (primaryType ~= -1 and secondaryType ~= -1) and 1 or 0
+        local score = wep:GetWeight() * 3
+        score = score + ((ply:GetAmmoCount(primaryType) * dmgPrimary) * 0.1) + ((ply:GetAmmoCount(secondaryType) * dmgSecondary) * 0.5) + bonusDual
+        return score - (WEAPON_PRIORITY_PENALTY[wep:GetClass()] or 0)
+    end
+
+    function GM:GetNextBestWeapon(ply, exclude)
+        local bestWep = nil
+        local bestScore = nil
+        for _, wep in ipairs(ply:GetWeapons()) do
+            if wep ~= exclude and self:WeaponHasAmmo(ply, wep) == true then
+                local score = self:GetWeaponScore(ply, wep)
+                if bestScore == nil or score > bestScore then
+                    bestWep = wep
+                    bestScore = score
+                end
+            end
+        end
+
+        return bestWep
+    end
+
+    function GM:ShouldSwitchToWeapon(ply, wep)
+        local activeWep = ply:GetActiveWeapon()
+        if not IsValid(activeWep) then return true end
+        if activeWep == wep then return false end
+        if ply:GetInfoNum("cl_autowepswitch", 1) == 0 then return false end
+        if self:WeaponHasAmmo(ply, wep) == false then return false end
+        return wep:GetWeight() > activeWep:GetWeight()
+    end
+
+    function GM:SelectBestWeapon(ply, exclude)
+        local betterWep = self:GetNextBestWeapon(ply, exclude)
         if IsValid(betterWep) then
             ply:SelectWeapon(betterWep:GetClass())
             return
@@ -1445,7 +1457,6 @@ function GM:FinishPlayerCollisionSweep(plys)
 end
 
 function GM:UpdatePlayerCollisions()
-    -- If server set collisions off don't bother reverting.
     if self:GetSetting("playercollision", true) == false then return end
     local plys = util.GetAllPlayers()
     local count = #plys
@@ -1532,7 +1543,7 @@ function GM:OnPlayerAmmoDepleted(ply, wep)
     if SERVER then
         util.RunDelayed(function()
             -- Only switch if we are still holding the empty weapon.
-            if ply:GetActiveWeapon() == wep then self:SelectBestWeapon(ply) end
+            if ply:GetActiveWeapon() == wep then self:SelectBestWeapon(ply, wep) end
         end, CurTime() + 1.5)
     end
 

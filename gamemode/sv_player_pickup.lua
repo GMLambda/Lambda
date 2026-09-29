@@ -298,10 +298,12 @@ function GM:WeaponEquip(wep, owner)
     if owner.IsCurrentlySpawning == false then
         local class = wep:GetClass()
 
-        util.RunNextFrame(function()
-            if not IsValid(ply) then return end
-            ply:SelectWeapon(class)
-        end)
+        if self:ShouldSwitchToWeapon(ply, wep) == true then
+            util.RunNextFrame(function()
+                if not IsValid(ply) then return end
+                ply:SelectWeapon(class)
+            end)
+        end
 
         if wep.ShouldHidePickupInfo == nil or wep.ShouldHidePickupInfo() ~= true then
             ply:EmitSound("Player.PickupWeapon")
