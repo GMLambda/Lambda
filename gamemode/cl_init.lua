@@ -229,6 +229,33 @@ function GM:CalcViewModelView(wep, vm, oldPos, oldAng, vm_origin, vm_angles)
     return newPos, newAng
 end
 
+local GIB_VIEW_DISTANCE_MIN = 32
+local GIB_VIEW_DISTANCE_MAX = 96
+local GIB_VIEW_DISTANCE_SPEED = 48
+local GIB_VIEW_HULL_MINS = Vector(-4, -4, -4)
+local GIB_VIEW_HULL_MAXS = Vector(4, 4, 4)
+
+function GM:CalcGibView(ply, view)
+    local ragdollMgr = ply:GetRagdollManager()
+    if not IsValid(ragdollMgr) or ragdollMgr.GetHeadGib == nil then return end
+    local headGib, startTime = ragdollMgr:GetHeadGib()
+    if not IsValid(headGib) then return end
+    local dist = math.min(GIB_VIEW_DISTANCE_MIN + (CurTime() - startTime) * GIB_VIEW_DISTANCE_SPEED, GIB_VIEW_DISTANCE_MAX)
+    local origin = headGib:GetPos()
+    local tr = util.TraceHull({
+        start = origin,
+        endpos = origin - view.angles:Forward() * dist,
+        mins = GIB_VIEW_HULL_MINS,
+        maxs = GIB_VIEW_HULL_MAXS,
+        mask = MASK_SOLID,
+        filter = ply
+    })
+
+    view.origin = tr.HitPos
+
+    return view
+end
+
 function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
     local view = {}
     view.origin = pos
@@ -237,6 +264,11 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
     view.znear = nearZ
     view.zfar = farZ
     view.drawviewer = false
+    if not ply:Alive() then
+        local gibView = self:CalcGibView(ply, view)
+        if gibView ~= nil then return gibView end
+    end
+
     local viewlock = ply:GetViewLock()
     local lastViewLock = ply.LastViewLock or -1
     ply.LastViewLock = viewlock

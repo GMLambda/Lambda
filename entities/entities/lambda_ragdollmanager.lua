@@ -115,6 +115,7 @@ local MAX_SPEED_THRESHOLD = 300
 local MAX_GIBS = 100
 local GIBS_MAX_LIFETIME = 10
 local UPDATE_TIME = 1 / 30
+local HEAD_BONE = "ValveBiped.Bip01_Head1"
 
 game.AddParticles("particles/blood_impact.pcf")
 game.AddParticles("particles/fire_01.pcf")
@@ -407,7 +408,7 @@ end
 function ENT:UpdateGibPart(gib)
     local curTime = CurTime()
 
-    if curTime - gib.StartTime >= GIBS_MAX_LIFETIME then
+    if gib ~= self.HeadGib and curTime - gib.StartTime >= GIBS_MAX_LIFETIME then
         gib:Remove()
 
         return false
@@ -459,15 +460,25 @@ function ENT:UpdateGibs()
         table.remove(self.GibQueue, 1)
     end
 
+    if IsValid(self.HeadGib) then
+        local ply = self:GetOwner()
+        if IsValid(ply) and ply:Alive() then
+            if self.HeadGibOwnerDied == true then self.HeadGib:Remove() end
+        else
+            self.HeadGibOwnerDied = true
+        end
+    end
+
     -- Limit the maximum possible gibs, remove oldest.
     while #self.GibParts > MAX_GIBS do
-        local gib = self.GibParts[1]
+        local oldest = self.GibParts[1] == self.HeadGib and 2 or 1
+        local gib = self.GibParts[oldest]
 
         if IsValid(gib) then
             gib:Remove()
         end
 
-        table.remove(self.GibParts, 1)
+        table.remove(self.GibParts, oldest)
     end
 
     local idx = 1
@@ -572,6 +583,12 @@ function ENT:CreateGibPart(boneName, pos, ang, posOffset, angOffset, mdl, dmgFor
     end
 
     table.insert(self.GibParts, gib)
+
+    return gib
+end
+
+function ENT:GetHeadGib()
+    return self.HeadGib, self.HeadGibTime
 end
 
 function ENT:GibPlayerClient()
@@ -596,7 +613,12 @@ function ENT:GibPlayerClient()
 
             if boneParts ~= nil then
                 for _, v in pairs(boneParts) do
-                    self:CreateGibPart(boneName, pos, ang, v.Offset, v.Ang, v.Mdl, (dmgForce * 0.8) + offset, 0, didExplode, true, v.Scale or 1)
+                    local gib = self:CreateGibPart(boneName, pos, ang, v.Offset, v.Ang, v.Mdl, (dmgForce * 0.8) + offset, 0, didExplode, true, v.Scale or 1)
+                    if boneName == HEAD_BONE then
+                        self.HeadGib = gib
+                        self.HeadGibTime = CurTime()
+                        self.HeadGibOwnerDied = false
+                    end
                 end
             end
 
