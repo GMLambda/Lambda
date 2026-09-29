@@ -96,11 +96,14 @@ function MAPSCRIPT:PostInit()
             ent:Fire("AddOutput", "OnTrigger relayAnim_PodExtractor_extract,Trigger,,5,-1")
         end)
 
+        ents.WaitForEntityByName("lcs_np_teleport03", function(ent)
+            ent:Fire("AddOutput", "OnTrigger2 logic_eli_pod_start_1,Trigger,,1,-1")
+        end)
+
         ents.WaitForEntityByName("lcs_np_teleport04", function(ent)
             ent:Remove()
             ents.WaitForEntityByName("lcs_np_teleport05", function(ent2)
                 ent2:SetName("lcs_np_teleport04")
-                ent2:Fire("AddOutput", "OnTrigger1")
             end)
         end)
 

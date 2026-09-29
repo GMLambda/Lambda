@@ -73,6 +73,10 @@ function GM:AcceptInput(ent, inputName, activator, caller, value)
     if inputName == "AddOutput" and self.IsCreatingInternalOutputs ~= true then
         -- Split outputname and output parameters.
         local outputName, outputParams = string.match(value, "(%w+)%s+(.*)")
+        if outputName == nil or outputParams == nil then
+            ErrorNoHaltWithStack("Malformed AddOutput '" .. tostring(value) .. "' on " .. tostring(ent) .. ", caller: " .. tostring(caller) .. ", activator: " .. tostring(activator) .. "\n")
+            return
+        end
 
         -- AddOutput uses double point instead of comma, replace that.
         outputParams = string.gsub(outputParams, ":", ",")
