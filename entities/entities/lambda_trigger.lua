@@ -135,7 +135,6 @@ if SERVER then
         self.TeamInside = false
         self.IsWaiting = false
         self.NextTimeout = 0
-        self.DisabledTouchingObjects = {}
         self.TouchingObjects = {}
         self.LastTouch = CurTime()
         self.PendingStartTouch = false
@@ -183,6 +182,10 @@ if SERVER then
 
         if self:GetNWVar("Blocked") == true then
             self:HandleBlockingUpdate(nil, false, true)
+        end
+
+        if self:IsDisabled() then
+            self:RemoveSolidFlags(FSOLID_TRIGGER)
         end
 
         hook.Add("PlayerInitialSpawn", self, function(gm, ply)
@@ -257,12 +260,18 @@ if SERVER then
         self:SetTrigger(true)
         self:SetCollisionBounds(mins, maxs)
         self:UseTriggerBounds(true)
+        if self:IsDisabled() then
+            self:RemoveSolidFlags(FSOLID_TRIGGER)
+        end
     end
 
     function ENT:ResizeTriggerBox(mins, maxs)
         self:SetTrigger(true)
         self:SetCollisionBounds(mins, maxs)
         self:UseTriggerBounds(true)
+        if self:IsDisabled() then
+            self:RemoveSolidFlags(FSOLID_TRIGGER)
+        end
     end
 
     function ENT:Enable()
@@ -279,37 +288,30 @@ if SERVER then
         util.RunNextFrame(function()
             if not IsValid(self) then return end
             self:SetNWVar("Disabled", false)
+            self:AddSolidFlags(FSOLID_TRIGGER)
 
             if not self:IsEFlagSet(EFL_CHECK_UNTOUCH) then
                 self:AddEFlags(EFL_CHECK_UNTOUCH)
             end
 
-            for k, v in pairs(self.DisabledTouchingObjects) do
-                local ent = Entity(k)
-
-                if IsValid(ent) then
-                    self:StartTouch(ent)
-                end
+            local touching = util.TraceTriggerTouching(self)
+            for _, ent in ipairs(touching) do
+                self:StartTouch(ent)
             end
 
-            for k, v in pairs(self.DisabledTouchingObjects) do
-                local ent = Entity(k)
-
+            for _, ent in ipairs(touching) do
                 if IsValid(ent) then
                     self:Touch(ent)
                 end
             end
-
-            self.DisabledTouchingObjects = {}
         end)
     end
 
     function ENT:Disable()
         DbgPrint(self, "ENT:Disable")
-        --self:RemoveSolidFlags(FSOLID_TRIGGER)
+        self:RemoveSolidFlags(FSOLID_TRIGGER)
         self:SetNWVar("Disabled", true)
         self:RemoveEFlags(EFL_CHECK_UNTOUCH)
-        self.DisabledTouchingObjects = self.TouchingObjects or {}
         self.TouchingObjects = {}
     end
 
@@ -361,7 +363,6 @@ if SERVER then
         self.TeamInside = false
         self.IsWaiting = false
         self.NextTimeout = 0
-        self.DisabledTouchingObjects = {}
         self.TouchingObjects = {}
         self:FullPlayerUpdate()
     end
@@ -385,14 +386,6 @@ if SERVER then
 
     function ENT:Think()
         local playersInside = 0
-
-        for id, v in pairs(self.DisabledTouchingObjects) do
-            local ent = Entity(id)
-
-            if not IsValid(ent) then
-                self.DisabledTouchingObjects[id] = nil
-            end
-        end
 
         for id, v in pairs(self.TouchingObjects) do
             local ent = Entity(id)
@@ -634,10 +627,6 @@ if SERVER then
         local entIndex = ent:EntIndex()
 
         if self:GetNWVar("Disabled") == true then
-            if self.DisabledTouchingObjects[entIndex] == nil then
-                self.DisabledTouchingObjects[entIndex] = CurTime()
-            end
-
             return
         end
 
@@ -687,10 +676,6 @@ if SERVER then
 
     function ENT:EndTouch(ent)
         local entIndex = ent:EntIndex()
-
-        if self.DisabledTouchingObjects[entIndex] ~= nil then
-            self.DisabledTouchingObjects[entIndex] = nil
-        end
 
         if self:GetNWVar("DisableEndTouch") ~= true then
             self.TouchingObjects = self.TouchingObjects or {} -- Seems this is called before Initialize in some cases.

@@ -28,6 +28,7 @@
 - Fixed: Large objects such as the gunship not transitioning when only partially inside the transition volume.
 - Fixed: Players spawning or teleporting inside another player being unable to move.
 - Fixed: Entity outputs no longer firing after one-time outputs of the same event were used up.
+- Fixed: Triggers were always active to workaround an issue invalidating touch when enabled, now uses an optimization to avoid that.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).

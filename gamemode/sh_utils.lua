@@ -648,3 +648,94 @@ function util.StopSoundScript(ent, name)
         ent:StopSound(snd)
     end
 end
+
+local TRIGGER_PLANE_EPSILON = 0.01
+
+local function GetTriggerPlanes(trigger)
+    local mdl = trigger:GetModel() or ""
+    if trigger.LambdaTriggerPlanesModel == mdl then return trigger.LambdaTriggerPlanes end
+    local planes = false
+    if string.sub(mdl, 1, 1) == "*" and trigger.GetBrushPlaneCount ~= nil then
+        local count = trigger:GetBrushPlaneCount()
+        if count > 0 then
+            planes = {}
+            local normals = {}
+            for i = 0, count - 1 do
+                local _, normal, dist = trigger:GetBrushPlane(i)
+                local key = string.format("%.3f %.3f %.3f", normal.x, normal.y, normal.z)
+                if normals[key] == true then
+                    planes = false
+                    break
+                end
+
+                normals[key] = true
+                planes[#planes + 1] = {
+                    Normal = normal,
+                    Dist = dist
+                }
+            end
+        end
+    end
+
+    trigger.LambdaTriggerPlanesModel = mdl
+    trigger.LambdaTriggerPlanes = planes
+
+    return planes
+end
+
+local function IsTouchingTrigger(trigger, ent)
+    local entMins, entMaxs = ent:WorldSpaceAABB()
+    local localMins = nil
+    local localMaxs = nil
+    for i = 0, 7 do
+        local corner = Vector(bit.band(i, 1) ~= 0 and entMaxs.x or entMins.x, bit.band(i, 2) ~= 0 and entMaxs.y or entMins.y, bit.band(i, 4) ~= 0 and entMaxs.z or entMins.z)
+        local localPos = trigger:WorldToLocal(corner)
+        if localMins == nil then
+            localMins = Vector(localPos)
+            localMaxs = Vector(localPos)
+        else
+            localMins.x = math.min(localMins.x, localPos.x)
+            localMins.y = math.min(localMins.y, localPos.y)
+            localMins.z = math.min(localMins.z, localPos.z)
+            localMaxs.x = math.max(localMaxs.x, localPos.x)
+            localMaxs.y = math.max(localMaxs.y, localPos.y)
+            localMaxs.z = math.max(localMaxs.z, localPos.z)
+        end
+    end
+
+    local obbMins = trigger:OBBMins()
+    local obbMaxs = trigger:OBBMaxs()
+    if localMins.x > obbMaxs.x or localMaxs.x < obbMins.x then return false end
+    if localMins.y > obbMaxs.y or localMaxs.y < obbMins.y then return false end
+    if localMins.z > obbMaxs.z or localMaxs.z < obbMins.z then return false end
+
+    local planes = GetTriggerPlanes(trigger)
+    if planes == false then return true end
+
+    for _, plane in ipairs(planes) do
+        local n = plane.Normal
+        local minDot = n.x * (n.x > 0 and localMins.x or localMaxs.x) + n.y * (n.y > 0 and localMins.y or localMaxs.y) + n.z * (n.z > 0 and localMins.z or localMaxs.z)
+        if minDot > plane.Dist + TRIGGER_PLANE_EPSILON then return false end
+    end
+
+    return true
+end
+
+function util.TraceTriggerTouching(trigger, allEntities)
+    local res = {}
+    local candidates
+    if allEntities == true then
+        candidates = ents.GetAll()
+    else
+        local mins, maxs = trigger:WorldSpaceAABB()
+        candidates = ents.FindInBox(mins, maxs)
+    end
+
+    for _, ent in ipairs(candidates) do
+        if ent ~= trigger and IsTouchingTrigger(trigger, ent) then
+            res[#res + 1] = ent
+        end
+    end
+
+    return res
+end

@@ -609,16 +609,14 @@ local function CheckTouchingVolume(volume, obj)
     return Profiled("CheckTouchingVolume", function()
         -- Check if the volume registered the object as touching.
         if IsTouchingVolume(volume, obj) == true then return true end
-        -- Check against bounding box.
-        local volPos = volume:GetPos()
-        local volMins = volPos + volume:OBBMins()
-        local volMaxs = volPos + volume:OBBMaxs()
-        local objMins, objMaxs = obj:WorldSpaceAABB()
+        if volume.LambdaTouchingSet == nil then
+            volume.LambdaTouchingSet = {}
+            for _, ent in ipairs(util.TraceTriggerTouching(volume, true)) do
+                volume.LambdaTouchingSet[ent] = true
+            end
+        end
 
-        if objMins.x > volMaxs.x or objMaxs.x < volMins.x then return false end
-        if objMins.y > volMaxs.y or objMaxs.y < volMins.y then return false end
-        if objMins.z > volMaxs.z or objMaxs.z < volMins.z then return false end
-        return true
+        return volume.LambdaTouchingSet[obj] == true
     end)
 end
 
