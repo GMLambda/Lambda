@@ -26,7 +26,9 @@ MAPSCRIPT.DefaultLoadout = {
     HEV = true
 }
 
-MAPSCRIPT.InputFilters = {}
+MAPSCRIPT.InputFilters = {
+    ["goo_pit3_ladder_relay"] = {"Trigger"}
+}
 MAPSCRIPT.EntityFilterByClass = {}
 MAPSCRIPT.EntityFilterByName = {
     ["global_newgame_spawner_suit"] = true,
@@ -73,7 +75,27 @@ MAPSCRIPT.Checkpoints = {
     },
 }
 
+local VEHICLE_PIECES = {
+    { Mdl = "models/vehicle/vehicle_engine_block.mdl", Pos = Vector(0, 0.7, 0.4) },
+    { Mdl = "models/props_vehicles/carparts_wheel01a.mdl", Pos = Vector(-0.85, 0.6, 0.2) },
+    { Mdl = "models/props_vehicles/carparts_wheel01a.mdl", Pos = Vector(0.85, 0.6, 0.2) },
+    { Mdl = "models/props_vehicles/carparts_tire01a.mdl", Pos = Vector(-0.85, -0.6, 0.2) },
+    { Mdl = "models/props_vehicles/carparts_tire01a.mdl", Pos = Vector(0.85, -0.6, 0.2) },
+    { Mdl = "models/props_vehicles/carparts_door01a.mdl", Pos = Vector(-0.95, 0, 0.45) },
+    { Mdl = "models/props_vehicles/carparts_axel01a.mdl", Pos = Vector(0, -0.6, 0.15) },
+    { Mdl = "models/props_vehicles/carparts_muffler01a.mdl", Pos = Vector(-0.3, -0.9, 0.1) },
+}
+
 function MAPSCRIPT:PostInit()
+    local alyxMayEnterVehicle = false
+    GAMEMODE:WaitForInput("jeep", "UnlockEntrance", function()
+        alyxMayEnterVehicle = true
+    end)
+
+    GAMEMODE:WaitForInput("alyx", "EnterVehicle", function()
+        if alyxMayEnterVehicle == false then return true end
+    end)
+
     ents.WaitForEntityByName("trigger_alyxChoreoArrive06", function(ent)
         ent.OnTrigger = function()
             local loadout = GAMEMODE:GetMapScript().DefaultLoadout
@@ -129,6 +151,71 @@ function MAPSCRIPT:PostInit()
         ent.OnTrigger = function(_, activator)
             GAMEMODE:SetPlayerCheckpoint(cp10, activator)
         end
+    end)
+
+    for _, piece in ipairs(VEHICLE_PIECES) do
+        util.PrecacheModel(piece.Mdl)
+    end
+
+    local function SpawnVehiclePieces(vehicle, center)
+        local mins = vehicle:OBBMins()
+        local maxs = vehicle:OBBMaxs()
+        local mid = (mins + maxs) * 0.5
+        local half = (maxs - mins) * 0.5
+        local vehicleVel = vehicle:GetVelocity()
+        local vehicleAng = vehicle:GetAngles()
+        for _, piece in ipairs(VEHICLE_PIECES) do
+            local localPos = Vector(mid.x + half.x * piece.Pos.x, mid.y + half.y * piece.Pos.y, mins.z + (maxs.z - mins.z) * piece.Pos.z)
+            local worldPos = vehicle:LocalToWorld(localPos)
+            local prop = ents.Create("prop_physics")
+            prop:SetModel(piece.Mdl)
+            prop:SetPos(worldPos)
+            prop:SetAngles(vehicleAng)
+            prop:Spawn()
+            prop:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+            local phys = prop:GetPhysicsObject()
+            if IsValid(phys) then
+                phys:SetVelocity(vehicleVel + (worldPos - center):GetNormalized() * 350 + Vector(0, 0, 250))
+                phys:AddAngleVelocity(VectorRand() * 300)
+            end
+        end
+    end
+
+    local function ExplodeFallenVehicle(vehicle)
+        if not IsValid(vehicle) or vehicle.LambdaFallExploded == true then return end
+        vehicle.LambdaFallExploded = true
+        local pos = vehicle:WorldSpaceCenter()
+        local explosion = ents.Create("env_explosion")
+        explosion:SetPos(pos)
+        explosion:SetKeyValue("iMagnitude", "0")
+        explosion:Spawn()
+        local occupants = {vehicle:GetDriver(), GAMEMODE:VehicleGetPassenger(vehicle)}
+        for i = 1, 2 do
+            local ply = occupants[i]
+            if IsValid(ply) and ply:IsPlayer() and ply:Alive() then
+                ply:SetArmor(0)
+                local dmgInfo = DamageInfo()
+                dmgInfo:SetDamage(100000)
+                dmgInfo:SetDamageType(bit.bor(DMG_BLAST, DMG_VEHICLE))
+                dmgInfo:SetDamagePosition(pos)
+                dmgInfo:SetAttacker(game.GetWorld())
+                dmgInfo:SetInflictor(explosion)
+                ply:TakeDamageInfo(dmgInfo)
+            end
+        end
+
+        explosion:Fire("Explode")
+        SpawnVehiclePieces(vehicle, pos)
+        vehicle:Remove()
+    end
+
+    ents.WaitForEntityByName("fall_trigger", function(ent)
+        ent:Fire("AddOutput", "OnTrigger !self,LambdaFallExplode,,1,-1")
+    end)
+
+    GAMEMODE:WaitForInput("fall_trigger", "LambdaFallExplode", function(_, _, activator)
+        ExplodeFallenVehicle(activator)
+        return true
     end)
 end
 
