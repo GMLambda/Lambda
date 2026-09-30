@@ -818,14 +818,22 @@ if SERVER then
         end
     end
 
+    local SPECTATE_KEYS = {IN_ATTACK, IN_ATTACK2, IN_JUMP}
+
     function GM:PlayerDeathThink(ply)
         if self.WaitingForRoundStart == true or self:IsRoundRestarting() == true then
             DbgPrint("Can not spawn before players available")
             return false
         end
 
-        local elapsed = GetSyncedTimestamp() - ply.DeathTime
-        if elapsed >= 5 and ply:IsSpectator() == false then ply:SetSpectator() end
+        if ply:IsSpectator() == false then
+            for _, key in ipairs(SPECTATE_KEYS) do
+                if ply:KeyDown(key) and not ply:KeyDownLast(key) then
+                    ply:SetSpectator()
+                    break
+                end
+            end
+        end
         if GetSyncedTimestamp() < ply.RespawnTime then return false end
         local timeout = self:CallGameTypeFunc("GetPlayerRespawnTime")
         if timeout >= 0 then if GetSyncedTimestamp() < ply.RespawnTime then return false end end

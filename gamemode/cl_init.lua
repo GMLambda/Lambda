@@ -264,7 +264,7 @@ function GM:CalcView(ply, pos, ang, fov, nearZ, farZ)
     view.znear = nearZ
     view.zfar = farZ
     view.drawviewer = false
-    if not ply:Alive() then
+    if not ply:Alive() and not ply:IsSpectator() then
         local gibView = self:CalcGibView(ply, view)
         if gibView ~= nil then return gibView end
     end
