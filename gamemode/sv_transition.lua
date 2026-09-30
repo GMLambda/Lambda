@@ -908,6 +908,11 @@ function GM:CreateTransitionObjects()
         for _, data in pairs(objects) do
             if data.Ignored == true then continue end
             local hasGlobalEnt = IsValid(data.GlobalEnt)
+            if hasGlobalEnt == false and data.GlobalName ~= nil and data.GlobalName ~= "" then
+                DbgPrint("Ignoring global entity without counterpart: " .. data.Class, data.GlobalName)
+                continue
+            end
+
             if hasGlobalEnt == false and data.Mdl ~= nil and string.sub(data.Mdl, 1, 1) == "*" then
                 DbgPrint("Ignoring creation of brush entity without counterpart: " .. data.Class)
                 continue
