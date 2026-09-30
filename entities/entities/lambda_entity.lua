@@ -371,7 +371,7 @@ function ENT:FireOutputs(name, param, activator, caller)
     local actualCaller = caller or self
     local actualActivator = activator or self
     local outputs = self.OutputsTable[name] or {}
-    if #outputs == 0 then return end
+    if next(outputs) == nil then return end
 
     util.EnqueueOutput(function()
         DbgPrint(self, "FireOutputs: " .. name .. " " .. table.Count(outputs) .. " outputs")

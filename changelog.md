@@ -27,6 +27,7 @@
 - Fixed: Level transitions breaking global triggers and other brush entities, losing their state when returning to a map.
 - Fixed: Large objects such as the gunship not transitioning when only partially inside the transition volume.
 - Fixed: Players spawning or teleporting inside another player being unable to move.
+- Fixed: Entity outputs no longer firing after one-time outputs of the same event were used up.
 
 0.9.29
 - Improved: Use new checkpoint structure in mapscripts where possible with better positioning (first 5 chapters).
