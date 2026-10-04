@@ -9,7 +9,6 @@ local IsValid = IsValid
 
 -- Turn this off when we are sure it is all correct.
 local WARN_ON_FRIENDLY_SCALING = true
-local SIMULATE_HIGH_PLAYERCOUNT = true
 
 DEFINE_BASECLASS("lambda_entity")
 ENT.Base = "lambda_entity"
@@ -40,15 +39,6 @@ local SCALED_CLASS_LIVE_LIMITS = {
     ["npc_antlion"] = 40
 }
 local SCALED_CLASS_LIVE_LIMIT_DEFAULT = 32
-local CLASS_SCALE_FACTORS = {
-    ["npc_hunter"] = 0.3,
-    ["npc_antlionguard"] = 0.2,
-    ["npc_poisonzombie"] = 0.5,
-    ["npc_zombine"] = 0.7,
-    ["npc_headcrab"] = 1.2,
-    ["npc_headcrab_fast"] = 1.2,
-    ["npc_headcrab_black"] = 1.2
-}
 local MakerChildrenPerClass = {}
 
 hook.Add("PostCleanupMap", "LambdaNPCMakerCounters", function()
@@ -216,40 +206,6 @@ function ENT:ShouldScale()
     return true
 end
 
-local function GetPlayerCount()
-    if SIMULATE_HIGH_PLAYERCOUNT then
-        return 35 -- Simulate
-    end
-    local actual = player.GetCount()
-    return actual
-end
-
--- The officially recommended supported maximum player count for scaling.
-local SOFT_CAP_PLAYERS = 24
-local SOFT_CAP_MULT   = 6.0
-local TAIL_BASE       = 1.0
-
-function ScaleCount(original, tightness)
-    if original == 0 then
-        return 0
-    end
-    tightness = tightness or 1.0
-    local pc = GetPlayerCount()
-    if pc == 0 then
-        return 0
-    end
-    local soft = math.min(pc, SOFT_CAP_PLAYERS)
-    local tail = math.max(pc - SOFT_CAP_PLAYERS, 0)
-    local targetMult = 1 + (SOFT_CAP_MULT - 1) * tightness
-    local linear = 1 + (soft - 1) * ((targetMult - 1) / (SOFT_CAP_PLAYERS - 1))
-    local extra  = math.sqrt(tail) * TAIL_BASE * tightness
-    return math.max(1, math.ceil(original * (linear + extra)))
-end
-
-function ENT:GetScaleTightness()
-    return GAMEMODE:GetNPCSpawningScale() * (CLASS_SCALE_FACTORS[self:GetNPCClass()] or 1.0)
-end
-
 function ENT:GetScaledMaxLiveChildren()
     if self.CachedMaxLiveChildren ~= nil then return self.CachedMaxLiveChildren end
     if self:ShouldScale() == false then
@@ -263,7 +219,7 @@ function ENT:GetScaledMaxLiveChildren()
         maxScaledLiveChildren = realMaxLiveChildren
     end
     local maxLiveChildren = math.min(realMaxLiveChildren, maxScaledLiveChildren)
-    local res = math.max(maxScaledLiveChildren, ScaleCount(maxLiveChildren, self:GetScaleTightness()))
+    local res = math.max(maxScaledLiveChildren, GAMEMODE:GetScaledMaxLiveChildren(maxLiveChildren, self:GetNPCClass()))
     DbgPrint(self, "Scaled max live children: " .. tostring(res), realMaxLiveChildren, maxScaledLiveChildren)
     self.CachedMaxLiveChildren = res
     return res
@@ -282,7 +238,7 @@ function ENT:GetScaledMaxNPCs()
         maxScaledNPCCount = realMaxNPCCount
     end
     local maxNPCCount = math.min(realMaxNPCCount, maxScaledNPCCount)
-    local res = math.max(maxScaledNPCCount, ScaleCount(maxNPCCount, self:GetScaleTightness()))
+    local res = math.max(maxScaledNPCCount, GAMEMODE:GetScaledMaxNPCCount(maxNPCCount, self:GetNPCClass()))
     DbgPrint(self, "Scaled max NPC count: " .. tostring(res), realMaxNPCCount, maxScaledNPCCount)
     self.CachedMaxNPCCount = res
     return res

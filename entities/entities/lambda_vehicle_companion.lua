@@ -95,8 +95,8 @@ function ENT:InputOnPlayerVehicleEnter(data, activator, caller)
         return
     end
 
-    local oldName = activator:GetName()
-    local newName = "lambda_vehicle_companion_" .. tostring(activator:EntIndex())
+    local oldName = caller:GetName()
+    local newName = "lambda_vehicle_companion_" .. tostring(caller:EntIndex())
     caller:SetName(newName)
     DbgPrint("Requesting '" .. companionName .. "' to enter vehicle")
     closest:Input("EnterVehicle", activator, self, newName)

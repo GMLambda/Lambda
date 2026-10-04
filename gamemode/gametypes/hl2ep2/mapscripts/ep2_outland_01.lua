@@ -96,6 +96,31 @@ function MAPSCRIPT:PostInit()
         ent:SetName("lambda_physbox_floor_door")
     end)
 
+
+    -- Remove all triggers when dropping into building and do it our way
+    local roomtrig1 = ents.FindByPos(Vector(-5486.51, 4505.71, -12), "trigger_once")
+    local roomtrig2 = ents.FindByPos(Vector(-5634, 4428, -72), "trigger_once")
+
+    local roomCP = GAMEMODE:CreateCheckpoint(Vector(-5689, 4510, -128), Angle(0, 0, 0))
+
+    local newRoomTrigger = ents.Create("trigger_once")
+    newRoomTrigger:SetupTrigger(Vector(-5624, 4508, -76), Angle(0, 0, 0), Vector(-168, -108, -42), Vector(168, 108, 42))
+    newRoomTrigger:SetName("AYAYAYAY")
+    newRoomTrigger:SetKeyValue("teamwait", "1")
+    newRoomTrigger:CloneOutputs(roomtrig1[1])
+    newRoomTrigger:Fire("AddOutput", "OnTrigger lcs.alyx.window,Start,,0,-1")
+    newRoomTrigger:Fire("AddOutput", "OnTrigger gate_control_lever,Unlock,,0,-1")
+    newRoomTrigger.OnTrigger = function(_, activator)
+        GAMEMODE:SetPlayerCheckpoint(roomCP, activator)
+    end
+
+    ents.WaitForEntityByName("gate_control_lever", function(ent)
+        ent:SetKeyValue("unlocked_sound", "13")
+    end)
+
+    roomtrig1[1]:Remove()
+    roomtrig2[1]:Remove()
+
     local openDoorTrigger = ents.Create("trigger_once")
     openDoorTrigger:SetName("lambda_trigger_open_door")
     openDoorTrigger:SetKeyValue("teamwait", "1")

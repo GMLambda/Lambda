@@ -35,6 +35,7 @@ MAPSCRIPT.EntityFilterByName = {
     ["spawnitems"] = true,
     ["velsensor_car_superjump_01"] = true,
     ["velsensor_car_superjump_00"] = true,
+    ["trigger_trans_player"] = true,
 }
 
 MAPSCRIPT.GlobalStates = {
@@ -44,8 +45,6 @@ MAPSCRIPT.Checkpoints = {
 }
 
 function MAPSCRIPT:PostInit()
-    print("-- Incomplete mapscript --")
-
     -- Checkpoint before heli fight area
     local containerCP = GAMEMODE:CreateCheckpoint(Vector(-998, 1096, 96))
     ents.WaitForEntityByName("trigger_enter_box", function(ent)
@@ -53,6 +52,11 @@ function MAPSCRIPT:PostInit()
             GAMEMODE:SetPlayerCheckpoint(containerCP, activator)
         end
     end)
+
+    local finalRoomTrigger = ents.Create("trigger_once")
+    finalRoomTrigger:SetupTrigger(Vector(-3120, 1948, 72), Angle(0, 0, 0), Vector(-152, -76, 0), Vector(152, 76, 244))
+    finalRoomTrigger:SetKeyValue("teamwait", "1")
+    finalRoomTrigger:Fire("AddOutput", "OnTrigger counter_trans,Add,1,0,-1")
 end
 
 function MAPSCRIPT:OnJalopyCreated(jalopy)
