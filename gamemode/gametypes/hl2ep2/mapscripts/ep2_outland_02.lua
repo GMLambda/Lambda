@@ -97,6 +97,42 @@ function MAPSCRIPT:PostInit()
             )
             ent:SetKeyValue("teamwait", "1")
         end)
+
+        -- point_viewcontrol entities need to have their spawnflags altered for the GMan scene to work properly
+        ents.WaitForEntityByName("pvc_black", function(ent)
+            local sf = bit.bor(4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc0", function(ent)
+            local sf = bit.bor(1, 4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc1", function(ent)
+            local sf = bit.bor(4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc2", function(ent)
+            local sf = bit.bor(4, 8, 16, 32, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc3", function(ent)
+            local sf = bit.bor(4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc4", function(ent)
+            local sf = bit.bor(4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
+
+        ents.WaitForEntityByName("pvc5", function(ent)
+            local sf = bit.bor(4, 8, 128)
+            ent:SetKeyValue("spawnflags", sf)
+        end)
     else
         -- The default spawn gets players stuck.
         for _, v in pairs(ents.FindByClass("info_player_start")) do

@@ -18,6 +18,21 @@ local PROFICIENCY_NAME = {
     [WEAPON_PROFICIENCY_PERFECT] = "Perfect"
 }
 
+local SIMULATE_HIGH_PLAYERCOUNT = true
+local SIMULATED_PLAYERCOUNT = 35
+local SOFT_CAP_PLAYERS = 24
+local SOFT_CAP_MULT = 6.0
+local TAIL_BASE = 1.0
+local CLASS_SCALE_FACTORS = {
+    ["npc_hunter"] = 0.3,
+    ["npc_antlionguard"] = 0.2,
+    ["npc_poisonzombie"] = 0.5,
+    ["npc_zombine"] = 0.7,
+    ["npc_headcrab"] = 1.2,
+    ["npc_headcrab_fast"] = 1.2,
+    ["npc_headcrab_black"] = 1.2
+}
+
 cvars.AddChangeCallback("lambda_difficulty", function(cvar, oldVal, newVal)
     GAMEMODE:ResetMetrics()
     GAMEMODE:AdjustDifficulty()
@@ -149,6 +164,40 @@ function GM:GetNPCSpawningScale()
     if data == nil then return 0 end
 
     return data.NPCSpawningScale
+end
+
+function GM:GetScalingPlayerCount()
+    if SIMULATE_HIGH_PLAYERCOUNT then return SIMULATED_PLAYERCOUNT end
+    return player.GetCount()
+end
+
+function GM:GetScaleTightness(class)
+    return self:GetNPCSpawningScale() * (CLASS_SCALE_FACTORS[class] or 1.0)
+end
+
+function GM:GetScaleMultiplier(tightness)
+    local pc = self:GetScalingPlayerCount()
+    if pc <= 1 then return 1.0 end
+    local soft = math.min(pc, SOFT_CAP_PLAYERS)
+    local tail = math.max(pc - SOFT_CAP_PLAYERS, 0)
+    local targetMult = 1 + (SOFT_CAP_MULT - 1) * tightness
+    local linear = 1 + (soft - 1) * ((targetMult - 1) / (SOFT_CAP_PLAYERS - 1))
+    local extra = math.sqrt(tail) * TAIL_BASE * tightness
+    return linear + extra
+end
+
+function GM:GetScaledCount(original, class)
+    if original == 0 then return 0 end
+    if self:GetScalingPlayerCount() == 0 then return 0 end
+    return math.max(1, math.ceil(original * self:GetScaleMultiplier(self:GetScaleTightness(class))))
+end
+
+function GM:GetScaledMaxLiveChildren(original, class)
+    return self:GetScaledCount(original, class)
+end
+
+function GM:GetScaledMaxNPCCount(original, class)
+    return self:GetScaledCount(original, class)
 end
 
 function GM:AdjustDifficulty()
